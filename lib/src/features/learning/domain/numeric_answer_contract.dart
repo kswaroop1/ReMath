@@ -1,10 +1,7 @@
 enum AnswerVerdict { correct, incorrect, invalid }
 
 final class AnswerMark {
-  const AnswerMark({
-    required this.normalizedInput,
-    required this.verdict,
-  });
+  const AnswerMark({required this.normalizedInput, required this.verdict});
 
   final String normalizedInput;
   final AnswerVerdict verdict;
