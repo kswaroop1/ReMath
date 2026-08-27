@@ -3,12 +3,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/app.dart';
 import 'package:remath/src/features/learning/data/in_memory_progress_repository.dart';
 
+import 'support/foundation_pack.dart';
+
 void main() {
   testWidgets('starts an arithmetic drill and records an answer', (
     tester,
   ) async {
     final repository = InMemoryProgressRepository();
-    await tester.pumpWidget(ReMathApp(repository: repository));
+    await tester.pumpWidget(
+      ReMathApp(contentPack: foundationPackForTest(), repository: repository),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Mental arithmetic foundation'), findsOneWidget);

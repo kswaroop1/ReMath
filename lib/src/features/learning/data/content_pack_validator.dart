@@ -1,0 +1,86 @@
+import '../domain/arithmetic_question.dart';
+import '../domain/content_pack.dart';
+
+final class ContentPackValidator {
+  const ContentPackValidator();
+
+  static final _idPattern = RegExp(r'^[a-z][a-z0-9]*(\.[a-z][a-z0-9-]*)+$');
+  static final _versionPattern = RegExp(r'^\d+\.\d+\.\d+$');
+  static const _allowedLicenses = {'CC-BY-SA-4.0', 'CC-BY-4.0', 'GPL-3.0-only'};
+
+  List<String> validate(ContentPack pack) {
+    final issues = <String>[];
+    if (pack.schemaVersion != 1) {
+      issues.add('Unsupported schemaVersion ${pack.schemaVersion}.');
+    }
+    if (!_idPattern.hasMatch(pack.id)) {
+      issues.add('Pack id is not a stable dotted identifier: ${pack.id}.');
+    }
+    if (!_versionPattern.hasMatch(pack.version)) {
+      issues.add('Pack version must use semantic versioning: ${pack.version}.');
+    }
+    if (!_allowedLicenses.contains(pack.license)) {
+      issues.add('Unsupported or missing content licence: ${pack.license}.');
+    }
+    if (pack.skills.isEmpty) {
+      issues.add('At least one skill is required.');
+    }
+    if (pack.templates.isEmpty) {
+      issues.add('At least one template is required.');
+    }
+
+    final skillIds = <String>{};
+    for (final skill in pack.skills) {
+      if (!_idPattern.hasMatch(skill.id)) {
+        issues.add('Invalid skill id: ${skill.id}.');
+      }
+      if (!skillIds.add(skill.id)) {
+        issues.add('Duplicate skill id: ${skill.id}.');
+      }
+    }
+    final templateIds = <String>{};
+    for (final template in pack.templates) {
+      if (!_idPattern.hasMatch(template.id)) {
+        issues.add('Invalid template id: ${template.id}.');
+      }
+      if (!templateIds.add(template.id)) {
+        issues.add('Duplicate template id: ${template.id}.');
+      }
+      if (!skillIds.contains(template.skillId)) {
+        issues.add(
+          'Template ${template.id} references missing skill ${template.skillId}.',
+        );
+      }
+      if (template.version < 1) {
+        issues.add('Template ${template.id} has a non-positive version.');
+      }
+      if (template.minimumOperand < 0 ||
+          template.maximumOperand < template.minimumOperand) {
+        issues.add('Template ${template.id} has invalid operand bounds.');
+      }
+      if (template.fluentTarget <= Duration.zero) {
+        issues.add('Template ${template.id} has an invalid fluency target.');
+      }
+      if (template.skillId != template.operation.skillId) {
+        issues.add('Template ${template.id} operation and skill disagree.');
+      }
+    }
+    return List.unmodifiable(issues);
+  }
+
+  void validateOrThrow(ContentPack pack) {
+    final issues = validate(pack);
+    if (issues.isNotEmpty) {
+      throw ContentPackValidationException(issues);
+    }
+  }
+}
+
+final class ContentPackValidationException implements Exception {
+  const ContentPackValidationException(this.issues);
+
+  final List<String> issues;
+
+  @override
+  String toString() => 'Content pack validation failed:\n${issues.join('\n')}';
+}

@@ -2,12 +2,26 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/domain/arithmetic_generator.dart';
 import 'package:remath/src/features/learning/domain/arithmetic_question.dart';
 
+import '../../../support/foundation_pack.dart';
+
 void main() {
   const generator = ArithmeticGenerator();
+  final pack = foundationPackForTest();
 
   test('same identity always generates the same question', () {
-    final first = generator.generate(seed: 42, index: 7);
-    final second = generator.generate(seed: 42, index: 7);
+    final template = pack.templateFor(ArithmeticOperation.addition);
+    final first = generator.generate(
+      seed: 42,
+      index: 7,
+      packId: pack.id,
+      template: template,
+    );
+    final second = generator.generate(
+      seed: 42,
+      index: 7,
+      packId: pack.id,
+      template: template,
+    );
 
     expect(second.id, first.id);
     expect(second.prompt, first.prompt);
@@ -17,10 +31,13 @@ void main() {
   test('generated subtraction never has a negative answer', () {
     for (var seed = 0; seed < 100; seed++) {
       for (var index = 0; index < 20; index++) {
-        final question = generator.generate(seed: seed, index: index);
-        if (question.operation == ArithmeticOperation.subtraction) {
-          expect(question.answer, isNonNegative);
-        }
+        final question = generator.generate(
+          seed: seed,
+          index: index,
+          packId: pack.id,
+          template: pack.templateFor(ArithmeticOperation.subtraction),
+        );
+        expect(question.answer, isNonNegative);
       }
     }
   });
@@ -29,15 +46,24 @@ void main() {
     final question = generator.generate(
       seed: 42,
       index: 2,
-      operation: ArithmeticOperation.multiplication,
+      packId: pack.id,
+      template: pack.templateFor(ArithmeticOperation.multiplication),
     );
 
     expect(question.operation, ArithmeticOperation.multiplication);
     expect(question.skillId, 'arithmetic.multiplication');
-    expect(question.id, contains('.v2.multiplication.'));
+    expect(question.id, contains('.multiplication-small.v1.'));
   });
 
   test('rejects a negative question index', () {
-    expect(() => generator.generate(seed: 1, index: -1), throwsArgumentError);
+    expect(
+      () => generator.generate(
+        seed: 1,
+        index: -1,
+        packId: pack.id,
+        template: pack.templateFor(ArithmeticOperation.addition),
+      ),
+      throwsArgumentError,
+    );
   });
 }

@@ -3,12 +3,15 @@ import 'package:remath/src/features/learning/data/in_memory_progress_repository.
 import 'package:remath/src/features/learning/domain/fluency.dart';
 import 'package:remath/src/features/learning/presentation/learning_controller.dart';
 
+import '../../../support/foundation_pack.dart';
+
 void main() {
   test('records a marked answer and advances reproducibly', () async {
     final repository = InMemoryProgressRepository();
     var now = DateTime.utc(2026, 8, 27, 8);
     var nextId = 0;
     final controller = LearningController(
+      contentPack: foundationPackForTest(),
       repository: repository,
       clock: () => now,
       idFactory: () => 'id-${nextId++}',
@@ -35,6 +38,7 @@ void main() {
     final repository = InMemoryProgressRepository();
     final now = DateTime.utc(2026, 8, 27, 8);
     final first = LearningController(
+      contentPack: foundationPackForTest(),
       repository: repository,
       clock: () => now,
       idFactory: () => 'session',
@@ -46,6 +50,7 @@ void main() {
     final questionId = first.currentQuestion?.id;
 
     final restored = LearningController(
+      contentPack: foundationPackForTest(),
       repository: repository,
       clock: () => now,
     );

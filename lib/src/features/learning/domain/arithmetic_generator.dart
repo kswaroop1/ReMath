@@ -1,4 +1,5 @@
 import 'arithmetic_question.dart';
+import 'content_pack.dart';
 
 final class ArithmeticGenerator {
   const ArithmeticGenerator();
@@ -6,22 +7,21 @@ final class ArithmeticGenerator {
   ArithmeticQuestion generate({
     required int seed,
     required int index,
-    ArithmeticOperation? operation,
+    required String packId,
+    required ArithmeticTemplate template,
   }) {
     if (index < 0) {
       throw ArgumentError.value(index, 'index', 'must not be negative');
     }
 
     var state = _mix(seed, index);
-    final selectedOperation =
-        operation ??
-        ArithmeticOperation.values[state % ArithmeticOperation.values.length];
     state = _next(state);
-    var left = 2 + state % 18;
+    final operandCount = template.maximumOperand - template.minimumOperand + 1;
+    var left = template.minimumOperand + state % operandCount;
     state = _next(state);
-    var right = 2 + state % 18;
+    var right = template.minimumOperand + state % operandCount;
 
-    if (selectedOperation == ArithmeticOperation.subtraction && right > left) {
+    if (template.operation == ArithmeticOperation.subtraction && right > left) {
       final temporary = left;
       left = right;
       right = temporary;
@@ -30,9 +30,12 @@ final class ArithmeticGenerator {
     return ArithmeticQuestion(
       index: index,
       left: left,
-      operation: selectedOperation,
+      operation: template.operation,
+      packId: packId,
       right: right,
       seed: seed,
+      templateId: template.id,
+      templateVersion: template.version,
     );
   }
 

@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../../learning/domain/arithmetic_question.dart';
+import '../../learning/domain/content_pack.dart';
 import '../../learning/domain/fluency.dart';
 import '../../learning/domain/progress_repository.dart';
 import '../../learning/presentation/learning_controller.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({required this.repository, super.key});
+  const HomeScreen({
+    required this.contentPack,
+    required this.repository,
+    super.key,
+  });
+
+  final ContentPack contentPack;
   final ProgressRepository repository;
 
   @override
@@ -21,8 +28,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = LearningController(repository: widget.repository)
-      ..addListener(_handleControllerChange);
+    _controller = LearningController(
+      contentPack: widget.contentPack,
+      repository: widget.repository,
+    )..addListener(_handleControllerChange);
     _answerController = TextEditingController()
       ..addListener(() => _controller.updateDraft(_answerController.text));
     _initialised = _controller.initialise();

@@ -30,18 +30,23 @@ final class ArithmeticQuestion {
     required this.index,
     required this.left,
     required this.operation,
+    required this.packId,
     required this.right,
     required this.seed,
+    required this.templateId,
+    required this.templateVersion,
   });
 
   final int index;
   final int left;
   final ArithmeticOperation operation;
+  final String packId;
   final int right;
   final int seed;
+  final String templateId;
+  final int templateVersion;
 
-  String get id =>
-      'foundation.mental-arithmetic.v2.${operation.name}.$seed.$index';
+  String get id => '$packId.$templateId.v$templateVersion.$seed.$index';
 
   String get skillId => operation.skillId;
 
