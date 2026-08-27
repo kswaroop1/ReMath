@@ -52,9 +52,9 @@ final class ExactFractionAnswer {
   String get canonicalAnswer => '$_numerator/$_denominator';
 
   AnswerMark mark(String input) {
-    final match = RegExp(r'^([+-]?\d+)\s*/\s*([+-]?\d+)$').firstMatch(
-      input.trim(),
-    );
+    final match = RegExp(
+      r'^([+-]?\d+)\s*/\s*([+-]?\d+)$',
+    ).firstMatch(input.trim());
     if (match == null) {
       return const AnswerMark(
         normalizedInput: '',
