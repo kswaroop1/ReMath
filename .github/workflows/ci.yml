@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_call:
   workflow_dispatch:
 
 permissions:
@@ -13,12 +14,9 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  FLUTTER_CHANNEL: stable
-
 jobs:
   quality:
-    name: Analyse and test
+    name: Build and test
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -26,7 +24,7 @@ jobs:
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: ${{ env.FLUTTER_CHANNEL }}
+          channel: stable
           cache: true
       - name: Install dependencies
         run: flutter pub get
@@ -38,119 +36,3 @@ jobs:
         run: flutter test --coverage
       - name: Enforce coverage floor
         run: dart run tool/check_coverage.dart 70
-      - name: Upload coverage report
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: coverage
-          path: coverage/lcov.info
-          if-no-files-found: error
-          retention-days: 14
-
-  android:
-    name: Build Android APK
-    needs: quality
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: ${{ env.FLUTTER_CHANNEL }}
-          cache: true
-      - name: Generate platform runner
-        run: flutter create --org com.kswaroop --project-name remath --platforms=android .
-      - name: Build release APK
-        run: flutter build apk --release
-      - name: Upload Android APK
-        uses: actions/upload-artifact@v7
-        with:
-          name: remath-android-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
-          if-no-files-found: error
-          retention-days: 14
-
-  web:
-    name: Build web
-    needs: quality
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: ${{ env.FLUTTER_CHANNEL }}
-          cache: true
-      - name: Generate platform runner
-        run: flutter create --org com.kswaroop --project-name remath --platforms=web .
-      - name: Build web release
-        run: flutter build web --release
-      - name: Upload web build
-        uses: actions/upload-artifact@v7
-        with:
-          name: remath-web
-          path: build/web
-          if-no-files-found: error
-          retention-days: 14
-
-  windows:
-    name: Build Windows
-    needs: quality
-    runs-on: windows-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: ${{ env.FLUTTER_CHANNEL }}
-          cache: true
-      - name: Generate platform runner
-        run: flutter create --org com.kswaroop --project-name remath --platforms=windows .
-      - name: Build Windows release
-        run: flutter build windows --release
-      - name: Upload Windows build
-        uses: actions/upload-artifact@v7
-        with:
-          name: remath-windows
-          path: build/windows/x64/runner/Release
-          if-no-files-found: error
-          retention-days: 14
-
-  apple:
-    name: Build macOS and iOS simulator
-    needs: quality
-    runs-on: macos-latest
-    timeout-minutes: 40
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: ${{ env.FLUTTER_CHANNEL }}
-          cache: true
-      - name: Generate platform runners
-        run: flutter create --org com.kswaroop --project-name remath --platforms=ios,macos .
-      - name: Configure warning-free macOS script phase
-        run: |
-          ruby -0777 -pi -e 'gsub("isa = PBXShellScriptBuildPhase;\n\t\t\tbuildActionMask", "isa = PBXShellScriptBuildPhase;\n\t\t\talwaysOutOfDate = 1;\n\t\t\tbuildActionMask")' macos/Runner.xcodeproj/project.pbxproj
-      - name: Build macOS release
-        run: flutter build macos --release
-      - name: Build iOS simulator app
-        run: flutter build ios --simulator
-      - name: Upload macOS app
-        uses: actions/upload-artifact@v7
-        with:
-          name: remath-macos
-          path: build/macos/Build/Products/Release/remath.app
-          if-no-files-found: error
-          retention-days: 14
-      - name: Upload iOS simulator app
-        uses: actions/upload-artifact@v7
-        with:
-          name: remath-ios-simulator
-          path: build/ios/iphonesimulator/Runner.app
-          if-no-files-found: error
-          retention-days: 14
