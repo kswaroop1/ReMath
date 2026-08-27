@@ -132,3 +132,23 @@ pre-commit framework provisions the pinned scanner, so contributors do not need
 to install the Gitleaks executable separately. Git's security model means
 repository hooks cannot be silently activated by cloning; CI remains the
 non-bypassable merge gate.
+
+## CI run 39: formatting failure and correction
+
+GitHub Actions run 39 started for commit
+`58ba2bb0e2e22c89f9f3304280bdd10d07415a0b`. The new **Secret scan** job
+passed. **Build and test** failed at the non-mutating formatting gate before
+analysis or tests ran. Dart 3.47.1 reported seven files requiring canonical
+formatting:
+
+- `lib/src/features/home/presentation/home_screen.dart`
+- `lib/src/features/learning/data/asset_content_pack_repository.dart`
+- `lib/src/features/learning/data/content_pack_parser.dart`
+- `lib/src/features/learning/domain/content_pack.dart`
+- `test/features/learning/data/content_pack_test.dart`
+- `test/support/foundation_pack.dart`
+- `tool/validate_content.dart`
+
+Codex retrieved the job log, applied only the exact formatter-produced changes,
+and left the CI check non-mutating. No lint suppression, test weakening, coverage
+change, or secret-scan exception was introduced.
