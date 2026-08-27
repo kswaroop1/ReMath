@@ -34,7 +34,7 @@ Install a current stable Flutter SDK, then run:
 
 ```bash
 flutter pub get
-flutter analyze
+flutter analyze --fatal-infos --fatal-warnings
 flutter test --coverage
 flutter run
 ```
