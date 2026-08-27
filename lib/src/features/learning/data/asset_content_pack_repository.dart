@@ -5,7 +5,8 @@ import 'content_pack_parser.dart';
 import 'content_pack_validator.dart';
 
 final class AssetContentPackRepository implements ContentPackRepository {
-  AssetContentPackRepository({AssetBundle? bundle}) : _bundle = bundle ?? rootBundle;
+  AssetContentPackRepository({AssetBundle? bundle})
+    : _bundle = bundle ?? rootBundle;
 
   static const foundationPackPath =
       'assets/content/foundation_arithmetic/pack.json';
