@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/domain/numeric_answer_contract.dart';
 
 void main() {
-  const answer = ExactFractionAnswer(numerator: 1, denominator: 2);
+  final answer = ExactFractionAnswer(numerator: 1, denominator: 2);
 
   test('equivalent fractions are marked correct and reduced canonically', () {
     for (final input in ['1/2', '2/4', '-3/-6', ' 4 / 8 ']) {
@@ -26,7 +26,7 @@ void main() {
   });
 
   test('expected fractions normalize sign and reject a zero denominator', () {
-    const negative = ExactFractionAnswer(numerator: 1, denominator: -2);
+    final negative = ExactFractionAnswer(numerator: 1, denominator: -2);
 
     expect(negative.canonicalAnswer, '-1/2');
     expect(
