@@ -5,7 +5,9 @@ import 'package:remath/src/features/learning/data/content_pack_validator.dart';
 
 Future<void> main(List<String> arguments) async {
   if (arguments.isEmpty) {
-    stderr.writeln('Usage: dart run tool/validate_content.dart <pack.json> [...]');
+    stderr.writeln(
+      'Usage: dart run tool/validate_content.dart <pack.json> [...]',
+    );
     exitCode = 64;
     return;
   }
