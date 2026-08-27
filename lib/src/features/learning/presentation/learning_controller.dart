@@ -59,10 +59,7 @@ final class LearningController extends ChangeNotifier {
     return _generator.generate(
       seed: session.seed,
       index: session.currentQuestionIndex,
-      operation: _scheduler.choose(
-        fluency: _fluency,
-        now: _clock().toUtc(),
-      ),
+      operation: _scheduler.choose(fluency: _fluency, now: _clock().toUtc()),
     );
   }
 
@@ -125,15 +122,15 @@ final class LearningController extends ChangeNotifier {
     final beganAt = _questionBeganAt ?? now;
     final isCorrect = answer == question.answer;
     final event = AttemptEvent(
-        answer: answer.toString(),
-        eventId: _idFactory(),
-        isCorrect: isCorrect,
-        occurredAt: now,
-        questionId: question.id,
-        responseTime: now.difference(beganAt),
-        sessionId: session.id,
-        skillId: question.skillId,
-      );
+      answer: answer.toString(),
+      eventId: _idFactory(),
+      isCorrect: isCorrect,
+      occurredAt: now,
+      questionId: question.id,
+      responseTime: now.difference(beganAt),
+      sessionId: session.id,
+      skillId: question.skillId,
+    );
     await _repository.recordAttempt(event);
     _attempts = await _repository.loadAttempts();
     _lastAssessment = AttemptAssessment.fromEvent(event);

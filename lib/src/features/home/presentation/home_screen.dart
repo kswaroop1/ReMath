@@ -153,14 +153,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         if (_controller.lastAssessment != null) ...[
           const SizedBox(height: 12),
-          Text(
-            switch (_controller.lastAssessment!.pace) {
-              AttemptPace.fluent => 'Correct and fluent',
-              AttemptPace.slow => 'Correct — keep building speed',
-              AttemptPace.incorrect => 'Not quite — this skill will return soon',
-            },
-            textAlign: TextAlign.center,
-          ),
+          Text(switch (_controller.lastAssessment!.pace) {
+            AttemptPace.fluent => 'Correct and fluent',
+            AttemptPace.slow => 'Correct — keep building speed',
+            AttemptPace.incorrect => 'Not quite — this skill will return soon',
+          }, textAlign: TextAlign.center),
         ],
         const SizedBox(height: 20),
         TextButton(

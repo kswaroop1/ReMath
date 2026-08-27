@@ -84,7 +84,10 @@ void main() {
     expect(addition.attempts, 2);
     expect(addition.fluentAttempts, 1);
     expect(addition.score, closeTo(0.3, 0.0001));
-    expect(addition.nextReviewAt, now.add(const Duration(hours: 1, minutes: 1)));
+    expect(
+      addition.nextReviewAt,
+      now.add(const Duration(hours: 1, minutes: 1)),
+    );
   });
 
   test('scheduler introduces unattempted skills before weakest review', () {

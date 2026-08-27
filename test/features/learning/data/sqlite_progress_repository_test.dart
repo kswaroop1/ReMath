@@ -108,7 +108,10 @@ void main() {
 
     expect(attempts.single.eventId, 'legacy-event');
     expect(attempts.single.skillId, 'arithmetic.mixed.legacy');
-    expect(database.select('SELECT version FROM schema_version').single['version'], 2);
+    expect(
+      database.select('SELECT version FROM schema_version').single['version'],
+      2,
+    );
     await migrated.close();
   });
 }

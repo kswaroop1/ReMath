@@ -13,7 +13,9 @@ final class AttemptAssessment {
     final operation = ArithmeticOperationDefinition.fromSkillId(event.skillId);
     final target = operation?.fluentTarget ?? const Duration(seconds: 8);
     return AttemptAssessment(
-      pace: event.responseTime <= target ? AttemptPace.fluent : AttemptPace.slow,
+      pace: event.responseTime <= target
+          ? AttemptPace.fluent
+          : AttemptPace.slow,
     );
   }
 
@@ -45,43 +47,45 @@ final class FluencyCalculator {
       bySkill.putIfAbsent(attempt.skillId, () => []).add(attempt);
     }
 
-    return ArithmeticOperation.values.map((operation) {
-      final events = bySkill[operation.skillId] ?? const <AttemptEvent>[];
-      var score = 0.0;
-      var fluentAttempts = 0;
-      var fluentStreak = 0;
-      var hasEvidence = false;
-      DateTime? nextReviewAt;
-      for (final event in events) {
-        final assessment = AttemptAssessment.fromEvent(event);
-        final evidence = switch (assessment.pace) {
-          AttemptPace.incorrect => 0.0,
-          AttemptPace.slow => 0.6,
-          AttemptPace.fluent => 1.0,
-        };
-        score = hasEvidence ? (score * 0.7) + (evidence * 0.3) : evidence;
-        hasEvidence = true;
-        switch (assessment.pace) {
-          case AttemptPace.incorrect:
-            fluentStreak = 0;
-            nextReviewAt = event.occurredAt;
-          case AttemptPace.slow:
-            fluentStreak = 0;
-            nextReviewAt = event.occurredAt.add(const Duration(minutes: 5));
-          case AttemptPace.fluent:
-            fluentAttempts++;
-            fluentStreak++;
-            nextReviewAt = event.occurredAt.add(_intervalFor(fluentStreak));
-        }
-      }
-      return SkillFluency(
-        attempts: events.length,
-        fluentAttempts: fluentAttempts,
-        nextReviewAt: nextReviewAt,
-        operation: operation,
-        score: score.clamp(0, 1),
-      );
-    }).toList(growable: false);
+    return ArithmeticOperation.values
+        .map((operation) {
+          final events = bySkill[operation.skillId] ?? const <AttemptEvent>[];
+          var score = 0.0;
+          var fluentAttempts = 0;
+          var fluentStreak = 0;
+          var hasEvidence = false;
+          DateTime? nextReviewAt;
+          for (final event in events) {
+            final assessment = AttemptAssessment.fromEvent(event);
+            final evidence = switch (assessment.pace) {
+              AttemptPace.incorrect => 0.0,
+              AttemptPace.slow => 0.6,
+              AttemptPace.fluent => 1.0,
+            };
+            score = hasEvidence ? (score * 0.7) + (evidence * 0.3) : evidence;
+            hasEvidence = true;
+            switch (assessment.pace) {
+              case AttemptPace.incorrect:
+                fluentStreak = 0;
+                nextReviewAt = event.occurredAt;
+              case AttemptPace.slow:
+                fluentStreak = 0;
+                nextReviewAt = event.occurredAt.add(const Duration(minutes: 5));
+              case AttemptPace.fluent:
+                fluentAttempts++;
+                fluentStreak++;
+                nextReviewAt = event.occurredAt.add(_intervalFor(fluentStreak));
+            }
+          }
+          return SkillFluency(
+            attempts: events.length,
+            fluentAttempts: fluentAttempts,
+            nextReviewAt: nextReviewAt,
+            operation: operation,
+            score: score.clamp(0, 1),
+          );
+        })
+        .toList(growable: false);
   }
 
   Duration _intervalFor(int fluentStreak) => switch (fluentStreak) {

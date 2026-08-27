@@ -14,7 +14,8 @@ final class ArithmeticGenerator {
 
     var state = _mix(seed, index);
     final selectedOperation =
-        operation ?? ArithmeticOperation.values[state % ArithmeticOperation.values.length];
+        operation ??
+        ArithmeticOperation.values[state % ArithmeticOperation.values.length];
     state = _next(state);
     var left = 2 + state % 18;
     state = _next(state);

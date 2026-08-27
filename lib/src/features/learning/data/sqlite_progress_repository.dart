@@ -33,9 +33,9 @@ final class SqliteProgressRepository implements ProgressRepository {
         occurred_at TEXT NOT NULL
       ) STRICT
     ''');
-    final version = _database.select(
-      'SELECT version FROM schema_version',
-    ).single['version'] as int;
+    final version =
+        _database.select('SELECT version FROM schema_version').single['version']
+            as int;
     if (version > _currentSchemaVersion) {
       throw StateError('Unsupported progress schema version $version');
     }
