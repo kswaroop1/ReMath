@@ -30,26 +30,29 @@ void main() {
     expect(controller.hasActiveSession, isFalse);
   });
 
-  test('non-numeric answers do not consume a question or create progress', () async {
-    final repository = InMemoryProgressRepository();
-    final controller = LearningController(
-      contentPack: foundationPackForTest(),
-      repository: repository,
-      clock: () => DateTime.utc(2026, 8, 27, 8),
-      idFactory: () => 'session',
-    );
-    await controller.initialise();
-    await controller.startChunk();
-    final question = controller.currentQuestion;
+  test(
+    'non-numeric answers do not consume a question or create progress',
+    () async {
+      final repository = InMemoryProgressRepository();
+      final controller = LearningController(
+        contentPack: foundationPackForTest(),
+        repository: repository,
+        clock: () => DateTime.utc(2026, 8, 27, 8),
+        idFactory: () => 'session',
+      );
+      await controller.initialise();
+      await controller.startChunk();
+      final question = controller.currentQuestion;
 
-    controller.updateDraft('not a number');
-    await Future<void>.delayed(Duration.zero);
-    await controller.submitAnswer();
+      controller.updateDraft('not a number');
+      await Future<void>.delayed(Duration.zero);
+      await controller.submitAnswer();
 
-    expect(controller.currentQuestion?.id, question?.id);
-    expect(controller.answerDraft, 'not a number');
-    expect(await repository.loadAttempts(), isEmpty);
-  });
+      expect(controller.currentQuestion?.id, question?.id);
+      expect(controller.answerDraft, 'not a number');
+      expect(await repository.loadAttempts(), isEmpty);
+    },
+  );
 
   test('remaining time never becomes negative', () async {
     final repository = InMemoryProgressRepository();
@@ -68,71 +71,80 @@ void main() {
     expect(controller.remaining, Duration.zero);
   });
 
-  test('answering at the time limit records the answer then completes the chunk', () async {
-    final repository = InMemoryProgressRepository();
-    var now = DateTime.utc(2026, 8, 27, 8);
-    var nextId = 0;
-    final controller = LearningController(
-      contentPack: foundationPackForTest(),
-      repository: repository,
-      clock: () => now,
-      idFactory: () => 'id-${nextId++}',
-    );
-    await controller.initialise();
-    await controller.startChunk();
-    controller.updateDraft(controller.currentQuestion!.answer.toString());
-    await Future<void>.delayed(Duration.zero);
+  test(
+    'answering at the time limit records the answer then completes the chunk',
+    () async {
+      final repository = InMemoryProgressRepository();
+      var now = DateTime.utc(2026, 8, 27, 8);
+      var nextId = 0;
+      final controller = LearningController(
+        contentPack: foundationPackForTest(),
+        repository: repository,
+        clock: () => now,
+        idFactory: () => 'id-${nextId++}',
+      );
+      await controller.initialise();
+      await controller.startChunk();
+      controller.updateDraft(controller.currentQuestion!.answer.toString());
+      await Future<void>.delayed(Duration.zero);
 
-    now = now.add(const Duration(minutes: 15));
-    await controller.submitAnswer();
+      now = now.add(const Duration(minutes: 15));
+      await controller.submitAnswer();
 
-    expect(await repository.loadAttempts(), hasLength(1));
-    expect(controller.hasActiveSession, isFalse);
-    expect(await repository.loadSession(), isNull);
-  });
+      expect(await repository.loadAttempts(), hasLength(1));
+      expect(controller.hasActiveSession, isFalse);
+      expect(await repository.loadSession(), isNull);
+    },
+  );
 
-  test('finishing early preserves attempts but removes resumable session state', () async {
-    final repository = InMemoryProgressRepository();
-    final controller = LearningController(
-      contentPack: foundationPackForTest(),
-      repository: repository,
-      clock: () => DateTime.utc(2026, 8, 27, 8),
-      idFactory: () => 'session',
-    );
-    await controller.initialise();
-    await controller.startChunk();
-    await controller.finishChunk();
+  test(
+    'finishing early preserves attempts but removes resumable session state',
+    () async {
+      final repository = InMemoryProgressRepository();
+      final controller = LearningController(
+        contentPack: foundationPackForTest(),
+        repository: repository,
+        clock: () => DateTime.utc(2026, 8, 27, 8),
+        idFactory: () => 'session',
+      );
+      await controller.initialise();
+      await controller.startChunk();
+      await controller.finishChunk();
 
-    expect(controller.hasActiveSession, isFalse);
-    expect(controller.lastAssessment, isNull);
-    expect(await repository.loadSession(), isNull);
-  });
+      expect(controller.hasActiveSession, isFalse);
+      expect(controller.lastAssessment, isNull);
+      expect(await repository.loadSession(), isNull);
+    },
+  );
 
-  test('a second submission is ignored while the first is being persisted', () async {
-    final repository = _BlockingProgressRepository();
-    var nextId = 0;
-    final controller = LearningController(
-      contentPack: foundationPackForTest(),
-      repository: repository,
-      clock: () => DateTime.utc(2026, 8, 27, 8),
-      idFactory: () => 'id-${nextId++}',
-    );
-    await controller.initialise();
-    await controller.startChunk();
-    controller.updateDraft(controller.currentQuestion!.answer.toString());
-    await Future<void>.delayed(Duration.zero);
+  test(
+    'a second submission is ignored while the first is being persisted',
+    () async {
+      final repository = _BlockingProgressRepository();
+      var nextId = 0;
+      final controller = LearningController(
+        contentPack: foundationPackForTest(),
+        repository: repository,
+        clock: () => DateTime.utc(2026, 8, 27, 8),
+        idFactory: () => 'id-${nextId++}',
+      );
+      await controller.initialise();
+      await controller.startChunk();
+      controller.updateDraft(controller.currentQuestion!.answer.toString());
+      await Future<void>.delayed(Duration.zero);
 
-    final first = controller.submitAnswer();
-    await repository.recordingStarted.future;
-    expect(controller.isBusy, isTrue);
-    await controller.submitAnswer();
-    expect(repository.recordCalls, 1);
+      final first = controller.submitAnswer();
+      await repository.recordingStarted.future;
+      expect(controller.isBusy, isTrue);
+      await controller.submitAnswer();
+      expect(repository.recordCalls, 1);
 
-    repository.allowRecording.complete();
-    await first;
-    expect(controller.isBusy, isFalse);
-    expect(await repository.loadAttempts(), hasLength(1));
-  });
+      repository.allowRecording.complete();
+      await first;
+      expect(controller.isBusy, isFalse);
+      expect(await repository.loadAttempts(), hasLength(1));
+    },
+  );
 }
 
 final class _BlockingProgressRepository implements ProgressRepository {
