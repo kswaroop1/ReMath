@@ -51,12 +51,14 @@ final class ContentPackParser {
     if (value is! List<Object?>) {
       throw FormatException('$key must be an array.');
     }
-    return value.map((item) {
-      if (item is! Map<String, Object?>) {
-        throw FormatException('$key entries must be objects.');
-      }
-      return item;
-    }).toList(growable: false);
+    return value
+        .map((item) {
+          if (item is! Map<String, Object?>) {
+            throw FormatException('$key entries must be objects.');
+          }
+          return item;
+        })
+        .toList(growable: false);
   }
 
   int _integer(Map<String, Object?> map, String key) {
