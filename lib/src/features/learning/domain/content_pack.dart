@@ -46,8 +46,8 @@ final class ContentPack {
   final String title;
   final String version;
 
-  ArithmeticTemplate templateFor(ArithmeticOperation operation) => templates
-      .firstWhere((template) => template.operation == operation);
+  ArithmeticTemplate templateFor(ArithmeticOperation operation) =>
+      templates.firstWhere((template) => template.operation == operation);
 }
 
 abstract interface class ContentPackRepository {
