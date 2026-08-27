@@ -45,7 +45,7 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
       - name: Verify formatting
-        run: dart format lib test tool && git diff --exit-code -- lib test tool
+        run: dart format --output=none --set-exit-if-changed lib test tool
       - name: Static analysis
         run: flutter analyze --fatal-infos --fatal-warnings
       - name: Validate content packs
