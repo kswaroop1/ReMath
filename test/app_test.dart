@@ -23,6 +23,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(await repository.loadAttempts(), hasLength(1));
-    expect(find.text('Not quite'), findsOneWidget);
+    expect(find.text('Not quite — this skill will return soon'), findsOneWidget);
   });
 }

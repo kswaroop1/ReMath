@@ -10,6 +10,7 @@ final class SqliteProgressRepository implements ProgressRepository {
   }
 
   final CommonDatabase _database;
+  static const _currentSchemaVersion = 2;
 
   void _migrate() {
     _database.execute('PRAGMA foreign_keys = ON');
@@ -32,6 +33,26 @@ final class SqliteProgressRepository implements ProgressRepository {
         occurred_at TEXT NOT NULL
       ) STRICT
     ''');
+    final version = _database.select(
+      'SELECT version FROM schema_version',
+    ).single['version'] as int;
+    if (version > _currentSchemaVersion) {
+      throw StateError('Unsupported progress schema version $version');
+    }
+    if (version < 2) {
+      _database.execute('BEGIN IMMEDIATE');
+      try {
+        _database.execute(
+          "ALTER TABLE attempt_events ADD COLUMN skill_id TEXT NOT NULL "
+          "DEFAULT 'arithmetic.mixed.legacy'",
+        );
+        _database.execute('UPDATE schema_version SET version = 2');
+        _database.execute('COMMIT');
+      } catch (_) {
+        _database.execute('ROLLBACK');
+        rethrow;
+      }
+    }
     _database.execute('''
       CREATE TABLE IF NOT EXISTS active_session (
         singleton INTEGER NOT NULL PRIMARY KEY CHECK (singleton = 1),
@@ -85,8 +106,8 @@ final class SqliteProgressRepository implements ProgressRepository {
       '''
       INSERT OR IGNORE INTO attempt_events (
         event_id, session_id, question_id, answer, is_correct,
-        response_ms, occurred_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        response_ms, occurred_at, skill_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       ''',
       [
         event.eventId,
@@ -96,6 +117,7 @@ final class SqliteProgressRepository implements ProgressRepository {
         event.isCorrect ? 1 : 0,
         event.responseTime.inMilliseconds,
         event.occurredAt.toUtc().toIso8601String(),
+        event.skillId,
       ],
     );
     return _database.updatedRows == 1;
@@ -134,5 +156,6 @@ final class SqliteProgressRepository implements ProgressRepository {
     questionId: row['question_id'] as String,
     responseTime: Duration(milliseconds: row['response_ms'] as int),
     sessionId: row['session_id'] as String,
+    skillId: row['skill_id'] as String,
   );
 }

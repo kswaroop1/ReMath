@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import '../domain/arithmetic_generator.dart';
 import '../domain/arithmetic_question.dart';
 import '../domain/attempt_event.dart';
+import '../domain/fluency.dart';
 import '../domain/learning_session.dart';
 import '../domain/mastery_summary.dart';
 import '../domain/progress_repository.dart';
@@ -17,27 +18,36 @@ final class LearningController extends ChangeNotifier {
   LearningController({
     required ProgressRepository repository,
     ArithmeticGenerator generator = const ArithmeticGenerator(),
+    ArithmeticScheduler scheduler = const ArithmeticScheduler(),
+    FluencyCalculator fluencyCalculator = const FluencyCalculator(),
     Clock? clock,
     IdFactory? idFactory,
   }) : _clock = clock ?? DateTime.now,
        _generator = generator,
+       _scheduler = scheduler,
+       _fluencyCalculator = fluencyCalculator,
        _idFactory = idFactory ?? _randomId,
        _repository = repository;
 
   final Clock _clock;
   final ArithmeticGenerator _generator;
+  final ArithmeticScheduler _scheduler;
+  final FluencyCalculator _fluencyCalculator;
   final IdFactory _idFactory;
   final ProgressRepository _repository;
 
   LearningSession? _session;
   MasterySummary _mastery = const MasterySummary.empty();
+  List<AttemptEvent> _attempts = const [];
+  List<SkillFluency> _fluency = const [];
   DateTime? _questionBeganAt;
   bool _isBusy = false;
-  bool? _lastAnswerWasCorrect;
+  AttemptAssessment? _lastAssessment;
 
   bool get hasActiveSession => _session != null;
   bool get isBusy => _isBusy;
-  bool? get lastAnswerWasCorrect => _lastAnswerWasCorrect;
+  AttemptAssessment? get lastAssessment => _lastAssessment;
+  List<SkillFluency> get fluency => List.unmodifiable(_fluency);
   MasterySummary get mastery => _mastery;
   String get answerDraft => _session?.answerDraft ?? '';
 
@@ -49,6 +59,10 @@ final class LearningController extends ChangeNotifier {
     return _generator.generate(
       seed: session.seed,
       index: session.currentQuestionIndex,
+      operation: _scheduler.choose(
+        fluency: _fluency,
+        now: _clock().toUtc(),
+      ),
     );
   }
 
@@ -65,7 +79,8 @@ final class LearningController extends ChangeNotifier {
 
   Future<void> initialise() async {
     _session = await _repository.loadSession();
-    _mastery = MasterySummary.fromAttempts(await _repository.loadAttempts());
+    _attempts = await _repository.loadAttempts();
+    _recalculateProgress();
     _questionBeganAt = _clock().toUtc();
     notifyListeners();
   }
@@ -79,7 +94,7 @@ final class LearningController extends ChangeNotifier {
       startedAt: now,
     );
     _questionBeganAt = now;
-    _lastAnswerWasCorrect = null;
+    _lastAssessment = null;
     await _repository.saveSession(_session!);
     notifyListeners();
   }
@@ -109,8 +124,7 @@ final class LearningController extends ChangeNotifier {
     final now = _clock().toUtc();
     final beganAt = _questionBeganAt ?? now;
     final isCorrect = answer == question.answer;
-    await _repository.recordAttempt(
-      AttemptEvent(
+    final event = AttemptEvent(
         answer: answer.toString(),
         eventId: _idFactory(),
         isCorrect: isCorrect,
@@ -118,11 +132,12 @@ final class LearningController extends ChangeNotifier {
         questionId: question.id,
         responseTime: now.difference(beganAt),
         sessionId: session.id,
-      ),
-    );
-
-    _lastAnswerWasCorrect = isCorrect;
-    _mastery = MasterySummary.fromAttempts(await _repository.loadAttempts());
+        skillId: question.skillId,
+      );
+    await _repository.recordAttempt(event);
+    _attempts = await _repository.loadAttempts();
+    _lastAssessment = AttemptAssessment.fromEvent(event);
+    _recalculateProgress();
     if (remaining == Duration.zero) {
       await _repository.completeSession(session.id);
       _session = null;
@@ -145,8 +160,13 @@ final class LearningController extends ChangeNotifier {
     }
     await _repository.completeSession(session.id);
     _session = null;
-    _lastAnswerWasCorrect = null;
+    _lastAssessment = null;
     notifyListeners();
+  }
+
+  void _recalculateProgress() {
+    _mastery = MasterySummary.fromAttempts(_attempts);
+    _fluency = _fluencyCalculator.calculate(_attempts);
   }
 
   static String _randomId() {
