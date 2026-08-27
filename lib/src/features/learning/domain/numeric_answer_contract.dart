@@ -135,6 +135,59 @@ final class ExactDecimalAnswer {
   }
 }
 
+
+final class ApproximateDecimalAnswer {
+  ApproximateDecimalAnswer({
+    required String expectedValue,
+    required String absoluteTolerance,
+  }) {
+    final expected = _NormalizedDecimal.tryParse(expectedValue);
+    if (expected == null) {
+      throw ArgumentError.value(
+        expectedValue,
+        'expectedValue',
+        'must be a finite decimal',
+      );
+    }
+    final tolerance = _NormalizedDecimal.tryParse(absoluteTolerance);
+    if (tolerance == null || tolerance.coefficient.isNegative) {
+      throw ArgumentError.value(
+        absoluteTolerance,
+        'absoluteTolerance',
+        'must be a non-negative finite decimal',
+      );
+    }
+    _expected = expected;
+    _absoluteTolerance = tolerance;
+  }
+
+  late final _NormalizedDecimal _expected;
+  late final _NormalizedDecimal _absoluteTolerance;
+
+  String get canonicalAnswer => _expected.canonical;
+  String get absoluteTolerance => _absoluteTolerance.canonical;
+
+  AnswerMark mark(String input) {
+    final parsed = _NormalizedDecimal.tryParse(input);
+    if (parsed == null) {
+      return const AnswerMark(
+        normalizedInput: '',
+        verdict: AnswerVerdict.invalid,
+      );
+    }
+
+    return AnswerMark(
+      normalizedInput: parsed.canonical,
+      verdict: parsed.isWithinAbsoluteToleranceOf(
+        _expected,
+        _absoluteTolerance,
+      )
+          ? AnswerVerdict.correct
+          : AnswerVerdict.incorrect,
+    );
+  }
+}
+
 final class _NormalizedDecimal {
   _NormalizedDecimal._(this.coefficient, this.exponent);
 
@@ -179,6 +232,27 @@ final class _NormalizedDecimal {
       exponent += 1;
     }
     return _NormalizedDecimal._(coefficient, exponent);
+  }
+
+  bool isWithinAbsoluteToleranceOf(
+    _NormalizedDecimal expected,
+    _NormalizedDecimal tolerance,
+  ) {
+    var commonExponent = exponent < expected.exponent
+        ? exponent
+        : expected.exponent;
+    if (tolerance.exponent < commonExponent) {
+      commonExponent = tolerance.exponent;
+    }
+    final difference =
+        (_atExponent(commonExponent) - expected._atExponent(commonExponent))
+            .abs();
+    return difference <= tolerance._atExponent(commonExponent);
+  }
+
+  BigInt _atExponent(int targetExponent) {
+    return coefficient *
+        BigInt.from(10).pow(exponent - targetExponent);
   }
 
   String get canonical {
