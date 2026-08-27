@@ -31,7 +31,15 @@ void main() {
   });
 
   test('ambiguous or non-decimal learner input is invalid', () {
-    for (final input in ['', '.', '1/4', '1.2.3', 'NaN', 'Infinity', '1.25 metres']) {
+    for (final input in [
+      '',
+      '.',
+      '1/4',
+      '1.2.3',
+      'NaN',
+      'Infinity',
+      '1.25 metres',
+    ]) {
       expect(answer.mark(input).verdict, AnswerVerdict.invalid, reason: input);
     }
   });
