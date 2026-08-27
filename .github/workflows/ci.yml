@@ -133,6 +133,9 @@ jobs:
           cache: true
       - name: Generate platform runners
         run: flutter create --org com.kswaroop --project-name remath --platforms=ios,macos .
+      - name: Configure warning-free macOS script phase
+        run: |
+          ruby -pi -e 'puts "\t\t\talwaysOutOfDate = 1;" if $_.include?("name = \"Run Script\";")' macos/Runner.xcodeproj/project.pbxproj
       - name: Build macOS release
         run: flutter build macos --release
       - name: Build iOS simulator app
