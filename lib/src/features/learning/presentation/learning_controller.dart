@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import '../domain/arithmetic_generator.dart';
 import '../domain/arithmetic_question.dart';
 import '../domain/attempt_event.dart';
+import '../domain/content_pack.dart';
 import '../domain/fluency.dart';
 import '../domain/learning_session.dart';
 import '../domain/mastery_summary.dart';
@@ -17,12 +18,14 @@ typedef IdFactory = String Function();
 final class LearningController extends ChangeNotifier {
   LearningController({
     required ProgressRepository repository,
+    required ContentPack contentPack,
     ArithmeticGenerator generator = const ArithmeticGenerator(),
     ArithmeticScheduler scheduler = const ArithmeticScheduler(),
     FluencyCalculator fluencyCalculator = const FluencyCalculator(),
     Clock? clock,
     IdFactory? idFactory,
   }) : _clock = clock ?? DateTime.now,
+       _contentPack = contentPack,
        _generator = generator,
        _scheduler = scheduler,
        _fluencyCalculator = fluencyCalculator,
@@ -30,6 +33,7 @@ final class LearningController extends ChangeNotifier {
        _repository = repository;
 
   final Clock _clock;
+  final ContentPack _contentPack;
   final ArithmeticGenerator _generator;
   final ArithmeticScheduler _scheduler;
   final FluencyCalculator _fluencyCalculator;
@@ -56,10 +60,15 @@ final class LearningController extends ChangeNotifier {
     if (session == null) {
       return null;
     }
+    final operation = _scheduler.choose(
+      fluency: _fluency,
+      now: _clock().toUtc(),
+    );
     return _generator.generate(
       seed: session.seed,
       index: session.currentQuestionIndex,
-      operation: _scheduler.choose(fluency: _fluency, now: _clock().toUtc()),
+      packId: _contentPack.id,
+      template: _contentPack.templateFor(operation),
     );
   }
 
