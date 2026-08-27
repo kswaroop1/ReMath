@@ -93,3 +93,40 @@ file required one formatter-only correction; no business assertion changed.
 
 Green evidence:
 `https://github.com/kswaroop1/ReMath/actions/runs/33106645866`.
+
+## Cycle 2: exact fraction answers
+
+### Assistant
+
+> I’m moving to the next business slice: exact fractions. Tests will establish
+> that equivalent forms such as `1/2`, `2/4`, and `-3/-6` are correct,
+> canonical feedback is reduced and sign-normalized, different valid fractions
+> are incorrect, and malformed or zero-denominator answers are invalid.
+
+Codex committed the fraction business tests before production code.
+
+### Assistant
+
+> The fraction cycle has a valid red stage in CI run #88: formatting passed and
+> strict analysis failed because `ExactFractionAnswer` did not yet exist. I’m
+> adding only exact rational parsing, reduction and sign normalization to the
+> existing pure-Dart contract.
+
+Red evidence:
+`https://github.com/kswaroop1/ReMath/actions/runs/33106863886`.
+
+Codex implemented exact rational comparison with `BigInt`, greatest-common-
+divisor reduction, normalized denominator signs, invalid learner zero
+denominators, and an argument error for an invalid expected answer.
+
+CI run #90 then stopped only at the formatter. Diagnostic run #91 captured the
+single canonical Dart formatting change; the non-mutating formatter gate was
+restored without changing any business assertion or behaviour.
+
+### Assistant
+
+> Run #93 is fully green: secret scanning, formatting, zero-warning static
+> analysis, content validation, tests, and the coverage gate all passed.
+
+Green evidence:
+`https://github.com/kswaroop1/ReMath/actions/runs/33107323685`.
