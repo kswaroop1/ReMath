@@ -82,6 +82,14 @@ credentials, or personal learning data.
 - Parameterised generators must constrain inputs to avoid ambiguity, undefined
   operations, accidental duplicate answers, and numerically unstable marking.
 
+## Releases
+
+- Do not edit `VERSION` unless the user explicitly chooses a new major/minor.
+- The commit changing `VERSION` is patch zero for that line.
+- Never create, move, or replace a release tag outside the manual release workflow.
+- Release only from the default branch after CI succeeds.
+- Treat published tags and release assets as immutable.
+
 ## Commit discipline
 
 Keep commits focused and use imperative messages. Do not modify unrelated user
