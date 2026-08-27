@@ -31,8 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _controller = LearningController(
       contentPack: widget.contentPack,
       repository: widget.repository,
-    )
-      ..addListener(_handleControllerChange);
+    )..addListener(_handleControllerChange);
     _answerController = TextEditingController()
       ..addListener(() => _controller.updateDraft(_answerController.text));
     _initialised = _controller.initialise();
