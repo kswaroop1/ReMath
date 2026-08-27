@@ -258,3 +258,23 @@ The CI threshold was raised to 90%, while near-100% meaningful coverage became
 the documented engineering objective. Business-critical domain/data policies
 are expected to approach or reach 100% line and branch coverage. Coverage gaming,
 unjustified exclusions, and tests that merely execute lines are prohibited.
+
+## Merge authorization and handoff to PR 4
+
+### User
+
+> Yes pl merge, and then move to pr#4
+
+### Assistant
+
+> I’ll finalize PR #3 first: reconcile its completed feature IDs, finalize AI
+> provenance with the successful CI run, confirm no unresolved review threads,
+> mark it ready and squash-merge only while the verified head is unchanged. Then
+> I’ll create PR #4 and begin its first business-focused red test cycle for
+> numeric answer contracts.
+
+Codex confirmed that PR 3 had no reviews or unresolved review threads and that CI
+run 72 succeeded at commit `9ae0c486fbd65e6006522b9cdd7e102b549e81f6`.
+The feature tracker was reconciled conservatively: CG-001 and QA-017 were marked
+complete, while partially implemented broader content-pack features remained
+unchecked. The user explicitly authorized the merge and continuation to PR 4.
