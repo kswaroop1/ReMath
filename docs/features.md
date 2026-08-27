@@ -48,7 +48,8 @@ Last reviewed: 27 August 2026.
 - [ ] **LX-005 — Exact pause and resume.** Persist question, timer, answer draft,
   hint state, and remaining chunk plan.
 - [ ] **LX-006 — Learn chunk.** Introduce one concept and immediate practice.
-- [ ] **LX-007 — Drill chunk.** Timed fluency and muscle-memory repetition.
+- [x] **LX-007 — Drill chunk.** A resumable 15-minute mental-arithmetic drill
+  records locally marked answers and advances through generated questions.
 - [ ] **LX-008 — Review chunk.** Spaced retrieval across previously learned skills.
 - [ ] **LX-009 — Challenge chunk.** Unlabelled, unfamiliar, multi-topic problems.
 - [ ] **LX-010 — Application chunk.** Finance, AI, computing, engineering, or
@@ -99,8 +100,8 @@ Last reviewed: 27 August 2026.
 
 ## 4. Question and assessment engine
 
-- [ ] **QA-001 — Deterministic question identity.** Pack ID, template ID,
-  versions, generator version, and seed reproduce the same question everywhere.
+- [x] **QA-001 — Deterministic question identity.** The foundation arithmetic
+  generator reproduces a question from its versioned ID, seed, and index.
 - [ ] **QA-002 — Numeric short answers.** Exact, rational, decimal, tolerance, and
   significant-figure contracts.
 - [ ] **QA-003 — Symbolic short answers.** Algebraic equivalence with explicit
@@ -162,9 +163,10 @@ Last reviewed: 27 August 2026.
 
 ## 5. Mastery, repetition, and progress
 
-- [ ] **MP-001 — Immutable attempt events.** Unique, idempotent records for every
-  answer and meaningful learning action.
-- [ ] **MP-002 — Accuracy tracking.** First-attempt and eventual correctness.
+- [x] **MP-001 — Immutable attempt events.** Answer attempts use unique event IDs;
+  SQLite primary-key insertion makes duplicate delivery idempotent.
+- [x] **MP-002 — Accuracy tracking.** The foundation drill records correctness
+  and derives an accuracy summary from immutable attempts.
 - [ ] **MP-003 — Response-time tracking.** Active time separated from interruption.
 - [ ] **MP-004 — Attempt and correction tracking.** Attempts, hints, revealed
   steps, and correction success.
@@ -259,8 +261,8 @@ Last reviewed: 27 August 2026.
 
 ## 8. Local data, sync, and portability
 
-- [ ] **DS-001 — Local progress database.** Complete offline operation on every
-  device.
+- [x] **DS-001 — Local progress database.** SQLite persists native-platform
+  attempts and resumable sessions without network access.
 - [ ] **DS-002 — Database migrations.** Forward-tested schema evolution.
 - [ ] **DS-003 — Local content cache.** Independently managed from personal data.
 - [ ] **DS-004 — Event merge engine.** Union immutable events instead of replacing
@@ -282,7 +284,8 @@ Last reviewed: 27 August 2026.
   histories.
 - [ ] **DS-014 — Provider migration.** Verified export from one provider and
   import into another.
-- [ ] **DS-015 — Local-only mode.** No account or cloud requirement.
+- [x] **DS-015 — Local-only mode.** The implemented learning loop requires no
+  account, cloud provider, AI service, or network access.
 - [ ] **DS-016 — Encrypted export.** Portable backup with integrity metadata.
 - [ ] **DS-017 — Import preview.** Show identity, versions, counts, and conflicts
   before applying.
@@ -295,7 +298,8 @@ Last reviewed: 27 August 2026.
 
 ## 9. Security, privacy, and optional AI
 
-- [ ] **SP-001 — No mandatory AI service.** Core learning and marking remain local.
+- [x] **SP-001 — No mandatory AI service.** Foundation question generation,
+  integer marking, progress, and resume operate locally.
 - [ ] **SP-002 — No behavioural analytics by default.** Explicit opt-in if
   diagnostics are ever added.
 - [ ] **SP-003 — Secret scanning.** Prevent API keys, OAuth secrets, and signing
