@@ -12,50 +12,59 @@ void main() {
 
     expect(
       () => SqliteProgressRepository(database),
-      throwsA(isA<StateError>().having(
-        (error) => error.message,
-        'message',
-        contains('Unsupported progress schema version 999'),
-      )),
+      throwsA(
+        isA<StateError>().having(
+          (error) => error.message,
+          'message',
+          contains('Unsupported progress schema version 999'),
+        ),
+      ),
     );
     database.close();
   });
 
-  test('attempt history restores marking fields and chronological order', () async {
-    final repository = SqliteProgressRepository(sqlite3.openInMemory());
+  test(
+    'attempt history restores marking fields and chronological order',
+    () async {
+      final repository = SqliteProgressRepository(sqlite3.openInMemory());
 
-    AttemptEvent attempt({
-      required String id,
-      required bool correct,
-      required DateTime occurredAt,
-    }) => AttemptEvent(
-      answer: correct ? '4' : '5',
-      eventId: id,
-      isCorrect: correct,
-      occurredAt: occurredAt,
-      questionId: 'question-$id',
-      responseTime: const Duration(milliseconds: 1250),
-      sessionId: 'session',
-      skillId: 'arithmetic.addition',
-    );
+      AttemptEvent attempt({
+        required String id,
+        required bool correct,
+        required DateTime occurredAt,
+      }) => AttemptEvent(
+        answer: correct ? '4' : '5',
+        eventId: id,
+        isCorrect: correct,
+        occurredAt: occurredAt,
+        questionId: 'question-$id',
+        responseTime: const Duration(milliseconds: 1250),
+        sessionId: 'session',
+        skillId: 'arithmetic.addition',
+      );
 
-    await repository.recordAttempt(
-      attempt(id: 'later', correct: true, occurredAt: DateTime.utc(2026, 2)),
-    );
-    await repository.recordAttempt(
-      attempt(id: 'earlier', correct: false, occurredAt: DateTime.utc(2026, 1)),
-    );
+      await repository.recordAttempt(
+        attempt(id: 'later', correct: true, occurredAt: DateTime.utc(2026, 2)),
+      );
+      await repository.recordAttempt(
+        attempt(
+          id: 'earlier',
+          correct: false,
+          occurredAt: DateTime.utc(2026, 1),
+        ),
+      );
 
-    final loaded = await repository.loadAttempts();
-    expect(loaded.map((event) => event.eventId), ['earlier', 'later']);
-    expect(loaded.first.answer, '5');
-    expect(loaded.first.isCorrect, isFalse);
-    expect(loaded.first.questionId, 'question-earlier');
-    expect(loaded.first.sessionId, 'session');
-    expect(loaded.first.responseTime, const Duration(milliseconds: 1250));
-    expect(loaded.first.occurredAt, DateTime.utc(2026, 1));
-    await repository.close();
-  });
+      final loaded = await repository.loadAttempts();
+      expect(loaded.map((event) => event.eventId), ['earlier', 'later']);
+      expect(loaded.first.answer, '5');
+      expect(loaded.first.isCorrect, isFalse);
+      expect(loaded.first.questionId, 'question-earlier');
+      expect(loaded.first.sessionId, 'session');
+      expect(loaded.first.responseTime, const Duration(milliseconds: 1250));
+      expect(loaded.first.occurredAt, DateTime.utc(2026, 1));
+      await repository.close();
+    },
+  );
 
   test('latest interrupted state replaces the previous checkpoint', () async {
     final repository = SqliteProgressRepository(sqlite3.openInMemory());
