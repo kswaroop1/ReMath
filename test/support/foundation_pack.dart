@@ -7,10 +7,8 @@ ContentPack foundationPackForTest() => ContentPack(
   schemaVersion: 1,
   skills: ArithmeticOperation.values
       .map(
-        (operation) => SkillDefinition(
-          id: operation.skillId,
-          title: operation.label,
-        ),
+        (operation) =>
+            SkillDefinition(id: operation.skillId, title: operation.label),
       )
       .toList(growable: false),
   templates: ArithmeticOperation.values
