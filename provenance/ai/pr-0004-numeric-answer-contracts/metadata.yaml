@@ -1,0 +1,23 @@
+schema_version: 1
+pull_request: 4
+title: Add numeric answer contracts
+human_owner: kswaroop1
+agents:
+  - product: OpenAI Codex
+    model: not exposed to repository session
+started_at: 2026-08-27T18:55:07Z
+finalized_at: null
+scope:
+  - numeric answer contracts
+  - business-focused TDD
+  - property tests
+  - misconception classification foundation
+  - difficulty calibration foundation
+redactions: []
+excluded_context:
+  - hidden system and developer instructions
+  - model internal reasoning
+  - routine raw tool telemetry unless it changed the implementation
+ci_runs:
+  - https://github.com/kswaroop1/ReMath/actions/runs/33106280082
+  - https://github.com/kswaroop1/ReMath/actions/runs/33106645866
