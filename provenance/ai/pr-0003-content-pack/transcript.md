@@ -179,3 +179,82 @@ the complete job log and alphabetized the package imports in only the two
 reported files. The strict analysis settings were preserved. The secret scan and
 format gate had passed; content validation, tests, and coverage had not run
 because analysis failed first.
+
+## TDD and near-complete coverage follow-up
+
+### User
+
+> Ok whilst that is min cutoff, the objective really should be to ensure close to
+> 100% coverage.
+>
+> Have ww got rules for tests. I now want to handle dev in TDD red-green refactor
+> method strictly. Hence for each round of dev, for the selected features to be
+> implemented, first write tests which MUST be businees focused as much as
+> possible, rather than technical; then build to get red/failing stage,
+> interfaces and data model updates as needed, and then write the code yo get
+> back to green.
+>
+> Can you bake that into agents.md etc and update other relevant docs, and then
+> please write tests for getting close to 100% coverage.
+
+### Assistant
+
+> Yes. I’ll formalise strict red–green–refactor as the repository’s required
+> development contract, with business-behaviour tests written and committed
+> before production implementation. For coverage, I’ll treat 90% as only the
+> merge floor and near-100% as the objective—especially for domain/data
+> code—while excluding neither awkward branches nor bugs merely to improve a
+> number.
+>
+> For this current round, I’ll first identify the exact uncovered production
+> lines, add behaviour-focused tests, confirm the intended red stage where new
+> behaviour is required, and only then make the smallest production changes
+> needed for green.
+
+### Assistant
+
+> One nuance I’m encoding explicitly: strict red–green applies to new or changed
+> business behaviour. Coverage remediation for already-working behaviour uses
+> characterization tests; we should not manufacture a failing test or
+> deliberately break production code just to display “red.” Those tests still
+> come before any production refactoring they motivate.
+
+Codex added a test-only characterization batch covering learner-facing arithmetic
+semantics, mastery, resumable sessions, repetition intervals, scheduler
+selection, malformed content, pack safety, in-memory and SQLite persistence,
+time limits, invalid answers, early finish, and duplicate submissions. No
+production code changed.
+
+### Assistant
+
+> The first coverage-focused test batch is now committed before any production
+> change. It covers learner-facing arithmetic meaning, mastery, resumability,
+> repetition intervals, scheduler choices, malformed content, local persistence,
+> duplicate submissions and time-limit behaviour. I’m letting that test-only
+> head run now; any failure must be understood as either an expected test defect
+> or a real behavioural gap before documentation/threshold changes proceed.
+
+GitHub Actions run 57 failed at the format gate because six new test files were
+not in canonical Dart format. Codex temporarily used the already-established
+diagnostic formatter command to retrieve the exact Dart 3.47.2 diff, applied
+only that diff, and restored the non-mutating format gate. No test assertion or
+production behaviour changed.
+
+Codex then updated `AGENTS.md`, `docs/testing.md`, `CONTRIBUTING.md`, and
+the pull-request template to require feature selection, business acceptance
+criteria, recorded red evidence, minimum green implementation, green refactoring,
+bug-first regression tests, and documented coverage exceptions.
+
+### Assistant
+
+> The characterization suite is green and raised measured line coverage from
+> **89.39% to 99.57%** without changing production code. Formatting, strict
+> analysis, content validation, tests, coverage and secret scanning all pass.
+> I’m now raising the actual CI floor from 70% to 90% and aligning the feature
+> tracker; 99.57% remains the engineering objective achieved today, not a brittle
+> mandatory cutoff.
+
+The CI threshold was raised to 90%, while near-100% meaningful coverage became
+the documented engineering objective. Business-critical domain/data policies
+are expected to approach or reach 100% line and branch coverage. Coverage gaming,
+unjustified exclusions, and tests that merely execute lines are prohibited.
