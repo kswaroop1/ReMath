@@ -76,3 +76,59 @@ appended explicitly.
 Codex created a feature branch, added CONTRIBUTING.md, a pull-request template,
 SECURITY.md, and provenance/ai/README.md, and opened draft PR 3. No review or CI
 failure had occurred when this entry was appended.
+
+## Secret-scanning follow-up
+
+### User
+
+> In the build/test pipeline, please do include the secrets sanitiser step. I am
+> assuming a github tool or some well established/regarded opensource tool
+> already exists.
+
+### Assistant
+
+> I’ll add Gitleaks as a fail-fast secret-detection gate in the normal build/test
+> workflow, pinned to an immutable release commit. I’ll also document the
+> remediation rule: the pipeline must never “sanitize” or rewrite a leaked secret
+> automatically—if it finds one, the credential must be revoked and the
+> commit/history handled deliberately.
+
+### Assistant
+
+> The current Gitleaks release is v3, which uses GitHub Actions’ Node 24 runtime;
+> v2 is now deprecated. I’m using v3 and pinning it by full commit SHA, with a
+> full-history checkout so secrets introduced in earlier commits are not missed.
+> ReMath is under a personal GitHub account, so Gitleaks does not require a
+> licence secret.
+
+Codex added a separate CI secret-scan job using
+`gitleaks/gitleaks-action` v3 at immutable commit
+`e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e`, with full Git history and
+redacted output. It also restored the non-mutating formatter check.
+
+### User
+
+> Actually best would be have it as a pre-commit hook, push hook T least the
+> secrets checker must pass before commits are allowed, perhaps locally too on
+> dev's PC
+
+### Assistant
+
+> Agreed. I’ll make secret detection layered:
+>
+> - `pre-commit`: scan the staged snapshot before the commit is created.
+> - `pre-push`: scan the commits being sent, including their history range.
+> - CI: authoritative backstop, because Git intentionally does not activate
+>   repository-supplied hooks automatically after clone.
+>
+> The local hooks will fail closed if Gitleaks is missing and give an exact
+> installation/setup instruction. I’ll avoid any automatic allowlist or secret
+> rewriting.
+
+Codex selected the official pre-commit integration for the MIT-licensed Gitleaks
+CLI, pinned it to v8.30.1, configured pre-commit and pre-push stages, documented
+one-time hook activation and incident response, and marked SP-003 complete. The
+pre-commit framework provisions the pinned scanner, so contributors do not need
+to install the Gitleaks executable separately. Git's security model means
+repository hooks cannot be silently activated by cloning; CI remains the
+non-bypassable merge gate.
