@@ -53,4 +53,4 @@ jobs:
       - name: Run tests with coverage
         run: flutter test --coverage
       - name: Enforce coverage floor
-        run: dart run tool/check_coverage.dart 70
+        run: dart run tool/check_coverage.dart 90
