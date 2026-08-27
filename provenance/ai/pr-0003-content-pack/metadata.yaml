@@ -11,6 +11,7 @@ scope:
   - contribution policy
   - AI provenance
   - security policy
+  - local and CI secret scanning
   - content-pack infrastructure
   - tests
   - CI
