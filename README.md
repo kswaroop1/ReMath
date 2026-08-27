@@ -52,6 +52,7 @@ generated changes before committing them.
 
 - [Architecture](docs/architecture.md)
 - [Testing strategy](docs/testing.md)
+- [Releases and versioning](docs/releases.md)
 - [Content-pack format](docs/content-packs.md)
 - [Contribution and agent guidance](AGENTS.md)
 
