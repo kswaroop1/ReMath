@@ -1,0 +1,241 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_release:
+        description: Confirm publication of a GitHub Release
+        required: true
+        type: boolean
+        default: false
+      mark_as_prerelease:
+        description: Mark this 0.x release as a prerelease
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  quality:
+    name: Validate release candidate
+    uses: ./.github/workflows/ci.yml
+
+  version:
+    name: Calculate semantic version
+    needs: quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      build_number: ${{ steps.version.outputs.build_number }}
+      base_commit: ${{ steps.version.outputs.base_commit }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Validate request and calculate version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ inputs.confirm_release }}" != "true" ]]; then
+            echo "Release confirmation was not selected." >&2
+            exit 1
+          fi
+
+          if [[ "${{ github.ref_name }}" != "${{ github.event.repository.default_branch }}" ]]; then
+            echo "Releases must be built from the default branch." >&2
+            exit 1
+          fi
+
+          base_version="$(tr -d '[:space:]' < VERSION)"
+          if [[ ! "$base_version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "VERSION must contain major.minor only; found: $base_version" >&2
+            exit 1
+          fi
+
+          base_commit="$(git log -1 --format=%H -- VERSION)"
+          if [[ -z "$base_commit" ]]; then
+            echo "Could not find the commit that declared $base_version." >&2
+            exit 1
+          fi
+
+          patch="$(git rev-list --count "$base_commit..HEAD")"
+          version="$base_version.$patch"
+          tag="v$version"
+          build_number="$(git rev-list --count HEAD)"
+
+          if git rev-parse --verify --quiet "refs/tags/$tag"; then
+            echo "Tag $tag already exists; releases are immutable." >&2
+            exit 1
+          fi
+
+          {
+            echo "version=$version"
+            echo "tag=$tag"
+            echo "build_number=$build_number"
+            echo "base_commit=$base_commit"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Release version: $version"
+          echo "Baseline commit: $base_commit"
+          echo "Commits since baseline: $patch"
+
+  android:
+    name: Build Android
+    needs: version
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate Android runner
+        run: flutter create --org com.kswaroop --project-name remath --platforms=android .
+      - name: Build release APK
+        run: >-
+          flutter build apk --release
+          --build-name "${{ needs.version.outputs.version }}"
+          --build-number "${{ needs.version.outputs.build_number }}"
+      - name: Name release asset
+        run: cp build/app/outputs/flutter-apk/app-release.apk "remath-${{ needs.version.outputs.version }}-android.apk"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-android
+          path: remath-${{ needs.version.outputs.version }}-android.apk
+          if-no-files-found: error
+          retention-days: 14
+
+  web:
+    name: Build web
+    needs: version
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate web runner
+        run: flutter create --org com.kswaroop --project-name remath --platforms=web .
+      - name: Build web release
+        run: flutter build web --release --dart-define="APP_VERSION=${{ needs.version.outputs.version }}"
+      - name: Package web release
+        run: cd build/web && zip -r "../../remath-${{ needs.version.outputs.version }}-web.zip" .
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-web
+          path: remath-${{ needs.version.outputs.version }}-web.zip
+          if-no-files-found: error
+          retention-days: 14
+
+  windows:
+    name: Build Windows
+    needs: version
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v7
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate Windows runner
+        run: flutter create --org com.kswaroop --project-name remath --platforms=windows .
+      - name: Build Windows release
+        run: >-
+          flutter build windows --release
+          --build-name "${{ needs.version.outputs.version }}"
+          --build-number "${{ needs.version.outputs.build_number }}"
+      - name: Package Windows release
+        shell: pwsh
+        run: Compress-Archive -Path "build/windows/x64/runner/Release/*" -DestinationPath "remath-${{ needs.version.outputs.version }}-windows.zip"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-windows
+          path: remath-${{ needs.version.outputs.version }}-windows.zip
+          if-no-files-found: error
+          retention-days: 14
+
+  apple:
+    name: Build Apple
+    needs: version
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate Apple runners
+        run: flutter create --org com.kswaroop --project-name remath --platforms=ios,macos .
+      - name: Configure warning-free macOS script phase
+        run: |
+          ruby -0777 -pi -e 'gsub("isa = PBXShellScriptBuildPhase;\n\t\t\tbuildActionMask", "isa = PBXShellScriptBuildPhase;\n\t\t\talwaysOutOfDate = 1;\n\t\t\tbuildActionMask")' macos/Runner.xcodeproj/project.pbxproj
+      - name: Build macOS release
+        run: >-
+          flutter build macos --release
+          --build-name "${{ needs.version.outputs.version }}"
+          --build-number "${{ needs.version.outputs.build_number }}"
+      - name: Build iOS simulator
+        run: >-
+          flutter build ios --simulator
+          --build-name "${{ needs.version.outputs.version }}"
+          --build-number "${{ needs.version.outputs.build_number }}"
+      - name: Package Apple releases
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent             build/macos/Build/Products/Release/remath.app             "remath-${{ needs.version.outputs.version }}-macos.zip"
+          ditto -c -k --sequesterRsrc --keepParent             build/ios/iphonesimulator/Runner.app             "remath-${{ needs.version.outputs.version }}-ios-simulator.zip"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-apple
+          path: |
+            remath-${{ needs.version.outputs.version }}-macos.zip
+            remath-${{ needs.version.outputs.version }}-ios-simulator.zip
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    name: Publish GitHub Release
+    needs: [version, android, web, windows, apple]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: release-*
+          path: dist
+          merge-multiple: true
+      - name: Create checksums
+        run: cd dist && sha256sum * > SHA256SUMS.txt
+      - name: Create draft, attach assets, and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.version.outputs.tag }}
+          VERSION: ${{ needs.version.outputs.version }}
+          TARGET_SHA: ${{ github.sha }}
+          PRERELEASE: ${{ inputs.mark_as_prerelease }}
+        run: |
+          set -euo pipefail
+          flags=(--draft --generate-notes)
+          if [[ "$PRERELEASE" == "true" ]]; then
+            flags+=(--prerelease)
+          fi
+
+          gh release create "$TAG" dist/*             --repo "$GITHUB_REPOSITORY"             --target "$TARGET_SHA"             --title "ReMath $VERSION"             "${flags[@]}"
+
+          gh release edit "$TAG"             --repo "$GITHUB_REPOSITORY"             --draft=false
