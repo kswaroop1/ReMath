@@ -73,8 +73,8 @@ Last reviewed: 27 August 2026.
 
 ## 3. Curriculum graph and progression
 
-- [ ] **CG-001 — Stable skill identifiers.** Every concept and micro-skill has a
-  durable ID independent of presentation or pack path.
+- [x] **CG-001 — Stable skill identifiers.** Foundation skills use durable dotted
+  identifiers independent of presentation and content-pack paths.
 - [ ] **CG-002 — Prerequisite graph.** Directed dependencies rather than one
   fixed linear course.
 - [ ] **CG-003 — Multi-track placement.** A learner may be advanced in computing
@@ -132,8 +132,8 @@ Last reviewed: 27 August 2026.
   calculating.
 - [ ] **QA-016 — Assumption identification.** Determine missing conditions,
   modelling assumptions, and theorem applicability.
-- [ ] **QA-017 — Parameterised generators.** Constrained generation with exact
-  solutions and deterministic seeds.
+- [x] **QA-017 — Parameterised generators.** Foundation arithmetic generation is
+  operand-bounded, exactly marked, template-versioned, and deterministic.
 - [ ] **QA-018 — Generator property tests.** Large seeded sweeps for ambiguity,
   invalid domains, duplicates, and unstable marking.
 - [ ] **QA-019 — Curated challenge bank.** Individually authored multi-topic
