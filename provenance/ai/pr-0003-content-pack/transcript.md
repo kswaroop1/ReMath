@@ -152,3 +152,30 @@ formatting:
 Codex retrieved the job log, applied only the exact formatter-produced changes,
 and left the CI check non-mutating. No lint suppression, test weakening, coverage
 change, or secret-scan exception was introduced.
+
+## CI run 47: strict-analysis failure and correction
+
+### User
+
+> The latest build has failed, are you tracking/correcting?
+
+### Assistant
+
+> Yes—I’m checking the latest PR-head run now. If it is a genuine code/workflow
+> failure rather than a cancelled superseded run, I’ll diagnose it, fix it on PR
+> #3, and append the failure and correction to the AI provenance log.
+
+### Assistant
+
+> Found it. The secret scan and formatter both passed; strict analysis failed on
+> exactly two informational lints: import ordering in `lib/main.dart` and
+> `lib/src/app.dart`. Because informational lints are deliberately treated as
+> errors, the pipeline stopped before tests. I’m correcting those two imports
+> now—no compiler-warning suppression.
+
+GitHub Actions run 47 failed at `flutter analyze --fatal-infos
+--fatal-warnings` with two `directives_ordering` diagnostics. Codex retrieved
+the complete job log and alphabetized the package imports in only the two
+reported files. The strict analysis settings were preserved. The secret scan and
+format gate had passed; content validation, tests, and coverage had not run
+because analysis failed first.
