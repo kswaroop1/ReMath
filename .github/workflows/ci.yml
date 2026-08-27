@@ -136,7 +136,7 @@ jobs:
       - name: Build macOS release
         run: flutter build macos --release
       - name: Build iOS simulator app
-        run: flutter build ios --simulator --release
+        run: flutter build ios --simulator
       - name: Upload macOS app
         uses: actions/upload-artifact@v4
         with:
