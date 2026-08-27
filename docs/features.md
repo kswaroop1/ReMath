@@ -333,8 +333,8 @@ Last reviewed: 27 August 2026.
   zero-diagnostic analysis, tests, and coverage only.
 - [x] **EN-002 — Diagnostics as errors.** Dart warnings and informational lints
   fail CI.
-- [x] **EN-003 — Coverage gate.** Repository line coverage cannot fall below 70%;
-  new domain logic targets substantially higher coverage.
+- [x] **EN-003 — Coverage gate.** Repository line coverage cannot fall below 90%;
+  meaningful coverage close to 100% is the engineering objective.
 - [x] **EN-004 — Warning-free verified build.** Latest verified full platform run
   completed without compiler or workflow warnings.
 - [x] **EN-005 — Manual release workflow.** Full artifacts are built only after an
