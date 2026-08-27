@@ -97,3 +97,105 @@ final class _NormalizedFraction {
 
   String get canonical => '$numerator/$denominator';
 }
+
+final class ExactDecimalAnswer {
+  ExactDecimalAnswer(String expectedValue) {
+    final parsed = _NormalizedDecimal.tryParse(expectedValue);
+    if (parsed == null) {
+      throw ArgumentError.value(
+        expectedValue,
+        'expectedValue',
+        'must be a finite decimal',
+      );
+    }
+    _expected = parsed;
+  }
+
+  late final _NormalizedDecimal _expected;
+
+  String get canonicalAnswer => _expected.canonical;
+
+  AnswerMark mark(String input) {
+    final parsed = _NormalizedDecimal.tryParse(input);
+    if (parsed == null) {
+      return const AnswerMark(
+        normalizedInput: '',
+        verdict: AnswerVerdict.invalid,
+      );
+    }
+
+    return AnswerMark(
+      normalizedInput: parsed.canonical,
+      verdict:
+          parsed.coefficient == _expected.coefficient &&
+              parsed.exponent == _expected.exponent
+          ? AnswerVerdict.correct
+          : AnswerVerdict.incorrect,
+    );
+  }
+}
+
+final class _NormalizedDecimal {
+  _NormalizedDecimal._(this.coefficient, this.exponent);
+
+  static const _maximumExponentMagnitude = 10000;
+  static final _pattern = RegExp(
+    r'^([+-]?)(?:(\d+)(?:\.(\d*))?|\.(\d+))(?:[eE]([+-]?\d+))?$',
+  );
+
+  final BigInt coefficient;
+  final int exponent;
+
+  static _NormalizedDecimal? tryParse(String input) {
+    final match = _pattern.firstMatch(input.trim());
+    if (match == null) {
+      return null;
+    }
+
+    final integerDigits = match.group(2) ?? '0';
+    final fractionalDigits = match.group(2) == null
+        ? match.group(4)!
+        : match.group(3) ?? '';
+    final explicitExponent = int.tryParse(match.group(5) ?? '0');
+    if (explicitExponent == null ||
+        explicitExponent.abs() > _maximumExponentMagnitude) {
+      return null;
+    }
+
+    var coefficient = BigInt.parse('$integerDigits$fractionalDigits');
+    if (match.group(1) == '-') {
+      coefficient = -coefficient;
+    }
+    var exponent = explicitExponent - fractionalDigits.length;
+    if (exponent.abs() > _maximumExponentMagnitude) {
+      return null;
+    }
+
+    if (coefficient == BigInt.zero) {
+      return _NormalizedDecimal._(BigInt.zero, 0);
+    }
+    while (coefficient % BigInt.from(10) == BigInt.zero) {
+      coefficient ~/= BigInt.from(10);
+      exponent += 1;
+    }
+    return _NormalizedDecimal._(coefficient, exponent);
+  }
+
+  String get canonical {
+    if (coefficient == BigInt.zero) {
+      return '0';
+    }
+
+    final sign = coefficient.isNegative ? '-' : '';
+    final digits = coefficient.abs().toString();
+    final decimalPoint = digits.length + exponent;
+    if (decimalPoint <= 0) {
+      return '${sign}0.${'0' * -decimalPoint}$digits';
+    }
+    if (decimalPoint >= digits.length) {
+      return '$sign$digits${'0' * (decimalPoint - digits.length)}';
+    }
+    return '$sign${digits.substring(0, decimalPoint)}.'
+        '${digits.substring(decimalPoint)}';
+  }
+}
