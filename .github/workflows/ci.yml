@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -33,14 +33,14 @@ jobs:
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed lib test tool
       - name: Static analysis
-        run: flutter analyze
+        run: flutter analyze --fatal-infos --fatal-warnings
       - name: Run tests with coverage
         run: flutter test --coverage
       - name: Enforce coverage floor
         run: dart run tool/check_coverage.dart 70
       - name: Upload coverage report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage
           path: coverage/lcov.info
@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -64,7 +64,7 @@ jobs:
       - name: Build release APK
         run: flutter build apk --release
       - name: Upload Android APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: remath-android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
@@ -77,7 +77,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -88,7 +88,7 @@ jobs:
       - name: Build web release
         run: flutter build web --release
       - name: Upload web build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: remath-web
           path: build/web
@@ -101,7 +101,7 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -112,7 +112,7 @@ jobs:
       - name: Build Windows release
         run: flutter build windows --release
       - name: Upload Windows build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: remath-windows
           path: build/windows/x64/runner/Release
@@ -125,7 +125,7 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -138,14 +138,14 @@ jobs:
       - name: Build iOS simulator app
         run: flutter build ios --simulator
       - name: Upload macOS app
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: remath-macos
           path: build/macos/Build/Products/Release/remath.app
           if-no-files-found: error
           retention-days: 14
       - name: Upload iOS simulator app
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: remath-ios-simulator
           path: build/ios/iphonesimulator/Runner.app
