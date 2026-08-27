@@ -5,23 +5,12 @@ void main() {
   test('each arithmetic skill exposes the learner-facing meaning', () {
     expect(
       ArithmeticOperation.values.map(
-        (operation) => (
-          operation.skillId,
-          operation.label,
-          operation.fluentTarget,
-        ),
+        (operation) =>
+            (operation.skillId, operation.label, operation.fluentTarget),
       ),
       [
-        (
-          'arithmetic.addition',
-          'Addition',
-          const Duration(seconds: 6),
-        ),
-        (
-          'arithmetic.subtraction',
-          'Subtraction',
-          const Duration(seconds: 6),
-        ),
+        ('arithmetic.addition', 'Addition', const Duration(seconds: 6)),
+        ('arithmetic.subtraction', 'Subtraction', const Duration(seconds: 6)),
         (
           'arithmetic.multiplication',
           'Multiplication',
@@ -77,10 +66,7 @@ void main() {
       templateVersion: 2,
     );
 
-    expect(
-      question.id,
-      'org.remath.foundation.foundation.addition.v2.91.4',
-    );
+    expect(question.id, 'org.remath.foundation.foundation.addition.v2.91.4');
     expect(question.skillId, 'arithmetic.addition');
   });
 }
