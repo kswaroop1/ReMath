@@ -51,6 +51,7 @@ generated changes before committing them.
 ## Documentation
 
 - [Architecture](docs/architecture.md)
+- [Numbered feature register](docs/features.md)
 - [Testing strategy](docs/testing.md)
 - [Releases and versioning](docs/releases.md)
 - [Content-pack format](docs/content-packs.md)
