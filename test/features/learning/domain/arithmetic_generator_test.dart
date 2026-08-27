@@ -26,9 +26,6 @@ void main() {
   });
 
   test('rejects a negative question index', () {
-    expect(
-      () => generator.generate(seed: 1, index: -1),
-      throwsArgumentError,
-    );
+    expect(() => generator.generate(seed: 1, index: -1), throwsArgumentError);
   });
 }

@@ -4,7 +4,9 @@ import 'package:remath/src/app.dart';
 import 'package:remath/src/features/learning/data/in_memory_progress_repository.dart';
 
 void main() {
-  testWidgets('starts an arithmetic drill and records an answer', (tester) async {
+  testWidgets('starts an arithmetic drill and records an answer', (
+    tester,
+  ) async {
     final repository = InMemoryProgressRepository();
     await tester.pumpWidget(ReMathApp(repository: repository));
     await tester.pumpAndSettle();

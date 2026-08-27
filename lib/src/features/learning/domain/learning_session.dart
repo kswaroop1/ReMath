@@ -15,14 +15,12 @@ final class LearningSession {
   final int seed;
   final DateTime startedAt;
 
-  LearningSession copyWith({
-    String? answerDraft,
-    int? currentQuestionIndex,
-  }) => LearningSession(
-    answerDraft: answerDraft ?? this.answerDraft,
-    currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
-    id: id,
-    seed: seed,
-    startedAt: startedAt,
-  );
+  LearningSession copyWith({String? answerDraft, int? currentQuestionIndex}) =>
+      LearningSession(
+        answerDraft: answerDraft ?? this.answerDraft,
+        currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
+        id: id,
+        seed: seed,
+        startedAt: startedAt,
+      );
 }

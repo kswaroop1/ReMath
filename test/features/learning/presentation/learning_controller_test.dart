@@ -24,8 +24,10 @@ void main() {
     expect(controller.mastery.attempts, 1);
     expect(controller.mastery.accuracy, 1);
     expect(controller.currentQuestion?.index, 1);
-    expect((await repository.loadAttempts()).single.responseTime,
-        const Duration(seconds: 4));
+    expect(
+      (await repository.loadAttempts()).single.responseTime,
+      const Duration(seconds: 4),
+    );
   });
 
   test('restores question and draft after controller recreation', () async {

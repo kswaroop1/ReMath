@@ -56,7 +56,9 @@ class _HomeScreenState extends State<HomeScreen> {
       future: _initialised,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const Center(child: Text('Could not open local progress data.'));
+          return const Center(
+            child: Text('Could not open local progress data.'),
+          );
         }
         if (snapshot.connectionState != ConnectionState.done) {
           return const Center(child: CircularProgressIndicator());
