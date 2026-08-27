@@ -47,6 +47,15 @@ hidden behind `ProgressRepository`, so a later move to Drift or an asynchronous
 database worker does not change domain or presentation contracts. See
 [ADR 0001](adr/0001-local-progress-persistence.md).
 
+## Adaptive fluency
+
+Foundation arithmetic attempts are classified as incorrect, correct-but-slow,
+or fluent against per-operation targets. Derived scores are rebuilt from the
+immutable event stream. The scheduler first introduces unattempted operations,
+then prioritises due skills and lower fluency. Review intervals expand after
+consecutive fluent attempts and contract after slow or incorrect attempts. See
+[ADR 0002](adr/0002-adaptive-fluency-scheduling.md).
+
 ## Personal progress
 
 The local store is always available and writes immediately. Important actions

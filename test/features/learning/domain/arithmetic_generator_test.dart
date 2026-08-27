@@ -25,6 +25,18 @@ void main() {
     }
   });
 
+  test('honours the skill selected by the scheduler', () {
+    final question = generator.generate(
+      seed: 42,
+      index: 2,
+      operation: ArithmeticOperation.multiplication,
+    );
+
+    expect(question.operation, ArithmeticOperation.multiplication);
+    expect(question.skillId, 'arithmetic.multiplication');
+    expect(question.id, contains('.v2.multiplication.'));
+  });
+
   test('rejects a negative question index', () {
     expect(() => generator.generate(seed: 1, index: -1), throwsArgumentError);
   });

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/data/in_memory_progress_repository.dart';
+import 'package:remath/src/features/learning/domain/fluency.dart';
 import 'package:remath/src/features/learning/presentation/learning_controller.dart';
 
 void main() {
@@ -20,7 +21,7 @@ void main() {
     now = now.add(const Duration(seconds: 4));
     await controller.submitAnswer();
 
-    expect(controller.lastAnswerWasCorrect, isTrue);
+    expect(controller.lastAssessment?.pace, AttemptPace.fluent);
     expect(controller.mastery.attempts, 1);
     expect(controller.mastery.accuracy, 1);
     expect(controller.currentQuestion?.index, 1);

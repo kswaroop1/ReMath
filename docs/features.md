@@ -167,12 +167,14 @@ Last reviewed: 27 August 2026.
   SQLite primary-key insertion makes duplicate delivery idempotent.
 - [x] **MP-002 — Accuracy tracking.** The foundation drill records correctness
   and derives an accuracy summary from immutable attempts.
-- [ ] **MP-003 — Response-time tracking.** Active time separated from interruption.
+- [x] **MP-003 — Response-time tracking.** Each attempt records response time;
+  restarting an interrupted session starts a fresh active timing interval.
 - [ ] **MP-004 — Attempt and correction tracking.** Attempts, hints, revealed
   steps, and correction success.
 - [ ] **MP-005 — Error taxonomy.** Arithmetic, algebra, concept, assumption,
   notation, method selection, and careless error.
-- [ ] **MP-006 — Fluency score.** Speed and accuracy relative to calibrated target.
+- [x] **MP-006 — Fluency score.** Addition, subtraction, and multiplication derive
+  separate recent-evidence scores from correctness and operation-specific speed.
 - [ ] **MP-007 — Knowledge mastery score.** Understanding and retained correctness.
 - [ ] **MP-008 — Performance mastery score.** Solve demanding unfamiliar questions
   accurately under time pressure.
@@ -180,11 +182,12 @@ Last reviewed: 27 August 2026.
   topic labels.
 - [ ] **MP-010 — Confidence calibration score.** Agreement between confidence and
   actual performance.
-- [ ] **MP-011 — Spaced-repetition scheduler.** Incorrect or slow skills return
-  sooner; retained fluent skills recede.
+- [x] **MP-011 — Spaced-repetition scheduler.** Incorrect skills become immediately
+  due, slow skills return after five minutes, and fluent streaks expand intervals.
 - [ ] **MP-012 — Delayed mastery confirmation.** Multiple successful occasions at
   expanding intervals.
-- [ ] **MP-013 — Interleaving policy.** Mix neighbouring and confusable techniques.
+- [x] **MP-013 — Interleaving policy.** The foundation scheduler introduces all
+  arithmetic operations, then selects due or weakest skills across the mixture.
 - [ ] **MP-014 — Forgetting-risk estimate.** Forecast review need rather than
   treating mastery as permanent.
 - [ ] **MP-015 — Session recommendation.** Balance current goal, overdue review,
@@ -263,7 +266,8 @@ Last reviewed: 27 August 2026.
 
 - [x] **DS-001 — Local progress database.** SQLite persists native-platform
   attempts and resumable sessions without network access.
-- [ ] **DS-002 — Database migrations.** Forward-tested schema evolution.
+- [x] **DS-002 — Database migrations.** Transactional v1-to-v2 migration preserves
+  legacy attempts, assigns explicit legacy metadata, and is forward-tested.
 - [ ] **DS-003 — Local content cache.** Independently managed from personal data.
 - [ ] **DS-004 — Event merge engine.** Union immutable events instead of replacing
   whole databases.

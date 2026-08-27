@@ -46,6 +46,7 @@ void main() {
         questionId: 'question-1',
         responseTime: const Duration(seconds: 3),
         sessionId: 'session-1',
+        skillId: 'arithmetic.addition',
       );
 
       expect(await repository.recordAttempt(event), isTrue);
@@ -55,6 +56,7 @@ void main() {
       expect(attempts, hasLength(1));
       expect(attempts.single.eventId, event.eventId);
       expect(attempts.single.responseTime, const Duration(seconds: 3));
+      expect(attempts.single.skillId, 'arithmetic.addition');
     },
   );
 
@@ -77,4 +79,39 @@ void main() {
       expect(await repository.loadSession(), isNull);
     },
   );
+
+  test('migrates version-one attempts without losing history', () async {
+    final database = sqlite3.openInMemory();
+    database
+      ..execute('CREATE TABLE schema_version (version INTEGER NOT NULL) STRICT')
+      ..execute('INSERT INTO schema_version (version) VALUES (1)')
+      ..execute('''
+        CREATE TABLE attempt_events (
+          event_id TEXT NOT NULL PRIMARY KEY,
+          session_id TEXT NOT NULL,
+          question_id TEXT NOT NULL,
+          answer TEXT NOT NULL,
+          is_correct INTEGER NOT NULL,
+          response_ms INTEGER NOT NULL,
+          occurred_at TEXT NOT NULL
+        ) STRICT
+      ''')
+      ..execute('''
+        INSERT INTO attempt_events VALUES (
+          'legacy-event', 'legacy-session', 'legacy-question', '4', 1, 3000,
+          '2026-08-27T08:00:00.000Z'
+        )
+      ''');
+
+    final migrated = SqliteProgressRepository(database);
+    final attempts = await migrated.loadAttempts();
+
+    expect(attempts.single.eventId, 'legacy-event');
+    expect(attempts.single.skillId, 'arithmetic.mixed.legacy');
+    expect(
+      database.select('SELECT version FROM schema_version').single['version'],
+      2,
+    );
+    await migrated.close();
+  });
 }

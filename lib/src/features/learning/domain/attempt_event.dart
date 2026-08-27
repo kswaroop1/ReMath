@@ -7,6 +7,7 @@ final class AttemptEvent {
     required this.questionId,
     required this.responseTime,
     required this.sessionId,
+    required this.skillId,
   });
 
   final String answer;
@@ -16,4 +17,5 @@ final class AttemptEvent {
   final String questionId;
   final Duration responseTime;
   final String sessionId;
+  final String skillId;
 }

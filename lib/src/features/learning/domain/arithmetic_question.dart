@@ -1,5 +1,30 @@
 enum ArithmeticOperation { addition, subtraction, multiplication }
 
+extension ArithmeticOperationDefinition on ArithmeticOperation {
+  String get skillId => 'arithmetic.$name';
+
+  String get label => switch (this) {
+    ArithmeticOperation.addition => 'Addition',
+    ArithmeticOperation.subtraction => 'Subtraction',
+    ArithmeticOperation.multiplication => 'Multiplication',
+  };
+
+  Duration get fluentTarget => switch (this) {
+    ArithmeticOperation.addition => const Duration(seconds: 6),
+    ArithmeticOperation.subtraction => const Duration(seconds: 6),
+    ArithmeticOperation.multiplication => const Duration(seconds: 8),
+  };
+
+  static ArithmeticOperation? fromSkillId(String skillId) {
+    for (final operation in ArithmeticOperation.values) {
+      if (operation.skillId == skillId) {
+        return operation;
+      }
+    }
+    return null;
+  }
+}
+
 final class ArithmeticQuestion {
   const ArithmeticQuestion({
     required this.index,
@@ -15,7 +40,10 @@ final class ArithmeticQuestion {
   final int right;
   final int seed;
 
-  String get id => 'foundation.mental-arithmetic.v1.$seed.$index';
+  String get id =>
+      'foundation.mental-arithmetic.v2.${operation.name}.$seed.$index';
+
+  String get skillId => operation.skillId;
 
   int get answer => switch (operation) {
     ArithmeticOperation.addition => left + right,

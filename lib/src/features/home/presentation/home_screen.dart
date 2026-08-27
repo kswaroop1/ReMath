@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../learning/domain/arithmetic_question.dart';
+import '../../learning/domain/fluency.dart';
 import '../../learning/domain/progress_repository.dart';
 import '../../learning/presentation/learning_controller.dart';
 
@@ -95,6 +97,18 @@ class _HomeScreenState extends State<HomeScreen> {
         '${(_controller.mastery.accuracy * 100).round()}% accuracy',
         textAlign: TextAlign.center,
       ),
+      const SizedBox(height: 20),
+      ..._controller.fluency.map(
+        (skill) => Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Row(
+            children: [
+              Expanded(child: Text(skill.operation.label)),
+              Text('${(skill.score * 100).round()}% fluent'),
+            ],
+          ),
+        ),
+      ),
       const SizedBox(height: 32),
       FilledButton(
         onPressed: _controller.startChunk,
@@ -138,12 +152,13 @@ class _HomeScreenState extends State<HomeScreen> {
           onPressed: _controller.isBusy ? null : _controller.submitAnswer,
           child: const Text('Check answer'),
         ),
-        if (_controller.lastAnswerWasCorrect != null) ...[
+        if (_controller.lastAssessment != null) ...[
           const SizedBox(height: 12),
-          Text(
-            _controller.lastAnswerWasCorrect! ? 'Correct' : 'Not quite',
-            textAlign: TextAlign.center,
-          ),
+          Text(switch (_controller.lastAssessment!.pace) {
+            AttemptPace.fluent => 'Correct and fluent',
+            AttemptPace.slow => 'Correct — keep building speed',
+            AttemptPace.incorrect => 'Not quite — this skill will return soon',
+          }, textAlign: TextAlign.center),
         ],
         const SizedBox(height: 20),
         TextButton(
