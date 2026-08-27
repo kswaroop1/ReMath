@@ -20,8 +20,10 @@ void main() {
     expect(pack.license, 'CC-BY-SA-4.0');
   });
 
-  test('validator reports duplicate IDs, missing references, and bad bounds', () {
-    final pack = parser.parse('''
+  test(
+    'validator reports duplicate IDs, missing references, and bad bounds',
+    () {
+      final pack = parser.parse('''
       {
         "schemaVersion": 1,
         "id": "org.remath.test",
@@ -43,13 +45,14 @@ void main() {
         }]
       }
     ''');
-    final issues = validator.validate(pack);
+      final issues = validator.validate(pack);
 
-    expect(issues, contains('Duplicate skill id: arithmetic.addition.'));
-    expect(issues, contains(contains('references missing skill')));
-    expect(issues, contains(contains('invalid operand bounds')));
-    expect(issues, contains(contains('invalid fluency target')));
-  });
+      expect(issues, contains('Duplicate skill id: arithmetic.addition.'));
+      expect(issues, contains(contains('references missing skill')));
+      expect(issues, contains(contains('invalid operand bounds')));
+      expect(issues, contains(contains('invalid fluency target')));
+    },
+  );
 
   test('parser rejects unknown operations', () {
     expect(
