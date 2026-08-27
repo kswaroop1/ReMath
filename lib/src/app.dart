@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:remath/src/features/home/presentation/home_screen.dart';
-import 'package:remath/src/features/learning/domain/progress_repository.dart';
 import 'package:remath/src/features/learning/domain/content_pack.dart';
+import 'package:remath/src/features/learning/domain/progress_repository.dart';
 
 class ReMathApp extends StatelessWidget {
   const ReMathApp({
