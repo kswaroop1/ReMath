@@ -306,8 +306,8 @@ Last reviewed: 27 August 2026.
   integer marking, progress, and resume operate locally.
 - [ ] **SP-002 — No behavioural analytics by default.** Explicit opt-in if
   diagnostics are ever added.
-- [ ] **SP-003 — Secret scanning.** Prevent API keys, OAuth secrets, and signing
-  credentials entering Git.
+- [x] **SP-003 — Secret scanning.** Gitleaks blocks staged secrets before commit,
+  scans full history before push, and runs independently in CI.
 - [ ] **SP-004 — Least-privilege provider scopes.** App-folder access rather than
   general drive access.
 - [ ] **SP-005 — Backup encryption.** Modern authenticated encryption with a
