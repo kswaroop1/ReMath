@@ -145,30 +145,33 @@ void main() {
     );
   });
 
-  test('content pack selects the template for the requested learning skill', () {
-    const addition = ArithmeticTemplate(
-      fluentTarget: Duration(seconds: 6),
-      id: 'foundation.addition',
-      maximumOperand: 19,
-      minimumOperand: 2,
-      operation: ArithmeticOperation.addition,
-      skillId: 'arithmetic.addition',
-      version: 1,
-    );
-    const pack = ContentPack(
-      id: 'org.remath.test',
-      license: 'CC-BY-4.0',
-      schemaVersion: 1,
-      skills: [SkillDefinition(id: 'arithmetic.addition', title: 'Addition')],
-      templates: [addition],
-      title: 'Test',
-      version: '1.0.0',
-    );
+  test(
+    'content pack selects the template for the requested learning skill',
+    () {
+      const addition = ArithmeticTemplate(
+        fluentTarget: Duration(seconds: 6),
+        id: 'foundation.addition',
+        maximumOperand: 19,
+        minimumOperand: 2,
+        operation: ArithmeticOperation.addition,
+        skillId: 'arithmetic.addition',
+        version: 1,
+      );
+      const pack = ContentPack(
+        id: 'org.remath.test',
+        license: 'CC-BY-4.0',
+        schemaVersion: 1,
+        skills: [SkillDefinition(id: 'arithmetic.addition', title: 'Addition')],
+        templates: [addition],
+        title: 'Test',
+        version: '1.0.0',
+      );
 
-    expect(pack.templateFor(ArithmeticOperation.addition), same(addition));
-    expect(
-      () => pack.templateFor(ArithmeticOperation.subtraction),
-      throwsStateError,
-    );
-  });
+      expect(pack.templateFor(ArithmeticOperation.addition), same(addition));
+      expect(
+        () => pack.templateFor(ArithmeticOperation.subtraction),
+        throwsStateError,
+      );
+    },
+  );
 }
