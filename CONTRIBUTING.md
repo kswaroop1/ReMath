@@ -16,6 +16,37 @@ flutter test --coverage
 
 Content changes must also pass the content validator when one is present.
 
+## Required local secret hooks
+
+Install [pre-commit](https://pre-commit.com/) with `pipx install pre-commit`
+(or another supported installation method), then activate the repository hooks:
+
+```bash
+pre-commit install --install-hooks
+```
+
+The checked-in configuration installs both mandatory gates:
+
+- a pre-commit Gitleaks scan of staged changes; and
+- a pre-push Gitleaks scan of repository history.
+
+Verify the setup at any time with:
+
+```bash
+pre-commit run --all-files
+pre-commit run --hook-stage pre-push --all-files
+```
+
+Git does not activate repository-provided hooks automatically after cloning, so
+each contributor must run the installation command once per clone. CI repeats the
+full-history scan and is the authoritative merge gate. Do not bypass a finding
+with `SKIP`, `--no-verify`, an allowlist, or `gitleaks:allow` unless a reviewed
+false-positive exception is committed with a documented justification.
+
+If a real secret is detected, stop using it and revoke or rotate it immediately.
+Removing it in a later commit is insufficient because it remains in Git history.
+Never have a hook or formatter rewrite an exposed credential automatically.
+
 ## Pull requests
 
 Keep each pull request focused. Explain the user-visible outcome, architecture or
