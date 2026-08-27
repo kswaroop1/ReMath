@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/app.dart';
+import 'package:remath/src/features/learning/data/in_memory_progress_repository.dart';
 
 void main() {
-  testWidgets('shows the ReMath foundation screen', (tester) async {
-    await tester.pumpWidget(const ReMathApp());
+  testWidgets('starts an arithmetic drill and records an answer', (tester) async {
+    final repository = InMemoryProgressRepository();
+    await tester.pumpWidget(ReMathApp(repository: repository));
+    await tester.pumpAndSettle();
 
-    expect(find.text('ReMath'), findsOneWidget);
-    expect(find.text('Rebuild mathematical fluency'), findsOneWidget);
-    expect(find.byType(FilledButton), findsOneWidget);
-  });
+    expect(find.text('Mental arithmetic foundation'), findsOneWidget);
+    expect(find.text('0 attempts • 0% accuracy'), findsOneWidget);
 
-  testWidgets('uses a disabled placeholder action', (tester) async {
-    await tester.pumpWidget(const ReMathApp());
+    await tester.tap(find.text('Start 15-minute drill'));
+    await tester.pumpAndSettle();
 
-    final button = tester.widget<FilledButton>(find.byType(FilledButton));
-    expect(button.onPressed, isNull);
+    expect(find.byKey(const Key('questionPrompt')), findsOneWidget);
+    await tester.enterText(find.byType(TextField), '-999');
+    await tester.tap(find.text('Check answer'));
+    await tester.pumpAndSettle();
+
+    expect(await repository.loadAttempts(), hasLength(1));
+    expect(find.text('Not quite'), findsOneWidget);
   });
 }
