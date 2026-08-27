@@ -135,7 +135,6 @@ final class ExactDecimalAnswer {
   }
 }
 
-
 final class ApproximateDecimalAnswer {
   ApproximateDecimalAnswer({
     required String expectedValue,
@@ -178,10 +177,7 @@ final class ApproximateDecimalAnswer {
 
     return AnswerMark(
       normalizedInput: parsed.canonical,
-      verdict: parsed.isWithinAbsoluteToleranceOf(
-        _expected,
-        _absoluteTolerance,
-      )
+      verdict: parsed.isWithinAbsoluteToleranceOf(_expected, _absoluteTolerance)
           ? AnswerVerdict.correct
           : AnswerVerdict.incorrect,
     );
@@ -251,8 +247,7 @@ final class _NormalizedDecimal {
   }
 
   BigInt _atExponent(int targetExponent) {
-    return coefficient *
-        BigInt.from(10).pow(exponent - targetExponent);
+    return coefficient * BigInt.from(10).pow(exponent - targetExponent);
   }
 
   String get canonical {
