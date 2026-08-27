@@ -130,3 +130,72 @@ restored without changing any business assertion or behaviour.
 
 Green evidence:
 `https://github.com/kswaroop1/ReMath/actions/runs/33107323685`.
+
+## Cycle 3: exact decimal answers
+
+### User
+
+> Continue
+
+### Assistant
+
+> I’m continuing PR #4 with the next strict TDD slice: decimal answers and
+> tolerance rules. I’ll first add business-facing tests and obtain a valid red
+> CI result, then implement only the minimum contract needed to return to green.
+
+The tests required equivalent decimal forms, trailing-zero normalization,
+scientific notation, exact negative and zero handling, invalid-input separation,
+and content-time rejection of invalid expected values. Run #96 stopped only at
+formatting and was not accepted as red evidence.
+
+### Assistant
+
+> CI run #97 is the valid red stage: formatting and secret scanning passed, and
+> strict analysis failed specifically because `ExactDecimalAnswer` does not
+> exist.
+
+Red evidence:
+`https://github.com/kswaroop1/ReMath/actions/runs/33119505741`.
+
+Codex implemented exact normalized base-10 coefficient/exponent comparison using
+`BigInt`; it does not convert learner answers to binary floating point.
+
+### Assistant
+
+> Exact decimals are green in CI run #98 with all gates passing.
+
+Green evidence:
+`https://github.com/kswaroop1/ReMath/actions/runs/33119622201`.
+
+## Cycle 4: absolute decimal tolerance
+
+### Assistant
+
+> The next red cycle defines absolute-tolerance marking, including inclusive
+> boundary behaviour and invalid content configuration; this is important
+> because “within 0.01” must be deterministic across every platform.
+
+The tests required inclusive tolerance boundaries, exact behaviour for zero
+tolerance, incorrect-versus-invalid separation, normalized feedback, and
+content-time rejection of negative or malformed tolerances.
+
+### Assistant
+
+> CI run #99 is a valid red stage: formatting and secret scanning passed, then
+> analysis failed solely because `ApproximateDecimalAnswer` is absent.
+
+Red evidence:
+`https://github.com/kswaroop1/ReMath/actions/runs/33119735571`.
+
+Codex implemented exact absolute-error comparison at a common decimal exponent.
+Run #100 stopped only at formatting. Diagnostic run #101 captured three
+canonical formatting changes; the normal non-mutating formatter gate was then
+restored without changing tests or behaviour.
+
+### Assistant
+
+> Absolute-tolerance marking is green in CI run #103: formatting, zero-warning
+> analysis, tests, coverage, content validation, and secret scanning all passed.
+
+Green evidence:
+`https://github.com/kswaroop1/ReMath/actions/runs/33120054997`.
