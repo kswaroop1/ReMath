@@ -4,6 +4,23 @@ Thank you for helping build ReMath. Contributions must preserve offline operatio
 deterministic assessment, portable learner data, original or compatibly licensed
 content, and the quality requirements in `AGENTS.md`.
 
+## Required development cycle
+
+Behaviour changes must use the red–green–refactor process in
+`docs/testing.md`:
+
+1. select feature IDs and business acceptance criteria;
+2. commit or otherwise preserve the behaviour-focused test first;
+3. run it and record the expected red failure;
+4. implement only enough production code to reach green;
+5. refactor with the complete relevant suite green; and
+6. repeat per behaviour.
+
+Tests should express learner, content, progress, or safety outcomes wherever
+possible. Bug fixes require a failing regression test first. Characterization
+tests for existing behaviour precede the refactoring they protect and do not
+require an artificial failure.
+
 ## Development checks
 
 Before opening a pull request, run:
@@ -12,6 +29,7 @@ Before opening a pull request, run:
 dart format --output=none --set-exit-if-changed lib test tool
 flutter analyze --fatal-infos --fatal-warnings
 flutter test --coverage
+dart run tool/check_coverage.dart 90
 ```
 
 Content changes must also pass the content validator when one is present.
