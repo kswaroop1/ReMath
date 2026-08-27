@@ -2,11 +2,24 @@
 
 Describe the user-visible result.
 
+## TDD evidence
+
+- Feature IDs and business acceptance criteria:
+- Red command and expected failure:
+- Green command and result:
+- Refactor verification:
+- Final coverage and justified uncovered paths:
+
+- [ ] Behaviour tests were written before production behaviour
+- [ ] Tests describe business/safety outcomes rather than implementation details
+- [ ] Bug fixes include a reproducing regression test, or not applicable
+- [ ] Characterization-only work did not manufacture an artificial red failure
+
 ## Verification
 
 - [ ] Formatting passes
 - [ ] Analyzer passes with zero diagnostics
-- [ ] Tests and coverage pass
+- [ ] Tests pass and repository coverage is at least 90%
 - [ ] Content validation passes or is not applicable
 - [ ] Documentation and feature tracker are updated
 
