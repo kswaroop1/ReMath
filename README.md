@@ -52,6 +52,7 @@ generated changes before committing them.
 
 - [Architecture](docs/architecture.md)
 - [ADR 0001: local progress persistence](docs/adr/0001-local-progress-persistence.md)
+- [ADR 0002: adaptive fluency scheduling](docs/adr/0002-adaptive-fluency-scheduling.md)
 - [Numbered feature register](docs/features.md)
 - [Testing strategy](docs/testing.md)
 - [Releases and versioning](docs/releases.md)
