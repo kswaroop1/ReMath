@@ -43,8 +43,8 @@ final class SqliteProgressRepository implements ProgressRepository {
       _database.execute('BEGIN IMMEDIATE');
       try {
         _database.execute(
-          "ALTER TABLE attempt_events ADD COLUMN skill_id TEXT NOT NULL "
-          "DEFAULT 'arithmetic.mixed.legacy'",
+          'ALTER TABLE attempt_events ADD COLUMN skill_id TEXT NOT NULL '
+          'DEFAULT \'arithmetic.mixed.legacy\'',
         );
         _database.execute('UPDATE schema_version SET version = 2');
         _database.execute('COMMIT');
