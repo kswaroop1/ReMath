@@ -6,7 +6,7 @@ agents:
   - product: OpenAI Codex
     model: not exposed to repository session
 started_at: 2026-08-27T10:04:00Z
-finalized_at: null
+finalized_at: 2026-08-27T18:50:39Z
 scope:
   - contribution policy
   - AI provenance
@@ -20,4 +20,5 @@ excluded_context:
   - hidden system and developer instructions
   - model internal reasoning
   - routine raw tool telemetry unless it changed the implementation
-ci_runs: []
+ci_runs:
+  - https://github.com/kswaroop1/ReMath/actions/runs/33104589210
