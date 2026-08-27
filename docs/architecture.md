@@ -42,6 +42,11 @@ Repositories, local persistence, migrations, content-pack readers, and sync
 adapters. DTOs are translated at the boundary rather than leaking into domain
 models.
 
+The first native implementation uses SQLite through `package:sqlite3`. It is
+hidden behind `ProgressRepository`, so a later move to Drift or an asynchronous
+database worker does not change domain or presentation contracts. See
+[ADR 0001](adr/0001-local-progress-persistence.md).
+
 ## Personal progress
 
 The local store is always available and writes immediately. Important actions
