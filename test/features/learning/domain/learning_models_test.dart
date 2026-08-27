@@ -33,33 +33,36 @@ void main() {
     expect(summary.accuracy, closeTo(2 / 3, 0.000001));
   });
 
-  test('resuming a session preserves identity and changes only requested state', () {
-    final startedAt = DateTime.utc(2026, 8, 27, 8);
-    final original = LearningSession(
-      answerDraft: '17',
-      currentQuestionIndex: 4,
-      id: 'session-1',
-      seed: 91,
-      startedAt: startedAt,
-    );
+  test(
+    'resuming a session preserves identity and changes only requested state',
+    () {
+      final startedAt = DateTime.utc(2026, 8, 27, 8);
+      final original = LearningSession(
+        answerDraft: '17',
+        currentQuestionIndex: 4,
+        id: 'session-1',
+        seed: 91,
+        startedAt: startedAt,
+      );
 
-    final unchanged = original.copyWith();
-    expect(unchanged.id, 'session-1');
-    expect(unchanged.seed, 91);
-    expect(unchanged.startedAt, startedAt);
-    expect(unchanged.currentQuestionIndex, 4);
-    expect(unchanged.answerDraft, '17');
+      final unchanged = original.copyWith();
+      expect(unchanged.id, 'session-1');
+      expect(unchanged.seed, 91);
+      expect(unchanged.startedAt, startedAt);
+      expect(unchanged.currentQuestionIndex, 4);
+      expect(unchanged.answerDraft, '17');
 
-    final advanced = original.copyWith(
-      answerDraft: '',
-      currentQuestionIndex: 5,
-    );
-    expect(advanced.id, original.id);
-    expect(advanced.seed, original.seed);
-    expect(advanced.startedAt, original.startedAt);
-    expect(advanced.currentQuestionIndex, 5);
-    expect(advanced.answerDraft, isEmpty);
-  });
+      final advanced = original.copyWith(
+        answerDraft: '',
+        currentQuestionIndex: 5,
+      );
+      expect(advanced.id, original.id);
+      expect(advanced.seed, original.seed);
+      expect(advanced.startedAt, original.startedAt);
+      expect(advanced.currentQuestionIndex, 5);
+      expect(advanced.answerDraft, isEmpty);
+    },
+  );
 
   test('a learning chunk has the promised fifteen-minute duration', () {
     expect(LearningSession.duration, const Duration(minutes: 15));
