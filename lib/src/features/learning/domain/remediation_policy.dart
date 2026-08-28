@@ -39,29 +39,28 @@ final class RemediationPolicy {
     return null;
   }
 
-  RemediationRecommendation _recommendationFor(
-    ArithmeticOperation operation,
-  ) => switch (operation) {
-    ArithmeticOperation.addition => const RemediationRecommendation(
-      observedSkillId: 'arithmetic.addition',
-      reason:
-          'Repeated errors suggest rebuilding addition fundamentals before '
-          'increasing difficulty.',
-      recommendedSkillId: 'arithmetic.addition',
-    ),
-    ArithmeticOperation.subtraction => const RemediationRecommendation(
-      observedSkillId: 'arithmetic.subtraction',
-      reason:
-          'Repeated subtraction errors suggest reviewing addition as a '
-          'prerequisite.',
-      recommendedSkillId: 'arithmetic.addition',
-    ),
-    ArithmeticOperation.multiplication => const RemediationRecommendation(
-      observedSkillId: 'arithmetic.multiplication',
-      reason:
-          'Repeated multiplication errors suggest reviewing addition as a '
-          'prerequisite.',
-      recommendedSkillId: 'arithmetic.addition',
-    ),
-  };
+  RemediationRecommendation _recommendationFor(ArithmeticOperation operation) =>
+      switch (operation) {
+        ArithmeticOperation.addition => const RemediationRecommendation(
+          observedSkillId: 'arithmetic.addition',
+          reason:
+              'Repeated errors suggest rebuilding addition fundamentals before '
+              'increasing difficulty.',
+          recommendedSkillId: 'arithmetic.addition',
+        ),
+        ArithmeticOperation.subtraction => const RemediationRecommendation(
+          observedSkillId: 'arithmetic.subtraction',
+          reason:
+              'Repeated subtraction errors suggest reviewing addition as a '
+              'prerequisite.',
+          recommendedSkillId: 'arithmetic.addition',
+        ),
+        ArithmeticOperation.multiplication => const RemediationRecommendation(
+          observedSkillId: 'arithmetic.multiplication',
+          reason:
+              'Repeated multiplication errors suggest reviewing addition as a '
+              'prerequisite.',
+          recommendedSkillId: 'arithmetic.addition',
+        ),
+      };
 }
