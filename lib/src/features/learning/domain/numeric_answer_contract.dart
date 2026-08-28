@@ -336,7 +336,7 @@ final class _NormalizedDecimal {
 
   String withSignificantFigures(int figures) {
     if (coefficient == BigInt.zero) {
-      return figures == 1 ? '0' : '0.${'0' * (figures - 1)}';
+      return figures == 1 ? '0' : '0.${'0' * figures}';
     }
 
     final digitCount = coefficient.abs().toString().length;
