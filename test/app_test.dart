@@ -76,19 +76,11 @@ void main() {
       _attempt('arithmetic.addition', 0, seconds: 2),
       ...List.generate(
         3,
-        (index) => _attempt(
-          'arithmetic.subtraction',
-          index + 1,
-          seconds: 12,
-        ),
+        (index) => _attempt('arithmetic.subtraction', index + 1, seconds: 12),
       ),
       ...List.generate(
         3,
-        (index) => _attempt(
-          'arithmetic.multiplication',
-          index + 4,
-          seconds: 2,
-        ),
+        (index) => _attempt('arithmetic.multiplication', index + 4, seconds: 2),
       ),
       _attempt('arithmetic.addition', 7, sessionId: 'ordinary-session'),
     ];
@@ -105,10 +97,7 @@ void main() {
       find.textContaining('Addition: More evidence needed'),
       findsOneWidget,
     );
-    expect(
-      find.textContaining('Subtraction: Practise speed'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('Subtraction: Practise speed'), findsOneWidget);
     expect(
       find.textContaining('Multiplication: Ready to progress'),
       findsOneWidget,

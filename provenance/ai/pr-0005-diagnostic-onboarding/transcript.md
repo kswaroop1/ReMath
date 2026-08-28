@@ -106,6 +106,12 @@ green run `33186820450`. Diagnostic run `33186947308` identified the remaining
 four uncovered lines: the unexercised result labels and scanning past a newer
 ordinary attempt to recover the latest diagnostic.
 
+Final run `33187640910` passed the secret scan and reported only canonical Dart
+formatting differences in the new characterization test. Because the local
+executor had no Dart SDK, temporary diagnostic run `33187906149` printed the
+hosted formatter's exact diff. The canonical formatting was applied and the
+ordinary non-mutating formatter gate restored before final verification.
+
 ### Final coverage characterization
 
 A final business-focused widget test preloads independent evidence that yields
