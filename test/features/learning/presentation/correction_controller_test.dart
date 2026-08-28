@@ -78,6 +78,29 @@ void main() {
       expect(controller.mastery.accuracy, 0.5);
     },
   );
+
+  test(
+    'an interrupted correction restores its exact question and draft',
+    () async {
+      final repository = InMemoryProgressRepository();
+      final first = _controller(repository);
+      await first.initialise();
+      await first.startChunk();
+      final question = first.currentQuestion!;
+      first.updateDraft((question.answer + 1).toString());
+      await first.submitAnswer();
+      first.updateDraft('42');
+      await Future<void>.delayed(Duration.zero);
+
+      final restored = _controller(repository);
+      await restored.initialise();
+
+      expect(restored.isCorrecting, isTrue);
+      expect(restored.currentQuestion?.id, question.id);
+      expect(restored.correctionPrompt?.correctAnswer, question.answer);
+      expect(restored.answerDraft, '42');
+    },
+  );
 }
 
 LearningController _controller(InMemoryProgressRepository repository) {
