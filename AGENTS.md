@@ -82,6 +82,56 @@ refactoring verification. Never change a test merely because correct production
 code cannot satisfy it; resolve whether the requirement, test, or implementation
 is wrong and document the decision.
 
+
+## Code Review Rules
+
+### AI provenance integrity
+
+- Treat AI provenance as substantive review evidence, not a file-presence
+  checkbox. When a pull request declares or otherwise shows material AI
+  assistance, require the matching
+  `provenance/ai/pr-NNNN-short-slug/{metadata.yaml,transcript.md}` record and
+  verify that it is chronological and updated through the latest AI-assisted
+  review response, build diagnosis, and corrective change.
+- Compare the claimed scope, prompts, material agent responses, technical
+  decisions, TDD cycles, failures, and fixes against the pull-request diff,
+  commit history, CI runs, and review discussion. Flag as blocking any generic,
+  unrelated, contradictory, implausible, or materially incomplete record that
+  could have been supplied merely to satisfy the path/schema check. The record
+  need not prove cryptographic authorship, but it must provide a coherent,
+  credible causal account of the submitted change.
+- Do not request hidden instructions, chain-of-thought, credentials, unrelated
+  personal data, or confidential material. Explicit, justified redactions and
+  summaries of routine tool telemetry are permitted under
+  `provenance/ai/README.md`.
+
+### Test-driven development evidence
+
+- For every new or changed business behaviour, inspect commit history and CI
+  evidence for a test-first commit that contains the focused business test and
+  any minimum interface/data shape needed to state it, but no production
+  behaviour that makes it pass. Verify that the recorded red result failed for
+  the intended missing behaviour, followed by a green implementation commit and
+  a green refactor/full-suite result.
+- Flag production-first implementation, tests retrofitted after the behaviour,
+  a red commit manufactured by breaking working code, weakened assertions, or
+  red/green claims inconsistent with the commits or CI. Characterization tests
+  for existing behaviour and refactoring-only changes are valid exceptions only
+  when identified explicitly with green-before/green-after evidence.
+
+### Meaningful coverage
+
+- Treat the 90% CI threshold as an emergency merge floor, not the target. Compare
+  coverage before and after the pull request, investigate every decrease, and
+  require meaningful production line coverage as close to 100% as practical.
+  Business-critical domain, marking, progress, migration, and sync policies
+  should have 100% line and branch coverage unless the PR gives a specific,
+  credible justification.
+- Flag untested boundary, invalid-input, failure, interruption, retry,
+  concurrency, migration, and cross-platform paths relevant to the change.
+  Reject tests whose only purpose is executing lines without asserting a
+  business, safety, compatibility, or operational contract.
+
 ## Required checks
 
 ```bash

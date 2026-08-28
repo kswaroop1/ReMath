@@ -114,4 +114,21 @@ void main() {
     );
     await migrated.close();
   });
+
+  test('a failed migration rolls back without advancing the schema', () {
+    final database = sqlite3.openInMemory()
+      ..execute('CREATE TABLE schema_version (version INTEGER NOT NULL) STRICT')
+      ..execute('INSERT INTO schema_version VALUES (1)')
+      ..execute('CREATE TABLE attempt_events (skill_id TEXT) STRICT');
+
+    expect(
+      () => SqliteProgressRepository(database),
+      throwsA(isA<SqliteException>()),
+    );
+    expect(
+      database.select('SELECT version FROM schema_version').single['version'],
+      1,
+    );
+    database.close();
+  });
 }

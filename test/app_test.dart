@@ -23,7 +23,7 @@ void main() {
 
     expect(find.byKey(const Key('questionPrompt')), findsOneWidget);
     await tester.enterText(find.byType(TextField), '-999');
-    await tester.tap(find.text('Check answer'));
+    await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
 
     expect(await repository.loadAttempts(), hasLength(1));
