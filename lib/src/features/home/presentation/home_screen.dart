@@ -122,6 +122,16 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       const SizedBox(height: 32),
+      if (_controller.remediationRecommendation case final recommendation?) ...[
+        Text(
+          'Suggested review',
+          style: Theme.of(context).textTheme.titleLarge,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        Text(recommendation.reason, textAlign: TextAlign.center),
+        const SizedBox(height: 20),
+      ],
       if (_controller.hasEndOfChunkChoices) ...[
         Text(
           'Chunk complete',

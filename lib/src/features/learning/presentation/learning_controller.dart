@@ -14,6 +14,7 @@ import '../domain/fluency.dart';
 import '../domain/learning_session.dart';
 import '../domain/mastery_summary.dart';
 import '../domain/progress_repository.dart';
+import '../domain/remediation_policy.dart';
 
 typedef Clock = DateTime Function();
 typedef IdFactory = String Function();
@@ -84,6 +85,8 @@ final class LearningController extends ChangeNotifier {
   AttemptAssessment? get lastAssessment => _lastAssessment;
   List<SkillFluency> get fluency => List.unmodifiable(_fluency);
   MasterySummary get mastery => _mastery;
+  RemediationRecommendation? get remediationRecommendation =>
+      const RemediationPolicy().recommend(_attempts);
   String get answerDraft => _session?.answerDraft ?? '';
   List<DiagnosticPlacement> get diagnosticPlacements {
     final sessionId = _latestDiagnosticSessionId;
