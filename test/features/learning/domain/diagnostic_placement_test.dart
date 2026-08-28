@@ -12,7 +12,7 @@ void main() {
         _attempt(ArithmeticOperation.addition, correct: false, seconds: 4),
       ]);
 
-      expect(result.single.level, DiagnosticLevel.rebuildFundamentals);
+      expect(result.single.level, DiagnosticPlacementLevel.rebuildFundamentals);
       expect(result.single.reason, contains('accuracy'));
     });
 
@@ -23,7 +23,7 @@ void main() {
         _attempt(ArithmeticOperation.subtraction, correct: true, seconds: 10),
       ]);
 
-      expect(result.single.level, DiagnosticLevel.practiseSpeed);
+      expect(result.single.level, DiagnosticPlacementLevel.practiseSpeed);
       expect(result.single.reason, contains('speed'));
     });
 
@@ -34,7 +34,7 @@ void main() {
         _attempt(ArithmeticOperation.multiplication, correct: true, seconds: 5),
       ]);
 
-      expect(result.single.level, DiagnosticLevel.readyToProgress);
+      expect(result.single.level, DiagnosticPlacementLevel.readyToProgress);
       expect(result.single.objective, LearningObjective.fluency);
     });
 
@@ -64,7 +64,7 @@ void main() {
               (item) => item.operation == ArithmeticOperation.addition,
             )
             .level,
-        DiagnosticLevel.rebuildFundamentals,
+        DiagnosticPlacementLevel.rebuildFundamentals,
       );
       expect(
         result
@@ -72,7 +72,7 @@ void main() {
               (item) => item.operation == ArithmeticOperation.multiplication,
             )
             .level,
-        DiagnosticLevel.readyToProgress,
+        DiagnosticPlacementLevel.readyToProgress,
       );
     });
 
@@ -81,7 +81,7 @@ void main() {
         _attempt(ArithmeticOperation.addition, correct: true, seconds: 2),
       ]);
 
-      expect(result.single.level, DiagnosticLevel.moreEvidenceNeeded);
+      expect(result.single.level, DiagnosticPlacementLevel.moreEvidenceNeeded);
     });
   });
 }
