@@ -47,6 +47,25 @@ hidden behind `ProgressRepository`, so a later move to Drift or an asynchronous
 database worker does not change domain or presentation contracts. See
 [ADR 0001](adr/0001-local-progress-persistence.md).
 
+## Assessment contracts
+
+Numeric assessment remains pure Dart and offline. Integer and rational answers
+use exact `BigInt` arithmetic. Decimal, tolerance, scientific-notation, and
+significant-figure marking use normalized base-10 coefficients and exponents
+rather than binary floating point. Marking separates a valid but incorrect
+answer from malformed input so invalid text does not become false learning
+evidence.
+
+Difficulty is a validated vector of complexity, combined ideas, algebraic
+burden, abstraction, and time pressure. One profile is considered strictly
+harder only when it is no easier in every dimension and harder in at least one;
+the engine does not hide trade-offs behind an arbitrary scalar.
+
+Arithmetic misconception alternatives are derived from recognizable wrong
+operations, carry stable identifiers, exclude the correct answer, and are
+deduplicated before presentation or classification. Future content domains may
+add classifiers without changing the numeric answer contracts.
+
 ## Adaptive fluency
 
 Foundation arithmetic attempts are classified as incorrect, correct-but-slow,
