@@ -7,18 +7,25 @@ void main() {
     significantFigures: 3,
   );
 
-  test('equivalent answers expressed to the requested precision are correct', () {
-    for (final input in ['1230', '1.23e3', '+1230']) {
-      final result = answer.mark(input);
+  test(
+    'equivalent answers expressed to the requested precision are correct',
+    () {
+      for (final input in ['1230', '1.23e3', '+1230']) {
+        final result = answer.mark(input);
 
-      expect(result.verdict, AnswerVerdict.correct, reason: input);
-      expect(result.normalizedInput, '1230', reason: input);
-    }
-  });
+        expect(result.verdict, AnswerVerdict.correct, reason: input);
+        expect(result.normalizedInput, '1230', reason: input);
+      }
+    },
+  );
 
   test('a numerically close answer with the wrong precision is incorrect', () {
     for (final input in ['1234', '1.230e3', '1.2e3']) {
-      expect(answer.mark(input).verdict, AnswerVerdict.incorrect, reason: input);
+      expect(
+        answer.mark(input).verdict,
+        AnswerVerdict.incorrect,
+        reason: input,
+      );
     }
   });
 
