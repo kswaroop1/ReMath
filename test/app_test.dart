@@ -140,6 +140,28 @@ void main() {
       isNot(originalPrompt),
     );
   });
+
+  testWidgets('offers clear choices after ending a chunk', (tester) async {
+    final repository = InMemoryProgressRepository();
+    await tester.pumpWidget(
+      ReMathApp(contentPack: foundationPackForTest(), repository: repository),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Start 15-minute drill'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Finish for now'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Chunk complete'), findsOneWidget);
+    expect(find.text('Continue same skill'), findsOneWidget);
+    expect(find.text('Practise weakest skill'), findsOneWidget);
+    expect(find.text('Another mixed drill'), findsOneWidget);
+    expect(find.text('Done for now'), findsOneWidget);
+
+    await tester.tap(find.text('Continue same skill'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('questionPrompt')), findsOneWidget);
+  });
 }
 
 AttemptEvent _attempt(
