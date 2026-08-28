@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../learning/domain/arithmetic_question.dart';
 import '../../learning/domain/content_pack.dart';
+import '../../learning/domain/diagnostic_placement.dart';
 import '../../learning/domain/fluency.dart';
 import '../../learning/domain/progress_repository.dart';
 import '../../learning/presentation/learning_controller.dart';
@@ -80,9 +81,11 @@ class _HomeScreenState extends State<HomeScreen> {
               constraints: const BoxConstraints(maxWidth: 720),
               child: Padding(
                 padding: const EdgeInsets.all(24),
-                child: _controller.hasActiveSession
-                    ? _buildActiveChunk(context)
-                    : _buildOverview(context),
+                child: SingleChildScrollView(
+                  child: _controller.hasActiveSession
+                      ? _buildActiveChunk(context)
+                      : _buildOverview(context),
+                ),
               ),
             ),
           ),
@@ -119,6 +122,29 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       const SizedBox(height: 32),
+      if (_controller.diagnosticPlacements.isNotEmpty) ...[
+        Text(
+          'Your starting points',
+          style: Theme.of(context).textTheme.titleLarge,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 12),
+        ..._controller.diagnosticPlacements.map(
+          (placement) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              '${placement.operation.label}: ${_placementLabel(placement.level)}\n'
+              '${placement.reason}',
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+      ],
+      OutlinedButton(
+        onPressed: _controller.startDiagnostic,
+        child: const Text('Find my starting point'),
+      ),
+      const SizedBox(height: 12),
       FilledButton(
         onPressed: _controller.startChunk,
         child: const Text('Start 15-minute drill'),
@@ -134,7 +160,9 @@ class _HomeScreenState extends State<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Question ${question.index + 1} • about $minutes min remaining',
+          _controller.isDiagnostic
+              ? 'Diagnostic question ${question.index + 1} of 9'
+              : 'Question ${question.index + 1} • about $minutes min remaining',
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 24),
@@ -177,4 +205,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     );
   }
+
+  String _placementLabel(DiagnosticPlacementLevel level) => switch (level) {
+    DiagnosticPlacementLevel.moreEvidenceNeeded => 'More evidence needed',
+    DiagnosticPlacementLevel.rebuildFundamentals => 'Rebuild fundamentals',
+    DiagnosticPlacementLevel.practiseSpeed => 'Practise speed',
+    DiagnosticPlacementLevel.readyToProgress => 'Ready to progress',
+  };
 }

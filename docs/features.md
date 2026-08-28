@@ -37,8 +37,10 @@ Last reviewed: 28 August 2026.
 
 ## 2. Learning experience and 15-minute chunks
 
-- [ ] **LX-001 — Diagnostic onboarding.** **Next.** Establish starting fluency
-  independently for arithmetic, algebra, calculus, probability, and other tracks.
+- [x] **LX-001 — Diagnostic onboarding.** The offline arithmetic diagnostic
+  samples addition, subtraction, and multiplication independently, resumes an
+  interrupted question and draft, and explains each starting recommendation.
+  Algebra, calculus, probability, and further tracks remain planned extensions.
 - [ ] **LX-002 — Goal selection.** Choose goals such as JEE fluency, quant
   finance, AI-paper comprehension, engineering mathematics, or robotics.
 - [ ] **LX-003 — Fifteen-minute chunk planner.** Assemble a bounded session from
@@ -77,10 +79,12 @@ Last reviewed: 28 August 2026.
   identifiers independent of presentation and content-pack paths.
 - [ ] **CG-002 — Prerequisite graph.** Directed dependencies rather than one
   fixed linear course.
-- [ ] **CG-003 — Multi-track placement.** A learner may be advanced in computing
-  while rebuilding trigonometric fluency.
-- [ ] **CG-004 — Skill-level objectives.** Separate fluency, conceptual
-  understanding, derivation, and technique-selection outcomes.
+- [x] **CG-003 — Multi-track placement foundation.** Arithmetic operations retain
+  independent placement evidence, so weakness in one does not lower another.
+  Cross-subject placement remains planned.
+- [x] **CG-004 — Skill-level objectives foundation.** Arithmetic placement
+  distinguishes rebuilding understanding from fluency practice and progression.
+  Derivation and technique-selection objectives remain planned.
 - [x] **CG-005 — Difficulty calibration.** A validated multidimensional profile
   preserves complexity, combined ideas, algebraic burden, abstraction, and time
   pressure without forcing incomparable burdens into one score.

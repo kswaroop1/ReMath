@@ -75,6 +75,26 @@ then prioritises due skills and lower fluency. Review intervals expand after
 consecutive fluent attempts and contract after slow or incorrect attempts. See
 [ADR 0002](adr/0002-adaptive-fluency-scheduling.md).
 
+## Diagnostic placement
+
+The first diagnostic is a deterministic, offline arithmetic baseline. It asks
+three questions each for addition, subtraction, and multiplication, then places
+each operation independently. Fewer than three attempts means more evidence is
+needed; accuracy below 80% recommends rebuilding fundamentals; otherwise fewer
+than 60% fluent responses recommends speed practice; accurate, fluent evidence
+is ready to progress. Every result includes a learner-facing explanation.
+
+Diagnostic answers use the same immutable attempt events and
+`ProgressRepository` as ordinary drills. A reserved `diagnostic-` session-ID
+prefix distinguishes diagnostic sessions without changing the persisted session
+schema. The current question identity and answer draft therefore resume through
+the existing session contract, while completed placement is always rebuilt from
+events. A later ordinary attempt does not replace the latest diagnostic result.
+
+This is the multi-track placement foundation: arithmetic operations already
+remain independent, and later subject diagnostics can add explicit assessment
+types without coupling the placement policy to Flutter or storage packages.
+
 ## Personal progress
 
 The local store is always available and writes immediately. Important actions
