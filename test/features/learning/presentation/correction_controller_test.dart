@@ -101,6 +101,39 @@ void main() {
       expect(restored.answerDraft, '42');
     },
   );
+
+  test(
+    'ending a chunk offers focused, weakest, mixed, and stop choices',
+    () async {
+      final repository = InMemoryProgressRepository();
+      final controller = _controller(repository);
+      await controller.initialise();
+      await controller.startChunk();
+      final completedOperation = controller.currentQuestion!.operation;
+
+      await controller.finishChunk();
+      expect(controller.hasEndOfChunkChoices, isTrue);
+
+      await controller.continueSameSkill();
+      expect(controller.currentQuestion?.operation, completedOperation);
+
+      await controller.finishChunk();
+      final weakest = controller.fluency.reduce(
+        (first, second) => second.score < first.score ? second : first,
+      );
+      await controller.practiseWeakestSkill();
+      expect(controller.currentQuestion?.operation, weakest.operation);
+
+      await controller.finishChunk();
+      await controller.startChunk();
+      expect(controller.hasEndOfChunkChoices, isFalse);
+
+      await controller.finishChunk();
+      controller.stopAfterChunk();
+      expect(controller.hasEndOfChunkChoices, isFalse);
+      expect(controller.hasActiveSession, isFalse);
+    },
+  );
 }
 
 LearningController _controller(InMemoryProgressRepository repository) {
