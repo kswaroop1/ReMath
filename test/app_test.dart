@@ -32,4 +32,32 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('completes diagnostic onboarding and explains placement', (
+    tester,
+  ) async {
+    final repository = InMemoryProgressRepository();
+    await tester.pumpWidget(
+      ReMathApp(contentPack: foundationPackForTest(), repository: repository),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Find my starting point'));
+    await tester.pumpAndSettle();
+    expect(find.text('Diagnostic question 1 of 9'), findsOneWidget);
+
+    for (var index = 0; index < 9; index++) {
+      await tester.enterText(find.byType(TextField), '-999');
+      await tester.tap(find.text('Check answer'));
+      await tester.pumpAndSettle();
+    }
+
+    expect(find.text('Your starting points'), findsOneWidget);
+    expect(find.textContaining('Addition: Rebuild fundamentals'), findsOneWidget);
+    expect(find.textContaining('Subtraction: Rebuild fundamentals'), findsOneWidget);
+    expect(
+      find.textContaining('Multiplication: Rebuild fundamentals'),
+      findsOneWidget,
+    );
+  });
 }
