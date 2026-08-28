@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/domain/difficulty_profile.dart';
 
 void main() {
-  const routine = DifficultyProfile(
+  final routine = DifficultyProfile(
     complexity: 1,
     combinedIdeas: 1,
     algebraicBurden: 1,
@@ -19,14 +19,14 @@ void main() {
   });
 
   test('a profile is harder only when no dimension becomes easier', () {
-    const harder = DifficultyProfile(
+    final harder = DifficultyProfile(
       complexity: 2,
       combinedIdeas: 2,
       algebraicBurden: 1,
       abstraction: 1,
       timePressure: 2,
     );
-    const tradeOff = DifficultyProfile(
+    final tradeOff = DifficultyProfile(
       complexity: 0,
       combinedIdeas: 1,
       algebraicBurden: 1,
