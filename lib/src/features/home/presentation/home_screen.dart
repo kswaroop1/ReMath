@@ -149,33 +149,33 @@ class _HomeScreenState extends State<HomeScreen> {
           child: const Text('Done for now'),
         ),
       ] else ...[
-      if (_controller.diagnosticPlacements.isNotEmpty) ...[
-        Text(
-          'Your starting points',
-          style: Theme.of(context).textTheme.titleLarge,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 12),
-        ..._controller.diagnosticPlacements.map(
-          (placement) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              '${placement.operation.label}: ${_placementLabel(placement.level)}\n'
-              '${placement.reason}',
+        if (_controller.diagnosticPlacements.isNotEmpty) ...[
+          Text(
+            'Your starting points',
+            style: Theme.of(context).textTheme.titleLarge,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          ..._controller.diagnosticPlacements.map(
+            (placement) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                '${placement.operation.label}: ${_placementLabel(placement.level)}\n'
+                '${placement.reason}',
+              ),
             ),
           ),
+          const SizedBox(height: 20),
+        ],
+        OutlinedButton(
+          onPressed: _controller.startDiagnostic,
+          child: const Text('Find my starting point'),
         ),
-        const SizedBox(height: 20),
-      ],
-      OutlinedButton(
-        onPressed: _controller.startDiagnostic,
-        child: const Text('Find my starting point'),
-      ),
-      const SizedBox(height: 12),
-      FilledButton(
-        onPressed: _controller.startChunk,
-        child: const Text('Start 15-minute drill'),
-      ),
+        const SizedBox(height: 12),
+        FilledButton(
+          onPressed: _controller.startChunk,
+          child: const Text('Start 15-minute drill'),
+        ),
       ],
     ],
   );
