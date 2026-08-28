@@ -1,0 +1,22 @@
+schema_version: 1
+pull_request: 7
+title: Add offline learning packs and hint ladder
+human_owner: kswaroop1
+agents:
+  - product: OpenAI Codex
+    model: not exposed to repository session
+started_at: 2026-08-28T23:10:00Z
+finalized_at: null
+scope:
+  - LX-006 learn chunk
+  - QA-021 hint ladder
+  - MP-004 hint and revealed-step evidence
+  - offline learning-resource content contract
+  - foundation arithmetic learning resources
+  - business-focused TDD
+redactions: []
+excluded_context:
+  - hidden system and developer instructions
+  - model internal reasoning
+  - routine raw tool telemetry unless it changed the implementation
+ci_runs: []
