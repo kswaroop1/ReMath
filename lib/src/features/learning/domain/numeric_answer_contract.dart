@@ -184,6 +184,58 @@ final class ApproximateDecimalAnswer {
   }
 }
 
+
+final class SignificantFigureAnswer {
+  SignificantFigureAnswer({
+    required String expectedValue,
+    required this.significantFigures,
+  }) {
+    if (significantFigures <= 0) {
+      throw ArgumentError.value(
+        significantFigures,
+        'significantFigures',
+        'must be positive',
+      );
+    }
+    final expected = _NormalizedDecimal.tryParse(expectedValue);
+    if (expected == null) {
+      throw ArgumentError.value(
+        expectedValue,
+        'expectedValue',
+        'must be a finite decimal',
+      );
+    }
+    _roundedExpected = expected.roundedToSignificantFigures(significantFigures);
+  }
+
+  final int significantFigures;
+  late final _NormalizedDecimal _roundedExpected;
+
+  String get canonicalAnswer =>
+      _roundedExpected.withSignificantFigures(significantFigures);
+
+  AnswerMark mark(String input) {
+    final parsed = _NormalizedDecimal.tryParse(input);
+    final suppliedFigures = _NormalizedDecimal.significantFigureCount(input);
+    if (parsed == null || suppliedFigures == null) {
+      return const AnswerMark(
+        normalizedInput: '',
+        verdict: AnswerVerdict.invalid,
+      );
+    }
+
+    final sameValue =
+        parsed.coefficient == _roundedExpected.coefficient &&
+        parsed.exponent == _roundedExpected.exponent;
+    return AnswerMark(
+      normalizedInput: parsed.canonical,
+      verdict: sameValue && suppliedFigures == significantFigures
+          ? AnswerVerdict.correct
+          : AnswerVerdict.incorrect,
+    );
+  }
+}
+
 final class _NormalizedDecimal {
   _NormalizedDecimal._(this.coefficient, this.exponent);
 
@@ -194,6 +246,150 @@ final class _NormalizedDecimal {
 
   final BigInt coefficient;
   final int exponent;
+
+  static int? significantFigureCount(String input) {
+    final match = _pattern.firstMatch(input.trim());
+    if (match == null) {
+      return null;
+    }
+
+    final integerDigits = match.group(2);
+    final fractionalDigits = integerDigits == null
+        ? match.group(4)!
+        : match.group(3);
+    final hasDecimalPoint = input.toLowerCase().split('e').first.contains('.');
+    final hasExponent = match.group(5) != null;
+    var digits = '${integerDigits ?? ''}${fractionalDigits ?? ''}';
+    digits = digits.replaceFirst(RegExp(r'^0+'), '');
+    if (digits.isEmpty) {
+      if (hasDecimalPoint) {
+        final decimalDigits = fractionalDigits ?? '';
+        return decimalDigits.isEmpty ? 1 : decimalDigits.length;
+      }
+      return 1;
+    }
+    if (!hasDecimalPoint && !hasExponent) {
+      digits = digits.replaceFirst(RegExp(r'0+    final match = _pattern.firstMatch(input.trim());
+    if (match == null) {
+      return null;
+    }
+
+    final integerDigits = match.group(2) ?? '0';
+    final fractionalDigits = match.group(2) == null
+        ? match.group(4)!
+        : match.group(3) ?? '';
+    final explicitExponent = int.tryParse(match.group(5) ?? '0');
+    if (explicitExponent == null ||
+        explicitExponent.abs() > _maximumExponentMagnitude) {
+      return null;
+    }
+
+    var coefficient = BigInt.parse('$integerDigits$fractionalDigits');
+    if (match.group(1) == '-') {
+      coefficient = -coefficient;
+    }
+    var exponent = explicitExponent - fractionalDigits.length;
+    if (exponent.abs() > _maximumExponentMagnitude) {
+      return null;
+    }
+
+    if (coefficient == BigInt.zero) {
+      return _NormalizedDecimal._(BigInt.zero, 0);
+    }
+    while (coefficient % BigInt.from(10) == BigInt.zero) {
+      coefficient ~/= BigInt.from(10);
+      exponent += 1;
+    }
+    return _NormalizedDecimal._(coefficient, exponent);
+  }
+
+  bool isWithinAbsoluteToleranceOf(
+    _NormalizedDecimal expected,
+    _NormalizedDecimal tolerance,
+  ) {
+    var commonExponent = exponent < expected.exponent
+        ? exponent
+        : expected.exponent;
+    if (tolerance.exponent < commonExponent) {
+      commonExponent = tolerance.exponent;
+    }
+    final difference =
+        (_atExponent(commonExponent) - expected._atExponent(commonExponent))
+            .abs();
+    return difference <= tolerance._atExponent(commonExponent);
+  }
+
+  BigInt _atExponent(int targetExponent) {
+    return coefficient * BigInt.from(10).pow(exponent - targetExponent);
+  }
+
+  String get canonical {
+    if (coefficient == BigInt.zero) {
+      return '0';
+    }
+
+    final sign = coefficient.isNegative ? '-' : '';
+    final digits = coefficient.abs().toString();
+    final decimalPoint = digits.length + exponent;
+    if (decimalPoint <= 0) {
+      return '${sign}0.${'0' * -decimalPoint}$digits';
+    }
+    if (decimalPoint >= digits.length) {
+      return '$sign$digits${'0' * (decimalPoint - digits.length)}';
+    }
+    return '$sign${digits.substring(0, decimalPoint)}.'
+        '${digits.substring(decimalPoint)}';
+  }
+}
+), '');
+    }
+    return digits.length;
+  }
+
+  _NormalizedDecimal roundedToSignificantFigures(int figures) {
+    if (coefficient == BigInt.zero) {
+      return this;
+    }
+
+    final digitCount = coefficient.abs().toString().length;
+    if (digitCount <= figures) {
+      return this;
+    }
+    final removedDigits = digitCount - figures;
+    final factor = BigInt.from(10).pow(removedDigits);
+    final roundedMagnitude =
+        (coefficient.abs() + factor ~/ BigInt.two) ~/ factor;
+    var roundedCoefficient = coefficient.isNegative
+        ? -roundedMagnitude
+        : roundedMagnitude;
+    var roundedExponent = exponent + removedDigits;
+    while (roundedCoefficient % BigInt.from(10) == BigInt.zero) {
+      roundedCoefficient ~/= BigInt.from(10);
+      roundedExponent += 1;
+    }
+    return _NormalizedDecimal._(roundedCoefficient, roundedExponent);
+  }
+
+  String withSignificantFigures(int figures) {
+    if (coefficient == BigInt.zero) {
+      return figures == 1 ? '0' : '0.${'0' * (figures - 1)}';
+    }
+
+    final digitCount = coefficient.abs().toString().length;
+    if (figures == digitCount) {
+      return canonical;
+    }
+    if (exponent < 0) {
+      return '$canonical${'0' * (figures - digitCount)}';
+    }
+
+    final digits = coefficient.abs().toString();
+    final sign = coefficient.isNegative ? '-' : '';
+    final trailingFigures = digits.substring(1) + '0' * (figures - digitCount);
+    final decimal = trailingFigures.isEmpty ? '' : '.$trailingFigures';
+    final scientificExponent = digitCount - 1 + exponent;
+    return '$sign${digits[0]}${decimal}e$scientificExponent';
+  }
 
   static _NormalizedDecimal? tryParse(String input) {
     final match = _pattern.firstMatch(input.trim());
