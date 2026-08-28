@@ -76,6 +76,23 @@ void main() {
       );
     });
 
+    test('unrelated progress cannot influence arithmetic placement', () {
+      final result = const DiagnosticPlacementPolicy().place([
+        AttemptEvent(
+          answer: '1',
+          eventId: 'other',
+          isCorrect: true,
+          occurredAt: DateTime.utc(2026),
+          questionId: 'other',
+          responseTime: const Duration(seconds: 1),
+          sessionId: 'diagnostic',
+          skillId: 'calculus.differentiation',
+        ),
+      ]);
+
+      expect(result, isEmpty);
+    });
+
     test('does not claim placement before enough evidence exists', () {
       final result = const DiagnosticPlacementPolicy().place([
         _attempt(ArithmeticOperation.addition, correct: true, seconds: 2),
