@@ -336,3 +336,40 @@ coverage.
 
 Green evidence:
 `https://github.com/kswaroop1/ReMath/actions/runs/33149632984` (run #150).
+
+
+## On-demand Codex review setup
+
+### User
+
+> Who will review? I think you can setup a review agent on github, right?
+
+### Assistant
+
+> “Ready for review” is only a GitHub state; it does not appoint a reviewer.
+> Codex supports on-demand and automatic GitHub reviews. An initial
+> `@codex review` request was posted, but the connector bot reported that the
+> repository had not yet been connected to Codex.
+
+### User
+
+> I think i have now connected. Can you setup on demand reviewer, and also, since
+> we have provenance logs as part of PR, set up the reviewer to ensure it checks
+> for provenance must be part of pr, and that the ai conversation makes sense in
+> light of code being submitted (ie, contributor do not send some random text
+> just for the check to pass, reviewer must ensure the code being submitted could
+> genuinely have been ai generated using those conversations). It must also
+> ensure near 100% coverage, and perhaps the tdd methodology demonstrated, ie the
+> pr has a commit just with failing tests, and then green. Is this all posdible?
+
+### Assistant
+
+> Most of this is possible, with one important limit: a reviewer can assess
+> whether the AI transcript plausibly and coherently explains the submitted
+> changes, but it cannot cryptographically prove causation or authorship.
+>
+> Repository-wide Codex review rules were added for substantive provenance
+> consistency, history-visible business-focused red-to-green TDD, and meaningful
+> near-100% production coverage. Contributor guidance now documents the
+> on-demand `@codex review` flow and preserves CI and accountable human review
+> as separate gates.
