@@ -52,6 +52,8 @@ final class LearningController extends ChangeNotifier {
   AttemptAssessment? _lastAssessment;
   CorrectionPrompt? _correctionPrompt;
   ArithmeticQuestion? _correctionQuestion;
+  String? _correctionOfEventId;
+  bool _isRetesting = false;
   String? _latestDiagnosticSessionId;
 
   static const _diagnosticPrefix = 'diagnostic-';
@@ -61,6 +63,7 @@ final class LearningController extends ChangeNotifier {
   bool get isDiagnostic => _session?.id.startsWith(_diagnosticPrefix) ?? false;
   bool get isBusy => _isBusy;
   bool get isCorrecting => _correctionPrompt != null;
+  bool get isRetesting => _isRetesting;
   CorrectionPrompt? get correctionPrompt => _correctionPrompt;
   AttemptAssessment? get lastAssessment => _lastAssessment;
   List<SkillFluency> get fluency => List.unmodifiable(_fluency);
@@ -87,11 +90,10 @@ final class LearningController extends ChangeNotifier {
     final operation = isDiagnostic
         ? ArithmeticOperation.values[session.currentQuestionIndex ~/ 3]
         : _scheduler.choose(fluency: _fluency, now: _clock().toUtc());
-    return _generator.generate(
+    return _questionFor(
       seed: session.seed,
       index: session.currentQuestionIndex,
-      packId: _contentPack.id,
-      template: _contentPack.templateFor(operation),
+      operation: operation,
     );
   }
 
@@ -178,10 +180,18 @@ final class LearningController extends ChangeNotifier {
       answer: answer.toString(),
       eventId: _idFactory(),
       isCorrect: isCorrect,
+      kind: isCorrecting
+          ? AttemptKind.correction
+          : isRetesting
+          ? AttemptKind.retest
+          : AttemptKind.answer,
       misconceptionId: misconception?.stableId,
       occurredAt: now,
       questionId: question.id,
       responseTime: now.difference(beganAt),
+      relatedEventId: isCorrecting || isRetesting
+          ? _correctionOfEventId
+          : null,
       sessionId: session.id,
       skillId: question.skillId,
     );
@@ -189,7 +199,49 @@ final class LearningController extends ChangeNotifier {
     _attempts = await _repository.loadAttempts();
     _lastAssessment = AttemptAssessment.fromEvent(event);
     _recalculateProgress();
+    if (isCorrecting) {
+      if (isCorrect) {
+        _correctionPrompt = null;
+        _correctionQuestion = _questionFor(
+          seed: session.seed,
+          index: question.index + 1,
+          operation: question.operation,
+        );
+        _isRetesting = true;
+      }
+      _session = session.copyWith(answerDraft: '');
+      await _repository.saveSession(_session!);
+      _questionBeganAt = now;
+      _isBusy = false;
+      notifyListeners();
+      return;
+    }
+    if (isRetesting) {
+      if (!isCorrect) {
+        _correctionOfEventId = event.eventId;
+        _correctionPrompt = CorrectionPrompt.forAnswer(
+          question: question,
+          misconception: misconception?.id,
+        );
+        _isRetesting = false;
+      } else {
+        _correctionOfEventId = null;
+        _correctionQuestion = null;
+        _isRetesting = false;
+        _session = session.copyWith(
+          answerDraft: '',
+          currentQuestionIndex: question.index + 1,
+        );
+      }
+      _session = (_session ?? session).copyWith(answerDraft: '');
+      await _repository.saveSession(_session!);
+      _questionBeganAt = now;
+      _isBusy = false;
+      notifyListeners();
+      return;
+    }
     if (!isCorrect && !isDiagnostic) {
+      _correctionOfEventId = event.eventId;
       _correctionQuestion = question;
       _correctionPrompt = CorrectionPrompt.forAnswer(
         question: question,
@@ -250,4 +302,15 @@ final class LearningController extends ChangeNotifier {
     }
     return null;
   }
+
+  ArithmeticQuestion _questionFor({
+    required int seed,
+    required int index,
+    required ArithmeticOperation operation,
+  }) => _generator.generate(
+    seed: seed,
+    index: index,
+    packId: _contentPack.id,
+    template: _contentPack.templateFor(operation),
+  );
 }

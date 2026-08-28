@@ -9,6 +9,9 @@ final class MasterySummary {
     var attempts = 0;
     var correct = 0;
     for (final event in events) {
+      if (event.kind == AttemptKind.correction) {
+        continue;
+      }
       attempts++;
       if (event.isCorrect) {
         correct++;
