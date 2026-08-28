@@ -68,10 +68,7 @@ void main() {
       expect(attempts.single.skillId, 'arithmetic.addition');
       expect(attempts.single.kind, AttemptKind.correction);
       expect(attempts.single.relatedEventId, 'wrong-attempt');
-      expect(
-        attempts.single.misconceptionId,
-        'arithmetic.used-addition',
-      );
+      expect(attempts.single.misconceptionId, 'arithmetic.used-addition');
     },
   );
 
@@ -123,9 +120,12 @@ void main() {
 
     expect(attempts.single.eventId, 'legacy-event');
     expect(attempts.single.skillId, 'arithmetic.mixed.legacy');
+    expect(attempts.single.kind, AttemptKind.answer);
+    expect(attempts.single.relatedEventId, isNull);
+    expect(attempts.single.misconceptionId, isNull);
     expect(
       database.select('SELECT version FROM schema_version').single['version'],
-      2,
+      3,
     );
     await migrated.close();
   });
