@@ -84,7 +84,7 @@ void main() {
 
       expect(leadingDot.mark('.5').verdict, AnswerVerdict.correct);
       expect(negative.canonicalAnswer, '-1.24');
-      expect(carry.canonicalAnswer, '1000');
+      expect(carry.canonicalAnswer, '1.0e3');
       expect(paddedDecimal.canonicalAnswer, '0.500');
       expect(paddedInteger.canonicalAnswer, '-1.20e3');
     },
