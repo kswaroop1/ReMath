@@ -28,10 +28,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(await repository.loadAttempts(), hasLength(1));
-    expect(
-      find.text('Not quite — this skill will return soon'),
-      findsOneWidget,
-    );
+    expect(find.text('Correct this answer'), findsOneWidget);
+    expect(find.textContaining('Correct answer:'), findsOneWidget);
   });
 
   testWidgets('completes diagnostic onboarding and explains placement', (
