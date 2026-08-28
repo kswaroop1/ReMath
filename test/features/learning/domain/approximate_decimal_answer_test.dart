@@ -13,6 +13,11 @@ void main() {
     }
   });
 
+  test('correction feedback exposes the expected value and tolerance', () {
+    expect(answer.canonicalAnswer, '10');
+    expect(answer.absoluteTolerance, '0.05');
+  });
+
   test('an answer outside the tolerance is incorrect rather than invalid', () {
     final result = answer.mark('10.051');
 
