@@ -66,17 +66,12 @@ void main() {
 
   test('content requires a finite expected value and positive precision', () {
     expect(
-      () => SignificantFigureAnswer(
-        expectedValue: 'many',
-        significantFigures: 3,
-      ),
+      () =>
+          SignificantFigureAnswer(expectedValue: 'many', significantFigures: 3),
       throwsArgumentError,
     );
     expect(
-      () => SignificantFigureAnswer(
-        expectedValue: '1',
-        significantFigures: 0,
-      ),
+      () => SignificantFigureAnswer(expectedValue: '1', significantFigures: 0),
       throwsArgumentError,
     );
   });
