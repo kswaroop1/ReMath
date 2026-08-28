@@ -54,8 +54,7 @@ final class LearningController extends ChangeNotifier {
   static const _diagnosticQuestionCount = 9;
 
   bool get hasActiveSession => _session != null;
-  bool get isDiagnostic =>
-      _session?.id.startsWith(_diagnosticPrefix) ?? false;
+  bool get isDiagnostic => _session?.id.startsWith(_diagnosticPrefix) ?? false;
   bool get isBusy => _isBusy;
   AttemptAssessment? get lastAssessment => _lastAssessment;
   List<SkillFluency> get fluency => List.unmodifiable(_fluency);
