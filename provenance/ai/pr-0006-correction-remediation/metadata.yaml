@@ -1,0 +1,21 @@
+schema_version: 1
+pull_request: 6
+title: Add correction and remediation loop
+human_owner: kswaroop1
+agents:
+  - product: OpenAI Codex
+    model: not exposed to repository session
+started_at: 2026-08-28T16:15:00Z
+finalized_at: null
+scope:
+  - QA-022 correction loop
+  - MP-004 attempt and correction tracking
+  - CG-007 prerequisite remediation foundation
+  - LX-012 end-of-chunk choices foundation
+  - business-focused TDD
+redactions: []
+excluded_context:
+  - hidden system and developer instructions
+  - model internal reasoning
+  - routine raw tool telemetry unless it changed the implementation
+ci_runs: []
