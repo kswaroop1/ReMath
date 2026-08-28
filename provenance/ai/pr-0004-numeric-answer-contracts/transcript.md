@@ -304,3 +304,35 @@ Green evidence:
 `https://github.com/kswaroop1/ReMath/actions/runs/33148358450` (run #135).
 
 Run #135 reported 97.48% repository line coverage.
+
+
+## Coverage review follow-up
+
+### User
+
+> What do you mean by ready for review? Also the coverage went down from 99.7%
+> to 97.48%. This suggests some cases were missed
+
+### Assistant
+
+> “Ready for review” means the PR is open, no longer a draft, CI is green, and
+> GitHub reports it mergeable; it does not mean the PR has been merged.
+>
+> The coverage concern is valid. The PR was returned to draft while every
+> uncovered production line was identified and assessed.
+
+A temporary diagnostic CI step reported uncovered branches in approximate-answer
+feedback, significant-figure representations and rounding, arithmetic
+misconception identity, keyboard submission, and SQLite migration rollback.
+Business-focused tests were added for each case. The diagnostic step was then
+removed and the standard non-mutating workflow restored.
+
+One new test initially expected two-significant-figure rounding of `999` to be
+displayed as `1000`. CI exposed that ambiguity; the expected canonical form was
+corrected to `1.0e3`, which explicitly communicates two significant figures.
+
+Final verification passed all gates with 85 tests and 100.00% production line
+coverage.
+
+Green evidence:
+`https://github.com/kswaroop1/ReMath/actions/runs/33149632984` (run #150).
