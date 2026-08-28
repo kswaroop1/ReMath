@@ -6,7 +6,7 @@ agents:
   - product: OpenAI Codex
     model: not exposed to repository session
 started_at: 2026-08-28T16:15:00Z
-finalized_at: null
+finalized_at: 2026-08-28T23:00:00Z
 scope:
   - QA-022 correction loop
   - MP-004 attempt and correction tracking
@@ -18,4 +18,22 @@ excluded_context:
   - hidden system and developer instructions
   - model internal reasoning
   - routine raw tool telemetry unless it changed the implementation
-ci_runs: []
+ci_runs:
+  - id: 33218011412
+    purpose: repeated-error remediation red
+    conclusion: failure
+  - id: 33218142417
+    purpose: production formatting check
+    conclusion: failure
+  - id: 33218275748
+    purpose: canonical formatting diagnostic
+    conclusion: failure
+  - id: 33218411380
+    purpose: production green before coverage completion
+    conclusion: success
+  - id: 33218558979
+    purpose: uncovered-line diagnostic
+    conclusion: failure
+  - id: 33218722175
+    purpose: permanent final implementation pipeline
+    conclusion: success

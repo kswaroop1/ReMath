@@ -95,6 +95,27 @@ This is the multi-track placement foundation: arithmetic operations already
 remain independent, and later subject diagnostics can add explicit assessment
 types without coupling the placement policy to Flutter or storage packages.
 
+## Correction and remediation
+
+An incorrect ordinary-drill answer enters a persisted correction phase for the
+same deterministic question. The original answer remains an immutable
+`answer` event. Each correction is a separately linked `correction` event and a
+successful correction produces a nearby same-operation `retest` event. Only
+answer and retest evidence contributes to accuracy and fluency; coached
+corrections do not retroactively turn failure into independent mastery.
+
+The active-session record stores its question, correction, or retest phase,
+focused skill, originating event ID, and current draft. SQLite schema version 3
+adds those fields and the corresponding event kind, relationship, and
+misconception columns. Version-one history migrates with `answer` as its safe
+default, and each migration is transactional.
+
+`RemediationPolicy` is pure Dart and derives suggestions from the immutable
+event stream. Its first arithmetic rule requires repeated errors in one
+operation, excludes correction submissions, and can direct subtraction or
+multiplication learners back to addition as a prerequisite. This deterministic
+foundation will later consume the general curriculum dependency graph.
+
 ## Personal progress
 
 The local store is always available and writes immediately. Important actions
