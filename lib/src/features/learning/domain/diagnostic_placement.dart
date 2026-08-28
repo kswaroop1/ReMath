@@ -80,7 +80,7 @@ final class DiagnosticPlacementPolicy {
         accuracy,
         fluentShare,
         DiagnosticPlacementLevel.rebuildFundamentals,
-        'Accuracy is not yet reliable; rebuild the fundamentals first.',
+        'Your accuracy is not yet reliable; rebuild the fundamentals first.',
       );
     }
     if (fluentShare < 0.6) {
