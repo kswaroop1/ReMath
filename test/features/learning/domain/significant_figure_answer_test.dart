@@ -53,8 +53,8 @@ void main() {
       significantFigures: 3,
     );
 
-    expect(zero.canonicalAnswer, '0.00');
-    expect(zero.mark('0.00').verdict, AnswerVerdict.correct);
+    expect(zero.canonicalAnswer, '0.000');
+    expect(zero.mark('0.000').verdict, AnswerVerdict.correct);
     expect(zero.mark('0').verdict, AnswerVerdict.incorrect);
   });
 
