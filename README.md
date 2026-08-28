@@ -14,11 +14,13 @@ three separate capabilities:
 
 ## Status
 
-This repository contains the initial Flutter foundation. The first milestone is
-the learning-session shell, deterministic question generation, local progress
-events, and tests. Cloud synchronisation and downloadable course packs are
-deliberately separated behind interfaces so providers can be added without
-changing the learning engine.
+The implemented foundation includes deterministic arithmetic generation, exact
+local marking, immutable progress events, adaptive fluency scheduling, resumable
+15-minute drills, and an offline arithmetic diagnostic with independent,
+explainable placement for addition, subtraction, and multiplication. Cloud
+synchronisation and downloadable course packs remain deliberately separated
+behind interfaces so providers can be added without changing the learning
+engine.
 
 ## Platforms
 
