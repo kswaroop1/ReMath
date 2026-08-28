@@ -103,6 +103,48 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('guides a wrong drill answer through correction and retest', (
+    tester,
+  ) async {
+    final repository = InMemoryProgressRepository();
+    await tester.pumpWidget(
+      ReMathApp(contentPack: foundationPackForTest(), repository: repository),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Start 15-minute drill'));
+    await tester.pumpAndSettle();
+    final originalPrompt = tester
+        .widget<Text>(find.byKey(const Key('questionPrompt')))
+        .data;
+
+    await tester.enterText(find.byType(TextField), '-999');
+    await tester.tap(find.text('Check answer'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Correct this answer'), findsOneWidget);
+    expect(find.textContaining('Correct answer:'), findsOneWidget);
+    expect(
+      find.text('Enter the correct answer to continue.'),
+      findsOneWidget,
+    );
+    expect(find.text('Submit correction'), findsOneWidget);
+    final answerText = tester
+        .widget<Text>(find.textContaining('Correct answer:'))
+        .data!;
+    final correctAnswer = answerText.split(':').last.trim();
+
+    await tester.enterText(find.byType(TextField), correctAnswer);
+    await tester.tap(find.text('Submit correction'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Retest this skill'), findsOneWidget);
+    expect(find.text('Check retest'), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('questionPrompt'))).data,
+      isNot(originalPrompt),
+    );
+  });
 }
 
 AttemptEvent _attempt(
