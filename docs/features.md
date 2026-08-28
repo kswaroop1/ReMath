@@ -12,7 +12,7 @@ This is the authoritative, numbered product and content backlog for ReMath.
 - Feature IDs are permanent. Retired features remain recorded rather than being
   renumbered.
 
-Last reviewed: 27 August 2026.
+Last reviewed: 28 August 2026.
 
 ## 1. Product foundations
 
@@ -81,8 +81,9 @@ Last reviewed: 27 August 2026.
   while rebuilding trigonometric fluency.
 - [ ] **CG-004 — Skill-level objectives.** Separate fluency, conceptual
   understanding, derivation, and technique-selection outcomes.
-- [ ] **CG-005 — Difficulty calibration.** Parameters for complexity, number of
-  combined ideas, algebraic burden, abstraction, and time pressure.
+- [x] **CG-005 — Difficulty calibration.** A validated multidimensional profile
+  preserves complexity, combined ideas, algebraic burden, abstraction, and time
+  pressure without forcing incomparable burdens into one score.
 - [ ] **CG-006 — Unlock policy.** Recommend readiness without unnecessarily
   preventing exploration.
 - [ ] **CG-007 — Prerequisite remediation.** Diagnose likely missing precursor
@@ -102,8 +103,9 @@ Last reviewed: 27 August 2026.
 
 - [x] **QA-001 — Deterministic question identity.** The foundation arithmetic
   generator reproduces a question from its versioned ID, seed, and index.
-- [ ] **QA-002 — Numeric short answers.** Exact, rational, decimal, tolerance, and
-  significant-figure contracts.
+- [x] **QA-002 — Numeric short answers.** Exact integer, reduced rational,
+  exact decimal, absolute-tolerance, and significant-figure contracts use exact
+  local arithmetic and distinguish incorrect from invalid input.
 - [ ] **QA-003 — Symbolic short answers.** Algebraic equivalence with explicit
   assumptions and domain restrictions.
 - [ ] **QA-004 — Single-answer MCQ.** Randomised distractors with misconception
@@ -134,12 +136,14 @@ Last reviewed: 27 August 2026.
   modelling assumptions, and theorem applicability.
 - [x] **QA-017 — Parameterised generators.** Foundation arithmetic generation is
   operand-bounded, exactly marked, template-versioned, and deterministic.
-- [ ] **QA-018 — Generator property tests.** Large seeded sweeps for ambiguity,
-  invalid domains, duplicates, and unstable marking.
+- [x] **QA-018 — Generator property tests.** A 30,000-identity seeded sweep
+  verifies current arithmetic templates for bounds, valid domains, unique
+  identities, deterministic replay, and stable exact marking.
 - [ ] **QA-019 — Curated challenge bank.** Individually authored multi-topic
   JEE/Oxbridge/university/professional-style questions.
-- [ ] **QA-020 — Common misconception distractors.** Wrong answers derived from
-  diagnosed mistakes rather than arbitrary values.
+- [x] **QA-020 — Common misconception distractors.** The arithmetic foundation
+  derives deduplicated operation-confusion alternatives, excludes correct
+  answers, and records stable misconception identifiers for feedback.
 - [ ] **QA-021 — Hint ladder.** Concept cue, method cue, next step, and worked
   solution with escalating mastery cost.
 - [ ] **QA-022 — Correction loop.** Require understanding and a nearby corrective
