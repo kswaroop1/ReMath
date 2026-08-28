@@ -50,10 +50,6 @@ final class LearningController extends ChangeNotifier {
   DateTime? _questionBeganAt;
   bool _isBusy = false;
   AttemptAssessment? _lastAssessment;
-  CorrectionPrompt? _correctionPrompt;
-  ArithmeticQuestion? _correctionQuestion;
-  String? _correctionOfEventId;
-  bool _isRetesting = false;
   String? _latestDiagnosticSessionId;
 
   static const _diagnosticPrefix = 'diagnostic-';
@@ -62,9 +58,27 @@ final class LearningController extends ChangeNotifier {
   bool get hasActiveSession => _session != null;
   bool get isDiagnostic => _session?.id.startsWith(_diagnosticPrefix) ?? false;
   bool get isBusy => _isBusy;
-  bool get isCorrecting => _correctionPrompt != null;
-  bool get isRetesting => _isRetesting;
-  CorrectionPrompt? get correctionPrompt => _correctionPrompt;
+  bool get isCorrecting =>
+      _session?.phase == LearningSessionPhase.correction;
+  bool get isRetesting => _session?.phase == LearningSessionPhase.retest;
+  CorrectionPrompt? get correctionPrompt {
+    final session = _session;
+    final question = currentQuestion;
+    if (!isCorrecting || session == null || question == null) {
+      return null;
+    }
+    final related = _attemptById(session.correctionOfEventId);
+    final learnerAnswer = related == null ? null : int.tryParse(related.answer);
+    final misconception = learnerAnswer == null
+        ? null
+        : const ArithmeticMisconceptionClassifier()
+              .classify(question, learnerAnswer)
+              ?.id;
+    return CorrectionPrompt.forAnswer(
+      question: question,
+      misconception: misconception,
+    );
+  }
   AttemptAssessment? get lastAssessment => _lastAssessment;
   List<SkillFluency> get fluency => List.unmodifiable(_fluency);
   MasterySummary get mastery => _mastery;
@@ -80,16 +94,17 @@ final class LearningController extends ChangeNotifier {
   }
 
   ArithmeticQuestion? get currentQuestion {
-    if (_correctionQuestion != null) {
-      return _correctionQuestion;
-    }
     final session = _session;
     if (session == null) {
       return null;
     }
-    final operation = isDiagnostic
-        ? ArithmeticOperation.values[session.currentQuestionIndex ~/ 3]
-        : _scheduler.choose(fluency: _fluency, now: _clock().toUtc());
+    final focusedOperation = ArithmeticOperationDefinition.fromSkillId(
+      session.focusSkillId ?? '',
+    );
+    final operation = focusedOperation ??
+        (isDiagnostic
+            ? ArithmeticOperation.values[session.currentQuestionIndex ~/ 3]
+            : _scheduler.choose(fluency: _fluency, now: _clock().toUtc()));
     return _questionFor(
       seed: session.seed,
       index: session.currentQuestionIndex,
@@ -189,7 +204,9 @@ final class LearningController extends ChangeNotifier {
       occurredAt: now,
       questionId: question.id,
       responseTime: now.difference(beganAt),
-      relatedEventId: isCorrecting || isRetesting ? _correctionOfEventId : null,
+      relatedEventId: isCorrecting || isRetesting
+          ? session.correctionOfEventId
+          : null,
       sessionId: session.id,
       skillId: question.skillId,
     );
@@ -199,15 +216,14 @@ final class LearningController extends ChangeNotifier {
     _recalculateProgress();
     if (isCorrecting) {
       if (isCorrect) {
-        _correctionPrompt = null;
-        _correctionQuestion = _questionFor(
-          seed: session.seed,
-          index: question.index + 1,
-          operation: question.operation,
+        _session = session.copyWith(
+          answerDraft: '',
+          currentQuestionIndex: question.index + 1,
+          phase: LearningSessionPhase.retest,
         );
-        _isRetesting = true;
+      } else {
+        _session = session.copyWith(answerDraft: '');
       }
-      _session = session.copyWith(answerDraft: '');
       await _repository.saveSession(_session!);
       _questionBeganAt = now;
       _isBusy = false;
@@ -216,22 +232,19 @@ final class LearningController extends ChangeNotifier {
     }
     if (isRetesting) {
       if (!isCorrect) {
-        _correctionOfEventId = event.eventId;
-        _correctionPrompt = CorrectionPrompt.forAnswer(
-          question: question,
-          misconception: misconception?.id,
-        );
-        _isRetesting = false;
-      } else {
-        _correctionOfEventId = null;
-        _correctionQuestion = null;
-        _isRetesting = false;
         _session = session.copyWith(
           answerDraft: '',
+          correctionOfEventId: event.eventId,
+          phase: LearningSessionPhase.correction,
+        );
+      } else {
+        _session = session.copyWith(
+          answerDraft: '',
+          clearRemediation: true,
           currentQuestionIndex: question.index + 1,
+          phase: LearningSessionPhase.question,
         );
       }
-      _session = (_session ?? session).copyWith(answerDraft: '');
       await _repository.saveSession(_session!);
       _questionBeganAt = now;
       _isBusy = false;
@@ -239,13 +252,12 @@ final class LearningController extends ChangeNotifier {
       return;
     }
     if (!isCorrect && !isDiagnostic) {
-      _correctionOfEventId = event.eventId;
-      _correctionQuestion = question;
-      _correctionPrompt = CorrectionPrompt.forAnswer(
-        question: question,
-        misconception: misconception?.id,
+      _session = session.copyWith(
+        answerDraft: '',
+        correctionOfEventId: event.eventId,
+        focusSkillId: question.skillId,
+        phase: LearningSessionPhase.correction,
       );
-      _session = session.copyWith(answerDraft: '');
       await _repository.saveSession(_session!);
       _questionBeganAt = now;
       _isBusy = false;
@@ -311,4 +323,13 @@ final class LearningController extends ChangeNotifier {
     packId: _contentPack.id,
     template: _contentPack.templateFor(operation),
   );
+
+  AttemptEvent? _attemptById(String? eventId) {
+    for (final attempt in _attempts) {
+      if (attempt.eventId == eventId) {
+        return attempt;
+      }
+    }
+    return null;
+  }
 }
