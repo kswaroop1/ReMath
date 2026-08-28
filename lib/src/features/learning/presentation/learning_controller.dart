@@ -4,9 +4,11 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 
 import '../domain/arithmetic_generator.dart';
+import '../domain/arithmetic_misconceptions.dart';
 import '../domain/arithmetic_question.dart';
 import '../domain/attempt_event.dart';
 import '../domain/content_pack.dart';
+import '../domain/correction_prompt.dart';
 import '../domain/diagnostic_placement.dart';
 import '../domain/fluency.dart';
 import '../domain/learning_session.dart';
@@ -48,6 +50,8 @@ final class LearningController extends ChangeNotifier {
   DateTime? _questionBeganAt;
   bool _isBusy = false;
   AttemptAssessment? _lastAssessment;
+  CorrectionPrompt? _correctionPrompt;
+  ArithmeticQuestion? _correctionQuestion;
   String? _latestDiagnosticSessionId;
 
   static const _diagnosticPrefix = 'diagnostic-';
@@ -56,6 +60,8 @@ final class LearningController extends ChangeNotifier {
   bool get hasActiveSession => _session != null;
   bool get isDiagnostic => _session?.id.startsWith(_diagnosticPrefix) ?? false;
   bool get isBusy => _isBusy;
+  bool get isCorrecting => _correctionPrompt != null;
+  CorrectionPrompt? get correctionPrompt => _correctionPrompt;
   AttemptAssessment? get lastAssessment => _lastAssessment;
   List<SkillFluency> get fluency => List.unmodifiable(_fluency);
   MasterySummary get mastery => _mastery;
@@ -71,6 +77,9 @@ final class LearningController extends ChangeNotifier {
   }
 
   ArithmeticQuestion? get currentQuestion {
+    if (_correctionQuestion != null) {
+      return _correctionQuestion;
+    }
     final session = _session;
     if (session == null) {
       return null;
@@ -161,10 +170,15 @@ final class LearningController extends ChangeNotifier {
     final now = _clock().toUtc();
     final beganAt = _questionBeganAt ?? now;
     final isCorrect = answer == question.answer;
+    final misconception = const ArithmeticMisconceptionClassifier().classify(
+      question,
+      answer,
+    );
     final event = AttemptEvent(
       answer: answer.toString(),
       eventId: _idFactory(),
       isCorrect: isCorrect,
+      misconceptionId: misconception?.stableId,
       occurredAt: now,
       questionId: question.id,
       responseTime: now.difference(beganAt),
@@ -175,6 +189,19 @@ final class LearningController extends ChangeNotifier {
     _attempts = await _repository.loadAttempts();
     _lastAssessment = AttemptAssessment.fromEvent(event);
     _recalculateProgress();
+    if (!isCorrect && !isDiagnostic) {
+      _correctionQuestion = question;
+      _correctionPrompt = CorrectionPrompt.forAnswer(
+        question: question,
+        misconception: misconception?.id,
+      );
+      _session = session.copyWith(answerDraft: '');
+      await _repository.saveSession(_session!);
+      _questionBeganAt = now;
+      _isBusy = false;
+      notifyListeners();
+      return;
+    }
     final diagnosticComplete =
         isDiagnostic &&
         session.currentQuestionIndex + 1 >= _diagnosticQuestionCount;

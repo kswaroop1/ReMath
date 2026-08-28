@@ -1,3 +1,5 @@
+enum AttemptKind { answer, correction, retest }
+
 final class AttemptEvent {
   const AttemptEvent({
     required this.answer,
@@ -8,14 +10,20 @@ final class AttemptEvent {
     required this.responseTime,
     required this.sessionId,
     required this.skillId,
+    this.kind = AttemptKind.answer,
+    this.misconceptionId,
+    this.relatedEventId,
   });
 
   final String answer;
   final String eventId;
   final bool isCorrect;
+  final AttemptKind kind;
+  final String? misconceptionId;
   final DateTime occurredAt;
   final String questionId;
   final Duration responseTime;
+  final String? relatedEventId;
   final String sessionId;
   final String skillId;
 }
