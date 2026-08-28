@@ -42,7 +42,7 @@ final class DiagnosticPlacementPolicy {
       );
       if (definition != null) {
         byOperation
-            .putIfAbsent(definition.operation, () => <AttemptEvent>[])
+            .putIfAbsent(definition, () => <AttemptEvent>[])
             .add(attempt);
       }
     }
