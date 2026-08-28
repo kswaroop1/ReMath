@@ -199,3 +199,108 @@ restored without changing tests or behaviour.
 
 Green evidence:
 `https://github.com/kswaroop1/ReMath/actions/runs/33120054997`.
+
+## Completion request and reconciliation
+
+### User
+
+> Can you please finish the work.
+>
+> I am now lost how much of the planned features for this or is complete, how
+> much remain.
+
+### Assistant
+
+> I’ll finish PR #4, but first I’ll reconcile its original scope against the
+> feature tracker and actual code so nothing is silently omitted or overstated.
+> Then I’ll complete each remaining item through strict red–green cycles, update
+> the tracker/provenance, verify CI and review status, and report an exact
+> completed-versus-remaining breakdown.
+
+The reconciliation found QA-002 missing significant figures, QA-018 missing its
+full invariant sweep, and the planned QA-020 and CG-005 foundations absent.
+QA-017 parameterised arithmetic generation was already complete.
+
+## Cycle 5: significant figures
+
+Business tests required equivalent scientific notation, explicit precision,
+leading-zero handling, invalid-input separation, and content validation. Runs
+#106 and #107 stopped at formatting and were not accepted as red evidence.
+
+### Assistant
+
+> Run #110 is the valid red stage for significant figures: formatting and secret
+> scanning passed, then strict analysis failed because
+> `SignificantFigureAnswer` is missing.
+
+Red evidence:
+`https://github.com/kswaroop1/ReMath/actions/runs/33146799531`.
+
+Codex implemented exact significant-figure rounding and representation checks on
+the normalized base-10 model. A source-replacement operation accidentally
+interpreted a regex end-anchor as replacement syntax; diagnostic run #112
+identified the corruption, which was repaired before analysis or tests could
+pass.
+
+Run #117 reached tests and exposed an ambiguous zero-precision expectation.
+The requirement was corrected transparently: `0.000`, not `0.00`, explicitly
+carries three significant decimal zeros. No assertion was weakened.
+
+Green evidence:
+`https://github.com/kswaroop1/ReMath/actions/runs/33147339169` (run #119).
+
+## Cycle 6: generator property characterization
+
+QA-018 strengthens assurance around existing behaviour, so the repository
+policy required characterization rather than an artificial red failure. The
+new sweep exercises 30,000 identities across every current operation and checks
+operand bounds, valid subtraction domains, unique IDs, deterministic replay,
+and exact correct/incorrect marking.
+
+Green evidence:
+`https://github.com/kswaroop1/ReMath/actions/runs/33147564300` (run #123).
+
+## Cycle 7: multidimensional difficulty
+
+Business tests required every learning burden to remain independently visible,
+strictly-harder comparison only under Pareto dominance, and rejection of invalid
+content calibration values.
+
+### Assistant
+
+> Run #124 is the intended red stage for CG-005: formatting passed and analysis
+> failed because the difficulty-profile domain contract does not exist.
+
+Red evidence:
+`https://github.com/kswaroop1/ReMath/actions/runs/33147696344`.
+
+Codex implemented a validated pure-Dart profile for complexity, combined ideas,
+algebraic burden, abstraction, and time pressure, without an arbitrary aggregate
+score.
+
+Green evidence:
+`https://github.com/kswaroop1/ReMath/actions/runs/33147915703` (run #129).
+
+## Cycle 8: arithmetic misconception foundation
+
+Business tests required stable misconception IDs, operation-derived
+alternatives, classification for corrective feedback, and exclusion of correct
+or duplicate alternatives.
+
+### Assistant
+
+> Run #130 is the valid red stage for the misconception foundation: formatting
+> and secret scanning passed, and analysis failed because the misconception
+> domain API is absent.
+
+Red evidence:
+`https://github.com/kswaroop1/ReMath/actions/runs/33148033918`.
+
+Codex implemented pure-Dart arithmetic misconception derivation and
+classification. Run #134 failed the zero-warning gate on import ordering; that
+lint was corrected without behavioural changes.
+
+Green evidence:
+`https://github.com/kswaroop1/ReMath/actions/runs/33148358450` (run #135).
+
+Run #135 reported 97.48% repository line coverage.
