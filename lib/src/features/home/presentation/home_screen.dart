@@ -160,7 +160,11 @@ class _HomeScreenState extends State<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          _controller.isDiagnostic
+          _controller.isCorrecting
+              ? 'Correct this answer'
+              : _controller.isRetesting
+              ? 'Retest this skill'
+              : _controller.isDiagnostic
               ? 'Diagnostic question ${question.index + 1} of 9'
               : 'Question ${question.index + 1} • about $minutes min remaining',
           textAlign: TextAlign.center,
@@ -173,12 +177,27 @@ class _HomeScreenState extends State<HomeScreen> {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 24),
+        if (_controller.correctionPrompt case final prompt?) ...[
+          Text(
+            'Correct answer: ${prompt.correctAnswer}',
+            style: Theme.of(context).textTheme.titleLarge,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(prompt.explanation, textAlign: TextAlign.center),
+          const SizedBox(height: 8),
+          const Text(
+            'Enter the correct answer to continue.',
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+        ],
         TextField(
           autofocus: true,
           controller: _answerController,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'Answer',
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            labelText: _controller.isCorrecting ? 'Correct answer' : 'Answer',
           ),
           keyboardType: const TextInputType.numberWithOptions(signed: true),
           onSubmitted: (_) => _controller.submitAnswer(),
@@ -187,9 +206,17 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(height: 12),
         FilledButton(
           onPressed: _controller.isBusy ? null : _controller.submitAnswer,
-          child: const Text('Check answer'),
+          child: Text(
+            _controller.isCorrecting
+                ? 'Submit correction'
+                : _controller.isRetesting
+                ? 'Check retest'
+                : 'Check answer',
+          ),
         ),
-        if (_controller.lastAssessment != null) ...[
+        if (_controller.lastAssessment != null &&
+            !_controller.isCorrecting &&
+            !_controller.isRetesting) ...[
           const SizedBox(height: 12),
           Text(switch (_controller.lastAssessment!.pace) {
             AttemptPace.fluent => 'Correct and fluent',

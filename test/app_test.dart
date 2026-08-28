@@ -124,10 +124,7 @@ void main() {
 
     expect(find.text('Correct this answer'), findsOneWidget);
     expect(find.textContaining('Correct answer:'), findsOneWidget);
-    expect(
-      find.text('Enter the correct answer to continue.'),
-      findsOneWidget,
-    );
+    expect(find.text('Enter the correct answer to continue.'), findsOneWidget);
     expect(find.text('Submit correction'), findsOneWidget);
     final answerText = tester
         .widget<Text>(find.textContaining('Correct answer:'))
