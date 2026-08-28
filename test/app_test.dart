@@ -162,17 +162,38 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('questionPrompt')), findsOneWidget);
   });
+
+  testWidgets('shows a focused recommendation after repeated errors', (
+    tester,
+  ) async {
+    final repository = InMemoryProgressRepository();
+    await repository.recordAttempt(
+      _attempt('arithmetic.addition', 20, isCorrect: false),
+    );
+    await repository.recordAttempt(
+      _attempt('arithmetic.addition', 21, isCorrect: false),
+    );
+
+    await tester.pumpWidget(
+      ReMathApp(contentPack: foundationPackForTest(), repository: repository),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Suggested review'), findsOneWidget);
+    expect(find.textContaining('addition fundamentals'), findsOneWidget);
+  });
 }
 
 AttemptEvent _attempt(
   String skillId,
   int index, {
   int seconds = 2,
+  bool isCorrect = true,
   String sessionId = 'diagnostic-placement',
 }) => AttemptEvent(
   answer: '1',
   eventId: 'event-$sessionId-$index',
-  isCorrect: true,
+  isCorrect: isCorrect,
   occurredAt: DateTime.utc(2026, 8, 28, 8, 0, index),
   questionId: 'question-$index',
   responseTime: Duration(seconds: seconds),

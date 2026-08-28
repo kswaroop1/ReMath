@@ -11,10 +11,7 @@ void main() {
   });
 
   test('repeated addition errors recommend focused addition rebuilding', () {
-    final recommendation = policy.recommend([
-      _attempt('one'),
-      _attempt('two'),
-    ]);
+    final recommendation = policy.recommend([_attempt('one'), _attempt('two')]);
 
     expect(recommendation?.observedSkillId, 'arithmetic.addition');
     expect(recommendation?.recommendedSkillId, 'arithmetic.addition');
