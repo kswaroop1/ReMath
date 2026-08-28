@@ -122,6 +122,10 @@ behaviour. The temporary coverage-report step was then removed from CI; the
 standard formatter, fatal static analysis, complete test/coverage run, content
 validation, 90% emergency floor, and secret scan remain the permanent gates.
 
+Final CI run `33188135366` passed every permanent gate with 95 tests and
+100.00% production line coverage. Static analysis produced no warnings or
+information-level findings, and the repository-wide secret scan passed.
+
 ## Scope outcome
 
 PR #5 implements LX-001 for foundation arithmetic and the CG-003/CG-004
