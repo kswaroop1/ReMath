@@ -50,12 +50,14 @@ final class LearningController extends ChangeNotifier {
   DateTime? _questionBeganAt;
   bool _isBusy = false;
   AttemptAssessment? _lastAssessment;
+  ArithmeticOperation? _lastCompletedOperation;
   String? _latestDiagnosticSessionId;
 
   static const _diagnosticPrefix = 'diagnostic-';
   static const _diagnosticQuestionCount = 9;
 
   bool get hasActiveSession => _session != null;
+  bool get hasEndOfChunkChoices => _lastCompletedOperation != null;
   bool get isDiagnostic => _session?.id.startsWith(_diagnosticPrefix) ?? false;
   bool get isBusy => _isBusy;
   bool get isCorrecting => _session?.phase == LearningSessionPhase.correction;
@@ -134,14 +136,20 @@ final class LearningController extends ChangeNotifier {
   }
 
   Future<void> startChunk() async {
+    await _startChunk();
+  }
+
+  Future<void> _startChunk({ArithmeticOperation? operation}) async {
     final now = _clock().toUtc();
     _session = LearningSession(
       currentQuestionIndex: 0,
+      focusSkillId: operation?.skillId,
       id: _idFactory(),
       seed: now.microsecondsSinceEpoch & 0x7fffffff,
       startedAt: now,
     );
     _questionBeganAt = now;
+    _lastCompletedOperation = null;
     _lastAssessment = null;
     await _repository.saveSession(_session!);
     notifyListeners();
@@ -158,6 +166,7 @@ final class LearningController extends ChangeNotifier {
     );
     _latestDiagnosticSessionId = id;
     _questionBeganAt = now;
+    _lastCompletedOperation = null;
     _lastAssessment = null;
     await _repository.saveSession(_session!);
     notifyListeners();
@@ -271,6 +280,9 @@ final class LearningController extends ChangeNotifier {
     if (remaining == Duration.zero || diagnosticComplete) {
       await _repository.completeSession(session.id);
       _session = null;
+      if (!session.id.startsWith(_diagnosticPrefix)) {
+        _lastCompletedOperation = question.operation;
+      }
     } else {
       _session = session.copyWith(
         answerDraft: '',
@@ -288,9 +300,30 @@ final class LearningController extends ChangeNotifier {
     if (session == null) {
       return;
     }
+    final completedOperation = isDiagnostic ? null : currentQuestion?.operation;
     await _repository.completeSession(session.id);
     _session = null;
+    _lastCompletedOperation = completedOperation;
     _lastAssessment = null;
+    notifyListeners();
+  }
+
+  Future<void> continueSameSkill() async {
+    final operation = _lastCompletedOperation;
+    if (operation != null) {
+      await _startChunk(operation: operation);
+    }
+  }
+
+  Future<void> practiseWeakestSkill() async {
+    final weakest = _fluency.reduce(
+      (first, second) => second.score < first.score ? second : first,
+    );
+    await _startChunk(operation: weakest.operation);
+  }
+
+  void stopAfterChunk() {
+    _lastCompletedOperation = null;
     notifyListeners();
   }
 

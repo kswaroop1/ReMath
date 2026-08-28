@@ -122,6 +122,33 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       const SizedBox(height: 32),
+      if (_controller.hasEndOfChunkChoices) ...[
+        Text(
+          'Chunk complete',
+          style: Theme.of(context).textTheme.headlineSmall,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 16),
+        FilledButton(
+          onPressed: _controller.continueSameSkill,
+          child: const Text('Continue same skill'),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton(
+          onPressed: _controller.practiseWeakestSkill,
+          child: const Text('Practise weakest skill'),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton(
+          onPressed: _controller.startChunk,
+          child: const Text('Another mixed drill'),
+        ),
+        const SizedBox(height: 8),
+        TextButton(
+          onPressed: _controller.stopAfterChunk,
+          child: const Text('Done for now'),
+        ),
+      ] else ...[
       if (_controller.diagnosticPlacements.isNotEmpty) ...[
         Text(
           'Your starting points',
@@ -149,6 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: _controller.startChunk,
         child: const Text('Start 15-minute drill'),
       ),
+      ],
     ],
   );
 
