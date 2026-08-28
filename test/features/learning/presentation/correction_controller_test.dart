@@ -29,6 +29,55 @@ void main() {
     expect(original.misconceptionId, MisconceptionId.usedSubtraction.stableId);
     expect(original.relatedEventId, isNull);
   });
+
+  test(
+    'correction is linked, excluded from mastery, and followed by a retest',
+    () async {
+      final repository = InMemoryProgressRepository();
+      final controller = _controller(repository);
+      await controller.initialise();
+      await controller.startChunk();
+      final originalQuestion = controller.currentQuestion!;
+
+      controller.updateDraft((originalQuestion.answer + 1).toString());
+      await controller.submitAnswer();
+      final originalAttempt = (await repository.loadAttempts()).single;
+
+      controller.updateDraft((originalQuestion.answer + 2).toString());
+      await controller.submitAnswer();
+      expect(controller.isCorrecting, isTrue);
+      var attempts = await repository.loadAttempts();
+      expect(attempts.last.kind, AttemptKind.correction);
+      expect(attempts.last.isCorrect, isFalse);
+      expect(attempts.last.relatedEventId, originalAttempt.eventId);
+
+      controller.updateDraft(originalQuestion.answer.toString());
+      await controller.submitAnswer();
+
+      expect(controller.isCorrecting, isFalse);
+      expect(controller.isRetesting, isTrue);
+      expect(controller.currentQuestion?.id, isNot(originalQuestion.id));
+      expect(controller.currentQuestion?.operation, originalQuestion.operation);
+      attempts = await repository.loadAttempts();
+      expect(attempts.last.kind, AttemptKind.correction);
+      expect(attempts.last.isCorrect, isTrue);
+      expect(attempts.last.relatedEventId, originalAttempt.eventId);
+      expect(controller.mastery.attempts, 1);
+      expect(controller.mastery.accuracy, 0);
+
+      final retest = controller.currentQuestion!;
+      controller.updateDraft(retest.answer.toString());
+      await controller.submitAnswer();
+
+      expect(controller.isRetesting, isFalse);
+      expect(controller.currentQuestion?.operation, isNotNull);
+      attempts = await repository.loadAttempts();
+      expect(attempts.last.kind, AttemptKind.retest);
+      expect(attempts.last.relatedEventId, originalAttempt.eventId);
+      expect(controller.mastery.attempts, 2);
+      expect(controller.mastery.accuracy, 0.5);
+    },
+  );
 }
 
 LearningController _controller(InMemoryProgressRepository repository) {
