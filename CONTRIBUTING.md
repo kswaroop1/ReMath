@@ -104,3 +104,19 @@ links to CI logs; output that caused a design or code change must be recorded.
 
 AI provenance is review evidence, not a transfer of responsibility to the tool.
 Undisclosed AI-assisted pull requests may be closed.
+
+
+### Codex review
+
+After the pull request is complete and its provenance record is current, request
+the repository's on-demand Codex review with:
+
+```text
+@codex review
+```
+
+Codex applies the repository-wide `## Code Review Rules` in `AGENTS.md`.
+Contributors must resolve substantive findings and append any AI-assisted review
+discussion, diagnosis, or fixes to the provenance transcript before merge. A
+Codex review is an additional signal; it does not replace CI, branch protection,
+or the accountable human review required above.
