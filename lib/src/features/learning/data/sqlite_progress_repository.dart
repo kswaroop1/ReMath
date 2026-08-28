@@ -83,9 +83,7 @@ final class SqliteProgressRepository implements ProgressRepository {
             'DEFAULT \'question\' CHECK (phase IN '
             '(\'question\', \'correction\', \'retest\'))',
           )
-          ..execute(
-            'ALTER TABLE active_session ADD COLUMN focus_skill_id TEXT',
-          )
+          ..execute('ALTER TABLE active_session ADD COLUMN focus_skill_id TEXT')
           ..execute(
             'ALTER TABLE active_session ADD COLUMN correction_of_event_id TEXT',
           )
