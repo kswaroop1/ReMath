@@ -1,5 +1,10 @@
 # Feature register
 
+The recommended implementation order for the next bounded feature sets is
+recorded in the [delivery roadmap](roadmap.md). This register remains the
+authoritative status of individual features; roadmap inclusion alone does not
+mark a feature complete.
+
 This is the authoritative, numbered product and content backlog for ReMath.
 
 ## Tracking convention

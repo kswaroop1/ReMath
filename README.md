@@ -58,6 +58,7 @@ generated changes before committing them.
 - [ADR 0001: local progress persistence](docs/adr/0001-local-progress-persistence.md)
 - [ADR 0002: adaptive fluency scheduling](docs/adr/0002-adaptive-fluency-scheduling.md)
 - [Numbered feature register](docs/features.md)
+- [Delivery roadmap](docs/roadmap.md)
 - [Testing strategy](docs/testing.md)
 - [Releases and versioning](docs/releases.md)
 - [Content-pack format](docs/content-packs.md)
