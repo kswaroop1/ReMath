@@ -7,12 +7,7 @@ final class DifficultyProfile {
     required int timePressure,
   }) {
     _checkScale(complexity, 'complexity');
-    RangeError.checkValueInInterval(
-      combinedIdeas,
-      1,
-      5,
-      'combinedIdeas',
-    );
+    RangeError.checkValueInInterval(combinedIdeas, 1, 5, 'combinedIdeas');
     _checkScale(algebraicBurden, 'algebraicBurden');
     _checkScale(abstraction, 'abstraction');
     _checkScale(timePressure, 'timePressure');
