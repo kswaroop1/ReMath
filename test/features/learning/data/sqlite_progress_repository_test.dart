@@ -18,8 +18,11 @@ void main() {
     () async {
       final session = LearningSession(
         answerDraft: '17',
+        correctionOfEventId: 'wrong-attempt',
         currentQuestionIndex: 4,
+        focusSkillId: 'arithmetic.subtraction',
         id: 'session-1',
+        phase: LearningSessionPhase.correction,
         seed: 91,
         startedAt: DateTime.utc(2026, 8, 27, 8),
       );
@@ -31,6 +34,9 @@ void main() {
       expect(restored?.seed, session.seed);
       expect(restored?.currentQuestionIndex, 4);
       expect(restored?.answerDraft, '17');
+      expect(restored?.phase, LearningSessionPhase.correction);
+      expect(restored?.focusSkillId, 'arithmetic.subtraction');
+      expect(restored?.correctionOfEventId, 'wrong-attempt');
       expect(restored?.startedAt, session.startedAt);
     },
   );
@@ -42,9 +48,12 @@ void main() {
         answer: '12',
         eventId: 'event-1',
         isCorrect: true,
+        kind: AttemptKind.correction,
+        misconceptionId: 'arithmetic.used-addition',
         occurredAt: DateTime.utc(2026, 8, 27, 8, 1),
         questionId: 'question-1',
         responseTime: const Duration(seconds: 3),
+        relatedEventId: 'wrong-attempt',
         sessionId: 'session-1',
         skillId: 'arithmetic.addition',
       );
@@ -57,6 +66,9 @@ void main() {
       expect(attempts.single.eventId, event.eventId);
       expect(attempts.single.responseTime, const Duration(seconds: 3));
       expect(attempts.single.skillId, 'arithmetic.addition');
+      expect(attempts.single.kind, AttemptKind.correction);
+      expect(attempts.single.relatedEventId, 'wrong-attempt');
+      expect(attempts.single.misconceptionId, 'arithmetic.used-addition');
     },
   );
 
@@ -108,9 +120,12 @@ void main() {
 
     expect(attempts.single.eventId, 'legacy-event');
     expect(attempts.single.skillId, 'arithmetic.mixed.legacy');
+    expect(attempts.single.kind, AttemptKind.answer);
+    expect(attempts.single.relatedEventId, isNull);
+    expect(attempts.single.misconceptionId, isNull);
     expect(
       database.select('SELECT version FROM schema_version').single['version'],
-      2,
+      3,
     );
     await migrated.close();
   });
@@ -128,6 +143,38 @@ void main() {
     expect(
       database.select('SELECT version FROM schema_version').single['version'],
       1,
+    );
+    database.close();
+  });
+
+  test('a failed correction migration rolls back schema version two', () {
+    final database = sqlite3.openInMemory()
+      ..execute('CREATE TABLE schema_version (version INTEGER NOT NULL) STRICT')
+      ..execute('INSERT INTO schema_version VALUES (2)')
+      ..execute('''
+        CREATE TABLE attempt_events (
+          event_id TEXT PRIMARY KEY,
+          event_kind TEXT
+        ) STRICT
+      ''')
+      ..execute('''
+        CREATE TABLE active_session (
+          singleton INTEGER PRIMARY KEY,
+          session_id TEXT NOT NULL,
+          seed INTEGER NOT NULL,
+          started_at TEXT NOT NULL,
+          current_question_index INTEGER NOT NULL,
+          answer_draft TEXT NOT NULL
+        ) STRICT
+      ''');
+
+    expect(
+      () => SqliteProgressRepository(database),
+      throwsA(isA<SqliteException>()),
+    );
+    expect(
+      database.select('SELECT version FROM schema_version').single['version'],
+      2,
     );
     database.close();
   });

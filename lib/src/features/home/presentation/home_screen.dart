@@ -122,33 +122,71 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       const SizedBox(height: 32),
-      if (_controller.diagnosticPlacements.isNotEmpty) ...[
+      if (_controller.remediationRecommendation case final recommendation?) ...[
         Text(
-          'Your starting points',
+          'Suggested review',
           style: Theme.of(context).textTheme.titleLarge,
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 12),
-        ..._controller.diagnosticPlacements.map(
-          (placement) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              '${placement.operation.label}: ${_placementLabel(placement.level)}\n'
-              '${placement.reason}',
-            ),
-          ),
-        ),
+        const SizedBox(height: 8),
+        Text(recommendation.reason, textAlign: TextAlign.center),
         const SizedBox(height: 20),
       ],
-      OutlinedButton(
-        onPressed: _controller.startDiagnostic,
-        child: const Text('Find my starting point'),
-      ),
-      const SizedBox(height: 12),
-      FilledButton(
-        onPressed: _controller.startChunk,
-        child: const Text('Start 15-minute drill'),
-      ),
+      if (_controller.hasEndOfChunkChoices) ...[
+        Text(
+          'Chunk complete',
+          style: Theme.of(context).textTheme.headlineSmall,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 16),
+        FilledButton(
+          onPressed: _controller.continueSameSkill,
+          child: const Text('Continue same skill'),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton(
+          onPressed: _controller.practiseWeakestSkill,
+          child: const Text('Practise weakest skill'),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton(
+          onPressed: _controller.startChunk,
+          child: const Text('Another mixed drill'),
+        ),
+        const SizedBox(height: 8),
+        TextButton(
+          onPressed: _controller.stopAfterChunk,
+          child: const Text('Done for now'),
+        ),
+      ] else ...[
+        if (_controller.diagnosticPlacements.isNotEmpty) ...[
+          Text(
+            'Your starting points',
+            style: Theme.of(context).textTheme.titleLarge,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          ..._controller.diagnosticPlacements.map(
+            (placement) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                '${placement.operation.label}: ${_placementLabel(placement.level)}\n'
+                '${placement.reason}',
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
+        OutlinedButton(
+          onPressed: _controller.startDiagnostic,
+          child: const Text('Find my starting point'),
+        ),
+        const SizedBox(height: 12),
+        FilledButton(
+          onPressed: _controller.startChunk,
+          child: const Text('Start 15-minute drill'),
+        ),
+      ],
     ],
   );
 
@@ -160,7 +198,11 @@ class _HomeScreenState extends State<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          _controller.isDiagnostic
+          _controller.isCorrecting
+              ? 'Correct this answer'
+              : _controller.isRetesting
+              ? 'Retest this skill'
+              : _controller.isDiagnostic
               ? 'Diagnostic question ${question.index + 1} of 9'
               : 'Question ${question.index + 1} • about $minutes min remaining',
           textAlign: TextAlign.center,
@@ -173,12 +215,27 @@ class _HomeScreenState extends State<HomeScreen> {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 24),
+        if (_controller.correctionPrompt case final prompt?) ...[
+          Text(
+            'Correct answer: ${prompt.correctAnswer}',
+            style: Theme.of(context).textTheme.titleLarge,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(prompt.explanation, textAlign: TextAlign.center),
+          const SizedBox(height: 8),
+          const Text(
+            'Enter the correct answer to continue.',
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+        ],
         TextField(
           autofocus: true,
           controller: _answerController,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'Answer',
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            labelText: _controller.isCorrecting ? 'Correct answer' : 'Answer',
           ),
           keyboardType: const TextInputType.numberWithOptions(signed: true),
           onSubmitted: (_) => _controller.submitAnswer(),
@@ -187,9 +244,17 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(height: 12),
         FilledButton(
           onPressed: _controller.isBusy ? null : _controller.submitAnswer,
-          child: const Text('Check answer'),
+          child: Text(
+            _controller.isCorrecting
+                ? 'Submit correction'
+                : _controller.isRetesting
+                ? 'Check retest'
+                : 'Check answer',
+          ),
         ),
-        if (_controller.lastAssessment != null) ...[
+        if (_controller.lastAssessment != null &&
+            !_controller.isCorrecting &&
+            !_controller.isRetesting) ...[
           const SizedBox(height: 12),
           Text(switch (_controller.lastAssessment!.pace) {
             AttemptPace.fluent => 'Correct and fluent',

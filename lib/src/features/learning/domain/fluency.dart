@@ -44,6 +44,9 @@ final class FluencyCalculator {
   List<SkillFluency> calculate(Iterable<AttemptEvent> attempts) {
     final bySkill = <String, List<AttemptEvent>>{};
     for (final attempt in attempts) {
+      if (attempt.kind == AttemptKind.correction) {
+        continue;
+      }
       bySkill.putIfAbsent(attempt.skillId, () => []).add(attempt);
     }
 

@@ -59,7 +59,9 @@ Last reviewed: 28 August 2026.
 - [ ] **LX-011 — Paper-reading chunk.** Decode one equation, paragraph, figure, or
   modelling choice from a technical paper.
 - [ ] **LX-012 — End-of-chunk choices.** Stop, repeat, continue topic, review, or
-  attempt a challenge.
+  attempt a challenge. The foundation drill now offers stop, same-skill,
+  weakest-skill, and mixed-drill choices; explicit review and challenge routes
+  remain to complete this feature.
 - [ ] **LX-013 — Configurable intensity.** Two-minute drill, standard 15-minute
   chunk, or chained study block.
 - [ ] **LX-014 — Confidence capture.** Optional pre-answer confidence and
@@ -91,7 +93,9 @@ Last reviewed: 28 August 2026.
 - [ ] **CG-006 — Unlock policy.** Recommend readiness without unnecessarily
   preventing exploration.
 - [ ] **CG-007 — Prerequisite remediation.** Diagnose likely missing precursor
-  skills after repeated or characteristic errors.
+  skills after repeated or characteristic errors. The arithmetic foundation now
+  detects repeated same-operation errors, ignores correction evidence, and
+  recommends a deterministic prerequisite; the general curriculum graph remains.
 - [ ] **CG-008 — Retention prerequisites.** Require delayed success, not only
   immediate lesson success, before durable mastery.
 - [ ] **CG-009 — Curriculum map UI.** Browse dependencies, current position,
@@ -150,8 +154,9 @@ Last reviewed: 28 August 2026.
   answers, and records stable misconception identifiers for feedback.
 - [ ] **QA-021 — Hint ladder.** Concept cue, method cue, next step, and worked
   solution with escalating mastery cost.
-- [ ] **QA-022 — Correction loop.** Require understanding and a nearby corrective
-  question after an error.
+- [x] **QA-022 — Correction loop.** An ordinary-drill error is preserved, must be
+  corrected, and is followed by a nearby same-operation retest. Both phases and
+  drafts resume after interruption; diagnostic placement remains independent.
 - [ ] **QA-023 — Timed rapid-fire mode.** Low-friction mental and symbolic fluency.
 - [ ] **QA-024 — Mixed-topic assessment.** Do not reveal the technique through the
   section heading.
@@ -177,8 +182,10 @@ Last reviewed: 28 August 2026.
   and derives an accuracy summary from immutable attempts.
 - [x] **MP-003 — Response-time tracking.** Each attempt records response time;
   restarting an interrupted session starts a fresh active timing interval.
-- [ ] **MP-004 — Attempt and correction tracking.** Attempts, hints, revealed
-  steps, and correction success.
+- [ ] **MP-004 — Attempt and correction tracking.** Answer, correction, and retest
+  events are immutable, typed, and linked without converting an original error
+  into unaided success. Hint and revealed-step evidence remains to complete this
+  feature.
 - [ ] **MP-005 — Error taxonomy.** Arithmetic, algebra, concept, assumption,
   notation, method selection, and careless error.
 - [x] **MP-006 — Fluency score.** Addition, subtraction, and multiplication derive

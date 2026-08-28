@@ -10,7 +10,7 @@ final class SqliteProgressRepository implements ProgressRepository {
   }
 
   final CommonDatabase _database;
-  static const _currentSchemaVersion = 2;
+  static const _currentSchemaVersion = 3;
 
   void _migrate() {
     _database.execute('PRAGMA foreign_keys = ON');
@@ -63,6 +63,37 @@ final class SqliteProgressRepository implements ProgressRepository {
         answer_draft TEXT NOT NULL
       ) STRICT
     ''');
+    if (version < 3) {
+      _database.execute('BEGIN IMMEDIATE');
+      try {
+        _database
+          ..execute(
+            'ALTER TABLE attempt_events ADD COLUMN event_kind TEXT NOT NULL '
+            'DEFAULT \'answer\' CHECK (event_kind IN '
+            '(\'answer\', \'correction\', \'retest\'))',
+          )
+          ..execute(
+            'ALTER TABLE attempt_events ADD COLUMN related_event_id TEXT',
+          )
+          ..execute(
+            'ALTER TABLE attempt_events ADD COLUMN misconception_id TEXT',
+          )
+          ..execute(
+            'ALTER TABLE active_session ADD COLUMN phase TEXT NOT NULL '
+            'DEFAULT \'question\' CHECK (phase IN '
+            '(\'question\', \'correction\', \'retest\'))',
+          )
+          ..execute('ALTER TABLE active_session ADD COLUMN focus_skill_id TEXT')
+          ..execute(
+            'ALTER TABLE active_session ADD COLUMN correction_of_event_id TEXT',
+          )
+          ..execute('UPDATE schema_version SET version = 3')
+          ..execute('COMMIT');
+      } catch (_) {
+        _database.execute('ROLLBACK');
+        rethrow;
+      }
+    }
   }
 
   @override
@@ -93,8 +124,11 @@ final class SqliteProgressRepository implements ProgressRepository {
     final row = rows.single;
     return LearningSession(
       answerDraft: row['answer_draft'] as String,
+      correctionOfEventId: row['correction_of_event_id'] as String?,
       currentQuestionIndex: row['current_question_index'] as int,
+      focusSkillId: row['focus_skill_id'] as String?,
       id: row['session_id'] as String,
+      phase: LearningSessionPhase.values.byName(row['phase'] as String),
       seed: row['seed'] as int,
       startedAt: DateTime.parse(row['started_at'] as String).toUtc(),
     );
@@ -106,8 +140,9 @@ final class SqliteProgressRepository implements ProgressRepository {
       '''
       INSERT OR IGNORE INTO attempt_events (
         event_id, session_id, question_id, answer, is_correct,
-        response_ms, occurred_at, skill_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        response_ms, occurred_at, skill_id, event_kind, related_event_id,
+        misconception_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ''',
       [
         event.eventId,
@@ -118,6 +153,9 @@ final class SqliteProgressRepository implements ProgressRepository {
         event.responseTime.inMilliseconds,
         event.occurredAt.toUtc().toIso8601String(),
         event.skillId,
+        event.kind.name,
+        event.relatedEventId,
+        event.misconceptionId,
       ],
     );
     return _database.updatedRows == 1;
@@ -129,14 +167,17 @@ final class SqliteProgressRepository implements ProgressRepository {
       '''
       INSERT INTO active_session (
         singleton, session_id, seed, started_at, current_question_index,
-        answer_draft
-      ) VALUES (1, ?, ?, ?, ?, ?)
+        answer_draft, phase, focus_skill_id, correction_of_event_id
+      ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(singleton) DO UPDATE SET
         session_id = excluded.session_id,
         seed = excluded.seed,
         started_at = excluded.started_at,
         current_question_index = excluded.current_question_index,
-        answer_draft = excluded.answer_draft
+        answer_draft = excluded.answer_draft,
+        phase = excluded.phase,
+        focus_skill_id = excluded.focus_skill_id,
+        correction_of_event_id = excluded.correction_of_event_id
       ''',
       [
         session.id,
@@ -144,6 +185,9 @@ final class SqliteProgressRepository implements ProgressRepository {
         session.startedAt.toUtc().toIso8601String(),
         session.currentQuestionIndex,
         session.answerDraft,
+        session.phase.name,
+        session.focusSkillId,
+        session.correctionOfEventId,
       ],
     );
   }
@@ -152,9 +196,12 @@ final class SqliteProgressRepository implements ProgressRepository {
     answer: row['answer'] as String,
     eventId: row['event_id'] as String,
     isCorrect: (row['is_correct'] as int) == 1,
+    kind: AttemptKind.values.byName(row['event_kind'] as String),
+    misconceptionId: row['misconception_id'] as String?,
     occurredAt: DateTime.parse(row['occurred_at'] as String).toUtc(),
     questionId: row['question_id'] as String,
     responseTime: Duration(milliseconds: row['response_ms'] as int),
+    relatedEventId: row['related_event_id'] as String?,
     sessionId: row['session_id'] as String,
     skillId: row['skill_id'] as String,
   );

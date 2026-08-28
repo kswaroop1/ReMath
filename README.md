@@ -17,7 +17,9 @@ three separate capabilities:
 The implemented foundation includes deterministic arithmetic generation, exact
 local marking, immutable progress events, adaptive fluency scheduling, resumable
 15-minute drills, and an offline arithmetic diagnostic with independent,
-explainable placement for addition, subtraction, and multiplication. Cloud
+explainable placement for addition, subtraction, and multiplication. Incorrect
+drill answers now require a persisted correction and same-skill retest, while
+repeated errors produce an offline prerequisite-review suggestion. Cloud
 synchronisation and downloadable course packs remain deliberately separated
 behind interfaces so providers can be added without changing the learning
 engine.
