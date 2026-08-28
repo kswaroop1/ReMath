@@ -373,3 +373,26 @@ Green evidence:
 > near-100% production coverage. Contributor guidance now documents the
 > on-demand `@codex review` flow and preserves CI and accountable human review
 > as separate gates.
+
+
+## Review connection deferred and merge authorization
+
+Three on-demand `@codex review` requests were made after the repository review
+rules were added. Each was rejected by `chatgpt-codex-connector[bot]` with a
+request to connect Codex to GitHub; no Codex review began and no review finding
+was produced. CI run #156 nevertheless verified the final code and documentation
+head then under review configuration.
+
+### User
+
+> Ok we will do this later, pl go ahead and mergw if pr4's scope is complete
+
+### Assistant
+
+> PR #4's planned feature scope is complete. Before merging, the unsuccessful
+> review attempts will be recorded, provenance finalized, CI rerun on the exact
+> resulting head, and mergeability/review state rechecked. The merge will be
+> conditional on those repository gates and will use the verified head SHA.
+
+The user explicitly deferred Codex Cloud review setup. The absence of a Codex
+review is therefore recorded rather than represented as a successful review.
