@@ -58,8 +58,7 @@ final class LearningController extends ChangeNotifier {
   bool get hasActiveSession => _session != null;
   bool get isDiagnostic => _session?.id.startsWith(_diagnosticPrefix) ?? false;
   bool get isBusy => _isBusy;
-  bool get isCorrecting =>
-      _session?.phase == LearningSessionPhase.correction;
+  bool get isCorrecting => _session?.phase == LearningSessionPhase.correction;
   bool get isRetesting => _session?.phase == LearningSessionPhase.retest;
   CorrectionPrompt? get correctionPrompt {
     final session = _session;
@@ -79,6 +78,7 @@ final class LearningController extends ChangeNotifier {
       misconception: misconception,
     );
   }
+
   AttemptAssessment? get lastAssessment => _lastAssessment;
   List<SkillFluency> get fluency => List.unmodifiable(_fluency);
   MasterySummary get mastery => _mastery;
@@ -101,7 +101,8 @@ final class LearningController extends ChangeNotifier {
     final focusedOperation = ArithmeticOperationDefinition.fromSkillId(
       session.focusSkillId ?? '',
     );
-    final operation = focusedOperation ??
+    final operation =
+        focusedOperation ??
         (isDiagnostic
             ? ArithmeticOperation.values[session.currentQuestionIndex ~/ 3]
             : _scheduler.choose(fluency: _fluency, now: _clock().toUtc()));

@@ -30,19 +30,16 @@ final class LearningSession {
     String? focusSkillId,
     LearningSessionPhase? phase,
     bool clearRemediation = false,
-  }) =>
-      LearningSession(
-        answerDraft: answerDraft ?? this.answerDraft,
-        correctionOfEventId: clearRemediation
-            ? null
-            : correctionOfEventId ?? this.correctionOfEventId,
-        currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
-        focusSkillId: clearRemediation
-            ? null
-            : focusSkillId ?? this.focusSkillId,
-        id: id,
-        phase: phase ?? this.phase,
-        seed: seed,
-        startedAt: startedAt,
-      );
+  }) => LearningSession(
+    answerDraft: answerDraft ?? this.answerDraft,
+    correctionOfEventId: clearRemediation
+        ? null
+        : correctionOfEventId ?? this.correctionOfEventId,
+    currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
+    focusSkillId: clearRemediation ? null : focusSkillId ?? this.focusSkillId,
+    id: id,
+    phase: phase ?? this.phase,
+    seed: seed,
+    startedAt: startedAt,
+  );
 }
