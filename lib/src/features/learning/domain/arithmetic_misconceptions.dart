@@ -1,17 +1,12 @@
 import 'arithmetic_question.dart';
 
-enum MisconceptionId {
-  usedSubtraction,
-  usedAddition,
-  reversedSubtraction,
-}
+enum MisconceptionId { usedSubtraction, usedAddition, reversedSubtraction }
 
 extension MisconceptionIdDefinition on MisconceptionId {
   String get stableId => switch (this) {
     MisconceptionId.usedSubtraction => 'arithmetic.used-subtraction',
     MisconceptionId.usedAddition => 'arithmetic.used-addition',
-    MisconceptionId.reversedSubtraction =>
-      'arithmetic.reversed-subtraction',
+    MisconceptionId.reversedSubtraction => 'arithmetic.reversed-subtraction',
   };
 }
 
