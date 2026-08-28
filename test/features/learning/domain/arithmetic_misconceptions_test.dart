@@ -54,6 +54,12 @@ void main() {
 
     expect(result?.id, MisconceptionId.usedAddition);
     expect(result?.stableId, 'arithmetic.used-addition');
+    expect(
+      classifier
+          .classify(question(ArithmeticOperation.subtraction), -5)
+          ?.stableId,
+      'arithmetic.reversed-subtraction',
+    );
   });
 
   test('correct, unknown and degenerate alternatives are not classified', () {
