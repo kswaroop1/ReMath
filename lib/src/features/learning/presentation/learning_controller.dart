@@ -189,9 +189,7 @@ final class LearningController extends ChangeNotifier {
       occurredAt: now,
       questionId: question.id,
       responseTime: now.difference(beganAt),
-      relatedEventId: isCorrecting || isRetesting
-          ? _correctionOfEventId
-          : null,
+      relatedEventId: isCorrecting || isRetesting ? _correctionOfEventId : null,
       sessionId: session.id,
       skillId: question.skillId,
     );
