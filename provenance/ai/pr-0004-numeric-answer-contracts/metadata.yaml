@@ -6,13 +6,14 @@ agents:
   - product: OpenAI Codex
     model: not exposed to repository session
 started_at: 2026-08-27T18:55:07Z
-finalized_at: 2026-08-28T06:58:34Z
+finalized_at: null
 scope:
   - numeric answer contracts
   - business-focused TDD
   - property tests
   - misconception classification foundation
   - difficulty calibration foundation
+  - Codex review policy
 redactions: []
 excluded_context:
   - hidden system and developer instructions
