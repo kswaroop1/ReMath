@@ -58,34 +58,37 @@ void main() {
     expect(zero.mark('0').verdict, AnswerVerdict.incorrect);
   });
 
-  test('rounding handles signs, carry, leading dots and explicit precision', () {
-    final leadingDot = SignificantFigureAnswer(
-      expectedValue: '.5',
-      significantFigures: 1,
-    );
-    final negative = SignificantFigureAnswer(
-      expectedValue: '-1.235',
-      significantFigures: 3,
-    );
-    final carry = SignificantFigureAnswer(
-      expectedValue: '999',
-      significantFigures: 2,
-    );
-    final paddedDecimal = SignificantFigureAnswer(
-      expectedValue: '0.5',
-      significantFigures: 3,
-    );
-    final paddedInteger = SignificantFigureAnswer(
-      expectedValue: '-1200',
-      significantFigures: 3,
-    );
+  test(
+    'rounding handles signs, carry, leading dots and explicit precision',
+    () {
+      final leadingDot = SignificantFigureAnswer(
+        expectedValue: '.5',
+        significantFigures: 1,
+      );
+      final negative = SignificantFigureAnswer(
+        expectedValue: '-1.235',
+        significantFigures: 3,
+      );
+      final carry = SignificantFigureAnswer(
+        expectedValue: '999',
+        significantFigures: 2,
+      );
+      final paddedDecimal = SignificantFigureAnswer(
+        expectedValue: '0.5',
+        significantFigures: 3,
+      );
+      final paddedInteger = SignificantFigureAnswer(
+        expectedValue: '-1200',
+        significantFigures: 3,
+      );
 
-    expect(leadingDot.mark('.5').verdict, AnswerVerdict.correct);
-    expect(negative.canonicalAnswer, '-1.24');
-    expect(carry.canonicalAnswer, '1000');
-    expect(paddedDecimal.canonicalAnswer, '0.500');
-    expect(paddedInteger.canonicalAnswer, '-1.20e3');
-  });
+      expect(leadingDot.mark('.5').verdict, AnswerVerdict.correct);
+      expect(negative.canonicalAnswer, '-1.24');
+      expect(carry.canonicalAnswer, '1000');
+      expect(paddedDecimal.canonicalAnswer, '0.500');
+      expect(paddedInteger.canonicalAnswer, '-1.20e3');
+    },
+  );
 
   test('invalid learner input remains invalid', () {
     for (final input in ['', '1/3', 'NaN', 'about 1230']) {
