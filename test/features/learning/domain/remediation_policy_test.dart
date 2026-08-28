@@ -29,6 +29,17 @@ void main() {
     expect(recommendation?.reason, contains('prerequisite'));
   });
 
+  test('repeated multiplication errors revisit their addition basis', () {
+    final recommendation = policy.recommend([
+      _attempt('one', operation: ArithmeticOperation.multiplication),
+      _attempt('two', operation: ArithmeticOperation.multiplication),
+    ]);
+
+    expect(recommendation?.observedSkillId, 'arithmetic.multiplication');
+    expect(recommendation?.recommendedSkillId, 'arithmetic.addition');
+    expect(recommendation?.reason, contains('prerequisite'));
+  });
+
   test('corrections and another operation do not create a recommendation', () {
     expect(
       policy.recommend([

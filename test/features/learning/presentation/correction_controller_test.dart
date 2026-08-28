@@ -102,6 +102,28 @@ void main() {
     },
   );
 
+  test('a failed retest starts a new linked correction', () async {
+    final repository = InMemoryProgressRepository();
+    final controller = _controller(repository);
+    await controller.initialise();
+    await controller.startChunk();
+    final original = controller.currentQuestion!;
+    controller.updateDraft((original.answer + 1).toString());
+    await controller.submitAnswer();
+    controller.updateDraft(original.answer.toString());
+    await controller.submitAnswer();
+    final retest = controller.currentQuestion!;
+
+    controller.updateDraft((retest.answer + 1).toString());
+    await controller.submitAnswer();
+
+    final attempts = await repository.loadAttempts();
+    expect(attempts.last.kind, AttemptKind.retest);
+    expect(controller.isCorrecting, isTrue);
+    expect(controller.currentQuestion?.id, retest.id);
+    expect(controller.correctionPrompt?.correctAnswer, retest.answer);
+  });
+
   test(
     'ending a chunk offers focused, weakest, mixed, and stop choices',
     () async {

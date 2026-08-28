@@ -146,4 +146,36 @@ void main() {
     );
     database.close();
   });
+
+  test('a failed correction migration rolls back schema version two', () {
+    final database = sqlite3.openInMemory()
+      ..execute('CREATE TABLE schema_version (version INTEGER NOT NULL) STRICT')
+      ..execute('INSERT INTO schema_version VALUES (2)')
+      ..execute('''
+        CREATE TABLE attempt_events (
+          event_id TEXT PRIMARY KEY,
+          event_kind TEXT
+        ) STRICT
+      ''')
+      ..execute('''
+        CREATE TABLE active_session (
+          singleton INTEGER PRIMARY KEY,
+          session_id TEXT NOT NULL,
+          seed INTEGER NOT NULL,
+          started_at TEXT NOT NULL,
+          current_question_index INTEGER NOT NULL,
+          answer_draft TEXT NOT NULL
+        ) STRICT
+      ''');
+
+    expect(
+      () => SqliteProgressRepository(database),
+      throwsA(isA<SqliteException>()),
+    );
+    expect(
+      database.select('SELECT version FROM schema_version').single['version'],
+      2,
+    );
+    database.close();
+  });
 }
