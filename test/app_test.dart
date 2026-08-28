@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/app.dart';
-import 'package:remath/src/features/learning/data/in_memory_progress_repository.dart';\nimport 'package:remath/src/features/learning/domain/attempt_event.dart';
+import 'package:remath/src/features/learning/data/in_memory_progress_repository.dart';
 
 import 'support/foundation_pack.dart';
 
