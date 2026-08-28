@@ -2,7 +2,7 @@ import 'arithmetic_question.dart';
 import 'attempt_event.dart';
 import 'fluency.dart';
 
-enum DiagnosticLevel {
+enum DiagnosticPlacementLevel {
   moreEvidenceNeeded,
   rebuildFundamentals,
   practiseSpeed,
@@ -23,7 +23,7 @@ final class DiagnosticPlacement {
 
   final double accuracy;
   final double fluentShare;
-  final DiagnosticLevel level;
+  final DiagnosticPlacementLevel level;
   final LearningObjective objective;
   final ArithmeticOperation operation;
   final String reason;
@@ -70,7 +70,7 @@ final class DiagnosticPlacementPolicy {
         operation,
         accuracy,
         fluentShare,
-        DiagnosticLevel.moreEvidenceNeeded,
+        DiagnosticPlacementLevel.moreEvidenceNeeded,
         'More evidence is needed before recommending a starting point.',
       );
     }
@@ -79,7 +79,7 @@ final class DiagnosticPlacementPolicy {
         operation,
         accuracy,
         fluentShare,
-        DiagnosticLevel.rebuildFundamentals,
+        DiagnosticPlacementLevel.rebuildFundamentals,
         'Accuracy is not yet reliable; rebuild the fundamentals first.',
       );
     }
@@ -88,7 +88,7 @@ final class DiagnosticPlacementPolicy {
         operation,
         accuracy,
         fluentShare,
-        DiagnosticLevel.practiseSpeed,
+        DiagnosticPlacementLevel.practiseSpeed,
         'Accuracy is secure; practise speed to make the skill fluent.',
       );
     }
@@ -96,7 +96,7 @@ final class DiagnosticPlacementPolicy {
       operation,
       accuracy,
       fluentShare,
-      DiagnosticLevel.readyToProgress,
+      DiagnosticPlacementLevel.readyToProgress,
       'Accuracy and speed are both secure; progress to the next skill.',
     );
   }
@@ -105,13 +105,13 @@ final class DiagnosticPlacementPolicy {
     ArithmeticOperation operation,
     double accuracy,
     double fluentShare,
-    DiagnosticLevel level,
+    DiagnosticPlacementLevel level,
     String reason,
   ) => DiagnosticPlacement(
     accuracy: accuracy,
     fluentShare: fluentShare,
     level: level,
-    objective: level == DiagnosticLevel.rebuildFundamentals
+    objective: level == DiagnosticPlacementLevel.rebuildFundamentals
         ? LearningObjective.understanding
         : LearningObjective.fluency,
     operation: operation,
