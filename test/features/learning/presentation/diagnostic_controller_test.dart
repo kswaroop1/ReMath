@@ -28,7 +28,7 @@ void main() {
     expect(controller.diagnosticPlacements, hasLength(3));
     expect(
       controller.diagnosticPlacements.map((item) => item.level),
-      everyElement(DiagnosticLevel.readyToProgress),
+      everyElement(DiagnosticPlacementLevel.readyToProgress),
     );
   });
 
