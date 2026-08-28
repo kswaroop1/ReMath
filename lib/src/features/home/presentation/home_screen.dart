@@ -204,10 +204,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  String _placementLabel(DiagnosticLevel level) => switch (level) {
-    DiagnosticLevel.moreEvidenceNeeded => 'More evidence needed',
-    DiagnosticLevel.rebuildFundamentals => 'Rebuild fundamentals',
-    DiagnosticLevel.practiseSpeed => 'Practise speed',
-    DiagnosticLevel.readyToProgress => 'Ready to progress',
+  String _placementLabel(DiagnosticPlacementLevel level) => switch (level) {
+    DiagnosticPlacementLevel.moreEvidenceNeeded => 'More evidence needed',
+    DiagnosticPlacementLevel.rebuildFundamentals => 'Rebuild fundamentals',
+    DiagnosticPlacementLevel.practiseSpeed => 'Practise speed',
+    DiagnosticPlacementLevel.readyToProgress => 'Ready to progress',
   };
 }
