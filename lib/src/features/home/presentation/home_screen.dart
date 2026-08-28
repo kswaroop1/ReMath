@@ -81,9 +81,11 @@ class _HomeScreenState extends State<HomeScreen> {
               constraints: const BoxConstraints(maxWidth: 720),
               child: Padding(
                 padding: const EdgeInsets.all(24),
-                child: _controller.hasActiveSession
-                    ? _buildActiveChunk(context)
-                    : _buildOverview(context),
+                child: SingleChildScrollView(
+                  child: _controller.hasActiveSession
+                      ? _buildActiveChunk(context)
+                      : _buildOverview(context),
+                ),
               ),
             ),
           ),
