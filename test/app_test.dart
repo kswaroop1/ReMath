@@ -53,8 +53,14 @@ void main() {
     }
 
     expect(find.text('Your starting points'), findsOneWidget);
-    expect(\n      find.textContaining('Addition: Rebuild fundamentals'),\n      findsOneWidget,\n    );
-    expect(\n      find.textContaining('Subtraction: Rebuild fundamentals'),\n      findsOneWidget,\n    );
+    expect(
+      find.textContaining('Addition: Rebuild fundamentals'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('Subtraction: Rebuild fundamentals'),
+      findsOneWidget,
+    );
     expect(
       find.textContaining('Multiplication: Rebuild fundamentals'),
       findsOneWidget,
