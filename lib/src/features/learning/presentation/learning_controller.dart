@@ -7,6 +7,7 @@ import '../domain/arithmetic_generator.dart';
 import '../domain/arithmetic_question.dart';
 import '../domain/attempt_event.dart';
 import '../domain/content_pack.dart';
+import '../domain/diagnostic_placement.dart';
 import '../domain/fluency.dart';
 import '../domain/learning_session.dart';
 import '../domain/mastery_summary.dart';
@@ -47,23 +48,37 @@ final class LearningController extends ChangeNotifier {
   DateTime? _questionBeganAt;
   bool _isBusy = false;
   AttemptAssessment? _lastAssessment;
+  String? _latestDiagnosticSessionId;
+
+  static const _diagnosticPrefix = 'diagnostic-';
+  static const _diagnosticQuestionCount = 9;
 
   bool get hasActiveSession => _session != null;
+  bool get isDiagnostic =>
+      _session?.id.startsWith(_diagnosticPrefix) ?? false;
   bool get isBusy => _isBusy;
   AttemptAssessment? get lastAssessment => _lastAssessment;
   List<SkillFluency> get fluency => List.unmodifiable(_fluency);
   MasterySummary get mastery => _mastery;
   String get answerDraft => _session?.answerDraft ?? '';
+  List<DiagnosticPlacement> get diagnosticPlacements {
+    final sessionId = _latestDiagnosticSessionId;
+    if (sessionId == null) {
+      return const [];
+    }
+    return const DiagnosticPlacementPolicy().place(
+      _attempts.where((attempt) => attempt.sessionId == sessionId),
+    );
+  }
 
   ArithmeticQuestion? get currentQuestion {
     final session = _session;
     if (session == null) {
       return null;
     }
-    final operation = _scheduler.choose(
-      fluency: _fluency,
-      now: _clock().toUtc(),
-    );
+    final operation = isDiagnostic
+        ? ArithmeticOperation.values[session.currentQuestionIndex ~/ 3]
+        : _scheduler.choose(fluency: _fluency, now: _clock().toUtc());
     return _generator.generate(
       seed: session.seed,
       index: session.currentQuestionIndex,
@@ -86,6 +101,7 @@ final class LearningController extends ChangeNotifier {
   Future<void> initialise() async {
     _session = await _repository.loadSession();
     _attempts = await _repository.loadAttempts();
+    _latestDiagnosticSessionId = _latestDiagnosticId(_attempts);
     _recalculateProgress();
     _questionBeganAt = _clock().toUtc();
     notifyListeners();
@@ -99,6 +115,22 @@ final class LearningController extends ChangeNotifier {
       seed: now.microsecondsSinceEpoch & 0x7fffffff,
       startedAt: now,
     );
+    _questionBeganAt = now;
+    _lastAssessment = null;
+    await _repository.saveSession(_session!);
+    notifyListeners();
+  }
+
+  Future<void> startDiagnostic() async {
+    final now = _clock().toUtc();
+    final id = '$_diagnosticPrefix${_idFactory()}';
+    _session = LearningSession(
+      currentQuestionIndex: 0,
+      id: id,
+      seed: now.microsecondsSinceEpoch & 0x7fffffff,
+      startedAt: now,
+    );
+    _latestDiagnosticSessionId = id;
     _questionBeganAt = now;
     _lastAssessment = null;
     await _repository.saveSession(_session!);
@@ -144,7 +176,10 @@ final class LearningController extends ChangeNotifier {
     _attempts = await _repository.loadAttempts();
     _lastAssessment = AttemptAssessment.fromEvent(event);
     _recalculateProgress();
-    if (remaining == Duration.zero) {
+    final diagnosticComplete =
+        isDiagnostic &&
+        session.currentQuestionIndex + 1 >= _diagnosticQuestionCount;
+    if (remaining == Duration.zero || diagnosticComplete) {
       await _repository.completeSession(session.id);
       _session = null;
     } else {
@@ -179,5 +214,14 @@ final class LearningController extends ChangeNotifier {
     final random = Random.secure();
     final timestamp = DateTime.now().toUtc().microsecondsSinceEpoch;
     return '$timestamp-${random.nextInt(1 << 32)}-${random.nextInt(1 << 32)}';
+  }
+
+  static String? _latestDiagnosticId(List<AttemptEvent> attempts) {
+    for (final attempt in attempts.reversed) {
+      if (attempt.sessionId.startsWith(_diagnosticPrefix)) {
+        return attempt.sessionId;
+      }
+    }
+    return null;
   }
 }
