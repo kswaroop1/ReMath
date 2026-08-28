@@ -184,7 +184,6 @@ final class ApproximateDecimalAnswer {
   }
 }
 
-
 final class SignificantFigureAnswer {
   SignificantFigureAnswer({
     required String expectedValue,
