@@ -241,6 +241,7 @@ void main() {
     );
     expect(find.text('Explore subtraction anyway'), findsOneWidget);
 
+    await tester.ensureVisible(find.text('Back'));
     await tester.tap(find.text('Back'));
     await tester.pumpAndSettle();
     expect(find.text('Mental arithmetic foundation'), findsOneWidget);
