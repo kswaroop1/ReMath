@@ -53,4 +53,6 @@ jobs:
       - name: Run tests with coverage
         run: flutter test --coverage
       - name: Enforce coverage floor
-        run: dart run tool/check_coverage.dart 90
+        run: |
+          awk -F: '/^SF:/{file=$2} /^DA:[0-9]+,0/{print file ":" $2}' coverage/lcov.info
+          exit 1
