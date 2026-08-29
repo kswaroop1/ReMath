@@ -76,3 +76,12 @@ added responsive offline dashboard and history views. The screens expose honest
 empty states, practice time, independent/assisted counts, knowledge and
 performance indicators, retention, review risk, and an explanation for every
 recorded event.
+
+### Canonical formatting diagnosis
+
+Implementation CI runs 33259760954 and 33259949305 stopped at the formatter.
+Because Flutter was unavailable locally, Codex temporarily made CI print the
+canonical formatter diff in run 33260041746. The resulting changes were applied
+verbatim, the permanent non-mutating format gate was restored, and Flutter
+3.47's generated analyzer exclusion for `build/**` was retained to prevent
+`flutter pub get` from dirtying the checkout.

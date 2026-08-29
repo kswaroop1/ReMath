@@ -263,10 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 4),
-        Text(
-          _practiceTime(dashboard.totalTime),
-          textAlign: TextAlign.center,
-        ),
+        Text(_practiceTime(dashboard.totalTime), textAlign: TextAlign.center),
         const SizedBox(height: 20),
         for (final skill in dashboard.skills) ...[
           _buildSkillProgress(context, skill),
@@ -309,9 +306,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
           const SizedBox(height: 8),
           OutlinedButton(
-            onPressed: () => setState(
-              () => _selectedProgressSkillId = skill.skillId,
-            ),
+            onPressed: () =>
+                setState(() => _selectedProgressSkillId = skill.skillId),
             child: Text('View ${skill.label} history'),
           ),
         ],

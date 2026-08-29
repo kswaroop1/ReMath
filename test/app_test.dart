@@ -301,11 +301,7 @@ void main() {
       _attempt('arithmetic.addition', 40, isCorrect: false),
     );
     await repository.recordAttempt(
-      _attempt(
-        'arithmetic.addition',
-        41,
-        kind: AttemptKind.correction,
-      ),
+      _attempt('arithmetic.addition', 41, kind: AttemptKind.correction),
     );
     await repository.recordAttempt(_attempt('arithmetic.addition', 42));
     await tester.pumpWidget(

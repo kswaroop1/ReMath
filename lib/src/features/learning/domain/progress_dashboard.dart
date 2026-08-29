@@ -134,9 +134,7 @@ final class ProgressDashboardCalculator {
         : fluency.fluentAttempts / independent.length;
     final knowledge = accuracy == null
         ? null
-        : ((accuracy * 0.7) +
-                  (retentionProgress * 0.2) +
-                  (fluentRatio * 0.1))
+        : ((accuracy * 0.7) + (retentionProgress * 0.2) + (fluentRatio * 0.1))
               .clamp(0.0, 1.0);
 
     return SkillProgress(
@@ -185,13 +183,14 @@ final class ProgressDashboardCalculator {
         final time = second.occurredAt.compareTo(first.occurredAt);
         return time != 0 ? time : second.eventId.compareTo(first.eventId);
       });
-    final independentAscending = events
-        .where((event) => event.kind.contributesToMastery)
-        .toList(growable: false)
-      ..sort((first, second) {
-        final time = first.occurredAt.compareTo(second.occurredAt);
-        return time != 0 ? time : first.eventId.compareTo(second.eventId);
-      });
+    final independentAscending =
+        events
+            .where((event) => event.kind.contributesToMastery)
+            .toList(growable: false)
+          ..sort((first, second) {
+            final time = first.occurredAt.compareTo(second.occurredAt);
+            return time != 0 ? time : first.eventId.compareTo(second.eventId);
+          });
     return ordered
         .map(
           (event) => _historyEntry(
@@ -232,7 +231,8 @@ final class ProgressDashboardCalculator {
             : 'Independent answer needs review',
       );
     }
-    final fluent = AttemptAssessment.fromEvent(event).pace == AttemptPace.fluent;
+    final fluent =
+        AttemptAssessment.fromEvent(event).pace == AttemptPace.fluent;
     return ProgressHistoryEntry(
       eventId: event.eventId,
       explanation: fluent

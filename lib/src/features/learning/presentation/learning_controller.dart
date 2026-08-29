@@ -124,8 +124,8 @@ final class LearningController extends ChangeNotifier {
         now: _clock().toUtc(),
       );
   MasterySummary get mastery => _mastery;
-  ProgressDashboard get progressDashboard => _progressDashboardCalculator
-      .calculate(_attempts, now: _clock().toUtc());
+  ProgressDashboard get progressDashboard =>
+      _progressDashboardCalculator.calculate(_attempts, now: _clock().toUtc());
   CurriculumGraph get curriculumGraph =>
       CurriculumGraph(goals: _contentPack.goals, skills: _contentPack.skills);
   Set<String> get masteredSkillIds => _fluency
