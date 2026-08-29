@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../learning/domain/arithmetic_question.dart';
 import '../../learning/domain/content_pack.dart';
+import '../../learning/domain/curriculum_graph.dart';
 import '../../learning/domain/diagnostic_placement.dart';
 import '../../learning/domain/fluency.dart';
 import '../../learning/domain/progress_repository.dart';
@@ -25,6 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late final LearningController _controller;
   late final TextEditingController _answerController;
   late final Future<void> _initialised;
+  bool _showCurriculum = false;
 
   @override
   void initState() {
@@ -86,6 +88,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ? _controller.isLearning
                             ? _buildLearnChunk(context)
                             : _buildActiveChunk(context)
+                      : _showCurriculum
+                      ? _buildCurriculum(context)
                       : _buildOverview(context),
                 ),
               ),
@@ -193,6 +197,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 12),
         OutlinedButton(
+          onPressed: () => setState(() => _showCurriculum = true),
+          child: const Text('Explore curriculum'),
+        ),
+        const SizedBox(height: 12),
+        OutlinedButton(
           onPressed: () => _controller.startLearn('arithmetic.addition'),
           child: const Text('Learn addition'),
         ),
@@ -204,6 +213,71 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     ],
   );
+
+  Widget _buildCurriculum(BuildContext context) {
+    final graph = _controller.curriculumGraph;
+    final mastered = _controller.masteredSkillIds;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Curriculum map',
+          style: Theme.of(context).textTheme.headlineMedium,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 16),
+        for (final goal in graph.goals) ...[
+          Text(goal.title, style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            graph.skillsForGoal(goal.id).map((skill) => skill.title).join(' • '),
+          ),
+          const SizedBox(height: 16),
+        ],
+        for (final skill in graph.skills) ...[
+          _buildCurriculumSkill(context, graph, skill, mastered),
+          const SizedBox(height: 12),
+        ],
+        TextButton(
+          onPressed: () => setState(() => _showCurriculum = false),
+          child: const Text('Back'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCurriculumSkill(
+    BuildContext context,
+    CurriculumGraph graph,
+    SkillDefinition skill,
+    Set<String> mastered,
+  ) {
+    final readiness = graph.readinessFor(
+      skill.id,
+      masteredSkillIds: mastered,
+    );
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(skill.title, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 4),
+            Text(readiness.reason),
+            const SizedBox(height: 8),
+            OutlinedButton(
+              onPressed: () => _controller.startLearn(skill.id),
+              child: Text(
+                readiness.isRecommended
+                    ? 'Learn ${skill.title.toLowerCase()}'
+                    : 'Explore ${skill.title.toLowerCase()} anyway',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _buildLearnChunk(BuildContext context) {
     final card = _controller.conceptCard!;
