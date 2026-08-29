@@ -93,3 +93,12 @@ the default test viewport. Codex preserved the business expectations: exact
 full mastery is normalized to 100%, due language explicitly says overdue,
 ordinary failed answers remain ordinary answers in history, and the secondary
 progress action was moved below the primary drill action.
+
+### Coverage refinement
+
+CI run 33260338902 passed all 156 tests and every quality/safety gate at 99.59%
+line coverage. A temporary diagnostic in run 33260460500 located six uncovered
+learner-facing branches: dashboard back navigation, empty history, minute-scale
+practice time, retained/lapsed labels, and an approaching-review risk label.
+Codex restored the permanent 90% merge floor and added characterization journeys
+asserting those meaningful states, with 100% retained as the engineering target.

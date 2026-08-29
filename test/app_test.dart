@@ -291,6 +291,16 @@ void main() {
     expect(find.text('Progress dashboard'), findsOneWidget);
     expect(find.text('No independent practice yet'), findsOneWidget);
     expect(find.text('No evidence yet'), findsNWidgets(3));
+
+    await tester.tap(find.text('View Addition history'));
+    await tester.pumpAndSettle();
+    expect(find.text('No attempts recorded for this skill.'), findsOneWidget);
+    await tester.tap(find.text('Back to progress'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Back'));
+    await tester.tap(find.text('Back'));
+    await tester.pumpAndSettle();
+    expect(find.text('Mental arithmetic foundation'), findsOneWidget);
   });
 
   testWidgets('explains skill measures and immutable history offline', (
@@ -332,6 +342,53 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Progress dashboard'), findsOneWidget);
   });
+
+  testWidgets('shows retained, lapsed, and approaching review states', (
+    tester,
+  ) async {
+    final repository = InMemoryProgressRepository();
+    final now = DateTime.now().toUtc();
+    final first = now.subtract(const Duration(days: 2, hours: 1));
+    final second = first.add(const Duration(hours: 1));
+    final third = second.add(const Duration(days: 1));
+    await repository.recordAttempt(
+      _attempt('arithmetic.addition', 50, occurredAt: first, seconds: 70),
+    );
+    await repository.recordAttempt(
+      _attempt('arithmetic.addition', 51, occurredAt: second),
+    );
+    await repository.recordAttempt(
+      _attempt('arithmetic.addition', 52, occurredAt: third),
+    );
+    await repository.recordAttempt(
+      _attempt(
+        'arithmetic.subtraction',
+        53,
+        occurredAt: now.subtract(const Duration(hours: 2)),
+      ),
+    );
+    await repository.recordAttempt(
+      _attempt(
+        'arithmetic.subtraction',
+        54,
+        isCorrect: false,
+        occurredAt: now.subtract(const Duration(hours: 1)),
+      ),
+    );
+    await tester.pumpWidget(
+      ReMathApp(contentPack: foundationPackForTest(), repository: repository),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('View progress'));
+    await tester.tap(find.text('View progress'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 min practised'), findsOneWidget);
+    expect(find.text('Retention confirmed'), findsOneWidget);
+    expect(find.text('Retention lapsed'), findsOneWidget);
+    expect(find.textContaining('forgetting risk'), findsOneWidget);
+  });
 }
 
 AttemptEvent _attempt(
@@ -341,12 +398,13 @@ AttemptEvent _attempt(
   bool isCorrect = true,
   String sessionId = 'diagnostic-placement',
   AttemptKind kind = AttemptKind.answer,
+  DateTime? occurredAt,
 }) => AttemptEvent(
   answer: '1',
   eventId: 'event-$sessionId-$index',
   isCorrect: isCorrect,
   kind: kind,
-  occurredAt: DateTime.utc(2026, 8, 28, 8, 0, index),
+  occurredAt: occurredAt ?? DateTime.utc(2026, 8, 28, 8, 0, index),
   questionId: 'question-$index',
   responseTime: Duration(seconds: seconds),
   sessionId: sessionId,
