@@ -116,4 +116,65 @@ void main() {
     expect(recommendations.last.priority, ReviewPriority.approaching);
     expect(recommendations.first.reason, contains('overdue'));
   });
+
+  test('new and due learning states explain their different next actions', () {
+    final newSkill = calculator.forSkill(
+      ArithmeticOperation.addition.skillId,
+      const [],
+      now: start,
+    );
+    final dueLearning = calculator.forSkill(
+      ArithmeticOperation.addition.skillId,
+      [attempt(id: 'first', at: start, correct: true)],
+      now: start.add(const Duration(hours: 1)),
+    );
+
+    expect(newSkill.state, RetainedMasteryState.unattempted);
+    expect(newSkill.nextReviewAt, isNull);
+    expect(newSkill.reason, contains('independent attempt'));
+    expect(dueLearning.isDue, isTrue);
+    expect(dueLearning.reason, contains('due'));
+  });
+
+  test('retained mastery remains explicit when confirmation becomes due', () {
+    final second = start.add(const Duration(hours: 1));
+    final third = second.add(const Duration(days: 1));
+    final due = third.add(const Duration(days: 3));
+    final result = calculator.forSkill(ArithmeticOperation.addition.skillId, [
+      attempt(id: 'first', at: start, correct: true),
+      attempt(id: 'second', at: second, correct: true),
+      attempt(id: 'third', at: third, correct: true),
+    ], now: due);
+
+    expect(result.state, RetainedMasteryState.retained);
+    expect(result.isDue, isTrue);
+    expect(result.reason, contains('confirmation'));
+  });
+
+  test('retention ceiling and curriculum order remain deterministic', () {
+    final second = start.add(const Duration(hours: 1));
+    final third = second.add(const Duration(days: 1));
+    final fourth = third.add(const Duration(days: 3));
+    final result = calculator.forSkill(ArithmeticOperation.addition.skillId, [
+      attempt(id: 'first', at: start, correct: true),
+      attempt(id: 'second', at: second, correct: true),
+      attempt(id: 'third', at: third, correct: true),
+      attempt(id: 'fourth', at: fourth, correct: true),
+    ], now: fourth);
+    final tied = calculator.recommendReviews([
+      attempt(id: 'addition', at: start, correct: true),
+      attempt(
+        id: 'subtraction',
+        at: start,
+        correct: true,
+        skillId: ArithmeticOperation.subtraction.skillId,
+      ),
+    ], now: second);
+
+    expect(result.nextReviewAt, fourth.add(const Duration(days: 7)));
+    expect(tied.map((item) => item.skillId), [
+      ArithmeticOperation.addition.skillId,
+      ArithmeticOperation.subtraction.skillId,
+    ]);
+  });
 }
