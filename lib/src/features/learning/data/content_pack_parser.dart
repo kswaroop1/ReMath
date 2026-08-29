@@ -34,8 +34,25 @@ final class ContentPackParser {
           ),
         )
         .toList(growable: false);
+    final conceptCards = _optionalList(decoded, 'conceptCards')
+        .map(
+          (value) => ConceptCard(
+            application: _string(value, 'application'),
+            commonMistake: _string(value, 'commonMistake'),
+            externalLinks: _optionalStringList(value, 'externalLinks'),
+            formula: _string(value, 'formula'),
+            hints: _hints(value),
+            id: _string(value, 'id'),
+            skillId: _string(value, 'skillId'),
+            summary: _string(value, 'summary'),
+            title: _string(value, 'title'),
+            workedExample: _string(value, 'workedExample'),
+          ),
+        )
+        .toList(growable: false);
 
     return ContentPack(
+      conceptCards: conceptCards,
       id: _string(decoded, 'id'),
       license: _string(decoded, 'license'),
       schemaVersion: _integer(decoded, 'schemaVersion'),
@@ -43,6 +60,19 @@ final class ContentPackParser {
       templates: templates,
       title: _string(decoded, 'title'),
       version: _string(decoded, 'version'),
+    );
+  }
+
+  HintLadder _hints(Map<String, Object?> map) {
+    final value = map['hints'];
+    if (value is! Map<String, Object?>) {
+      throw const FormatException('hints must be an object.');
+    }
+    return HintLadder(
+      conceptCue: _string(value, 'conceptCue'),
+      methodCue: _string(value, 'methodCue'),
+      nextStepCue: _string(value, 'nextStepCue'),
+      workedSolution: _string(value, 'workedSolution'),
     );
   }
 
@@ -59,6 +89,22 @@ final class ContentPackParser {
           return item;
         })
         .toList(growable: false);
+  }
+
+  List<Map<String, Object?>> _optionalList(
+    Map<String, Object?> map,
+    String key,
+  ) => map.containsKey(key) ? _list(map, key) : const [];
+
+  List<String> _optionalStringList(Map<String, Object?> map, String key) {
+    final value = map[key];
+    if (value == null) {
+      return const [];
+    }
+    if (value is! List<Object?> || value.any((item) => item is! String)) {
+      throw FormatException('$key must be an array of strings.');
+    }
+    return value.cast<String>().toList(growable: false);
   }
 
   int _integer(Map<String, Object?> map, String key) {

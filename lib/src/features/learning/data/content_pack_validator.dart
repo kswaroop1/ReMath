@@ -10,7 +10,7 @@ final class ContentPackValidator {
 
   List<String> validate(ContentPack pack) {
     final issues = <String>[];
-    if (pack.schemaVersion != 1) {
+    if (pack.schemaVersion != 1 && pack.schemaVersion != 2) {
       issues.add('Unsupported schemaVersion ${pack.schemaVersion}.');
     }
     if (!_idPattern.hasMatch(pack.id)) {
@@ -27,6 +27,9 @@ final class ContentPackValidator {
     }
     if (pack.templates.isEmpty) {
       issues.add('At least one template is required.');
+    }
+    if (pack.schemaVersion >= 2 && pack.conceptCards.isEmpty) {
+      issues.add('Schema version 2 requires at least one concept card.');
     }
 
     final skillIds = <String>{};
@@ -63,6 +66,26 @@ final class ContentPackValidator {
       }
       if (template.skillId != template.operation.skillId) {
         issues.add('Template ${template.id} operation and skill disagree.');
+      }
+    }
+    final cardIds = <String>{};
+    for (final card in pack.conceptCards) {
+      if (!_idPattern.hasMatch(card.id)) {
+        issues.add('Invalid concept card id: ${card.id}.');
+      }
+      if (!cardIds.add(card.id)) {
+        issues.add('Duplicate concept card id: ${card.id}.');
+      }
+      if (!skillIds.contains(card.skillId)) {
+        issues.add(
+          'Concept card ${card.id} references missing skill ${card.skillId}.',
+        );
+      }
+      for (final link in card.externalLinks) {
+        final uri = Uri.tryParse(link);
+        if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) {
+          issues.add('Concept card ${card.id} links must use valid HTTPS URLs.');
+        }
       }
     }
     return List.unmodifiable(issues);
