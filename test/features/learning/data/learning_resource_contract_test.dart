@@ -59,10 +59,9 @@ void main() {
   test('external refresher links must be strings', () {
     expect(
       () => const ContentPackParser().parse(
-        _sourceWithLinks(const []).replaceFirst(
-          '"externalLinks": []',
-          '"externalLinks": [42]',
-        ),
+        _sourceWithLinks(
+          const [],
+        ).replaceFirst('"externalLinks": []', '"externalLinks": [42]'),
       ),
       throwsFormatException,
     );
