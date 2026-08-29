@@ -69,11 +69,11 @@ void main() {
 
   test('concept card identifiers must be stable and unique', () {
     final source = _sourceWithLinks(const [])
-        .replaceAll('arithmetic.subtraction', 'arithmetic.addition')
         .replaceFirst(
           '"id": "card.arithmetic.subtraction.foundation"',
           '"id": "Bad Card"',
-        );
+        )
+        .replaceAll('arithmetic.subtraction', 'arithmetic.addition');
     final first = const ContentPackParser().parse(source);
     final duplicated = first.conceptCards.single;
     final pack = ContentPack(
