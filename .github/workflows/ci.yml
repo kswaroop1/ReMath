@@ -52,9 +52,5 @@ jobs:
         run: dart run tool/validate_content.dart assets/content/foundation_arithmetic/pack.json
       - name: Run tests with coverage
         run: flutter test --coverage
-      - name: Diagnose uncovered lines
-        run: |
-          awk -F: '/^SF:/{file=$2} /^DA:[0-9]+,0/{print file ":" $2}' coverage/lcov.info
-          exit 1
       - name: Enforce coverage floor
         run: dart run tool/check_coverage.dart 90
