@@ -58,3 +58,8 @@ deterministic history. The local environment did not contain Flutter (`flutter:
 command not found`), so the intended missing-domain failure is delegated to the
 unchanged GitHub CI environment and will be recorded below before production
 implementation is published.
+
+GitHub CI run 33259649391 was started against the test-only commit. Codex then
+implemented a pure-Dart calculator which derives every dashboard value and
+history explanation from immutable attempt events; it introduces no persistence
+or network dependency.
