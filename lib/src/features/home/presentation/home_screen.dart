@@ -269,6 +269,15 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildSkillProgress(context, skill),
           const SizedBox(height: 12),
         ],
+        Text(
+          'Goal readiness',
+          style: Theme.of(context).textTheme.titleLarge,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        for (final line in _goalReadinessLines())
+          Text(line, textAlign: TextAlign.center),
+        const SizedBox(height: 12),
         TextButton(
           onPressed: () => setState(() => _showProgress = false),
           child: const Text('Back'),
@@ -375,6 +384,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String _percent(double value) => '${(value * 100).round()}%';
+
+  List<String> _goalReadinessLines() {
+    final graph = _controller.curriculumGraph;
+    final mastered = _controller.masteredSkillIds;
+    return graph.goals.map((goal) {
+      final skills = graph.skillsForGoal(goal.id);
+      final ready = skills.where((skill) => mastered.contains(skill.id)).length;
+      return '${goal.title}: $ready of ${skills.length} skills ready';
+    }).toList(growable: false);
+  }
 
   Widget _buildCurriculum(BuildContext context) {
     final graph = _controller.curriculumGraph;

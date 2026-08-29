@@ -110,3 +110,8 @@ feature wording and found that goal readiness was not yet visible on the new
 dashboard. A final business test therefore requires the JEE goal to state how
 many contributing foundation skills are ready before the production view is
 added.
+
+CI run 33260774713 failed the new widget expectation while all earlier
+behavior remained green. Codex then added a derived goal-readiness section that
+counts currently mastered contributors for every goal in the active offline
+curriculum graph.
