@@ -181,6 +181,34 @@ void main() {
 
     expect(find.text('Suggested review'), findsOneWidget);
     expect(find.textContaining('addition fundamentals'), findsOneWidget);
+    expect(find.text('Review addition'), findsOneWidget);
+
+    await tester.tap(find.text('Review addition'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Addition foundations'), findsOneWidget);
+    expect(find.textContaining('Build addition fluency'), findsOneWidget);
+    expect(find.text('Show concept hint'), findsOneWidget);
+
+    await tester.tap(find.text('Show concept hint'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Think about addition'), findsOneWidget);
+    expect(find.text('Show method hint'), findsOneWidget);
+  });
+
+  testWidgets('starts an offline Learn chunk without remediation', (tester) async {
+    final repository = InMemoryProgressRepository();
+    await tester.pumpWidget(
+      ReMathApp(contentPack: foundationPackForTest(), repository: repository),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Learn addition'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Addition foundations'), findsOneWidget);
+    expect(find.textContaining('A short addition example'), findsOneWidget);
+    expect(find.textContaining('Use addition in daily totals'), findsOneWidget);
   });
 }
 
