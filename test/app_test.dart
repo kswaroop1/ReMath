@@ -196,7 +196,9 @@ void main() {
     expect(find.text('Show method hint'), findsOneWidget);
   });
 
-  testWidgets('starts an offline Learn chunk without remediation', (tester) async {
+  testWidgets('starts an offline Learn chunk without remediation', (
+    tester,
+  ) async {
     final repository = InMemoryProgressRepository();
     await tester.pumpWidget(
       ReMathApp(contentPack: foundationPackForTest(), repository: repository),

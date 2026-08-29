@@ -84,7 +84,9 @@ final class ContentPackValidator {
       for (final link in card.externalLinks) {
         final uri = Uri.tryParse(link);
         if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) {
-          issues.add('Concept card ${card.id} links must use valid HTTPS URLs.');
+          issues.add(
+            'Concept card ${card.id} links must use valid HTTPS URLs.',
+          );
         }
       }
     }

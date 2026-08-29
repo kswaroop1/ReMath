@@ -43,10 +43,12 @@ void main() {
   });
 
   test('publishing rejects missing skills and unsafe external links', () {
-    final pack = const ContentPackParser().parse(_sourceWithLinks([
-      'http://insecure.example/lesson',
-      'javascript:alert(1)',
-    ]));
+    final pack = const ContentPackParser().parse(
+      _sourceWithLinks([
+        'http://insecure.example/lesson',
+        'javascript:alert(1)',
+      ]),
+    );
 
     final issues = const ContentPackValidator().validate(pack);
     expect(issues, contains(contains('missing skill')));
@@ -54,7 +56,8 @@ void main() {
   });
 }
 
-String _sourceWithLinks(List<String> links) => '''
+String _sourceWithLinks(List<String> links) =>
+    '''
 {
   "schemaVersion": 2,
   "id": "org.remath.test",

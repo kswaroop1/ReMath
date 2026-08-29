@@ -7,44 +7,55 @@ import 'package:remath/src/features/learning/presentation/learning_controller.da
 import '../../../support/foundation_pack.dart';
 
 void main() {
-  test('a learner opens the recommended card and reveals hints in order', () async {
-    final repository = InMemoryProgressRepository();
-    final controller = _controller(repository);
-    await controller.initialise();
+  test(
+    'a learner opens the recommended card and reveals hints in order',
+    () async {
+      final repository = InMemoryProgressRepository();
+      final controller = _controller(repository);
+      await controller.initialise();
 
-    await controller.startLearn('arithmetic.addition');
-    expect(controller.isLearning, isTrue);
-    expect(controller.conceptCard?.title, 'Addition foundations');
-    expect(controller.revealedHints, isEmpty);
+      await controller.startLearn('arithmetic.addition');
+      expect(controller.isLearning, isTrue);
+      expect(controller.conceptCard?.title, 'Addition foundations');
+      expect(controller.revealedHints, isEmpty);
 
-    await controller.revealNextHint();
-    await controller.revealNextHint();
+      await controller.revealNextHint();
+      await controller.revealNextHint();
 
-    expect(
-      controller.revealedHints.map((hint) => hint.level),
-      [HintLevel.concept, HintLevel.method],
-    );
-    final evidence = await repository.loadAttempts();
-    expect(evidence, hasLength(2));
-    expect(evidence, everyElement(isA<AttemptEvent>()));
-    expect(evidence, everyElement(predicate<AttemptEvent>((e) => e.kind == AttemptKind.hint)));
-    expect(controller.mastery.attempts, 0);
-  });
+      expect(controller.revealedHints.map((hint) => hint.level), [
+        HintLevel.concept,
+        HintLevel.method,
+      ]);
+      final evidence = await repository.loadAttempts();
+      expect(evidence, hasLength(2));
+      expect(evidence, everyElement(isA<AttemptEvent>()));
+      expect(
+        evidence,
+        everyElement(
+          predicate<AttemptEvent>((e) => e.kind == AttemptKind.hint),
+        ),
+      );
+      expect(controller.mastery.attempts, 0);
+    },
+  );
 
-  test('an interrupted Learn chunk restores its card and revealed hints', () async {
-    final repository = InMemoryProgressRepository();
-    final first = _controller(repository);
-    await first.initialise();
-    await first.startLearn('arithmetic.subtraction');
-    await first.revealNextHint();
+  test(
+    'an interrupted Learn chunk restores its card and revealed hints',
+    () async {
+      final repository = InMemoryProgressRepository();
+      final first = _controller(repository);
+      await first.initialise();
+      await first.startLearn('arithmetic.subtraction');
+      await first.revealNextHint();
 
-    final restored = _controller(repository);
-    await restored.initialise();
+      final restored = _controller(repository);
+      await restored.initialise();
 
-    expect(restored.isLearning, isTrue);
-    expect(restored.conceptCard?.skillId, 'arithmetic.subtraction');
-    expect(restored.revealedHints.single.level, HintLevel.concept);
-  });
+      expect(restored.isLearning, isTrue);
+      expect(restored.conceptCard?.skillId, 'arithmetic.subtraction');
+      expect(restored.revealedHints.single.level, HintLevel.concept);
+    },
+  );
 
   test('the hint ladder stops after the worked solution', () async {
     final repository = InMemoryProgressRepository();

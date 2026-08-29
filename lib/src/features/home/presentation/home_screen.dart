@@ -134,9 +134,8 @@ class _HomeScreenState extends State<HomeScreen> {
         Text(recommendation.reason, textAlign: TextAlign.center),
         const SizedBox(height: 8),
         FilledButton.tonal(
-          onPressed: () => _controller.startLearn(
-            recommendation.recommendedSkillId,
-          ),
+          onPressed: () =>
+              _controller.startLearn(recommendation.recommendedSkillId),
           child: Text(
             'Review ${_skillLabel(recommendation.recommendedSkillId)}',
           ),
@@ -232,7 +231,10 @@ class _HomeScreenState extends State<HomeScreen> {
         Text('Common mistake', style: Theme.of(context).textTheme.titleMedium),
         Text(card.commonMistake),
         const SizedBox(height: 16),
-        Text('When this is useful', style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          'When this is useful',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         Text(card.application),
         for (final hint in hints) ...[
           const SizedBox(height: 12),

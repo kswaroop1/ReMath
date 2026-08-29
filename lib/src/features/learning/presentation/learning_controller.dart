@@ -83,6 +83,7 @@ final class LearningController extends ChangeNotifier {
         .map(card.hints.reveal)
         .toList(growable: false);
   }
+
   CorrectionPrompt? get correctionPrompt {
     final session = _session;
     final question = currentQuestion;
