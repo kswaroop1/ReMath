@@ -388,13 +388,15 @@ class _HomeScreenState extends State<HomeScreen> {
   List<String> _goalReadinessLines() {
     final graph = _controller.curriculumGraph;
     final mastered = _controller.masteredSkillIds;
-    return graph.goals.map((goal) {
-      final skills = graph.skillsForGoal(goal.id);
-      final ready = skills
-          .where((skill) => mastered.contains(skill.id))
-          .length;
-      return '${goal.title}: $ready of ${skills.length} skills ready';
-    }).toList(growable: false);
+    return graph.goals
+        .map((goal) {
+          final skills = graph.skillsForGoal(goal.id);
+          final ready = skills
+              .where((skill) => mastered.contains(skill.id))
+              .length;
+          return '${goal.title}: $ready of ${skills.length} skills ready';
+        })
+        .toList(growable: false);
   }
 
   Widget _buildCurriculum(BuildContext context) {

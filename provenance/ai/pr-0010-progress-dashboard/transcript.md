@@ -119,3 +119,7 @@ curriculum graph.
 CI run 33260905025 confirmed the goal behavior had been supplied and stopped at
 one canonical line wrap in the new readiness calculation. Codex applied that
 formatter-equivalent wrap without changing behavior.
+
+Run 33261002441 showed the first manual wrap was incomplete. Diagnostic run
+33261087324 printed the exact chained-call layout from Dart's current formatter;
+Codex applied it verbatim and restored the permanent format check.
