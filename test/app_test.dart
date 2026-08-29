@@ -253,6 +253,27 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Subtraction foundations'), findsOneWidget);
   });
+
+  testWidgets('starts an explained review chunk for overdue learning', (
+    tester,
+  ) async {
+    final repository = InMemoryProgressRepository();
+    await repository.recordAttempt(
+      _attempt('arithmetic.addition', 30, isCorrect: true),
+    );
+    await tester.pumpWidget(
+      ReMathApp(contentPack: foundationPackForTest(), repository: repository),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 review due'), findsOneWidget);
+    expect(find.textContaining('Addition review is overdue'), findsOneWidget);
+    await tester.tap(find.text('Start review chunk'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Review • Addition'), findsOneWidget);
+    expect(find.byKey(const Key('questionPrompt')), findsOneWidget);
+  });
 }
 
 AttemptEvent _attempt(

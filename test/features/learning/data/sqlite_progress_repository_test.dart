@@ -72,6 +72,26 @@ void main() {
     },
   );
 
+  test('persists and restores an interrupted focused review chunk', () async {
+    final session = LearningSession(
+      answerDraft: '12',
+      currentQuestionIndex: 2,
+      focusSkillId: 'arithmetic.addition',
+      id: 'review-session',
+      phase: LearningSessionPhase.review,
+      seed: 42,
+      startedAt: DateTime.utc(2026, 8, 29, 10),
+    );
+
+    await repository.saveSession(session);
+    final restored = await repository.loadSession();
+
+    expect(restored?.phase, LearningSessionPhase.review);
+    expect(restored?.focusSkillId, 'arithmetic.addition');
+    expect(restored?.answerDraft, '12');
+    expect(restored?.currentQuestionIndex, 2);
+  });
+
   test(
     'completing another session does not remove the active session',
     () async {
