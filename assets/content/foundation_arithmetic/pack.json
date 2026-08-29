@@ -1,13 +1,30 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "org.remath.foundation-arithmetic",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "title": "Foundation mental arithmetic",
   "license": "CC-BY-SA-4.0",
   "skills": [
-    {"id": "arithmetic.addition", "title": "Addition"},
-    {"id": "arithmetic.subtraction", "title": "Subtraction"},
-    {"id": "arithmetic.multiplication", "title": "Multiplication"}
+    {"id": "arithmetic.addition", "title": "Addition", "prerequisiteIds": []},
+    {"id": "arithmetic.subtraction", "title": "Subtraction", "prerequisiteIds": ["arithmetic.addition"]},
+    {"id": "arithmetic.multiplication", "title": "Multiplication", "prerequisiteIds": ["arithmetic.addition"]}
+  ],
+  "goals": [
+    {
+      "id": "goal.jee-foundation",
+      "title": "JEE foundation",
+      "skillIds": ["arithmetic.addition", "arithmetic.subtraction", "arithmetic.multiplication"]
+    },
+    {
+      "id": "goal.quant-finance",
+      "title": "Quant finance foundation",
+      "skillIds": ["arithmetic.addition", "arithmetic.subtraction", "arithmetic.multiplication"]
+    },
+    {
+      "id": "goal.ai-mathematics",
+      "title": "AI mathematics foundation",
+      "skillIds": ["arithmetic.addition", "arithmetic.subtraction", "arithmetic.multiplication"]
+    }
   ],
   "templates": [
     {

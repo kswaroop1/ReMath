@@ -9,6 +9,7 @@ import '../domain/arithmetic_question.dart';
 import '../domain/attempt_event.dart';
 import '../domain/content_pack.dart';
 import '../domain/correction_prompt.dart';
+import '../domain/curriculum_graph.dart';
 import '../domain/diagnostic_placement.dart';
 import '../domain/fluency.dart';
 import '../domain/learning_session.dart';
@@ -106,8 +107,24 @@ final class LearningController extends ChangeNotifier {
   AttemptAssessment? get lastAssessment => _lastAssessment;
   List<SkillFluency> get fluency => List.unmodifiable(_fluency);
   MasterySummary get mastery => _mastery;
-  RemediationRecommendation? get remediationRecommendation =>
-      const RemediationPolicy().recommend(_attempts);
+  CurriculumGraph get curriculumGraph =>
+      CurriculumGraph(goals: _contentPack.goals, skills: _contentPack.skills);
+  Set<String> get masteredSkillIds => _fluency
+      .where((skill) => skill.score >= 0.8)
+      .map((skill) => skill.operation.skillId)
+      .toSet();
+  RemediationRecommendation? get remediationRecommendation {
+    final repeated = const RemediationPolicy().recommend(_attempts);
+    if (repeated == null) {
+      return null;
+    }
+    return curriculumGraph.remediationFor(
+          repeated.observedSkillId,
+          masteredSkillIds: masteredSkillIds,
+        ) ??
+        repeated;
+  }
+
   String get answerDraft => _session?.answerDraft ?? '';
   List<DiagnosticPlacement> get diagnosticPlacements {
     final sessionId = _latestDiagnosticSessionId;

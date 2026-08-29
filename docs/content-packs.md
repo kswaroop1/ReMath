@@ -28,3 +28,14 @@ version until activation succeeds.
 
 Progress refers to stable IDs and versions, never local file paths. Removing or
 upgrading a pack therefore cannot erase learning history.
+
+## Implemented schema versions
+
+- Version 1: stable skills and deterministic arithmetic templates.
+- Version 2: offline concept cards, hint ladders, and HTTPS refresher links.
+- Version 3: directed skill prerequisites and explicit learning-goal-to-skill
+  mappings.
+
+Version-3 activation validates missing, duplicate, and self prerequisite
+references; rejects cycles; and checks every goal and referenced skill. Older
+packs remain readable and receive empty prerequisite and goal collections.

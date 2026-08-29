@@ -60,9 +60,26 @@ final class ConceptCard {
 }
 
 final class SkillDefinition {
-  const SkillDefinition({required this.id, required this.title});
+  const SkillDefinition({
+    required this.id,
+    required this.title,
+    this.prerequisiteIds = const [],
+  });
 
   final String id;
+  final List<String> prerequisiteIds;
+  final String title;
+}
+
+final class LearningGoal {
+  const LearningGoal({
+    required this.id,
+    required this.skillIds,
+    required this.title,
+  });
+
+  final String id;
+  final List<String> skillIds;
   final String title;
 }
 
@@ -89,6 +106,7 @@ final class ArithmeticTemplate {
 final class ContentPack {
   const ContentPack({
     this.conceptCards = const [],
+    this.goals = const [],
     required this.id,
     required this.license,
     required this.schemaVersion,
@@ -99,6 +117,7 @@ final class ContentPack {
   });
 
   final List<ConceptCard> conceptCards;
+  final List<LearningGoal> goals;
   final String id;
   final String license;
   final int schemaVersion;

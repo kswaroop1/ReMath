@@ -28,11 +28,27 @@ ContentPack foundationPackForTest() => ContentPack(
       .toList(growable: false),
   id: 'org.remath.foundation-arithmetic',
   license: 'CC-BY-SA-4.0',
-  schemaVersion: 1,
+  goals: const [
+    LearningGoal(
+      id: 'goal.jee-foundation',
+      skillIds: [
+        'arithmetic.addition',
+        'arithmetic.subtraction',
+        'arithmetic.multiplication',
+      ],
+      title: 'JEE foundation',
+    ),
+  ],
+  schemaVersion: 3,
   skills: ArithmeticOperation.values
       .map(
-        (operation) =>
-            SkillDefinition(id: operation.skillId, title: operation.label),
+        (operation) => SkillDefinition(
+          id: operation.skillId,
+          prerequisiteIds: operation == ArithmeticOperation.addition
+              ? const []
+              : const ['arithmetic.addition'],
+          title: operation.label,
+        ),
       )
       .toList(growable: false),
   templates: ArithmeticOperation.values

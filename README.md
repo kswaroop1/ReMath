@@ -21,8 +21,11 @@ explainable placement for addition, subtraction, and multiplication. Incorrect
 drill answers now require a persisted correction and same-skill retest, while
 repeated errors produce an offline prerequisite-review suggestion. The same
 recommendation can now open an offline concept card with a resumable
-four-level hint ladder; assistance remains separate from unaided mastery. Cloud
-synchronisation and downloadable course packs remain deliberately separated
+four-level hint ladder; assistance remains separate from unaided mastery. A
+validated schema-v3 curriculum graph now explains readiness, recommends unmet
+prerequisites without blocking exploration, and maps foundation skills to JEE,
+quant-finance, and AI-mathematics goals through an offline curriculum browser.
+Cloud synchronisation and downloadable course packs remain deliberately separated
 behind interfaces so providers can be added without changing the learning
 engine.
 

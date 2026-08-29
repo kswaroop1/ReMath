@@ -15,6 +15,16 @@ final class ContentPackParser {
         .map(
           (value) => SkillDefinition(
             id: _string(value, 'id'),
+            prerequisiteIds: _optionalStringList(value, 'prerequisiteIds'),
+            title: _string(value, 'title'),
+          ),
+        )
+        .toList(growable: false);
+    final goals = _optionalList(decoded, 'goals')
+        .map(
+          (value) => LearningGoal(
+            id: _string(value, 'id'),
+            skillIds: _requiredStringList(value, 'skillIds'),
             title: _string(value, 'title'),
           ),
         )
@@ -53,6 +63,7 @@ final class ContentPackParser {
 
     return ContentPack(
       conceptCards: conceptCards,
+      goals: goals,
       id: _string(decoded, 'id'),
       license: _string(decoded, 'license'),
       schemaVersion: _integer(decoded, 'schemaVersion'),
@@ -105,6 +116,13 @@ final class ContentPackParser {
       throw FormatException('$key must be an array of strings.');
     }
     return value.cast<String>().toList(growable: false);
+  }
+
+  List<String> _requiredStringList(Map<String, Object?> map, String key) {
+    if (!map.containsKey(key)) {
+      throw FormatException('$key must be an array of strings.');
+    }
+    return _optionalStringList(map, key);
   }
 
   int _integer(Map<String, Object?> map, String key) {

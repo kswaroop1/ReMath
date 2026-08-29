@@ -219,6 +219,40 @@ void main() {
     expect(find.textContaining('A short addition example'), findsOneWidget);
     expect(find.textContaining('Use addition in daily totals'), findsOneWidget);
   });
+
+  testWidgets('curriculum explains readiness without blocking exploration', (
+    tester,
+  ) async {
+    final repository = InMemoryProgressRepository();
+    await tester.pumpWidget(
+      ReMathApp(contentPack: foundationPackForTest(), repository: repository),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Explore curriculum'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Curriculum map'), findsOneWidget);
+    expect(find.text('JEE foundation'), findsOneWidget);
+    expect(find.textContaining('Addition is ready'), findsOneWidget);
+    expect(
+      find.textContaining('Recommended prerequisite: Addition'),
+      findsWidgets,
+    );
+    expect(find.text('Explore subtraction anyway'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Back'));
+    await tester.tap(find.text('Back'));
+    await tester.pumpAndSettle();
+    expect(find.text('Mental arithmetic foundation'), findsOneWidget);
+
+    await tester.tap(find.text('Explore curriculum'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Explore subtraction anyway'));
+    await tester.pumpAndSettle();
+    expect(find.text('Subtraction foundations'), findsOneWidget);
+  });
 }
 
 AttemptEvent _attempt(
