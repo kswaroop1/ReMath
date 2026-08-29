@@ -69,8 +69,7 @@ void main() {
     expect(
       () => const ContentPackParser().parse(
         _packSource(
-          goalsSource:
-              '{"id": "goal.incomplete", "title": "Incomplete goal"}',
+          goalsSource: '{"id": "goal.incomplete", "title": "Incomplete goal"}',
         ),
       ),
       throwsA(isA<FormatException>()),
