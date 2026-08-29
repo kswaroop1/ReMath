@@ -16,6 +16,7 @@ import '../domain/learning_session.dart';
 import '../domain/mastery_summary.dart';
 import '../domain/progress_repository.dart';
 import '../domain/remediation_policy.dart';
+import '../domain/retained_mastery.dart';
 
 typedef Clock = DateTime Function();
 typedef IdFactory = String Function();
@@ -27,6 +28,8 @@ final class LearningController extends ChangeNotifier {
     ArithmeticGenerator generator = const ArithmeticGenerator(),
     ArithmeticScheduler scheduler = const ArithmeticScheduler(),
     FluencyCalculator fluencyCalculator = const FluencyCalculator(),
+    RetainedMasteryCalculator retainedMasteryCalculator =
+        const RetainedMasteryCalculator(),
     Clock? clock,
     IdFactory? idFactory,
   }) : _clock = clock ?? DateTime.now,
@@ -34,6 +37,7 @@ final class LearningController extends ChangeNotifier {
        _generator = generator,
        _scheduler = scheduler,
        _fluencyCalculator = fluencyCalculator,
+       _retainedMasteryCalculator = retainedMasteryCalculator,
        _idFactory = idFactory ?? _randomId,
        _repository = repository;
 
@@ -42,6 +46,7 @@ final class LearningController extends ChangeNotifier {
   final ArithmeticGenerator _generator;
   final ArithmeticScheduler _scheduler;
   final FluencyCalculator _fluencyCalculator;
+  final RetainedMasteryCalculator _retainedMasteryCalculator;
   final IdFactory _idFactory;
   final ProgressRepository _repository;
 
@@ -56,6 +61,7 @@ final class LearningController extends ChangeNotifier {
   String? _latestDiagnosticSessionId;
 
   static const _diagnosticPrefix = 'diagnostic-';
+  static const _reviewPrefix = 'review-';
   static const _diagnosticQuestionCount = 9;
 
   bool get hasActiveSession => _session != null;
@@ -65,6 +71,7 @@ final class LearningController extends ChangeNotifier {
   bool get isCorrecting => _session?.phase == LearningSessionPhase.correction;
   bool get isRetesting => _session?.phase == LearningSessionPhase.retest;
   bool get isLearning => _session?.phase == LearningSessionPhase.learn;
+  bool get isReviewing => _session?.phase == LearningSessionPhase.review;
   ConceptCard? get conceptCard {
     final skillId = _session?.focusSkillId;
     if (!isLearning || skillId == null) {
@@ -106,6 +113,11 @@ final class LearningController extends ChangeNotifier {
 
   AttemptAssessment? get lastAssessment => _lastAssessment;
   List<SkillFluency> get fluency => List.unmodifiable(_fluency);
+  List<ReviewRecommendation> get reviewRecommendations =>
+      _retainedMasteryCalculator.recommendReviews(
+        _attempts,
+        now: _clock().toUtc(),
+      );
   MasterySummary get mastery => _mastery;
   CurriculumGraph get curriculumGraph =>
       CurriculumGraph(goals: _contentPack.goals, skills: _contentPack.skills);
@@ -231,6 +243,29 @@ final class LearningController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<bool> startReviewChunk() async {
+    final recommendations = reviewRecommendations;
+    if (recommendations.isEmpty) {
+      return false;
+    }
+    final now = _clock().toUtc();
+    final skillId = recommendations.first.skillId;
+    _session = LearningSession(
+      currentQuestionIndex: 0,
+      focusSkillId: skillId,
+      id: '$_reviewPrefix${_idFactory()}',
+      phase: LearningSessionPhase.review,
+      seed: now.microsecondsSinceEpoch & 0x7fffffff,
+      startedAt: now,
+    );
+    _questionBeganAt = now;
+    _lastCompletedOperation = null;
+    _lastAssessment = null;
+    await _repository.saveSession(_session!);
+    notifyListeners();
+    return true;
+  }
+
   Future<void> revealNextHint() async {
     final session = _session;
     final card = conceptCard;
@@ -341,7 +376,9 @@ final class LearningController extends ChangeNotifier {
           answerDraft: '',
           clearRemediation: true,
           currentQuestionIndex: question.index + 1,
-          phase: LearningSessionPhase.question,
+          phase: session.id.startsWith(_reviewPrefix)
+              ? LearningSessionPhase.review
+              : LearningSessionPhase.question,
         );
       }
       await _repository.saveSession(_session!);

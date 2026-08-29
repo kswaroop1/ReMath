@@ -145,7 +145,7 @@ void main() {
     expect(attempts.single.misconceptionId, isNull);
     expect(
       database.select('SELECT version FROM schema_version').single['version'],
-      4,
+      5,
     );
     await migrated.close();
   });

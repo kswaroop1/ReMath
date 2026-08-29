@@ -10,7 +10,7 @@ final class SqliteProgressRepository implements ProgressRepository {
   }
 
   final CommonDatabase _database;
-  static const _currentSchemaVersion = 4;
+  static const _currentSchemaVersion = 5;
 
   void _migrate() {
     _database.execute('PRAGMA foreign_keys = ON');
@@ -145,6 +145,39 @@ final class SqliteProgressRepository implements ProgressRepository {
           ''')
           ..execute('DROP TABLE active_session_v3')
           ..execute('UPDATE schema_version SET version = 4')
+          ..execute('COMMIT');
+      } catch (_) {
+        _database.execute('ROLLBACK');
+        rethrow;
+      }
+    }
+    if (version < 5) {
+      _database.execute('BEGIN IMMEDIATE');
+      try {
+        _database
+          ..execute('ALTER TABLE active_session RENAME TO active_session_v4')
+          ..execute('''
+            CREATE TABLE active_session (
+              singleton INTEGER NOT NULL PRIMARY KEY CHECK (singleton = 1),
+              session_id TEXT NOT NULL,
+              seed INTEGER NOT NULL,
+              started_at TEXT NOT NULL,
+              current_question_index INTEGER NOT NULL
+                CHECK (current_question_index >= 0),
+              answer_draft TEXT NOT NULL,
+              phase TEXT NOT NULL CHECK (phase IN
+                ('question', 'correction', 'retest', 'learn', 'review')),
+              focus_skill_id TEXT,
+              correction_of_event_id TEXT,
+              revealed_hint_count INTEGER NOT NULL DEFAULT 0
+                CHECK (revealed_hint_count BETWEEN 0 AND 4)
+            ) STRICT
+          ''')
+          ..execute('''
+            INSERT INTO active_session SELECT * FROM active_session_v4
+          ''')
+          ..execute('DROP TABLE active_session_v4')
+          ..execute('UPDATE schema_version SET version = 5')
           ..execute('COMMIT');
       } catch (_) {
         _database.execute('ROLLBACK');

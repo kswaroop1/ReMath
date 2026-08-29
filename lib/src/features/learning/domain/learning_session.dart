@@ -1,4 +1,4 @@
-enum LearningSessionPhase { question, correction, retest, learn }
+enum LearningSessionPhase { question, correction, retest, learn, review }
 
 final class LearningSession {
   const LearningSession({

@@ -128,6 +128,23 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       const SizedBox(height: 32),
+      if (_controller.reviewRecommendations.isNotEmpty) ...[
+        Text(
+          '${_controller.reviewRecommendations.length} '
+          '${_controller.reviewRecommendations.length == 1 ? 'review' : 'reviews'} due',
+          style: Theme.of(context).textTheme.titleLarge,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        for (final recommendation in _controller.reviewRecommendations)
+          Text(recommendation.reason, textAlign: TextAlign.center),
+        const SizedBox(height: 8),
+        FilledButton.tonal(
+          onPressed: _controller.startReviewChunk,
+          child: const Text('Start review chunk'),
+        ),
+        const SizedBox(height: 20),
+      ],
       if (_controller.remediationRecommendation case final recommendation?) ...[
         Text(
           'Suggested review',
@@ -344,6 +361,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ? 'Retest this skill'
               : _controller.isDiagnostic
               ? 'Diagnostic question ${question.index + 1} of 9'
+              : _controller.isReviewing
+              ? 'Review • ${question.operation.label}'
               : 'Question ${question.index + 1} • about $minutes min remaining',
           textAlign: TextAlign.center,
         ),
