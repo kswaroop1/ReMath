@@ -5,7 +5,9 @@ import '../../learning/domain/content_pack.dart';
 import '../../learning/domain/curriculum_graph.dart';
 import '../../learning/domain/diagnostic_placement.dart';
 import '../../learning/domain/fluency.dart';
+import '../../learning/domain/progress_dashboard.dart';
 import '../../learning/domain/progress_repository.dart';
+import '../../learning/domain/retained_mastery.dart';
 import '../../learning/presentation/learning_controller.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -27,6 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
   late final TextEditingController _answerController;
   late final Future<void> _initialised;
   bool _showCurriculum = false;
+  bool _showProgress = false;
+  String? _selectedProgressSkillId;
 
   @override
   void initState() {
@@ -90,6 +94,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             : _buildActiveChunk(context)
                       : _showCurriculum
                       ? _buildCurriculum(context)
+                      : _selectedProgressSkillId != null
+                      ? _buildSkillHistory(context, _selectedProgressSkillId!)
+                      : _showProgress
+                      ? _buildProgressDashboard(context)
                       : _buildOverview(context),
                 ),
               ),
@@ -219,6 +227,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 12),
         OutlinedButton(
+          onPressed: () => setState(() => _showProgress = true),
+          child: const Text('View progress'),
+        ),
+        const SizedBox(height: 12),
+        OutlinedButton(
           onPressed: () => _controller.startLearn('arithmetic.addition'),
           child: const Text('Learn addition'),
         ),
@@ -230,6 +243,142 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     ],
   );
+
+  Widget _buildProgressDashboard(BuildContext context) {
+    final dashboard = _controller.progressDashboard;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Progress dashboard',
+          style: Theme.of(context).textTheme.headlineMedium,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          dashboard.independentAttempts == 0
+              ? 'No independent practice yet'
+              : '${dashboard.independentAttempts} independent • '
+                    '${dashboard.assistedEvents} assisted',
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          _practiceTime(dashboard.totalTime),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 20),
+        for (final skill in dashboard.skills) ...[
+          _buildSkillProgress(context, skill),
+          const SizedBox(height: 12),
+        ],
+        TextButton(
+          onPressed: () => setState(() => _showProgress = false),
+          child: const Text('Back'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSkillProgress(BuildContext context, SkillProgress skill) => Card(
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(skill.label, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          if (skill.independentAttempts == 0)
+            const Text('No evidence yet')
+          else ...[
+            Wrap(
+              spacing: 16,
+              runSpacing: 4,
+              children: [
+                Text('${_percent(skill.knowledgeMastery!)} knowledge'),
+                Text('${_percent(skill.performanceMastery!)} performance'),
+                Text('${_percent(skill.independentAccuracy!)} accuracy'),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(_retentionLabel(skill)),
+            Text(_riskLabel(skill)),
+            Text(skill.reviewExplanation),
+            if (skill.assistedEvents > 0)
+              Text('${skill.assistedEvents} assisted learning event(s)'),
+          ],
+          const SizedBox(height: 8),
+          OutlinedButton(
+            onPressed: () => setState(
+              () => _selectedProgressSkillId = skill.skillId,
+            ),
+            child: Text('View ${skill.label} history'),
+          ),
+        ],
+      ),
+    ),
+  );
+
+  Widget _buildSkillHistory(BuildContext context, String skillId) {
+    final skill = _controller.progressDashboard.skills.singleWhere(
+      (candidate) => candidate.skillId == skillId,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          '${skill.label} history',
+          style: Theme.of(context).textTheme.headlineMedium,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        Text(skill.reviewExplanation, textAlign: TextAlign.center),
+        const SizedBox(height: 20),
+        if (skill.history.isEmpty)
+          const Text('No attempts recorded for this skill.')
+        else
+          for (final entry in skill.history)
+            Card(
+              child: ListTile(
+                title: Text(entry.title),
+                subtitle: Text(entry.explanation),
+              ),
+            ),
+        TextButton(
+          onPressed: () => setState(() => _selectedProgressSkillId = null),
+          child: const Text('Back to progress'),
+        ),
+      ],
+    );
+  }
+
+  String _practiceTime(Duration duration) {
+    if (duration.inMinutes > 0) {
+      return '${duration.inMinutes} min practised';
+    }
+    return '${duration.inSeconds} sec practised';
+  }
+
+  String _retentionLabel(SkillProgress skill) => switch (skill.retentionState) {
+    RetainedMasteryState.unattempted => 'Retention: no evidence',
+    RetainedMasteryState.learning =>
+      'Retention: ${skill.successfulOccasions} of 3 delayed successes',
+    RetainedMasteryState.retained => 'Retention confirmed',
+    RetainedMasteryState.lapsed => 'Retention lapsed',
+  };
+
+  String _riskLabel(SkillProgress skill) {
+    final risk = skill.forgettingRisk;
+    if (risk == null) {
+      return 'Forgetting risk: no evidence';
+    }
+    if (risk >= 1) {
+      return 'Review overdue';
+    }
+    return '${_percent(risk)} forgetting risk';
+  }
+
+  String _percent(double value) => '${(value * 100).round()}%';
 
   Widget _buildCurriculum(BuildContext context) {
     final graph = _controller.curriculumGraph;

@@ -284,6 +284,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('View progress'));
     await tester.tap(find.text('View progress'));
     await tester.pumpAndSettle();
 
@@ -312,6 +313,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('View progress'));
     await tester.tap(find.text('View progress'));
     await tester.pumpAndSettle();
 

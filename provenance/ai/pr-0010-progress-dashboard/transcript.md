@@ -70,3 +70,9 @@ Codex next added widget journeys requiring an explicit progress entry point, an
 honest empty dashboard, separate skill measures, due-review language, and a
 drill-down history containing fluent, incorrect, and assisted events. These
 tests precede the controller and UI behavior that will satisfy them.
+
+Codex then connected the derived progress model to the learning controller and
+added responsive offline dashboard and history views. The screens expose honest
+empty states, practice time, independent/assisted counts, knowledge and
+performance indicators, retention, review risk, and an explanation for every
+recorded event.
