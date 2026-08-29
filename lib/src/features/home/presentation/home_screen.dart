@@ -229,7 +229,10 @@ class _HomeScreenState extends State<HomeScreen> {
         for (final goal in graph.goals) ...[
           Text(goal.title, style: Theme.of(context).textTheme.titleLarge),
           Text(
-            graph.skillsForGoal(goal.id).map((skill) => skill.title).join(' • '),
+            graph
+                .skillsForGoal(goal.id)
+                .map((skill) => skill.title)
+                .join(' • '),
           ),
           const SizedBox(height: 16),
         ],
@@ -251,10 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
     SkillDefinition skill,
     Set<String> mastered,
   ) {
-    final readiness = graph.readinessFor(
-      skill.id,
-      masteredSkillIds: mastered,
-    );
+    final readiness = graph.readinessFor(skill.id, masteredSkillIds: mastered);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),

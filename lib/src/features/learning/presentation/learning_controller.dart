@@ -107,10 +107,8 @@ final class LearningController extends ChangeNotifier {
   AttemptAssessment? get lastAssessment => _lastAssessment;
   List<SkillFluency> get fluency => List.unmodifiable(_fluency);
   MasterySummary get mastery => _mastery;
-  CurriculumGraph get curriculumGraph => CurriculumGraph(
-    goals: _contentPack.goals,
-    skills: _contentPack.skills,
-  );
+  CurriculumGraph get curriculumGraph =>
+      CurriculumGraph(goals: _contentPack.goals, skills: _contentPack.skills);
   Set<String> get masteredSkillIds => _fluency
       .where((skill) => skill.score >= 0.8)
       .map((skill) => skill.operation.skillId)
@@ -126,6 +124,7 @@ final class LearningController extends ChangeNotifier {
         ) ??
         repeated;
   }
+
   String get answerDraft => _session?.answerDraft ?? '';
   List<DiagnosticPlacement> get diagnosticPlacements {
     final sessionId = _latestDiagnosticSessionId;

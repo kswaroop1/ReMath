@@ -49,14 +49,18 @@ final class ContentPackValidator {
           issues.add('Skill ${skill.id} cannot depend on itself.');
         }
         if (!prerequisites.add(prerequisiteId)) {
-          issues.add('Skill ${skill.id} has duplicate prerequisite $prerequisiteId.');
+          issues.add(
+            'Skill ${skill.id} has duplicate prerequisite $prerequisiteId.',
+          );
         }
       }
     }
     for (final skill in pack.skills) {
       for (final prerequisiteId in skill.prerequisiteIds) {
         if (!skillIds.contains(prerequisiteId)) {
-          issues.add('Skill ${skill.id} references missing prerequisite $prerequisiteId.');
+          issues.add(
+            'Skill ${skill.id} references missing prerequisite $prerequisiteId.',
+          );
         }
       }
     }
@@ -121,11 +125,15 @@ final class ContentPackValidator {
         issues.add('Duplicate learning goal id: ${goal.id}.');
       }
       if (goal.skillIds.isEmpty) {
-        issues.add('Learning goal ${goal.id} must reference at least one skill.');
+        issues.add(
+          'Learning goal ${goal.id} must reference at least one skill.',
+        );
       }
       for (final skillId in goal.skillIds) {
         if (!skillIds.contains(skillId)) {
-          issues.add('Learning goal ${goal.id} references missing skill $skillId.');
+          issues.add(
+            'Learning goal ${goal.id} references missing skill $skillId.',
+          );
         }
       }
     }

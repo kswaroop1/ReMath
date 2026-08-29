@@ -45,10 +45,7 @@ void main() {
   test('mastering prerequisites recommends the dependent skill', () {
     final readiness = graph.readinessFor(
       'algebra.linear-equations',
-      masteredSkillIds: {
-        'arithmetic.addition',
-        'arithmetic.subtraction',
-      },
+      masteredSkillIds: {'arithmetic.addition', 'arithmetic.subtraction'},
     );
 
     expect(readiness.isRecommended, isTrue);
@@ -67,14 +64,14 @@ void main() {
   });
 
   test('goals explain which skills contribute to them', () {
-    expect(graph.skillsForGoal('goal.jee-foundation').map((skill) => skill.id), [
-      'arithmetic.subtraction',
-      'algebra.linear-equations',
-    ]);
-    expect(graph.goalsForSkill('algebra.linear-equations').map((goal) => goal.id), [
-      'goal.jee-foundation',
-      'goal.quant-finance',
-    ]);
+    expect(
+      graph.skillsForGoal('goal.jee-foundation').map((skill) => skill.id),
+      ['arithmetic.subtraction', 'algebra.linear-equations'],
+    );
+    expect(
+      graph.goalsForSkill('algebra.linear-equations').map((goal) => goal.id),
+      ['goal.jee-foundation', 'goal.quant-finance'],
+    );
   });
 
   test('remediation selects the first unmet prerequisite from the graph', () {

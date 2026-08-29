@@ -40,13 +40,14 @@ final class CurriculumGraph {
     );
   }
 
-  List<String> recommendedNext({required Set<String> masteredSkillIds}) => skills
-      .where((skill) => !masteredSkillIds.contains(skill.id))
-      .where(
-        (skill) => skill.prerequisiteIds.every(masteredSkillIds.contains),
-      )
-      .map((skill) => skill.id)
-      .toList(growable: false);
+  List<String> recommendedNext({required Set<String> masteredSkillIds}) =>
+      skills
+          .where((skill) => !masteredSkillIds.contains(skill.id))
+          .where(
+            (skill) => skill.prerequisiteIds.every(masteredSkillIds.contains),
+          )
+          .map((skill) => skill.id)
+          .toList(growable: false);
 
   List<SkillDefinition> skillsForGoal(String goalId) {
     final goal = goals.firstWhere(

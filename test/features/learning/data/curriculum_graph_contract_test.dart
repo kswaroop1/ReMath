@@ -51,7 +51,8 @@ String _packSource({
   List<String> additionPrerequisites = const [],
   List<String> subtractionPrerequisites = const ['arithmetic.addition'],
   List<String> goalSkills = const ['arithmetic.subtraction'],
-}) => '''
+}) =>
+    '''
 {
   "schemaVersion": 3,
   "id": "org.remath.graph-test",
