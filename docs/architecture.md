@@ -168,6 +168,23 @@ SQLite schema version 5 extends resumable session state with the `review` phase.
 The migration transactionally rebuilds the constrained active-session table, so
 schema-v1 through schema-v4 progress can resume without weakening validation.
 
+## Explainable progress projection
+
+`ProgressDashboardCalculator` is a pure-Dart read model over immutable attempt
+events. It does not persist scores. For each foundation skill it separates
+independent answers/retests from hints/corrections, then derives accuracy,
+fluency-based performance, delayed retention, next review, and a bounded
+time-to-review forgetting-risk foundation. Knowledge and performance remain
+separate so a correct but slow learner is not told that conceptual evidence and
+time-pressure readiness are identical.
+
+Every source event also becomes a learner-facing history entry that states
+whether it improved independent evidence, reduced it, or recorded assistance
+without raising mastery. Stable event-time and event-ID ordering makes the view
+deterministic across devices. The presentation layer adds curriculum goal
+readiness from `CurriculumGraph`; all values remain available offline and can be
+rebuilt after a future scoring-algorithm change without migrating personal data.
+
 ## Personal progress
 
 The local store is always available and writes immediately. Important actions

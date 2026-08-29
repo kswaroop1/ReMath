@@ -123,3 +123,11 @@ formatter-equivalent wrap without changing behavior.
 Run 33261002441 showed the first manual wrap was incomplete. Diagnostic run
 33261087324 printed the exact chained-call layout from Dart's current formatter;
 Codex applied it verbatim and restored the permanent format check.
+
+## Final verification
+
+CI run 33261206706 passed formatting, fatal warnings and infos, content-pack
+validation, all 157 tests, the secret scan, and the permanent coverage gate. It
+reported 100.00% production line coverage. MP-016 and MP-017 are complete;
+MP-007, MP-008, and MP-014 remain explicitly tracked as broader planned features
+with their delivered arithmetic foundations documented rather than overstated.

@@ -6,7 +6,7 @@ agents:
   - product: OpenAI Codex
     model: not exposed to repository session
 started_at: 2026-08-29T15:25:00Z
-finalized_at: null
+finalized_at: 2026-08-29T15:49:20Z
 scope:
   - MP-016 progress dashboard
   - MP-017 skill history
@@ -19,4 +19,46 @@ excluded_context:
   - hidden system and developer instructions
   - model internal reasoning
   - routine raw tool telemetry unless it changed the implementation
-ci_runs: []
+ci_runs:
+  - id: 33259649391
+    purpose: explainable progress domain red
+    conclusion: failure
+  - id: 33259760954
+    purpose: first domain implementation formatting feedback
+    conclusion: failure
+  - id: 33259840431
+    purpose: dashboard learner journey red
+    conclusion: failure
+  - id: 33259949305
+    purpose: complete implementation formatting feedback
+    conclusion: failure
+  - id: 33260041746
+    purpose: canonical formatter diagnostic
+    conclusion: failure
+  - id: 33260184904
+    purpose: behavioral failure diagnosis
+    conclusion: failure
+  - id: 33260338902
+    purpose: first fully green implementation
+    conclusion: success
+  - id: 33260460500
+    purpose: uncovered-line diagnostic
+    conclusion: failure
+  - id: 33260621179
+    purpose: 100 percent coverage before goal-readiness audit
+    conclusion: success
+  - id: 33260774713
+    purpose: curriculum goal-readiness red
+    conclusion: failure
+  - id: 33260905025
+    purpose: goal-readiness formatting feedback
+    conclusion: failure
+  - id: 33261002441
+    purpose: incomplete manual formatting feedback
+    conclusion: failure
+  - id: 33261087324
+    purpose: exact goal-readiness formatter diagnostic
+    conclusion: failure
+  - id: 33261206706
+    purpose: final implementation and 100 percent coverage
+    conclusion: success

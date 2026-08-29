@@ -27,7 +27,10 @@ prerequisites without blocking exploration, and maps foundation skills to JEE,
 quant-finance, and AI-mathematics goals through an offline curriculum browser.
 Delayed-retention evidence now distinguishes immediate repetition from recall on
 separate occasions, records lapses, and offers resumable review chunks for
-overdue or approaching skills. Cloud synchronisation and downloadable course
+overdue or approaching skills. An offline progress dashboard separates
+knowledge, performance, accuracy, assistance, retention, forgetting risk, and
+goal readiness, with per-skill history explaining how every event affected the
+displayed state. Cloud synchronisation and downloadable course
 packs remain deliberately separated behind interfaces so providers can be added
 without changing the learning engine.
 
