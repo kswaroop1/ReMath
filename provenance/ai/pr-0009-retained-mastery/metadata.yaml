@@ -1,0 +1,22 @@
+schema_version: 1
+pull_request: 9
+title: Add review chunks and retained mastery
+human_owner: kswaroop1
+agents:
+  - product: OpenAI Codex
+    model: not exposed to repository session
+started_at: 2026-08-29T14:30:00Z
+finalized_at: null
+scope:
+  - LX-008 review chunks
+  - CG-008 retention prerequisites
+  - MP-011 delayed-review scheduling
+  - MP-012 delayed mastery confirmation
+  - lapse handling
+  - business-focused TDD
+redactions: []
+excluded_context:
+  - hidden system and developer instructions
+  - model internal reasoning
+  - routine raw tool telemetry unless it changed the implementation
+ci_runs: []
