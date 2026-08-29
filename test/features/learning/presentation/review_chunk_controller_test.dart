@@ -28,7 +28,10 @@ void main() {
     );
     await controller.initialise();
 
-    expect(controller.reviewRecommendations.first.priority, ReviewPriority.overdue);
+    expect(
+      controller.reviewRecommendations.first.priority,
+      ReviewPriority.overdue,
+    );
     expect(await controller.startReviewChunk(), isTrue);
     expect(controller.isReviewing, isTrue);
     expect(controller.currentQuestion?.skillId, 'arithmetic.addition');

@@ -47,16 +47,17 @@ final class RetainedMasteryCalculator {
     Iterable<AttemptEvent> attempts, {
     required DateTime now,
   }) {
-    final evidence = attempts
-        .where(
-          (event) =>
-              event.skillId == skillId && event.kind.contributesToMastery,
-        )
-        .toList(growable: false)
-      ..sort((first, second) {
-        final time = first.occurredAt.compareTo(second.occurredAt);
-        return time != 0 ? time : first.eventId.compareTo(second.eventId);
-      });
+    final evidence =
+        attempts
+            .where(
+              (event) =>
+                  event.skillId == skillId && event.kind.contributesToMastery,
+            )
+            .toList(growable: false)
+          ..sort((first, second) {
+            final time = first.occurredAt.compareTo(second.occurredAt);
+            return time != 0 ? time : first.eventId.compareTo(second.eventId);
+          });
     if (evidence.isEmpty) {
       return RetainedMastery(
         isDue: false,
@@ -82,9 +83,7 @@ final class RetainedMasteryCalculator {
         continue;
       }
       successfulOccasions++;
-      nextReviewAt = event.occurredAt.add(
-        _intervalAfter(successfulOccasions),
-      );
+      nextReviewAt = event.occurredAt.add(_intervalAfter(successfulOccasions));
       state = successfulOccasions >= 3
           ? RetainedMasteryState.retained
           : RetainedMasteryState.learning;
@@ -120,13 +119,7 @@ final class RetainedMasteryCalculator {
     required DateTime now,
   }) {
     final recommendations = ArithmeticOperation.values
-        .map(
-          (operation) => forSkill(
-            operation.skillId,
-            attempts,
-            now: now,
-          ),
-        )
+        .map((operation) => forSkill(operation.skillId, attempts, now: now))
         .where((retention) => retention.nextReviewAt != null)
         .where(
           (retention) =>
@@ -155,21 +148,20 @@ final class RetainedMasteryCalculator {
       if (time != 0) {
         return time;
       }
-      return _operationIndex(first.skillId).compareTo(
-        _operationIndex(second.skillId),
-      );
+      return _operationIndex(
+        first.skillId,
+      ).compareTo(_operationIndex(second.skillId));
     });
     return recommendations;
   }
 
-  Duration _intervalAfter(int successfulOccasions) => switch (
-    successfulOccasions
-  ) {
-    1 => const Duration(hours: 1),
-    2 => const Duration(days: 1),
-    3 => const Duration(days: 3),
-    _ => const Duration(days: 7),
-  };
+  Duration _intervalAfter(int successfulOccasions) =>
+      switch (successfulOccasions) {
+        1 => const Duration(hours: 1),
+        2 => const Duration(days: 1),
+        3 => const Duration(days: 3),
+        _ => const Duration(days: 7),
+      };
 
   String _label(String skillId) =>
       ArithmeticOperationDefinition.fromSkillId(skillId)?.label ?? skillId;

@@ -26,23 +26,19 @@ void main() {
   );
 
   test('immediate repetition cannot masquerade as retained mastery', () {
-    final result = calculator.forSkill(
-      ArithmeticOperation.addition.skillId,
-      [
-        attempt(id: 'first', at: start, correct: true),
-        attempt(
-          id: 'immediate-1',
-          at: start.add(const Duration(minutes: 5)),
-          correct: true,
-        ),
-        attempt(
-          id: 'immediate-2',
-          at: start.add(const Duration(minutes: 10)),
-          correct: true,
-        ),
-      ],
-      now: start.add(const Duration(minutes: 10)),
-    );
+    final result = calculator.forSkill(ArithmeticOperation.addition.skillId, [
+      attempt(id: 'first', at: start, correct: true),
+      attempt(
+        id: 'immediate-1',
+        at: start.add(const Duration(minutes: 5)),
+        correct: true,
+      ),
+      attempt(
+        id: 'immediate-2',
+        at: start.add(const Duration(minutes: 10)),
+        correct: true,
+      ),
+    ], now: start.add(const Duration(minutes: 10)));
 
     expect(result.successfulOccasions, 1);
     expect(result.state, RetainedMasteryState.learning);
@@ -53,15 +49,11 @@ void main() {
   test('three successful delayed occasions confirm retained mastery', () {
     final second = start.add(const Duration(hours: 1));
     final third = second.add(const Duration(days: 1));
-    final result = calculator.forSkill(
-      ArithmeticOperation.addition.skillId,
-      [
-        attempt(id: 'first', at: start, correct: true),
-        attempt(id: 'second', at: second, correct: true),
-        attempt(id: 'third', at: third, correct: true),
-      ],
-      now: third,
-    );
+    final result = calculator.forSkill(ArithmeticOperation.addition.skillId, [
+      attempt(id: 'first', at: start, correct: true),
+      attempt(id: 'second', at: second, correct: true),
+      attempt(id: 'third', at: third, correct: true),
+    ], now: third);
 
     expect(result.successfulOccasions, 3);
     expect(result.state, RetainedMasteryState.retained);
@@ -73,16 +65,12 @@ void main() {
     final second = start.add(const Duration(hours: 1));
     final third = second.add(const Duration(days: 1));
     final lapse = third.add(const Duration(days: 3));
-    final result = calculator.forSkill(
-      ArithmeticOperation.addition.skillId,
-      [
-        attempt(id: 'first', at: start, correct: true),
-        attempt(id: 'second', at: second, correct: true),
-        attempt(id: 'third', at: third, correct: true),
-        attempt(id: 'lapse', at: lapse, correct: false),
-      ],
-      now: lapse,
-    );
+    final result = calculator.forSkill(ArithmeticOperation.addition.skillId, [
+      attempt(id: 'first', at: start, correct: true),
+      attempt(id: 'second', at: second, correct: true),
+      attempt(id: 'third', at: third, correct: true),
+      attempt(id: 'lapse', at: lapse, correct: false),
+    ], now: lapse);
 
     expect(result.state, RetainedMasteryState.lapsed);
     expect(result.successfulOccasions, 0);
@@ -93,49 +81,32 @@ void main() {
 
   test('coached corrections and hints never confirm independent retention', () {
     final due = start.add(const Duration(hours: 1));
-    final result = calculator.forSkill(
-      ArithmeticOperation.addition.skillId,
-      [
-        attempt(id: 'first', at: start, correct: true),
-        attempt(
-          id: 'hint',
-          at: due,
-          correct: false,
-          kind: AttemptKind.hint,
-        ),
-        attempt(
-          id: 'correction',
-          at: due,
-          correct: true,
-          kind: AttemptKind.correction,
-        ),
-        attempt(
-          id: 'retest',
-          at: due,
-          correct: true,
-          kind: AttemptKind.retest,
-        ),
-      ],
-      now: due,
-    );
+    final result = calculator.forSkill(ArithmeticOperation.addition.skillId, [
+      attempt(id: 'first', at: start, correct: true),
+      attempt(id: 'hint', at: due, correct: false, kind: AttemptKind.hint),
+      attempt(
+        id: 'correction',
+        at: due,
+        correct: true,
+        kind: AttemptKind.correction,
+      ),
+      attempt(id: 'retest', at: due, correct: true, kind: AttemptKind.retest),
+    ], now: due);
 
     expect(result.successfulOccasions, 2);
   });
 
   test('review queue prioritises overdue work before approaching review', () {
     final now = start.add(const Duration(days: 4));
-    final recommendations = calculator.recommendReviews(
-      [
-        attempt(id: 'addition', at: start, correct: true),
-        attempt(
-          id: 'subtraction',
-          skillId: ArithmeticOperation.subtraction.skillId,
-          at: now.subtract(const Duration(minutes: 30)),
-          correct: true,
-        ),
-      ],
-      now: now,
-    );
+    final recommendations = calculator.recommendReviews([
+      attempt(id: 'addition', at: start, correct: true),
+      attempt(
+        id: 'subtraction',
+        skillId: ArithmeticOperation.subtraction.skillId,
+        at: now.subtract(const Duration(minutes: 30)),
+        correct: true,
+      ),
+    ], now: now);
 
     expect(recommendations.map((item) => item.skillId), [
       ArithmeticOperation.addition.skillId,
