@@ -116,6 +116,22 @@ operation, excludes correction submissions, and can direct subtraction or
 multiplication learners back to addition as a prerequisite. This deterministic
 foundation will later consume the general curriculum dependency graph.
 
+## Offline learning resources
+
+Content schema version 2 adds original concept cards alongside deterministic
+question templates. A card owns a stable ID and skill ID, concise explanation,
+formula, worked example, common mistake, application, four-level hint ladder,
+and optional HTTPS refresher links. The parser keeps schema-version-1 packs
+readable; validation rejects missing skills, duplicate or unstable card IDs,
+incomplete fields, and unsafe external links.
+
+A Learn chunk persists the selected skill and revealed-hint count. Each hint
+reveal is an idempotent immutable `hint` event, but only independent `answer`
+and `retest` events contribute to mastery or fluency. SQLite schema version 4
+widens the event-kind contract and adds resumable Learn state through a
+transactional table-rebuild migration. Migration failure restores the complete
+version-3 schema.
+
 ## Personal progress
 
 The local store is always available and writes immediately. Important actions
@@ -139,7 +155,8 @@ domain and sync-policy layers.
 
 ## Curriculum content
 
-The app bundles a small foundation pack. Other packs are downloadable, signed,
+The app bundles a foundation pack with arithmetic templates and original
+addition, subtraction, and multiplication concept cards. Other packs are downloadable, signed,
 compressed, independently versioned, cached locally, and safe to delete without
 deleting progress.
 

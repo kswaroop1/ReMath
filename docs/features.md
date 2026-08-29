@@ -54,7 +54,10 @@ Last reviewed: 28 August 2026.
   chunks without imposing one daily session.
 - [ ] **LX-005 — Exact pause and resume.** Persist question, timer, answer draft,
   hint state, and remaining chunk plan.
-- [ ] **LX-006 — Learn chunk.** Introduce one concept and immediate practice.
+- [x] **LX-006 — Learn chunk.** Open an offline concept card directly or from a
+  remediation recommendation, reveal staged help, and retain the active card
+  and revealed state across interruption. Focused practice follows through the
+  existing drill and correction loop.
 - [x] **LX-007 — Drill chunk.** A resumable 15-minute mental-arithmetic drill
   records locally marked answers and advances through generated questions.
 - [ ] **LX-008 — Review chunk.** Spaced retrieval across previously learned skills.
@@ -157,8 +160,9 @@ Last reviewed: 28 August 2026.
 - [x] **QA-020 — Common misconception distractors.** The arithmetic foundation
   derives deduplicated operation-confusion alternatives, excludes correct
   answers, and records stable misconception identifiers for feedback.
-- [ ] **QA-021 — Hint ladder.** Concept cue, method cue, next step, and worked
-  solution with escalating mastery cost.
+- [x] **QA-021 — Hint ladder.** Concept cue, method cue, next step, and worked
+  solution reveal in order; each reveal is immutable assistance evidence and
+  never contributes as unaided mastery.
 - [x] **QA-022 — Correction loop.** An ordinary-drill error is preserved, must be
   corrected, and is followed by a nearby same-operation retest. Both phases and
   drafts resume after interruption; diagnostic placement remains independent.
@@ -187,10 +191,10 @@ Last reviewed: 28 August 2026.
   and derives an accuracy summary from immutable attempts.
 - [x] **MP-003 — Response-time tracking.** Each attempt records response time;
   restarting an interrupted session starts a fresh active timing interval.
-- [ ] **MP-004 — Attempt and correction tracking.** Answer, correction, and retest
+- [x] **MP-004 — Attempt and correction tracking.** Answer, correction, retest,
+  and hint
   events are immutable, typed, and linked without converting an original error
-  into unaided success. Hint and revealed-step evidence remains to complete this
-  feature.
+  or assisted learning into unaided success.
 - [ ] **MP-005 — Error taxonomy.** Arithmetic, algebra, concept, assumption,
   notation, method selection, and careless error.
 - [x] **MP-006 — Fluency score.** Addition, subtraction, and multiplication derive

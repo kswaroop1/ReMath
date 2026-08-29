@@ -6,7 +6,7 @@ agents:
   - product: OpenAI Codex
     model: not exposed to repository session
 started_at: 2026-08-28T23:10:00Z
-finalized_at: null
+finalized_at: 2026-08-29T05:50:00Z
 scope:
   - LX-006 learn chunk
   - QA-021 hint ladder
@@ -19,4 +19,25 @@ excluded_context:
   - hidden system and developer instructions
   - model internal reasoning
   - routine raw tool telemetry unless it changed the implementation
-ci_runs: []
+ci_runs:
+  - id: 33235741857
+    purpose: offline learning-resource contract red
+    conclusion: failure
+  - id: 33235859232
+    purpose: resumable Learn chunk red
+    conclusion: failure
+  - id: 33235997133
+    purpose: learner-journey widget red
+    conclusion: failure
+  - id: 33236257353
+    purpose: first complete green implementation
+    conclusion: success
+  - id: 33236360399
+    purpose: uncovered-line diagnostic
+    conclusion: failure
+  - id: 33236676413
+    purpose: fixture defect diagnosis
+    conclusion: failure
+  - id: 33236772160
+    purpose: permanent final pipeline
+    conclusion: success

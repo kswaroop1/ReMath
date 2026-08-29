@@ -55,3 +55,54 @@ provenance commit precedes any PR #7 production behavior or tests.
   learning resources.
 - Permanent CI retains fatal warnings/infos, secret scanning, and meaningful
   production coverage at or near 100%.
+
+## Implementation continuation
+
+### User
+
+> Why are you always stopping at a step, the spec is clear, just go ahead and implement.
+
+### Assistant
+
+Codex acknowledged that the specification and authorization were already clear
+and continued autonomously through all implementation, CI, coverage,
+documentation, and provenance steps.
+
+## TDD record
+
+### Offline learning-resource contract
+
+The first test-only commit defined complete concept cards, four ordered hint
+levels, skill lookup for remediation, schema-v2 parsing, and rejection of
+missing-skill or non-HTTPS resources. Run 231 failed because those types and
+contracts did not exist. Production then added pure Dart card/hint models,
+schema-v1-compatible parsing, and schema-v2 validation.
+
+### Resumable Learn chunks and evidence
+
+The second test-only commit required starting a Learn chunk, ordered hint
+revelation, immutable `hint` events excluded from mastery, exact interruption
+resume, and a four-step ceiling. Run 233 confirmed red. Production added Learn
+session state, hint events, controller behavior, mastery/fluency exclusion, and
+transactional SQLite schema version 4.
+
+### Learner journey
+
+The third test-only commit required direct Learn entry, remediation-to-card
+navigation, visible card sections, and progressive hint controls. Run 235
+confirmed red. Production added the responsive Learn view and original bundled
+addition, subtraction, and multiplication cards.
+
+## Diagnostics and corrections
+
+- Run 236 stopped at formatting. Run 237 printed the canonical Dart diff;
+  Codex applied it exactly and restored the permanent non-mutating formatter.
+- Run 238 passed 117 tests but reported 99.44% line coverage.
+- Run 239 identified uncovered learner labels, invalid content contracts, and
+  migration rollback. Business and safety tests were added for each.
+- Run 240 stopped at formatting; run 241 supplied the one canonical test diff.
+- Run 242 passed formatting, fatal analysis, content validation, and secret
+  scanning, but one fixture failed because it renamed the skill before trying
+  to replace the original card ID. The fixture construction order was corrected
+  without weakening either assertion.
+- Run 243 passed the permanent pipeline: 120 tests and 100.00% line coverage.
