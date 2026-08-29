@@ -274,6 +274,66 @@ void main() {
     expect(find.text('Review • Addition'), findsOneWidget);
     expect(find.byKey(const Key('questionPrompt')), findsOneWidget);
   });
+
+  testWidgets('opens an honest progress dashboard before practice', (
+    tester,
+  ) async {
+    final repository = InMemoryProgressRepository();
+    await tester.pumpWidget(
+      ReMathApp(contentPack: foundationPackForTest(), repository: repository),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('View progress'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Progress dashboard'), findsOneWidget);
+    expect(find.text('No independent practice yet'), findsOneWidget);
+    expect(find.text('No evidence yet'), findsNWidgets(3));
+  });
+
+  testWidgets('explains skill measures and immutable history offline', (
+    tester,
+  ) async {
+    final repository = InMemoryProgressRepository();
+    await repository.recordAttempt(
+      _attempt('arithmetic.addition', 40, isCorrect: false),
+    );
+    await repository.recordAttempt(
+      _attempt(
+        'arithmetic.addition',
+        41,
+        kind: AttemptKind.correction,
+      ),
+    );
+    await repository.recordAttempt(_attempt('arithmetic.addition', 42));
+    await tester.pumpWidget(
+      ReMathApp(contentPack: foundationPackForTest(), repository: repository),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('View progress'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('2 independent • 1 assisted'), findsOneWidget);
+    expect(find.text('6 sec practised'), findsOneWidget);
+    expect(find.text('47% knowledge'), findsOneWidget);
+    expect(find.text('30% performance'), findsOneWidget);
+    expect(find.text('50% accuracy'), findsOneWidget);
+    expect(find.text('Review overdue'), findsOneWidget);
+
+    await tester.tap(find.text('View Addition history'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Addition history'), findsOneWidget);
+    expect(find.text('Fluent retest'), findsOneWidget);
+    expect(find.text('Coached correction'), findsOneWidget);
+    expect(find.text('Independent answer needs review'), findsOneWidget);
+
+    await tester.tap(find.text('Back to progress'));
+    await tester.pumpAndSettle();
+    expect(find.text('Progress dashboard'), findsOneWidget);
+  });
 }
 
 AttemptEvent _attempt(
@@ -282,10 +342,12 @@ AttemptEvent _attempt(
   int seconds = 2,
   bool isCorrect = true,
   String sessionId = 'diagnostic-placement',
+  AttemptKind kind = AttemptKind.answer,
 }) => AttemptEvent(
   answer: '1',
   eventId: 'event-$sessionId-$index',
   isCorrect: isCorrect,
+  kind: kind,
   occurredAt: DateTime.utc(2026, 8, 28, 8, 0, index),
   questionId: 'question-$index',
   responseTime: Duration(seconds: seconds),

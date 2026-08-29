@@ -63,3 +63,10 @@ GitHub CI run 33259649391 was started against the test-only commit. Codex then
 implemented a pure-Dart calculator which derives every dashboard value and
 history explanation from immutable attempt events; it introduces no persistence
 or network dependency.
+
+### Learner dashboard and history journey — red
+
+Codex next added widget journeys requiring an explicit progress entry point, an
+honest empty dashboard, separate skill measures, due-review language, and a
+drill-down history containing fluent, incorrect, and assisted events. These
+tests precede the controller and UI behavior that will satisfy them.
