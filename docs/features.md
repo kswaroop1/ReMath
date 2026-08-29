@@ -60,7 +60,8 @@ Last reviewed: 29 August 2026.
   existing drill and correction loop.
 - [x] **LX-007 — Drill chunk.** A resumable 15-minute mental-arithmetic drill
   records locally marked answers and advances through generated questions.
-- [ ] **LX-008 — Review chunk.** Spaced retrieval across previously learned skills.
+- [x] **LX-008 — Review chunk.** A resumable focused 15-minute chunk selects the
+  most urgent overdue or approaching previously learned skill.
 - [ ] **LX-009 — Challenge chunk.** Unlabelled, unfamiliar, multi-topic problems.
 - [ ] **LX-010 — Application chunk.** Finance, AI, computing, engineering, or
   robotics problem context.
@@ -103,8 +104,9 @@ Last reviewed: 29 August 2026.
 - [x] **CG-007 — Prerequisite remediation.** Repeated or characteristic errors
   retain their deterministic policy, then use the general graph to recommend the
   first unmet precursor skill.
-- [ ] **CG-008 — Retention prerequisites.** Require delayed success, not only
-  immediate lesson success, before durable mastery.
+- [x] **CG-008 — Retention prerequisites.** Durable mastery requires three
+  successful occasions separated by expanding review intervals; immediate
+  repetition does not advance retained mastery.
 - [ ] **CG-009 — Curriculum map UI.** Foundation delivered: learners can browse
   goals, contributing skills, readiness, gaps, and non-blocking learning paths.
   Rich dependency visualization, strengths, and alternate-path comparison remain.
@@ -208,9 +210,11 @@ Last reviewed: 29 August 2026.
 - [ ] **MP-010 — Confidence calibration score.** Agreement between confidence and
   actual performance.
 - [x] **MP-011 — Spaced-repetition scheduler.** Incorrect skills become immediately
-  due, slow skills return after five minutes, and fluent streaks expand intervals.
-- [ ] **MP-012 — Delayed mastery confirmation.** Multiple successful occasions at
-  expanding intervals.
+  due, slow skills return after five minutes, fluent streaks expand intervals,
+  and the review queue prioritises overdue work before approaching reviews.
+- [x] **MP-012 — Delayed mastery confirmation.** Three independent successful
+  occasions at expanding intervals confirm retention; a later failure records a
+  lapse and makes the skill immediately due.
 - [x] **MP-013 — Interleaving policy.** The foundation scheduler introduces all
   arithmetic operations, then selects due or weakest skills across the mixture.
 - [ ] **MP-014 — Forgetting-risk estimate.** Forecast review need rather than

@@ -6,7 +6,7 @@ agents:
   - product: OpenAI Codex
     model: not exposed to repository session
 started_at: 2026-08-29T14:30:00Z
-finalized_at: null
+finalized_at: 2026-08-29T14:51:36Z
 scope:
   - LX-008 review chunks
   - CG-008 retention prerequisites
@@ -19,4 +19,34 @@ excluded_context:
   - hidden system and developer instructions
   - model internal reasoning
   - routine raw tool telemetry unless it changed the implementation
-ci_runs: []
+ci_runs:
+  - id: 33257877036
+    purpose: acceptance and provenance baseline
+    conclusion: success
+  - id: 33257937508
+    purpose: retained-mastery business rules red
+    conclusion: failure
+  - id: 33258004361
+    purpose: retained-mastery implementation formatting check
+    conclusion: failure
+  - id: 33258081602
+    purpose: review journey and persistence red
+    conclusion: failure
+  - id: 33258172308
+    purpose: complete implementation formatting check
+    conclusion: failure
+  - id: 33258211032
+    purpose: canonical formatter diagnostic
+    conclusion: failure
+  - id: 33258327988
+    purpose: first functionally green implementation
+    conclusion: success
+  - id: 33258423020
+    purpose: uncovered-line diagnostic
+    conclusion: failure
+  - id: 33258563368
+    purpose: migration-test formatting check
+    conclusion: failure
+  - id: 33258657115
+    purpose: complete implementation at 100 percent coverage
+    conclusion: success

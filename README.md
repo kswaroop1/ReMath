@@ -25,9 +25,11 @@ four-level hint ladder; assistance remains separate from unaided mastery. A
 validated schema-v3 curriculum graph now explains readiness, recommends unmet
 prerequisites without blocking exploration, and maps foundation skills to JEE,
 quant-finance, and AI-mathematics goals through an offline curriculum browser.
-Cloud synchronisation and downloadable course packs remain deliberately separated
-behind interfaces so providers can be added without changing the learning
-engine.
+Delayed-retention evidence now distinguishes immediate repetition from recall on
+separate occasions, records lapses, and offers resumable review chunks for
+overdue or approaching skills. Cloud synchronisation and downloadable course
+packs remain deliberately separated behind interfaces so providers can be added
+without changing the learning engine.
 
 ## Platforms
 
