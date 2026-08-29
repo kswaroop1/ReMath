@@ -222,27 +222,30 @@ void main() {
     database.close();
   });
 
-  test('migrates an interrupted schema-four session without losing it', () async {
-    final database = _schemaFourDatabase()
-      ..execute('''
-        INSERT INTO active_session VALUES (
-          1, 'legacy-session', 42, '2026-08-29T10:00:00.000Z', 3,
-          '17', 'question', 'arithmetic.addition', NULL, 0
-        )
-      ''');
+  test(
+    'migrates an interrupted schema-four session without losing it',
+    () async {
+      final database = _schemaFourDatabase()
+        ..execute('''
+          INSERT INTO active_session VALUES (
+            1, 'legacy-session', 42, '2026-08-29T10:00:00.000Z', 3,
+            '17', 'question', 'arithmetic.addition', NULL, 0
+          )
+        ''');
 
-    final migrated = SqliteProgressRepository(database);
-    final session = await migrated.loadSession();
+      final migrated = SqliteProgressRepository(database);
+      final session = await migrated.loadSession();
 
-    expect(session?.id, 'legacy-session');
-    expect(session?.answerDraft, '17');
-    expect(session?.focusSkillId, 'arithmetic.addition');
-    expect(
-      database.select('SELECT version FROM schema_version').single['version'],
-      5,
-    );
-    await migrated.close();
-  });
+      expect(session?.id, 'legacy-session');
+      expect(session?.answerDraft, '17');
+      expect(session?.focusSkillId, 'arithmetic.addition');
+      expect(
+        database.select('SELECT version FROM schema_version').single['version'],
+        5,
+      );
+      await migrated.close();
+    },
+  );
 
   test('a failed review migration restores the schema-four database', () {
     final database = sqlite3.openInMemory()
