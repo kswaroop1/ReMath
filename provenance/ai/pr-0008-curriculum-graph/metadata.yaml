@@ -1,0 +1,23 @@
+schema_version: 1
+pull_request: 8
+title: Add curriculum and prerequisite graph
+human_owner: kswaroop1
+agents:
+  - product: OpenAI Codex
+    model: not exposed to repository session
+started_at: 2026-08-29T06:00:00Z
+finalized_at: null
+scope:
+  - CG-002 prerequisite graph
+  - CG-006 unlock policy foundation
+  - CG-007 general prerequisite remediation
+  - CG-009 curriculum navigation foundation
+  - CG-010 goal-to-syllabus mapping foundation
+  - schema-v3 content contract
+  - business-focused TDD
+redactions: []
+excluded_context:
+  - hidden system and developer instructions
+  - model internal reasoning
+  - routine raw tool telemetry unless it changed the implementation
+ci_runs: []
