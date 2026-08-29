@@ -291,6 +291,8 @@ void main() {
     expect(find.text('Progress dashboard'), findsOneWidget);
     expect(find.text('No independent practice yet'), findsOneWidget);
     expect(find.text('No evidence yet'), findsNWidgets(3));
+    expect(find.text('Goal readiness'), findsOneWidget);
+    expect(find.text('JEE foundation: 0 of 3 skills ready'), findsOneWidget);
 
     await tester.tap(find.text('View Addition history'));
     await tester.pumpAndSettle();

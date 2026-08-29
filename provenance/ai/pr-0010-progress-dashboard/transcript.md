@@ -102,3 +102,11 @@ learner-facing branches: dashboard back navigation, empty history, minute-scale
 practice time, retained/lapsed labels, and an approaching-review risk label.
 Codex restored the permanent 90% merge floor and added characterization journeys
 asserting those meaningful states, with 100% retained as the engineering target.
+
+### Goal readiness — red
+
+Before finalizing MP-016, Codex compared the implementation with the numbered
+feature wording and found that goal readiness was not yet visible on the new
+dashboard. A final business test therefore requires the JEE goal to state how
+many contributing foundation skills are ready before the production view is
+added.
