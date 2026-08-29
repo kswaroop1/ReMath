@@ -49,5 +49,12 @@ risk.
 
 ## Red–green implementation record
 
-To be appended chronologically as tests, CI results, implementation, review,
-and corrective work occur.
+### Explainable progress domain — red
+
+Codex first added business examples requiring an honest empty state, strict
+separation of assistance from independent evidence, separate knowledge and
+performance indicators, increasing forgetting risk, lapse explanations, and
+deterministic history. The local environment did not contain Flutter (`flutter:
+command not found`), so the intended missing-domain failure is delegated to the
+unchanged GitHub CI environment and will be recorded below before production
+implementation is published.
