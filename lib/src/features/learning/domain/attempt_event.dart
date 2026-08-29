@@ -1,4 +1,9 @@
-enum AttemptKind { answer, correction, retest }
+enum AttemptKind { answer, correction, retest, hint }
+
+extension AttemptKindEvidence on AttemptKind {
+  bool get contributesToMastery =>
+      this == AttemptKind.answer || this == AttemptKind.retest;
+}
 
 final class AttemptEvent {
   const AttemptEvent({

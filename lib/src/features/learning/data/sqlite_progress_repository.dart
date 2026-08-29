@@ -10,7 +10,7 @@ final class SqliteProgressRepository implements ProgressRepository {
   }
 
   final CommonDatabase _database;
-  static const _currentSchemaVersion = 3;
+  static const _currentSchemaVersion = 4;
 
   void _migrate() {
     _database.execute('PRAGMA foreign_keys = ON');
@@ -94,6 +94,63 @@ final class SqliteProgressRepository implements ProgressRepository {
         rethrow;
       }
     }
+    if (version < 4) {
+      _database.execute('BEGIN IMMEDIATE');
+      try {
+        _database
+          ..execute('ALTER TABLE attempt_events RENAME TO attempt_events_v3')
+          ..execute('''
+            CREATE TABLE attempt_events (
+              event_id TEXT NOT NULL PRIMARY KEY,
+              session_id TEXT NOT NULL,
+              question_id TEXT NOT NULL,
+              answer TEXT NOT NULL,
+              is_correct INTEGER NOT NULL CHECK (is_correct IN (0, 1)),
+              response_ms INTEGER NOT NULL CHECK (response_ms >= 0),
+              occurred_at TEXT NOT NULL,
+              skill_id TEXT NOT NULL,
+              event_kind TEXT NOT NULL CHECK (event_kind IN
+                ('answer', 'correction', 'retest', 'hint')),
+              related_event_id TEXT,
+              misconception_id TEXT
+            ) STRICT
+          ''')
+          ..execute('''
+            INSERT INTO attempt_events SELECT * FROM attempt_events_v3
+          ''')
+          ..execute('DROP TABLE attempt_events_v3')
+          ..execute('ALTER TABLE active_session RENAME TO active_session_v3')
+          ..execute('''
+            CREATE TABLE active_session (
+              singleton INTEGER NOT NULL PRIMARY KEY CHECK (singleton = 1),
+              session_id TEXT NOT NULL,
+              seed INTEGER NOT NULL,
+              started_at TEXT NOT NULL,
+              current_question_index INTEGER NOT NULL
+                CHECK (current_question_index >= 0),
+              answer_draft TEXT NOT NULL,
+              phase TEXT NOT NULL CHECK (phase IN
+                ('question', 'correction', 'retest', 'learn')),
+              focus_skill_id TEXT,
+              correction_of_event_id TEXT,
+              revealed_hint_count INTEGER NOT NULL DEFAULT 0
+                CHECK (revealed_hint_count BETWEEN 0 AND 4)
+            ) STRICT
+          ''')
+          ..execute('''
+            INSERT INTO active_session (
+              singleton, session_id, seed, started_at, current_question_index,
+              answer_draft, phase, focus_skill_id, correction_of_event_id
+            ) SELECT * FROM active_session_v3
+          ''')
+          ..execute('DROP TABLE active_session_v3')
+          ..execute('UPDATE schema_version SET version = 4')
+          ..execute('COMMIT');
+      } catch (_) {
+        _database.execute('ROLLBACK');
+        rethrow;
+      }
+    }
   }
 
   @override
@@ -129,6 +186,7 @@ final class SqliteProgressRepository implements ProgressRepository {
       focusSkillId: row['focus_skill_id'] as String?,
       id: row['session_id'] as String,
       phase: LearningSessionPhase.values.byName(row['phase'] as String),
+      revealedHintCount: row['revealed_hint_count'] as int,
       seed: row['seed'] as int,
       startedAt: DateTime.parse(row['started_at'] as String).toUtc(),
     );
@@ -167,8 +225,9 @@ final class SqliteProgressRepository implements ProgressRepository {
       '''
       INSERT INTO active_session (
         singleton, session_id, seed, started_at, current_question_index,
-        answer_draft, phase, focus_skill_id, correction_of_event_id
-      ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?)
+        answer_draft, phase, focus_skill_id, correction_of_event_id,
+        revealed_hint_count
+      ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(singleton) DO UPDATE SET
         session_id = excluded.session_id,
         seed = excluded.seed,
@@ -178,6 +237,7 @@ final class SqliteProgressRepository implements ProgressRepository {
         phase = excluded.phase,
         focus_skill_id = excluded.focus_skill_id,
         correction_of_event_id = excluded.correction_of_event_id
+        , revealed_hint_count = excluded.revealed_hint_count
       ''',
       [
         session.id,
@@ -188,6 +248,7 @@ final class SqliteProgressRepository implements ProgressRepository {
         session.phase.name,
         session.focusSkillId,
         session.correctionOfEventId,
+        session.revealedHintCount,
       ],
     );
   }
