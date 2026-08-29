@@ -227,11 +227,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 12),
         OutlinedButton(
-          onPressed: () => setState(() => _showProgress = true),
-          child: const Text('View progress'),
-        ),
-        const SizedBox(height: 12),
-        OutlinedButton(
           onPressed: () => _controller.startLearn('arithmetic.addition'),
           child: const Text('Learn addition'),
         ),
@@ -239,6 +234,11 @@ class _HomeScreenState extends State<HomeScreen> {
         FilledButton(
           onPressed: _controller.startChunk,
           child: const Text('Start 15-minute drill'),
+        ),
+        const SizedBox(height: 12),
+        OutlinedButton(
+          onPressed: () => setState(() => _showProgress = true),
+          child: const Text('View progress'),
         ),
       ],
     ],

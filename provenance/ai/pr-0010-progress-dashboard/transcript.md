@@ -85,3 +85,11 @@ canonical formatter diff in run 33260041746. The resulting changes were applied
 verbatim, the permanent non-mutating format gate was restored, and Flutter
 3.47's generated analyzer exclusion for `build/**` was retained to prevent
 `flutter pub get` from dirtying the checkout.
+
+CI run 33260184904 then passed formatting, fatal analysis, content validation,
+and secret scanning before exposing three domain expectation mismatches and a
+regression where the new home action displaced the primary drill action below
+the default test viewport. Codex preserved the business expectations: exact
+full mastery is normalized to 100%, due language explicitly says overdue,
+ordinary failed answers remain ordinary answers in history, and the secondary
+progress action was moved below the primary drill action.

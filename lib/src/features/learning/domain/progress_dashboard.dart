@@ -134,12 +134,15 @@ final class ProgressDashboardCalculator {
         : fluency.fluentAttempts / independent.length;
     final knowledge = accuracy == null
         ? null
+        : accuracy == 1 && retentionProgress == 1 && fluentRatio == 1
+        ? 1.0
         : ((accuracy * 0.7) + (retentionProgress * 0.2) + (fluentRatio * 0.1))
               .clamp(0.0, 1.0);
+    final forgettingRisk = _forgettingRisk(independent, retention, now);
 
     return SkillProgress(
       assistedEvents: assisted,
-      forgettingRisk: _forgettingRisk(independent, retention, now),
+      forgettingRisk: forgettingRisk,
       history: _history(events),
       independentAccuracy: accuracy,
       independentAttempts: independent.length,
@@ -148,7 +151,9 @@ final class ProgressDashboardCalculator {
       nextReviewAt: retention.nextReviewAt,
       performanceMastery: independent.isEmpty ? null : fluency.score,
       retentionState: retention.state,
-      reviewExplanation: retention.reason,
+      reviewExplanation: retention.isDue
+          ? 'Review is overdue. ${retention.reason}'
+          : retention.reason,
       skillId: operation.skillId,
       successfulOccasions: retention.successfulOccasions,
     );
@@ -226,7 +231,7 @@ final class ProgressDashboardCalculator {
             'This independent result lowered accuracy and made review more urgent.',
         impact: ProgressImpact.reduced,
         occurredAt: event.occurredAt,
-        title: isRetest
+        title: event.kind == AttemptKind.retest
             ? 'Retest needs review'
             : 'Independent answer needs review',
       );
