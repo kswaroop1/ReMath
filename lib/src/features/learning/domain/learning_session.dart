@@ -1,4 +1,4 @@
-enum LearningSessionPhase { question, correction, retest }
+enum LearningSessionPhase { question, correction, retest, learn }
 
 final class LearningSession {
   const LearningSession({
@@ -10,6 +10,7 @@ final class LearningSession {
     this.correctionOfEventId,
     this.focusSkillId,
     this.phase = LearningSessionPhase.question,
+    this.revealedHintCount = 0,
   });
 
   static const duration = Duration(minutes: 15);
@@ -20,6 +21,7 @@ final class LearningSession {
   final String? focusSkillId;
   final String id;
   final LearningSessionPhase phase;
+  final int revealedHintCount;
   final int seed;
   final DateTime startedAt;
 
@@ -29,6 +31,7 @@ final class LearningSession {
     String? correctionOfEventId,
     String? focusSkillId,
     LearningSessionPhase? phase,
+    int? revealedHintCount,
     bool clearRemediation = false,
   }) => LearningSession(
     answerDraft: answerDraft ?? this.answerDraft,
@@ -39,6 +42,7 @@ final class LearningSession {
     focusSkillId: clearRemediation ? null : focusSkillId ?? this.focusSkillId,
     id: id,
     phase: phase ?? this.phase,
+    revealedHintCount: revealedHintCount ?? this.revealedHintCount,
     seed: seed,
     startedAt: startedAt,
   );

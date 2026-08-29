@@ -83,7 +83,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.all(24),
                 child: SingleChildScrollView(
                   child: _controller.hasActiveSession
-                      ? _buildActiveChunk(context)
+                      ? _controller.isLearning
+                            ? _buildLearnChunk(context)
+                            : _buildActiveChunk(context)
                       : _buildOverview(context),
                 ),
               ),
@@ -130,6 +132,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 8),
         Text(recommendation.reason, textAlign: TextAlign.center),
+        const SizedBox(height: 8),
+        FilledButton.tonal(
+          onPressed: () =>
+              _controller.startLearn(recommendation.recommendedSkillId),
+          child: Text(
+            'Review ${_skillLabel(recommendation.recommendedSkillId)}',
+          ),
+        ),
         const SizedBox(height: 20),
       ],
       if (_controller.hasEndOfChunkChoices) ...[
@@ -182,6 +192,11 @@ class _HomeScreenState extends State<HomeScreen> {
           child: const Text('Find my starting point'),
         ),
         const SizedBox(height: 12),
+        OutlinedButton(
+          onPressed: () => _controller.startLearn('arithmetic.addition'),
+          child: const Text('Learn addition'),
+        ),
+        const SizedBox(height: 12),
         FilledButton(
           onPressed: _controller.startChunk,
           child: const Text('Start 15-minute drill'),
@@ -189,6 +204,57 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     ],
   );
+
+  Widget _buildLearnChunk(BuildContext context) {
+    final card = _controller.conceptCard!;
+    final hints = _controller.revealedHints;
+    final nextLevel = hints.length < HintLevel.values.length
+        ? HintLevel.values[hints.length]
+        : null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          card.title,
+          style: Theme.of(context).textTheme.headlineMedium,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 12),
+        Text(card.summary, textAlign: TextAlign.center),
+        const SizedBox(height: 20),
+        Text('Formula', style: Theme.of(context).textTheme.titleMedium),
+        Text(card.formula),
+        const SizedBox(height: 16),
+        Text('Worked example', style: Theme.of(context).textTheme.titleMedium),
+        Text(card.workedExample),
+        const SizedBox(height: 16),
+        Text('Common mistake', style: Theme.of(context).textTheme.titleMedium),
+        Text(card.commonMistake),
+        const SizedBox(height: 16),
+        Text(
+          'When this is useful',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        Text(card.application),
+        for (final hint in hints) ...[
+          const SizedBox(height: 12),
+          Text(hint.text),
+        ],
+        if (nextLevel != null) ...[
+          const SizedBox(height: 20),
+          FilledButton.tonal(
+            onPressed: _controller.revealNextHint,
+            child: Text('Show ${_hintLabel(nextLevel)} hint'),
+          ),
+        ],
+        const SizedBox(height: 20),
+        FilledButton(
+          onPressed: _controller.finishChunk,
+          child: const Text('Finish learning'),
+        ),
+      ],
+    );
+  }
 
   Widget _buildActiveChunk(BuildContext context) {
     final question = _controller.currentQuestion!;
@@ -277,4 +343,15 @@ class _HomeScreenState extends State<HomeScreen> {
     DiagnosticPlacementLevel.practiseSpeed => 'Practise speed',
     DiagnosticPlacementLevel.readyToProgress => 'Ready to progress',
   };
+
+  String _hintLabel(HintLevel level) => switch (level) {
+    HintLevel.concept => 'concept',
+    HintLevel.method => 'method',
+    HintLevel.nextStep => 'next-step',
+    HintLevel.workedSolution => 'worked-solution',
+  };
+
+  String _skillLabel(String skillId) =>
+      ArithmeticOperationDefinition.fromSkillId(skillId)?.label.toLowerCase() ??
+      'this skill';
 }

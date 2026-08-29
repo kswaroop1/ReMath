@@ -125,7 +125,7 @@ void main() {
     expect(attempts.single.misconceptionId, isNull);
     expect(
       database.select('SELECT version FROM schema_version').single['version'],
-      3,
+      4,
     );
     await migrated.close();
   });
@@ -175,6 +175,29 @@ void main() {
     expect(
       database.select('SELECT version FROM schema_version').single['version'],
       2,
+    );
+    database.close();
+  });
+
+  test('a failed Learn-state migration rolls back schema version three', () {
+    final database = sqlite3.openInMemory()
+      ..execute('CREATE TABLE schema_version (version INTEGER NOT NULL) STRICT')
+      ..execute('INSERT INTO schema_version VALUES (3)')
+      ..execute('CREATE TABLE attempt_events (event_id TEXT) STRICT');
+
+    expect(
+      () => SqliteProgressRepository(database),
+      throwsA(isA<SqliteException>()),
+    );
+    expect(
+      database.select('SELECT version FROM schema_version').single['version'],
+      3,
+    );
+    expect(
+      database.select(
+        "SELECT name FROM sqlite_master WHERE name = 'attempt_events'",
+      ),
+      isNotEmpty,
     );
     database.close();
   });

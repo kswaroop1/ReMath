@@ -63,6 +63,27 @@ final class LearningController extends ChangeNotifier {
   bool get isBusy => _isBusy;
   bool get isCorrecting => _session?.phase == LearningSessionPhase.correction;
   bool get isRetesting => _session?.phase == LearningSessionPhase.retest;
+  bool get isLearning => _session?.phase == LearningSessionPhase.learn;
+  ConceptCard? get conceptCard {
+    final skillId = _session?.focusSkillId;
+    if (!isLearning || skillId == null) {
+      return null;
+    }
+    return _contentPack.conceptCardFor(skillId);
+  }
+
+  List<RevealedHint> get revealedHints {
+    final card = conceptCard;
+    final count = _session?.revealedHintCount ?? 0;
+    if (card == null) {
+      return const [];
+    }
+    return HintLevel.values
+        .take(count)
+        .map(card.hints.reveal)
+        .toList(growable: false);
+  }
+
   CorrectionPrompt? get correctionPrompt {
     final session = _session;
     final question = currentQuestion;
@@ -172,6 +193,54 @@ final class LearningController extends ChangeNotifier {
     _lastCompletedOperation = null;
     _lastAssessment = null;
     await _repository.saveSession(_session!);
+    notifyListeners();
+  }
+
+  Future<void> startLearn(String skillId) async {
+    final now = _clock().toUtc();
+    _contentPack.conceptCardFor(skillId);
+    _session = LearningSession(
+      currentQuestionIndex: 0,
+      focusSkillId: skillId,
+      id: _idFactory(),
+      phase: LearningSessionPhase.learn,
+      seed: now.microsecondsSinceEpoch & 0x7fffffff,
+      startedAt: now,
+    );
+    _questionBeganAt = now;
+    _lastCompletedOperation = null;
+    _lastAssessment = null;
+    await _repository.saveSession(_session!);
+    notifyListeners();
+  }
+
+  Future<void> revealNextHint() async {
+    final session = _session;
+    final card = conceptCard;
+    if (session == null || card == null || session.revealedHintCount >= 4) {
+      return;
+    }
+    final level = HintLevel.values[session.revealedHintCount];
+    final now = _clock().toUtc();
+    await _repository.recordAttempt(
+      AttemptEvent(
+        answer: level.name,
+        eventId: _idFactory(),
+        isCorrect: false,
+        kind: AttemptKind.hint,
+        occurredAt: now,
+        questionId: card.id,
+        responseTime: now.difference(_questionBeganAt ?? now),
+        sessionId: session.id,
+        skillId: card.skillId,
+      ),
+    );
+    _attempts = await _repository.loadAttempts();
+    _session = session.copyWith(
+      revealedHintCount: session.revealedHintCount + 1,
+    );
+    await _repository.saveSession(_session!);
+    _recalculateProgress();
     notifyListeners();
   }
 

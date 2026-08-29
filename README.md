@@ -19,7 +19,9 @@ local marking, immutable progress events, adaptive fluency scheduling, resumable
 15-minute drills, and an offline arithmetic diagnostic with independent,
 explainable placement for addition, subtraction, and multiplication. Incorrect
 drill answers now require a persisted correction and same-skill retest, while
-repeated errors produce an offline prerequisite-review suggestion. Cloud
+repeated errors produce an offline prerequisite-review suggestion. The same
+recommendation can now open an offline concept card with a resumable
+four-level hint ladder; assistance remains separate from unaided mastery. Cloud
 synchronisation and downloadable course packs remain deliberately separated
 behind interfaces so providers can be added without changing the learning
 engine.
@@ -58,6 +60,7 @@ generated changes before committing them.
 - [ADR 0001: local progress persistence](docs/adr/0001-local-progress-persistence.md)
 - [ADR 0002: adaptive fluency scheduling](docs/adr/0002-adaptive-fluency-scheduling.md)
 - [Numbered feature register](docs/features.md)
+- [Delivery roadmap](docs/roadmap.md)
 - [Testing strategy](docs/testing.md)
 - [Releases and versioning](docs/releases.md)
 - [Content-pack format](docs/content-packs.md)
