@@ -81,7 +81,10 @@ void main() {
       LearningSession(
         answerDraft: '22',
         currentQuestionIndex: 7,
+        focusSkillId: 'arithmetic.addition',
         id: 'second',
+        phase: LearningSessionPhase.learn,
+        revealedHintCount: 2,
         seed: 2,
         startedAt: DateTime.utc(2026, 8, 27, 9),
       ),
@@ -92,6 +95,9 @@ void main() {
     expect(restored?.seed, 2);
     expect(restored?.currentQuestionIndex, 7);
     expect(restored?.answerDraft, '22');
+    expect(restored?.focusSkillId, 'arithmetic.addition');
+    expect(restored?.phase, LearningSessionPhase.learn);
+    expect(restored?.revealedHintCount, 2);
     expect(restored?.startedAt, DateTime.utc(2026, 8, 27, 9));
     await repository.close();
   });

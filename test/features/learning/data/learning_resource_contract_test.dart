@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/data/content_pack_parser.dart';
 import 'package:remath/src/features/learning/data/content_pack_validator.dart';
+import 'package:remath/src/features/learning/domain/content_pack.dart';
 
 void main() {
   test('authors can publish a complete offline concept card', () {
@@ -53,6 +54,43 @@ void main() {
     final issues = const ContentPackValidator().validate(pack);
     expect(issues, contains(contains('missing skill')));
     expect(issues, contains(contains('HTTPS')));
+  });
+
+  test('external refresher links must be strings', () {
+    expect(
+      () => const ContentPackParser().parse(
+        _sourceWithLinks(const []).replaceFirst(
+          '"externalLinks": []',
+          '"externalLinks": [42]',
+        ),
+      ),
+      throwsFormatException,
+    );
+  });
+
+  test('concept card identifiers must be stable and unique', () {
+    final source = _sourceWithLinks(const [])
+        .replaceAll('arithmetic.subtraction', 'arithmetic.addition')
+        .replaceFirst(
+          '"id": "card.arithmetic.subtraction.foundation"',
+          '"id": "Bad Card"',
+        );
+    final first = const ContentPackParser().parse(source);
+    final duplicated = first.conceptCards.single;
+    final pack = ContentPack(
+      conceptCards: [duplicated, duplicated],
+      id: first.id,
+      license: first.license,
+      schemaVersion: first.schemaVersion,
+      skills: first.skills,
+      templates: first.templates,
+      title: first.title,
+      version: first.version,
+    );
+
+    final issues = const ContentPackValidator().validate(pack);
+    expect(issues, contains(contains('Invalid concept card id')));
+    expect(issues, contains(contains('Duplicate concept card id')));
   });
 }
 

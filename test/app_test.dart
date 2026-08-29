@@ -194,6 +194,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('Think about addition'), findsOneWidget);
     expect(find.text('Show method hint'), findsOneWidget);
+
+    await tester.tap(find.text('Show method hint'));
+    await tester.pumpAndSettle();
+    expect(find.text('Show next-step hint'), findsOneWidget);
+    await tester.tap(find.text('Show next-step hint'));
+    await tester.pumpAndSettle();
+    expect(find.text('Show worked-solution hint'), findsOneWidget);
   });
 
   testWidgets('starts an offline Learn chunk without remediation', (
