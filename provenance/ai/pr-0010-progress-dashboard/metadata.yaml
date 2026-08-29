@@ -1,0 +1,22 @@
+schema_version: 1
+pull_request: 10
+title: Add progress dashboard and skill history
+human_owner: kswaroop1
+agents:
+  - product: OpenAI Codex
+    model: not exposed to repository session
+started_at: 2026-08-29T15:25:00Z
+finalized_at: null
+scope:
+  - MP-016 progress dashboard
+  - MP-017 skill history
+  - MP-007 knowledge-mastery foundation
+  - MP-008 performance-mastery foundation
+  - MP-014 forgetting-risk foundation
+  - business-focused TDD
+redactions: []
+excluded_context:
+  - hidden system and developer instructions
+  - model internal reasoning
+  - routine raw tool telemetry unless it changed the implementation
+ci_runs: []
