@@ -72,6 +72,26 @@ void main() {
     },
   );
 
+  test('persists and restores an interrupted focused review chunk', () async {
+    final session = LearningSession(
+      answerDraft: '12',
+      currentQuestionIndex: 2,
+      focusSkillId: 'arithmetic.addition',
+      id: 'review-session',
+      phase: LearningSessionPhase.review,
+      seed: 42,
+      startedAt: DateTime.utc(2026, 8, 29, 10),
+    );
+
+    await repository.saveSession(session);
+    final restored = await repository.loadSession();
+
+    expect(restored?.phase, LearningSessionPhase.review);
+    expect(restored?.focusSkillId, 'arithmetic.addition');
+    expect(restored?.answerDraft, '12');
+    expect(restored?.currentQuestionIndex, 2);
+  });
+
   test(
     'completing another session does not remove the active session',
     () async {
@@ -125,7 +145,7 @@ void main() {
     expect(attempts.single.misconceptionId, isNull);
     expect(
       database.select('SELECT version FROM schema_version').single['version'],
-      4,
+      5,
     );
     await migrated.close();
   });
@@ -201,4 +221,86 @@ void main() {
     );
     database.close();
   });
+
+  test(
+    'migrates an interrupted schema-four session without losing it',
+    () async {
+      final database = _schemaFourDatabase()
+        ..execute('''
+          INSERT INTO active_session VALUES (
+            1, 'legacy-session', 42, '2026-08-29T10:00:00.000Z', 3,
+            '17', 'question', 'arithmetic.addition', NULL, 0
+          )
+        ''');
+
+      final migrated = SqliteProgressRepository(database);
+      final session = await migrated.loadSession();
+
+      expect(session?.id, 'legacy-session');
+      expect(session?.answerDraft, '17');
+      expect(session?.focusSkillId, 'arithmetic.addition');
+      expect(
+        database.select('SELECT version FROM schema_version').single['version'],
+        5,
+      );
+      await migrated.close();
+    },
+  );
+
+  test('a failed review migration restores the schema-four database', () {
+    final database = sqlite3.openInMemory()
+      ..execute('CREATE TABLE schema_version (version INTEGER NOT NULL) STRICT')
+      ..execute('INSERT INTO schema_version VALUES (4)')
+      ..execute('CREATE TABLE active_session (singleton INTEGER) STRICT');
+
+    expect(
+      () => SqliteProgressRepository(database),
+      throwsA(isA<SqliteException>()),
+    );
+    expect(
+      database.select('SELECT version FROM schema_version').single['version'],
+      4,
+    );
+    expect(
+      database.select(
+        "SELECT name FROM sqlite_master WHERE name = 'active_session'",
+      ),
+      isNotEmpty,
+    );
+    database.close();
+  });
 }
+
+Database _schemaFourDatabase() => sqlite3.openInMemory()
+  ..execute('CREATE TABLE schema_version (version INTEGER NOT NULL) STRICT')
+  ..execute('INSERT INTO schema_version VALUES (4)')
+  ..execute('''
+    CREATE TABLE attempt_events (
+      event_id TEXT NOT NULL PRIMARY KEY,
+      session_id TEXT NOT NULL,
+      question_id TEXT NOT NULL,
+      answer TEXT NOT NULL,
+      is_correct INTEGER NOT NULL,
+      response_ms INTEGER NOT NULL,
+      occurred_at TEXT NOT NULL,
+      skill_id TEXT NOT NULL,
+      event_kind TEXT NOT NULL,
+      related_event_id TEXT,
+      misconception_id TEXT
+    ) STRICT
+  ''')
+  ..execute('''
+    CREATE TABLE active_session (
+      singleton INTEGER NOT NULL PRIMARY KEY CHECK (singleton = 1),
+      session_id TEXT NOT NULL,
+      seed INTEGER NOT NULL,
+      started_at TEXT NOT NULL,
+      current_question_index INTEGER NOT NULL,
+      answer_draft TEXT NOT NULL,
+      phase TEXT NOT NULL CHECK (phase IN
+        ('question', 'correction', 'retest', 'learn')),
+      focus_skill_id TEXT,
+      correction_of_event_id TEXT,
+      revealed_hint_count INTEGER NOT NULL DEFAULT 0
+    ) STRICT
+  ''');

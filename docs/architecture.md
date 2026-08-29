@@ -148,6 +148,26 @@ widens the event-kind contract and adds resumable Learn state through a
 transactional table-rebuild migration. Migration failure restores the complete
 version-3 schema.
 
+## Retained mastery and review chunks
+
+`RetainedMasteryCalculator` derives retention entirely from immutable attempt
+events. Only independent answers and retests count. The first correct occasion
+schedules review after one hour; subsequent on-time successes expand the
+interval to one day, three days, and then seven days. Correct repetitions before
+the due instant remain useful fluency evidence but do not advance retained
+mastery. Three delayed successful occasions confirm retention.
+
+Any later incorrect mastery event records a lapse, resets delayed occasions,
+and makes the skill immediately due. The review queue selects overdue skills
+first and then reviews approaching within 24 hours, with a learner-facing reason
+for each recommendation. A review chunk remains a normal 15-minute focused
+assessment: its answers are immutable events and use the existing correction
+and retest path.
+
+SQLite schema version 5 extends resumable session state with the `review` phase.
+The migration transactionally rebuilds the constrained active-session table, so
+schema-v1 through schema-v4 progress can resume without weakening validation.
+
 ## Personal progress
 
 The local store is always available and writes immediately. Important actions
