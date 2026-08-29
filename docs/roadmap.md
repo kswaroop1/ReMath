@@ -57,6 +57,19 @@ Implement **MP-016** and **MP-017**, with foundations for **MP-007**, **MP-008**
 and **MP-014**: an explainable view of attempts, accuracy, fluency, assistance,
 retention, and why each skill recommendation or score changed.
 
+Learner-facing acceptance criteria:
+
+- The dashboard distinguishes independent attempts from coached corrections and
+  hints, and never presents assisted work as independent mastery.
+- Every arithmetic skill shows accuracy, fluency, retained evidence, review
+  timing, and an explainable knowledge/performance indicator.
+- Forgetting risk rises predictably as a scheduled review approaches and is
+  explicit when overdue; an unattempted skill is shown as having no evidence.
+- A learner can open a skill history and understand how each answer, retest,
+  correction, or hint affected—or did not affect—the displayed progress.
+- Empty and partially populated histories are honest, deterministic, available
+  offline, and derived without mutating persisted attempt events.
+
 ## Intended product sequence
 
 1. Diagnose a learner's current foundation.

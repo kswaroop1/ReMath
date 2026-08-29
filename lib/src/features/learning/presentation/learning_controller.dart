@@ -14,6 +14,7 @@ import '../domain/diagnostic_placement.dart';
 import '../domain/fluency.dart';
 import '../domain/learning_session.dart';
 import '../domain/mastery_summary.dart';
+import '../domain/progress_dashboard.dart';
 import '../domain/progress_repository.dart';
 import '../domain/remediation_policy.dart';
 import '../domain/retained_mastery.dart';
@@ -28,6 +29,8 @@ final class LearningController extends ChangeNotifier {
     ArithmeticGenerator generator = const ArithmeticGenerator(),
     ArithmeticScheduler scheduler = const ArithmeticScheduler(),
     FluencyCalculator fluencyCalculator = const FluencyCalculator(),
+    ProgressDashboardCalculator progressDashboardCalculator =
+        const ProgressDashboardCalculator(),
     RetainedMasteryCalculator retainedMasteryCalculator =
         const RetainedMasteryCalculator(),
     Clock? clock,
@@ -37,6 +40,7 @@ final class LearningController extends ChangeNotifier {
        _generator = generator,
        _scheduler = scheduler,
        _fluencyCalculator = fluencyCalculator,
+       _progressDashboardCalculator = progressDashboardCalculator,
        _retainedMasteryCalculator = retainedMasteryCalculator,
        _idFactory = idFactory ?? _randomId,
        _repository = repository;
@@ -46,6 +50,7 @@ final class LearningController extends ChangeNotifier {
   final ArithmeticGenerator _generator;
   final ArithmeticScheduler _scheduler;
   final FluencyCalculator _fluencyCalculator;
+  final ProgressDashboardCalculator _progressDashboardCalculator;
   final RetainedMasteryCalculator _retainedMasteryCalculator;
   final IdFactory _idFactory;
   final ProgressRepository _repository;
@@ -119,6 +124,8 @@ final class LearningController extends ChangeNotifier {
         now: _clock().toUtc(),
       );
   MasterySummary get mastery => _mastery;
+  ProgressDashboard get progressDashboard =>
+      _progressDashboardCalculator.calculate(_attempts, now: _clock().toUtc());
   CurriculumGraph get curriculumGraph =>
       CurriculumGraph(goals: _contentPack.goals, skills: _contentPack.skills);
   Set<String> get masteredSkillIds => _fluency

@@ -203,8 +203,13 @@ Last reviewed: 29 August 2026.
 - [x] **MP-006 — Fluency score.** Addition, subtraction, and multiplication derive
   separate recent-evidence scores from correctness and operation-specific speed.
 - [ ] **MP-007 — Knowledge mastery score.** Understanding and retained correctness.
+  The arithmetic foundation now exposes an explainable derived indicator from
+  independent accuracy, fluent evidence, and delayed successful occasions;
+  richer concept evidence remains planned.
 - [ ] **MP-008 — Performance mastery score.** Solve demanding unfamiliar questions
-  accurately under time pressure.
+  accurately under time pressure. The arithmetic foundation now exposes
+  accuracy-and-speed performance separately from knowledge; unfamiliar advanced
+  problems remain planned.
 - [ ] **MP-009 — Technique-selection score.** Identify appropriate tools without
   topic labels.
 - [ ] **MP-010 — Confidence calibration score.** Agreement between confidence and
@@ -218,12 +223,17 @@ Last reviewed: 29 August 2026.
 - [x] **MP-013 — Interleaving policy.** The foundation scheduler introduces all
   arithmetic operations, then selects due or weakest skills across the mixture.
 - [ ] **MP-014 — Forgetting-risk estimate.** Forecast review need rather than
-  treating mastery as permanent.
+  treating mastery as permanent. A deterministic arithmetic foundation now
+  rises from zero to one across the current review interval and caps when due;
+  evidence-calibrated forecasting remains planned.
 - [ ] **MP-015 — Session recommendation.** Balance current goal, overdue review,
   fatigue, and available time.
-- [ ] **MP-016 — Progress dashboard.** Time, attempts, accuracy, speed, retention,
-  and goal readiness.
-- [ ] **MP-017 — Skill history.** Explain why a mastery score changed.
+- [x] **MP-016 — Progress dashboard.** Time, independent and assisted attempts,
+  accuracy, knowledge, performance, retention, forgetting risk, and curriculum
+  goal readiness are derived offline for each foundation skill.
+- [x] **MP-017 — Skill history.** Every answer, retest, correction, and hint has a
+  chronological learner-facing explanation of whether progress improved,
+  reduced, or remained assisted evidence.
 - [ ] **MP-018 — Benchmark readiness.** JEE, university, finance, ML, or robotics
   objective coverage and timed-performance estimates.
 - [ ] **MP-019 — Streaks without coercion.** Optional consistency information
