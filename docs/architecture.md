@@ -112,9 +112,25 @@ default, and each migration is transactional.
 
 `RemediationPolicy` is pure Dart and derives suggestions from the immutable
 event stream. Its first arithmetic rule requires repeated errors in one
-operation, excludes correction submissions, and can direct subtraction or
-multiplication learners back to addition as a prerequisite. This deterministic
-foundation will later consume the general curriculum dependency graph.
+operation and excludes correction submissions. When no characteristic rule
+applies, `CurriculumGraph` derives remediation from the first unmet directed
+prerequisite, so new subjects do not require hard-coded controller rules.
+
+## Curriculum graph and goals
+
+Content schema version 3 adds directed `prerequisiteIds` to skills and explicit
+learning goals that map stable goal IDs to stable skill IDs. Activation rejects
+missing or duplicate references, self-dependencies, and cycles before content
+can reach a learner. Schema versions 1 and 2 remain readable with empty graph
+metadata.
+
+`CurriculumGraph` is a package-neutral domain service. It calculates readiness,
+next recommendations, goal membership, and graph remediation from the active
+pack plus mastered skill IDs. Readiness is advisory: it explains unmet
+prerequisites, while the presentation layer always offers exploration and
+learning. The first curriculum screen browses goals and their contributing
+skills offline; richer dependency visualization can evolve without changing
+the content or progress contracts.
 
 ## Offline learning resources
 
@@ -155,10 +171,11 @@ domain and sync-policy layers.
 
 ## Curriculum content
 
-The app bundles a foundation pack with arithmetic templates and original
-addition, subtraction, and multiplication concept cards. Other packs are downloadable, signed,
-compressed, independently versioned, cached locally, and safe to delete without
-deleting progress.
+The app bundles a schema-v3 foundation pack with arithmetic templates, original
+addition, subtraction, and multiplication concept cards, directed
+prerequisites, and initial JEE, quant-finance, and AI-mathematics goal mappings.
+Other packs are downloadable, signed, compressed, independently versioned,
+cached locally, and safe to delete without deleting progress.
 
 Content sources are human-editable and compiled into a validated release format.
 Text uses Markdown, equations use LaTeX, and diagrams prefer SVG. Videos remain

@@ -17,7 +17,7 @@ This is the authoritative, numbered product and content backlog for ReMath.
 - Feature IDs are permanent. Retired features remain recorded rather than being
   renumbered.
 
-Last reviewed: 28 August 2026.
+Last reviewed: 29 August 2026.
 
 ## 1. Product foundations
 
@@ -87,8 +87,8 @@ Last reviewed: 28 August 2026.
 
 - [x] **CG-001 — Stable skill identifiers.** Foundation skills use durable dotted
   identifiers independent of presentation and content-pack paths.
-- [ ] **CG-002 — Prerequisite graph.** Directed dependencies rather than one
-  fixed linear course.
+- [x] **CG-002 — Prerequisite graph.** Schema-v3 skills publish validated,
+  acyclic directed dependencies rather than one fixed linear course.
 - [x] **CG-003 — Multi-track placement foundation.** Arithmetic operations retain
   independent placement evidence, so weakness in one does not lower another.
   Cross-subject placement remains planned.
@@ -98,18 +98,19 @@ Last reviewed: 28 August 2026.
 - [x] **CG-005 — Difficulty calibration.** A validated multidimensional profile
   preserves complexity, combined ideas, algebraic burden, abstraction, and time
   pressure without forcing incomparable burdens into one score.
-- [ ] **CG-006 — Unlock policy.** Recommend readiness without unnecessarily
-  preventing exploration.
-- [ ] **CG-007 — Prerequisite remediation.** Diagnose likely missing precursor
-  skills after repeated or characteristic errors. The arithmetic foundation now
-  detects repeated same-operation errors, ignores correction evidence, and
-  recommends a deterministic prerequisite; the general curriculum graph remains.
+- [x] **CG-006 — Unlock policy.** Readiness explanations recommend prerequisite
+  preparation while every skill remains available through “Explore anyway”.
+- [x] **CG-007 — Prerequisite remediation.** Repeated or characteristic errors
+  retain their deterministic policy, then use the general graph to recommend the
+  first unmet precursor skill.
 - [ ] **CG-008 — Retention prerequisites.** Require delayed success, not only
   immediate lesson success, before durable mastery.
-- [ ] **CG-009 — Curriculum map UI.** Browse dependencies, current position,
-  strengths, gaps, and alternate paths.
-- [ ] **CG-010 — Goal-to-syllabus mapping.** Show how skills contribute to JEE,
-  Oxbridge, finance, AI/ML, computing, and robotics goals.
+- [ ] **CG-009 — Curriculum map UI.** Foundation delivered: learners can browse
+  goals, contributing skills, readiness, gaps, and non-blocking learning paths.
+  Rich dependency visualization, strengths, and alternate-path comparison remain.
+- [ ] **CG-010 — Goal-to-syllabus mapping.** Foundation delivered: schema-v3
+  goals explicitly map skills to JEE, quant-finance, and AI-mathematics outcomes.
+  Full Oxbridge, computing, robotics, and versioned syllabus coverage remains.
 - [ ] **CG-011 — Syllabus-version migration.** Preserve progress when concepts
   split, merge, move, or are superseded.
 - [ ] **CG-012 — External benchmark mapping.** Map original ReMath objectives to

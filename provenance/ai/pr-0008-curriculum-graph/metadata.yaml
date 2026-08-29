@@ -6,7 +6,7 @@ agents:
   - product: OpenAI Codex
     model: not exposed to repository session
 started_at: 2026-08-29T06:00:00Z
-finalized_at: null
+finalized_at: 2026-08-29T12:31:24Z
 scope:
   - CG-002 prerequisite graph
   - CG-006 unlock policy foundation
@@ -20,4 +20,37 @@ excluded_context:
   - hidden system and developer instructions
   - model internal reasoning
   - routine raw tool telemetry unless it changed the implementation
-ci_runs: []
+ci_runs:
+  - id: 33237385925
+    purpose: curriculum graph business contracts red
+    conclusion: failure
+  - id: 33237522917
+    purpose: curriculum navigation learner journey red
+    conclusion: failure
+  - id: 33237598851
+    purpose: first complete implementation formatting check
+    conclusion: failure
+  - id: 33237677677
+    purpose: canonical formatter diagnostic
+    conclusion: failure
+  - id: 33237876543
+    purpose: first functionally green implementation
+    conclusion: success
+  - id: 33237962956
+    purpose: uncovered-line diagnostic
+    conclusion: failure
+  - id: 33238078770
+    purpose: repository-API transport failure
+    conclusion: failure
+  - id: 33238112191
+    purpose: coverage-test formatting check
+    conclusion: failure
+  - id: 33238173557
+    purpose: canonical coverage-test formatter diagnostic
+    conclusion: failure
+  - id: 33252560858
+    purpose: curriculum Back-navigation test diagnosis
+    conclusion: failure
+  - id: 33252668190
+    purpose: complete implementation at 100 percent coverage
+    conclusion: success
