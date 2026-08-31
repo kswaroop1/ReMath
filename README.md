@@ -71,6 +71,7 @@ generated changes before committing them.
 - [Delivery roadmap](docs/roadmap.md)
 - [Testing strategy](docs/testing.md)
 - [Releases and versioning](docs/releases.md)
+- [Installing release packages](docs/installing.md)
 - [Content-pack format](docs/content-packs.md)
 - [Contribution and agent guidance](AGENTS.md)
 

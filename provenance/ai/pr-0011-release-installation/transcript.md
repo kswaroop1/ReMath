@@ -59,3 +59,15 @@ recovery, preferred pre-extraction unblock sequence, explicit Android
 upgrade-signing limitation, Windows code-signing boundary, and automatic
 publication of that guidance in generated GitHub release notes. The expected
 installation document and workflow integration do not yet exist.
+
+CI run 33361477036 failed the new test because `docs/installing.md` did not
+exist, confirming the intended missing publication contract.
+
+### Release installation publication — green
+
+Codex added the verified Android and Windows instructions, including the
+pre-extraction Windows unblock sequence and the PowerShell recovery that the
+owner demonstrated. The guide explicitly separates portable artifacts from
+production signing and warns that current Android prereleases are not
+upgrade-stable. The release publisher now checks out the repository and prepends
+this guide to GitHub-generated notes for every future release.

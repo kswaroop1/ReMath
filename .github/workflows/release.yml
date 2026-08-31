@@ -215,6 +215,7 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
         with:
           pattern: release-*
@@ -231,7 +232,7 @@ jobs:
           PRERELEASE: ${{ inputs.mark_as_prerelease }}
         run: |
           set -euo pipefail
-          flags=(--draft --generate-notes)
+          flags=(--draft --generate-notes --notes "$(cat docs/installing.md)")
           if [[ "$PRERELEASE" == "true" ]]; then
             flags+=(--prerelease)
           fi
