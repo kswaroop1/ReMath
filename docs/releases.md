@@ -48,6 +48,10 @@ The release workflow reruns all quality checks, calculates the version, rejects
 an existing version tag, builds every platform, creates SHA-256 checksums, creates
 a draft GitHub Release, attaches all assets, and then publishes it.
 
+Each generated release page prepends the verified
+[installation guidance](installing.md), including Android sideloading, the
+Windows downloaded-file unblock sequence, and the current signing limitations.
+
 Published tags use `vMAJOR.MINOR.PATCH`. A published version is never moved or
 replaced; make another release for any changed content.
 
