@@ -52,4 +52,10 @@ overstating the incomplete Android and Windows production-signing features.
 
 ## TDD record
 
-To be appended as the release-contract test and implementation run.
+### Release installation publication — red
+
+Codex first added a repository contract requiring the verified `Unblock-File`
+recovery, preferred pre-extraction unblock sequence, explicit Android
+upgrade-signing limitation, Windows code-signing boundary, and automatic
+publication of that guidance in generated GitHub release notes. The expected
+installation document and workflow integration do not yet exist.
