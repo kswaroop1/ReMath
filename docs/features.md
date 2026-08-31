@@ -406,6 +406,9 @@ Last reviewed: 29 August 2026.
   devices and desktop platforms.
 - [ ] **EN-020 — Performance budgets.** Startup, question transition, database,
   download, and memory thresholds.
+- [ ] **EN-021 — Cross-platform installation guidance.** **Next.** Put verified
+  Android and Windows installation instructions and signing limitations on each
+  release page and in repository documentation.
 
 ## 11. Mathematics content modules
 
