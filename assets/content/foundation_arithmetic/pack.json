@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "id": "org.remath.foundation-arithmetic",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "title": "Foundation mental arithmetic",
   "license": "CC-BY-SA-4.0",
   "skills": [
@@ -47,11 +47,11 @@
     },
     {
       "id": "foundation.arithmetic.multiplication-small",
-      "version": 1,
+      "version": 2,
       "skillId": "arithmetic.multiplication",
       "operation": "multiplication",
       "minimumOperand": 2,
-      "maximumOperand": 19,
+      "maximumOperand": 9,
       "fluentTargetSeconds": 8
     }
   ],
@@ -96,14 +96,14 @@
       "title": "Multiplication foundations",
       "summary": "Break products into familiar multiples using distribution.",
       "formula": "a(b + c) = ab + ac",
-      "workedExample": "17 × 6 = (10 × 6) + (7 × 6) = 102.",
+      "workedExample": "8 × 7 = (5 × 7) + (3 × 7) = 56.",
       "commonMistake": "Distribute the multiplier to every part before recombining the partial products.",
       "application": "Use decomposition for quantities, rates, areas, and quick scaling estimates.",
       "hints": {
         "conceptCue": "Split one factor into parts whose products you know.",
         "methodCue": "Separate tens and units.",
-        "nextStepCue": "For 17 × 6, calculate 10 × 6 and 7 × 6.",
-        "workedSolution": "17 × 6 = 60 + 42 = 102."
+        "nextStepCue": "For 8 × 7, calculate 5 × 7 and 3 × 7.",
+        "workedSolution": "8 × 7 = 35 + 21 = 56."
       },
       "externalLinks": ["https://www.khanacademy.org/math/arithmetic"]
     }

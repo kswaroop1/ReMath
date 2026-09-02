@@ -1,0 +1,24 @@
+schema_version: 1
+pull_request: 12
+title: Improve drill focus and foundation difficulty
+human_owner: kswaroop1
+agents:
+  - product: OpenAI Codex
+    model: unknown
+started_at: 2026-08-31T00:00:00Z
+finalized_at: null
+scope:
+  - code
+  - tests
+  - content
+  - documentation
+redactions:
+  - category: hidden instructions and internal reasoning
+    reason: Excluded under repository policy
+ci_runs:
+  - id: 33681372290
+    purpose: green implementation verification
+    conclusion: failure
+  - id: 33681917311
+    purpose: formatted implementation and full verification
+    conclusion: success

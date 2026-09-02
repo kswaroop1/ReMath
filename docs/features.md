@@ -59,7 +59,10 @@ Last reviewed: 29 August 2026.
   and revealed state across interruption. Focused practice follows through the
   existing drill and correction loop.
 - [x] **LX-007 — Drill chunk.** A resumable 15-minute mental-arithmetic drill
-  records locally marked answers and advances through generated questions.
+  records locally marked answers, keeps keyboard focus on answer entry between
+  submissions, and advances through generated questions. Foundation addition
+  and subtraction use operands through 19; multiplication uses single-digit
+  factors so mixed drills do not introduce two-digit factors prematurely.
 - [x] **LX-008 — Review chunk.** A resumable focused 15-minute chunk selects the
   most urgent overdue or approaching previously learned skill.
 - [ ] **LX-009 — Challenge chunk.** Unlabelled, unfamiliar, multi-topic problems.

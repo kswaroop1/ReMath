@@ -27,6 +27,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late final LearningController _controller;
   late final TextEditingController _answerController;
+  late final FocusNode _answerFocusNode;
   late final Future<void> _initialised;
   bool _showCurriculum = false;
   bool _showProgress = false;
@@ -41,7 +42,15 @@ class _HomeScreenState extends State<HomeScreen> {
     )..addListener(_handleControllerChange);
     _answerController = TextEditingController()
       ..addListener(() => _controller.updateDraft(_answerController.text));
+    _answerFocusNode = FocusNode();
     _initialised = _controller.initialise();
+  }
+
+  Future<void> _submitAnswer() async {
+    await _controller.submitAnswer();
+    if (mounted && _controller.hasActiveSession && !_controller.isLearning) {
+      _answerFocusNode.requestFocus();
+    }
   }
 
   void _handleControllerChange() {
@@ -64,6 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ..removeListener(_handleControllerChange)
       ..dispose();
     _answerController.dispose();
+    _answerFocusNode.dispose();
     super.dispose();
   }
 
@@ -560,17 +570,19 @@ class _HomeScreenState extends State<HomeScreen> {
         TextField(
           autofocus: true,
           controller: _answerController,
+          focusNode: _answerFocusNode,
+          key: const Key('answerField'),
           decoration: InputDecoration(
             border: const OutlineInputBorder(),
             labelText: _controller.isCorrecting ? 'Correct answer' : 'Answer',
           ),
           keyboardType: const TextInputType.numberWithOptions(signed: true),
-          onSubmitted: (_) => _controller.submitAnswer(),
+          onSubmitted: (_) => _submitAnswer(),
           textInputAction: TextInputAction.done,
         ),
         const SizedBox(height: 12),
         FilledButton(
-          onPressed: _controller.isBusy ? null : _controller.submitAnswer,
+          onPressed: _controller.isBusy ? null : _submitAnswer,
           child: Text(
             _controller.isCorrecting
                 ? 'Submit correction'
