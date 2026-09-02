@@ -19,3 +19,6 @@ ci_runs:
   - id: 33681372290
     purpose: green implementation verification
     conclusion: failure
+  - id: 33681917311
+    purpose: formatted implementation and full verification
+    conclusion: success
