@@ -22,7 +22,8 @@ void main() {
     expect(
       pack.templateFor(ArithmeticOperation.multiplication).maximumOperand,
       9,
-      reason: 'foundation drills must not mix two-digit multiplication with '
+      reason:
+          'foundation drills must not mix two-digit multiplication with '
           'two-digit addition and subtraction',
     );
   });

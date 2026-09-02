@@ -53,6 +53,12 @@ Local JSON parsing and whitespace/diff validation passed. Flutter formatting,
 analysis, tests, content validation, and coverage are delegated to unchanged
 GitHub CI and will be appended after the runs complete.
 
+CI run `33681372290` passed the secret scan but stopped at canonical Dart
+formatting. The formatter identified only
+`test/features/learning/data/content_pack_test.dart`: the long `reason` named
+argument required the value on the following line. The agent applied that exact
+layout without changing the test or production behavior.
+
 ## Pull request and review workflow
 
 Draft PR #12 was opened after the two TDD commits. The review workflow deliberately

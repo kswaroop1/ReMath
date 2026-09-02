@@ -15,4 +15,7 @@ scope:
 redactions:
   - category: hidden instructions and internal reasoning
     reason: Excluded under repository policy
-ci_runs: []
+ci_runs:
+  - id: 33681372290
+    purpose: green implementation verification
+    conclusion: failure
