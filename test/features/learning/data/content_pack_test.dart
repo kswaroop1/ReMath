@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/data/content_pack_parser.dart';
 import 'package:remath/src/features/learning/data/content_pack_validator.dart';
+import 'package:remath/src/features/learning/domain/arithmetic_question.dart';
 
 void main() {
   const parser = ContentPackParser();
@@ -18,6 +19,12 @@ void main() {
     expect(pack.skills, hasLength(3));
     expect(pack.templates, hasLength(3));
     expect(pack.license, 'CC-BY-SA-4.0');
+    expect(
+      pack.templateFor(ArithmeticOperation.multiplication).maximumOperand,
+      9,
+      reason: 'foundation drills must not mix two-digit multiplication with '
+          'two-digit addition and subtraction',
+    );
   });
 
   test(
