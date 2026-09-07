@@ -52,3 +52,10 @@ Test-first rules cover independent numeric progression, assistance/MCQ exclusion
 from difficulty promotion, difficulty reduction after errors, delayed retention,
 review priority, prerequisite advice without blocking exploration, diagnostic
 sampling, and round-trip persistence of a complete plan and interrupted session.
+
+Cycle 2 red: run 34164204564 failed analysis for the missing study_plan.dart
+public seam. Implemented generic per-skill evidence, advisory prerequisite
+selection, due-review priority, two goal plans and independently sampled
+diagnostics. Frozen versioned JSON state preserves question and interaction
+identity. Numeric success is required for difficulty and delayed retention;
+MCQ accuracy is displayed but cannot establish these claims alone.
