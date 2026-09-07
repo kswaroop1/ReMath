@@ -41,3 +41,14 @@ verification authority; no local test success is claimed.
 Green implementation: original eleven-skill catalogue, two goals, three bounded
 question levels, exact existing numeric markers, four deterministic choices,
 four hints and immutable versioned question identity. No dependencies added.
+
+Cycle 1 verification: run 34163961997 reported directives_ordering in the test.
+Import order corrected without changing assertions. Run 34164069533 then passed
+analysis, the full test suite and coverage enforcement: 99.94% line coverage.
+
+## Cycle 2: goal planning, skill evidence and session serialization
+
+Test-first rules cover independent numeric progression, assistance/MCQ exclusion
+from difficulty promotion, difficulty reduction after errors, delayed retention,
+review priority, prerequisite advice without blocking exploration, diagnostic
+sampling, and round-trip persistence of a complete plan and interrupted session.
