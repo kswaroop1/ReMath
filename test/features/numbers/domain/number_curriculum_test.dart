@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:remath/src/features/numbers/domain/number_curriculum.dart';
 import 'package:remath/src/features/learning/domain/numeric_answer_contract.dart';
+import 'package:remath/src/features/numbers/domain/number_curriculum.dart';
 
 void main() {
   test('each offered goal has teachable skills and valid prerequisites', () {
