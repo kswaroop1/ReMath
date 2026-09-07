@@ -28,3 +28,16 @@ telemetry omitted. No hidden reasoning or credentials are included.
 
 Test-first contract covers all offered skills, exact division, fraction marking,
 unique misconception-labelled choices, staged hints and invalid identities.
+
+Red evidence: CI run 34163779871, job 101870701307, passed formatting and failed
+analysis because number_curriculum.dart and NumberCurriculum did not exist.
+This is the necessary public seam introduced by the contract test. Earlier runs
+34163553843/34163663175 were formatting failures, not behavioural red evidence.
+Local formatter needed --language-version=3.10 to match the package minimum.
+Local Flutter JIT exited 255; an AOT tool attempt was rejected by automatic review
+because startup contacted cloud metadata. That runner was abandoned. CI is the
+verification authority; no local test success is claimed.
+
+Green implementation: original eleven-skill catalogue, two goals, three bounded
+question levels, exact existing numeric markers, four deterministic choices,
+four hints and immutable versioned question identity. No dependencies added.
