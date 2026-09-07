@@ -17,7 +17,7 @@ This is the authoritative, numbered product and content backlog for ReMath.
 - Feature IDs are permanent. Retired features remain recorded rather than being
   renumbered.
 
-Last reviewed: 29 August 2026.
+Last reviewed: 31 August 2026.
 
 ## 1. Product foundations
 
@@ -406,6 +406,9 @@ Last reviewed: 29 August 2026.
   devices and desktop platforms.
 - [ ] **EN-020 — Performance budgets.** Startup, question transition, database,
   download, and memory thresholds.
+- [x] **EN-021 — Cross-platform installation guidance.** Verified
+  Android and Windows installation instructions and signing limitations on each
+  release page and in repository documentation.
 
 ## 11. Mathematics content modules
 

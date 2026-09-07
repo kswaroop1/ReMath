@@ -81,3 +81,17 @@ Learner-facing acceptance criteria:
 The roadmap is directional rather than permission to expand a pull request.
 Each PR must restate its exact feature IDs and learner-facing acceptance criteria
 before its first test-only commit.
+
+## PR #11 — Release installation guidance
+
+Implement **EN-021** and clarify the boundary of **EN-013** and **EN-015** after
+installing the first real release:
+
+- Future GitHub release pages explain how to install Android and Windows assets.
+- Windows ZIP instructions include unblocking the downloaded archive before
+  extraction and a PowerShell recovery command for an already extracted tree.
+- Documentation distinguishes a successful portable build from trusted Windows
+  code signing.
+- Documentation warns that the current CI-generated Android signing identity is
+  not suitable for reliable in-place upgrades; EN-013 remains incomplete until
+  an owner-controlled keystore is configured.
