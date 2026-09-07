@@ -1,0 +1,14 @@
+schema_version: 1
+pull_request: 13
+title: Number learning journey
+human_owner: kswaroop1
+agents:
+  - product: OpenAI Codex
+    model: unknown
+started_at: 2026-09-07T21:26:00Z
+finalized_at: null
+scope: [code, tests, documentation]
+redactions:
+  - category: unrelated conversation
+    reason: Only ReMath implementation instructions included
+ci_runs: []
