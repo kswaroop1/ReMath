@@ -32,6 +32,34 @@ void main() {
     expect(find.textContaining('Correct answer:'), findsOneWidget);
   });
 
+  testWidgets('answer entry keeps keyboard focus after submission', (
+    tester,
+  ) async {
+    final repository = InMemoryProgressRepository();
+    await tester.pumpWidget(
+      ReMathApp(contentPack: foundationPackForTest(), repository: repository),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Start 15-minute drill'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('answerField')), '-999');
+    await tester.tap(find.text('Check answer'));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<TextField>(find.byKey(const Key('answerField'))).focusNode,
+      isNotNull,
+    );
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('answerField')))
+          .focusNode!
+          .hasFocus,
+      isTrue,
+    );
+  });
+
   testWidgets('completes diagnostic onboarding and explains placement', (
     tester,
   ) async {
