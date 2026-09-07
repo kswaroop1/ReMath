@@ -25,10 +25,9 @@ void main() {
     for (var level = 0; level < 3; level++) {
       for (var seed = 0; seed < 100; seed++) {
         final q = curriculum.question('arithmetic.division', level, seed, 0);
-        final values = RegExp(r'\d+')
-            .allMatches(q.prompt)
-            .map((m) => int.parse(m.group(0)!))
-            .toList();
+        final values = RegExp(
+          r'\d+',
+        ).allMatches(q.prompt).map((m) => int.parse(m.group(0)!)).toList();
         expect(values[1], greaterThan(0));
         expect(values[0] % values[1], 0);
         expect(
@@ -54,30 +53,38 @@ void main() {
     },
   );
 
-  test('all skills offer unique MCQs with exactly one correct answer and four hints', () {
-    final curriculum = NumberCurriculum();
-    for (final skill in curriculum.skills) {
-      for (var level = 0; level < 3; level++) {
-        for (var seed = 0; seed < 20; seed++) {
-          final q = curriculum.question(skill.id, level, seed, 1);
-          expect(q.choices.length, 4);
-          expect(q.choices.map((c) => c.value).toSet().length, 4);
-          expect(
-            q.choices
-                .where((c) => q.mark(c.value).verdict == AnswerVerdict.correct)
-                .length,
-            1,
-          );
-          expect(q.choices.where((c) => c.misconception != null).length, 3);
-          expect(q.hints.length, 4);
-          expect(q.hints.last, contains(q.answer));
-          expect(q.mark('nonsense').verdict, AnswerVerdict.invalid);
-          expect(q.id, contains('.v1.'));
-          expect(q.id, isNot(curriculum.question(skill.id, level, seed, 2).id));
+  test(
+    'all skills offer unique MCQs with exactly one correct answer and four hints',
+    () {
+      final curriculum = NumberCurriculum();
+      for (final skill in curriculum.skills) {
+        for (var level = 0; level < 3; level++) {
+          for (var seed = 0; seed < 20; seed++) {
+            final q = curriculum.question(skill.id, level, seed, 1);
+            expect(q.choices.length, 4);
+            expect(q.choices.map((c) => c.value).toSet().length, 4);
+            expect(
+              q.choices
+                  .where(
+                    (c) => q.mark(c.value).verdict == AnswerVerdict.correct,
+                  )
+                  .length,
+              1,
+            );
+            expect(q.choices.where((c) => c.misconception != null).length, 3);
+            expect(q.hints.length, 4);
+            expect(q.hints.last, contains(q.answer));
+            expect(q.mark('nonsense').verdict, AnswerVerdict.invalid);
+            expect(q.id, contains('.v1.'));
+            expect(
+              q.id,
+              isNot(curriculum.question(skill.id, level, seed, 2).id),
+            );
+          }
         }
       }
-    }
-  });
+    },
+  );
 
   test('question generation rejects invalid identities and levels', () {
     final c = NumberCurriculum();
