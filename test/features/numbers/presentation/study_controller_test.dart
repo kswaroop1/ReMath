@@ -188,6 +188,17 @@ void main() {
       expect(learner.state.stepIndex, 1);
     },
   );
+  test(
+    'rapid pause and resume preserve event ordering and charge resumed time',
+    () async {
+      await controller.start();
+      final paused = controller.pause();
+      final resumed = Future<void>.sync(controller.resume);
+      await Future.wait([paused, resumed]);
+      now = now.add(const Duration(seconds: 5));
+      expect(controller.remaining, const Duration(minutes: 14, seconds: 55));
+    },
+  );
 }
 
 final class _AcknowledgementFailure implements ProgressRepository {

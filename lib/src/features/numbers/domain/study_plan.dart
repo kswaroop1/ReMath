@@ -77,6 +77,7 @@ final class StudyProgress {
   final int correct;
   final int assisted;
   final RetainedMastery retention;
+  double get chanceAdjustedAccuracy => throw UnimplementedError();
   double get accuracy => independent == 0 ? 0 : correct / independent;
   String get explanation => independent == 0
       ? 'No independent evidence yet. Start with a diagnostic or guided practice.'

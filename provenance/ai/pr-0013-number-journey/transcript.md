@@ -142,3 +142,23 @@ Run 34191706645: all new number-screen widget tests passed. Existing home tests
 failed because the added vertical button moved established controls outside the
 viewport. Move navigation into the app bar, preserving the legacy content layout;
 no existing test is weakened or changed to accommodate the regression.
+
+Cycle 6 green: run 34191887776 passed all checks, 97.98% coverage. Existing home
+interactions and new number flows both pass after the navigation correction.
+
+## Further continuation
+
+User: "We had run out of credits, pl continue now."
+
+Confirmed the remote PR matches the last verified navigation fix; retained the
+uncommitted boundary tests. No release has been created.
+
+## Cycle 7: scoring, validation, hints and lifecycle boundaries
+
+Add compiling tests for chance-adjusted MCQ accuracy, invalid persisted state,
+independently calculated answers for all generators, explicit worked-solution
+steps, and rapid lifecycle pause/resume ordering. The new accuracy getter is an
+UnimplementedError public seam in this red commit; it contains no scoring logic.
+Other new cases exercise existing behaviour directly, including the suspected
+pause/resume race. Independent arithmetic checks characterize existing valid
+questions, rather than manufacturing a failure.
