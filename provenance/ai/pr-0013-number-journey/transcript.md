@@ -130,3 +130,10 @@ Cycle 5 green: run 34191324869 passed all checks, 98.93% coverage.
 Widget tests first: reach the number journey from the existing home; enter and
 correct fractions while retaining focus; persist and submit a selected MCQ;
 read the offline lesson and finish a session into the progress overview.
+
+Cycle 6 red: run 34191479615 failed for the missing StudyScreen public seam.
+Added the home entry and a responsive scrollable screen with goal choice,
+explainable plan, learn/practice/reflection stages, fraction/decimal entry,
+selected MCQ state, hint ladder, skill progress/history and pause behaviour.
+The UI checkpoints active time every second and persists on lifecycle pause.
+The existing drill is preserved, and its home progress refreshes on return.

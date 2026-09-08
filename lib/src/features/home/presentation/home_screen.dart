@@ -9,6 +9,7 @@ import '../../learning/domain/progress_dashboard.dart';
 import '../../learning/domain/progress_repository.dart';
 import '../../learning/domain/retained_mastery.dart';
 import '../../learning/presentation/learning_controller.dart';
+import '../../numbers/presentation/study_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -122,6 +123,18 @@ class _HomeScreenState extends State<HomeScreen> {
     mainAxisAlignment: MainAxisAlignment.center,
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
+      FilledButton.tonal(
+        onPressed: () async {
+          await Navigator.of(context).push<void>(
+            MaterialPageRoute(
+              builder: (_) => StudyScreen(repository: widget.repository),
+            ),
+          );
+          if (mounted) await _controller.initialise();
+        },
+        child: const Text('Number learning journey'),
+      ),
+      const SizedBox(height: 16),
       Text(
         'Mental arithmetic foundation',
         style: Theme.of(context).textTheme.headlineMedium,
