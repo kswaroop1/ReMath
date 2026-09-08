@@ -116,3 +116,9 @@ Review found that a timer/pause snapshot could overwrite the already committed
 next state after an acknowledgement failure. Extend the existing lost-ack test
 with checkpoint and pause before retry; keep the single-event and next-step
 assertions. This is a compiling regression test against the current controller.
+
+Cycle 5 red: run 34191117324 passed analysis and failed the compiling recovery
+test: expected restored step 1, actual step 0 after checkpoint/pause and retry.
+The controller now preserves an uncertain-commit flag and blocks draft/timer/hint
+writes until submission retry resolves it. Retry uses the same immutable event
+identity and reloads the committed next state when already inserted.

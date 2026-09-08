@@ -28,10 +28,12 @@ final class StudyController extends ChangeNotifier {
   bool _running = false;
   bool _busy = false;
   bool _disposed = false;
+  bool _uncertainCommit = false;
   String? _error;
 
   StudyState get state => _state;
   bool get busy => _busy;
+  bool get needsRetry => _uncertainCommit;
   String? get error => _error;
   List<AttemptEvent> get history => List.unmodifiable(_attempts);
   List<StudyProgress> get progress => curriculum.skills
@@ -123,13 +125,13 @@ final class StudyController extends ChangeNotifier {
   }
 
   Future<void> updateDraft(String value) => _enqueue(() async {
-    if (question == null) return;
+    if (question == null || _uncertainCommit) return;
     _state = _timed().copyWith(draft: value);
     await _repository.saveStudyState(_state.encode());
   });
 
   Future<void> checkpoint() => _enqueue(() async {
-    if (_state.plan != null && _running) {
+    if (_state.plan != null && _running && !_uncertainCommit) {
       await _save(_timed());
     }
   });
@@ -138,7 +140,9 @@ final class StudyController extends ChangeNotifier {
     if (_state.plan != null) {
       final next = _timed();
       _running = false;
-      await _save(next);
+      if (!_uncertainCommit) {
+        await _save(next);
+      }
     }
   });
 
@@ -223,7 +227,12 @@ final class StudyController extends ChangeNotifier {
 
   Future<void> revealHint() => _exclusive(() async {
     final q = question;
-    if (q == null || _state.plan!.isDiagnostic || _state.hintCount >= 4) return;
+    if (q == null ||
+        _state.plan!.isDiagnostic ||
+        _state.hintCount >= 4 ||
+        _uncertainCommit) {
+      return;
+    }
     final before = _timed();
     final next = before.copyWith(
       hintCount: before.hintCount + 1,
@@ -267,10 +276,20 @@ final class StudyController extends ChangeNotifier {
   }
 
   Future<void> _commit(AttemptEvent event, StudyState next) async {
-    final inserted = await _repository.commitStudyAttempt(event, next.encode());
+    late final bool inserted;
+    try {
+      inserted = await _repository.commitStudyAttempt(event, next.encode());
+    } catch (_) {
+      // Until retry resolves the acknowledgement, snapshots must not rewind
+      // a transition that may already have committed successfully.
+      _uncertainCommit = true;
+      rethrow;
+    }
     _state = inserted
         ? next
         : StudyState.decode((await _repository.loadStudyState())!);
+    _uncertainCommit = false;
+    _error = null;
     _attempts = await _repository.loadAttempts();
   }
 
@@ -286,7 +305,9 @@ final class StudyController extends ChangeNotifier {
 
   Future<void> _enqueue(Future<void> Function() action) {
     final next = _pending.then((_) async {
-      _error = null;
+      if (!_uncertainCommit) {
+        _error = null;
+      }
       try {
         await action();
       } catch (_) {
