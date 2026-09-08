@@ -100,3 +100,10 @@ Test-first scenarios cover goal persistence, exact interrupted question/draft/ti
 correction followed by independent retest, persisted hints, invalid input,
 duplicate submit, multiple chunks, diagnostic isolation, time expiry, protection
 of an unfinished plan, and retry after a persisted write loses acknowledgement.
+
+Cycle 4 red: run 34190708526 failed analysis for the missing StudyController API.
+Implementation serializes state writes, guards concurrent submits, restores
+committed state on duplicate retries, and records assistance separately. Wrong
+practice answers require correction and a fresh numeric retest. Diagnostics
+advance without coaching. The timer charges active time only; the ADR explicitly
+states the one-second UI-checkpoint limit for an abrupt process kill.
