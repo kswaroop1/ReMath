@@ -33,3 +33,13 @@ SymbolicAnswer cases with UnimplementedError. Implement exact rational polynomia
 normalization, bounded recursive-descent parsing and a separate collected-form
 check. Syntax is never executed as code. Preserve variable-use information even
 when a subexpression simplifies, so domain-changing division stays unsupported.
+
+## Continuation after credit limit
+
+User: "We had run out of credits, pl continue now."
+
+The green implementation was saved locally as 011495f but its GitHub publication
+was rejected by automatic approval review because credits were exhausted. After
+the user resumed, confirmed the remote still held the test-only commit and
+published the saved implementation. Run 34260436411 reported a missing braced
+multiline if body; correct that lint without changing marking logic or tests.

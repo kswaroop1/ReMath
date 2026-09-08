@@ -219,8 +219,9 @@ final class _Parser {
       if (!take(')')) _invalid();
       return result;
     }
-    if (take('x'))
+    if (take('x')) {
       return _Value({1: _Rational.integer(1)}, [1], hasVariable: true);
+    }
     final start = position;
     // Force whitespace normalization before remembering the literal start.
     final first = next;
