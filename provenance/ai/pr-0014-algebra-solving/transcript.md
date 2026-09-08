@@ -27,3 +27,9 @@ Use CI for Flutter verification, continuing the earlier runner decision: local
 Flutter execution was abandoned after an automatic-review rejection of its
 metadata-network startup. Local Dart formatting remains available. No local test
 success is claimed. Routine command telemetry is omitted.
+
+Cycle 1 red: CI run 34228364008 passed analysis and failed the four new
+SymbolicAnswer cases with UnimplementedError. Implement exact rational polynomial
+normalization, bounded recursive-descent parsing and a separate collected-form
+check. Syntax is never executed as code. Preserve variable-use information even
+when a subexpression simplifies, so domain-changing division stays unsupported.
