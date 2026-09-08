@@ -54,3 +54,9 @@ and version-one number identities. Independently calculate expected answers from
 Require teaching/prerequisites, four hints, deterministic versioned identities,
 no fabricated symbolic MCQs and invalid-identity rejection. StudyCurriculum is a
 necessary new public seam; the test-first commit contains no catalogue behaviour.
+
+Cycle 2 red: run 34260971722 failed analysis because the necessary
+StudyCurriculum interface did not exist. Implement the combined catalogue,
+original algebra templates and shared StudyQuestion interface. NumberSkill and
+number-format names remain compatible; the number generator and goal sets do
+not change. Algebra has no MCQ choices in this increment.

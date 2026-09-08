@@ -1,5 +1,8 @@
 import '../../learning/domain/content_pack.dart';
 import '../../learning/domain/numeric_answer_contract.dart';
+import 'study_question.dart';
+
+export 'study_question.dart';
 
 final class NumberSkill {
   const NumberSkill(
@@ -16,15 +19,7 @@ final class NumberSkill {
   final List<String> prerequisites;
 }
 
-final class NumberChoice {
-  const NumberChoice(this.value, this.misconception);
-  final String value;
-  final String? misconception;
-}
-
-enum NumberAnswerFormat { integer, fraction, decimal }
-
-final class NumberQuestion {
+final class NumberQuestion implements StudyQuestion {
   NumberQuestion({
     required this.id,
     required this.skillId,
@@ -59,14 +54,21 @@ final class NumberQuestion {
     ]);
   }
 
+  @override
   final String id;
+  @override
   final String skillId;
+  @override
   final String prompt;
   final int numerator;
   final int denominator;
+  @override
   final NumberAnswerFormat format;
+  @override
   late final String answer;
+  @override
   late final List<String> hints;
+  @override
   late final List<NumberChoice> choices;
 
   String _render(int value) => switch (format) {
@@ -78,6 +80,7 @@ final class NumberQuestion {
     NumberAnswerFormat.decimal => _decimal(value, denominator),
   };
 
+  @override
   AnswerMark mark(String input) => switch (format) {
     NumberAnswerFormat.integer => ExactIntegerAnswer(numerator).mark(input),
     NumberAnswerFormat.fraction => ExactFractionAnswer(
@@ -86,6 +89,17 @@ final class NumberQuestion {
     ).mark(input),
     NumberAnswerFormat.decimal => ExactDecimalAnswer(answer).mark(input),
   };
+
+  @override
+  String? get inputGuidance => null;
+  @override
+  String get answerLabel => format == NumberAnswerFormat.fraction
+      ? 'Answer as a fraction, e.g. 3/4'
+      : 'Your answer';
+  @override
+  String get invalidInputMessage => format == NumberAnswerFormat.fraction
+      ? 'Enter a fraction such as 3/4.'
+      : 'Enter a valid number.';
 
   static String _decimal(int value, int scale) {
     final digits = scale == 100 ? 2 : 1;
