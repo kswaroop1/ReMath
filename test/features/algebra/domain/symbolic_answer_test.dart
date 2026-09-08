@@ -3,6 +3,14 @@ import 'package:remath/src/features/algebra/domain/symbolic_answer.dart';
 import 'package:remath/src/features/learning/domain/numeric_answer_contract.dart';
 
 void main() {
+  test('signed rational and zero-power notation retain exact meaning', () {
+    expect(SymbolicAnswer('x/2').mark('+x/ +2').verdict, AnswerVerdict.correct);
+    expect(SymbolicAnswer('-x/2').mark('x/-2').verdict, AnswerVerdict.correct);
+    expect(SymbolicAnswer('x/2').mark('.5x').verdict, AnswerVerdict.correct);
+    expect(SymbolicAnswer('1').mark('x^0').verdict, AnswerVerdict.correct);
+    expect(SymbolicAnswer('x').mark('x/(x^0)').verdict, AnswerVerdict.invalid);
+  });
+
   test('equivalent polynomials are marked exactly for all real x', () {
     for (final input in ['2(x+3)', '2*x+6', '6+x+x', '(4x+12)/2']) {
       expect(SymbolicAnswer('2x+6').mark(input).verdict, AnswerVerdict.correct);

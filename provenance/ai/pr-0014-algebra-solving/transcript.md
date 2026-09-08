@@ -91,3 +91,16 @@ is required because the existing atomic study snapshot is versioned JSON.
 
 Run 34261955387 reported directives_ordering in the controller imports. Correct
 only import order; no assertions or production behaviour change.
+
+Cycle 3 green: run 34262123821 passed the full suite and all checks, 99.88%
+coverage. Shared numeric regressions and all new offline algebra journeys pass.
+
+## Cycle 4: discoverable shared navigation and boundary characterization
+
+The home entry still says Number learning journey despite offering algebra.
+Require the generic Learning journey label and verify both goals are reachable
+from it. Update the existing tests' exact navigation text while retaining their
+behavioural assertions; the production label is unchanged in this red commit.
+Also characterize already implemented signed rationals/zero powers, explicit
+unknown question versions, linear input guidance and unsupported-history display.
+These latter cases have green-before evidence and do not add new behaviour.

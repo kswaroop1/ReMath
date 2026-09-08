@@ -4,6 +4,25 @@ import 'package:remath/src/features/numbers/domain/number_curriculum.dart';
 import 'package:remath/src/features/numbers/domain/study_curriculum.dart';
 
 void main() {
+  test(
+    'unknown question versions fail instead of replaying current templates',
+    () {
+      final c = StudyCurriculum();
+      expect(
+        () => c.question('algebra.collect', 0, 7, 0, templateVersion: 2),
+        throwsFormatException,
+      );
+      expect(
+        () => c.question('algebra.collect', 0, 7, 0, markingVersion: 2),
+        throwsFormatException,
+      );
+      expect(
+        () => c.question('algebra.collect', 0, 7, 0, scoringVersion: 2),
+        throwsFormatException,
+      );
+    },
+  );
+
   test('algebra adds an independent goal without changing number goals', () {
     final c = StudyCurriculum();
     expect(c.goals.last.id, 'algebra');

@@ -19,7 +19,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final entry = find.text('Number learning journey');
+    final entry = find.text('Learning journey');
     await tester.ensureVisible(entry);
     await tester.tap(entry);
     await tester.pumpAndSettle();
