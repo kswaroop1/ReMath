@@ -60,3 +60,17 @@ StudyCurriculum interface did not exist. Implement the combined catalogue,
 original algebra templates and shared StudyQuestion interface. NumberSkill and
 number-format names remain compatible; the number generator and goal sets do
 not change. Algebra has no MCQ choices in this increment.
+
+Cycle 2 green: run 34261285564 passed all checks, coverage 99.43%. The new
+uncovered lines are input labels/guidance pending their real UI integration,
+plus unary-plus handling and the two already documented defensive catalogue lines.
+
+## Cycle 3: offline algebra journey and versioned evidence
+
+Add compiling behavioural tests against the existing planner/controller/screen:
+algebra goal and independent diagnostic, exact symbolic draft/correction restore,
+full learn-practise-reflect completion, sixty-second algebra fluency policy,
+versioned immutable evidence/replay, unsupported-score exclusion, old snapshot
+compatibility and unknown-contract preservation. Widget tests require text-keyboard
+entry, saved drafts, explicit grammar feedback and focus after correction.
+No production integration is included in this test-first commit.
