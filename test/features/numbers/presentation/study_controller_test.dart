@@ -180,6 +180,8 @@ void main() {
       await learner.submit();
       expect(learner.error, isNotNull);
       expect(learner.state.stepIndex, 0);
+      await learner.checkpoint();
+      await learner.pause();
       await learner.submit();
       expect(learner.error, isNull);
       expect((await faulty.loadAttempts()).length, 1);
