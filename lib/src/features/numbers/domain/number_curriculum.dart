@@ -33,14 +33,16 @@ final class NumberQuestion {
     this.denominator = 1,
     this.format = NumberAnswerFormat.integer,
     required String method,
+    required String nextStep,
+    required String workedSolution,
     required int rotation,
   }) {
     answer = _render(numerator);
     hints = List.unmodifiable([
       'Identify the quantities and the operation before calculating.',
       method,
-      'Work one step at a time. $method Check the units of your answer.',
-      '$prompt = $answer. $method',
+      nextStep,
+      '$workedSolution Answer: $answer.',
     ]);
     final options = [NumberChoice(answer, null)];
     final candidates = [
@@ -213,32 +215,51 @@ final class NumberCurriculum {
     var format = NumberAnswerFormat.integer;
     late int result;
     late String prompt;
+    late String nextStep;
+    late String solution;
     var method = definition.lesson;
     switch (skillId) {
       case 'arithmetic.addition':
         prompt = '$a + $b';
         result = a + b;
+        nextStep = 'Split $b into ${b ~/ 10 * 10} and ${b % 10}.';
+        solution = '$a + ${b ~/ 10 * 10} + ${b % 10} = $result.';
       case 'arithmetic.subtraction':
         prompt = '${a + b} − $b';
         result = a;
+        nextStep = 'Subtract the tens of $b, then its units.';
+        solution = '${a + b} − $b = $a. Check: $a + $b = ${a + b}.';
       case 'arithmetic.multiplication':
         final factor = level == 0 ? b : 2 + b % 12;
         prompt = '$a × $factor';
         result = a * factor;
+        nextStep = 'Split $factor into tens and units before multiplying.';
+        solution =
+            '$a × $factor = ${a * (factor ~/ 10 * 10)} + ${a * (factor % 10)} = $result.';
       case 'arithmetic.division':
         final divisor = 1 + b % (level == 0 ? 9 : 12);
         prompt = '${a * divisor} ÷ $divisor';
         result = a;
+        nextStep = 'Find the missing factor: $divisor × ? = ${a * divisor}.';
+        solution =
+            '$divisor × $a = ${a * divisor}, so ${a * divisor} ÷ $divisor = $a.';
       case 'number.bonds':
         final total = [10, 100, 1000][level];
         final part = a % total;
         prompt = '$part + ? = $total';
         result = total - part;
+        nextStep = 'Subtract $part from $total.';
+        solution = '$total − $part = $result. Check: $part + $result = $total.';
       case 'number.estimation':
         final unit = [10, 100, 1000][level];
         final value = pick(unit * 10);
         prompt = 'Round $value to the nearest $unit';
         result = ((value + unit ~/ 2) ~/ unit) * unit;
+        final lower = value ~/ unit * unit;
+        nextStep = 'Compare the distances to $lower and ${lower + unit}.';
+        solution =
+            'Distances are ${value - lower} and ${lower + unit - value}. '
+            'Choose the nearer multiple, or the higher one at a tie: $result.';
       case 'number.fractions':
         final d = 2 + b % 8;
         final n = 1 + a % (d - 1);
@@ -247,6 +268,10 @@ final class NumberCurriculum {
         denominator = d * multiplier;
         result = n * multiplier + 1;
         format = NumberAnswerFormat.fraction;
+        nextStep = 'Rewrite $n/$d as ${n * multiplier}/$denominator.';
+        solution =
+            '${n * multiplier}/$denominator + 1/$denominator = '
+            '$result/$denominator. Reduce by any common factor.';
         method =
             'Rewrite the first fraction with denominator $denominator, '
             'then add the numerators. Give the answer as a fraction.';
@@ -255,6 +280,10 @@ final class NumberCurriculum {
         result = level == 2 ? a + 100 : a;
         prompt = 'Write $result/$denominator as a decimal';
         format = NumberAnswerFormat.decimal;
+        nextStep = 'Divide $result by $denominator using place value.';
+        solution =
+            'Move the decimal point ${denominator == 10 ? 1 : 2} '
+            'places left in $result, adding zeros where needed.';
       case 'number.ratios':
         final first = 1 + a % (3 + level * 3);
         final second = 1 + b % (4 + level * 3);
@@ -263,15 +292,25 @@ final class NumberCurriculum {
             'Share ${unit * (first + second)} in ratio $first:$second. '
             'What is the first share?';
         result = unit * first;
+        nextStep =
+            'There are ${first + second} parts; find the value of one part.';
+        solution =
+            '${unit * (first + second)} ÷ ${first + second} = $unit per part. '
+            'The first share is $first × $unit = $result.';
       case 'number.percentages':
         final percent = [10, 25, 5][level] * (1 + a % 3);
         final total = b * 100;
         prompt = 'What is $percent% of £$total? Enter pounds.';
         result = percent * b;
+        nextStep =
+            'One percent is £${total ~/ 100}. Multiply this by $percent.';
+        solution = '$total ÷ 100 = $b, then $percent × $b = $result pounds.';
       case 'number.units':
         final factor = level == 0 ? 100 : 1000;
         prompt = level == 0 ? 'Convert $a m to cm' : 'Convert $a kg to g';
         result = a * factor;
+        nextStep = 'Each larger unit contains $factor of the smaller unit.';
+        solution = '$a × $factor = $result ${level == 0 ? 'cm' : 'g'}.';
       default:
         throw StateError('No generator for $skillId');
     }
@@ -283,6 +322,8 @@ final class NumberCurriculum {
       denominator: denominator,
       format: format,
       method: method,
+      nextStep: nextStep,
+      workedSolution: solution,
       rotation: (seed + index) & 3,
     );
   }

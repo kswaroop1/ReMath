@@ -52,7 +52,7 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      _controller.resume();
+      unawaited(_controller.resume());
     } else {
       unawaited(_controller.pause());
     }
@@ -193,6 +193,10 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
       expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(progress.explanation),
+        Text(
+          '${(progress.chanceAdjustedAccuracy * 100).round()}% chance-adjusted accuracy. '
+          'Four-choice answers are adjusted for guessing.',
+        ),
         if (skill.prerequisites.isNotEmpty)
           Text(
             'Suggested preparation: ${skill.prerequisites.map((id) => _controller.curriculum.skill(id).title).join(', ')}',

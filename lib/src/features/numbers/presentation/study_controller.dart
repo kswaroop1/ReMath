@@ -146,11 +146,10 @@ final class StudyController extends ChangeNotifier {
     }
   });
 
-  void resume() {
+  Future<void> resume() => _enqueue(() async {
     _lastTick = _clock().toUtc();
     _running = _state.plan != null;
-    _notify();
-  }
+  });
 
   Future<void> continueStep() => _exclusive(() async {
     if (_state.plan == null || question != null) return;

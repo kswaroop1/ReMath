@@ -162,3 +162,14 @@ UnimplementedError public seam in this red commit; it contains no scoring logic.
 Other new cases exercise existing behaviour directly, including the suspected
 pause/resume race. Independent arithmetic checks characterize existing valid
 questions, rather than manufacturing a failure.
+
+Cycle 7 red: after a test-fixture for-loop lint correction, run 34225118851
+passed analysis and failed four intended cases: unimplemented chance adjustment,
+unknown saved goal accepted, missing intermediate worked calculation, and rapid
+resume leaving 15:00 instead of charging five active seconds. Independent prompt
+calculation checks passed.
+
+Implement four-choice chance adjustment (wrong choices subtract one third of a
+correct-answer unit, clamped to zero), validate saved goals/skills/levels, provide
+parameter-specific intermediate hints and solutions, and serialize resume with
+pause. Choice results still cannot establish numeric fluency or retention alone.

@@ -12,6 +12,7 @@ final class StudyProgress {
     required this.correct,
     required this.assisted,
     required this.retention,
+    required this.chanceAdjustedAccuracy,
   });
 
   factory StudyProgress.forSkill(
@@ -63,6 +64,19 @@ final class StudyProgress {
       independent: independent.length,
       correct: independent.where((e) => e.isCorrect).length,
       assisted: events.length - independent.length,
+      chanceAdjustedAccuracy: independent.isEmpty
+          ? 0
+          : ((independent.where((e) => e.isCorrect).length -
+                        independent
+                                .where(
+                                  (e) =>
+                                      e.questionId.endsWith('.mcq') &&
+                                      !e.isCorrect,
+                                )
+                                .length /
+                            3) /
+                    independent.length)
+                .clamp(0.0, 1.0),
       retention: const RetainedMasteryCalculator().forSkill(
         skillId,
         numeric,
@@ -77,7 +91,7 @@ final class StudyProgress {
   final int correct;
   final int assisted;
   final RetainedMastery retention;
-  double get chanceAdjustedAccuracy => throw UnimplementedError();
+  final double chanceAdjustedAccuracy;
   double get accuracy => independent == 0 ? 0 : correct / independent;
   String get explanation => independent == 0
       ? 'No independent evidence yet. Start with a diagnostic or guided practice.'
@@ -277,6 +291,17 @@ final class StudyState {
         state.responseMilliseconds < 0 ||
         (state.plan != null && state.stepIndex >= state.plan!.steps.length)) {
       throw const FormatException('Invalid study state');
+    }
+    final curriculum = NumberCurriculum();
+    if (!curriculum.goals.any((goal) => goal.id == state.goalId)) {
+      throw const FormatException('Unknown saved goal');
+    }
+    for (final step in state.plan?.steps ?? const <StudyStep>[]) {
+      if (step.level < 0 ||
+          step.level > 2 ||
+          !curriculum.skills.any((skill) => skill.id == step.skillId)) {
+        throw const FormatException('Invalid saved skill or difficulty');
+      }
     }
     return state;
   }
