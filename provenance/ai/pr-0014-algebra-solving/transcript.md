@@ -104,3 +104,8 @@ behavioural assertions; the production label is unchanged in this red commit.
 Also characterize already implemented signed rationals/zero powers, explicit
 unknown question versions, linear input guidance and unsupported-history display.
 These latter cases have green-before evidence and do not add new behaviour.
+
+Cycle 4 red: run 34262445769 passed analysis and failed navigation because
+Learning journey was absent. Rename the single existing home entry; both goals
+continue to use the same route. The characterization boundaries require no
+production change.

@@ -93,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
               );
               if (mounted) await _controller.initialise();
             },
-            child: const Text('Number learning journey'),
+            child: const Text('Learning journey'),
           ),
       ],
     ),
