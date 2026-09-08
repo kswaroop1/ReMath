@@ -96,6 +96,12 @@ final class StudyStep {
     this.level, {
     this.multipleChoice = false,
   });
+  factory StudyStep.fromJson(Map<String, dynamic> json) => StudyStep(
+    StudyStepKind.values.byName(json['kind'] as String),
+    json['skill'] as String,
+    json['level'] as int,
+    multipleChoice: json['mcq'] as bool,
+  );
   final StudyStepKind kind;
   final String skillId;
   final int level;
@@ -106,12 +112,6 @@ final class StudyStep {
     'level': level,
     'mcq': multipleChoice,
   };
-  factory StudyStep.fromJson(Map<String, dynamic> json) => StudyStep(
-    StudyStepKind.values.byName(json['kind'] as String),
-    json['skill'] as String,
-    json['level'] as int,
-    multipleChoice: json['mcq'] as bool,
-  );
 }
 
 final class StudyPlan {
@@ -120,6 +120,13 @@ final class StudyPlan {
     required this.reason,
     this.isDiagnostic = false,
   }) : steps = List.unmodifiable(steps);
+  factory StudyPlan.fromJson(Map<String, dynamic> json) => StudyPlan(
+    steps: (json['steps'] as List<dynamic>)
+        .map((s) => StudyStep.fromJson(s as Map<String, dynamic>))
+        .toList(),
+    reason: json['reason'] as String,
+    isDiagnostic: json['diagnostic'] as bool,
+  );
   final List<StudyStep> steps;
   final String reason;
   final bool isDiagnostic;
@@ -129,13 +136,6 @@ final class StudyPlan {
     'reason': reason,
     'diagnostic': isDiagnostic,
   };
-  factory StudyPlan.fromJson(Map<String, dynamic> json) => StudyPlan(
-    steps: (json['steps'] as List<dynamic>)
-        .map((s) => StudyStep.fromJson(s as Map<String, dynamic>))
-        .toList(),
-    reason: json['reason'] as String,
-    isDiagnostic: json['diagnostic'] as bool,
-  );
 }
 
 final class StudyPlanner {
@@ -245,6 +245,40 @@ final class StudyState {
     this.serial = 0,
     this.responseMilliseconds = 0,
   });
+  factory StudyState.decode(String source) {
+    final json = jsonDecode(source) as Map<String, dynamic>;
+    if (json['version'] != 1) {
+      throw const FormatException('Unsupported study state');
+    }
+    final state = StudyState(
+      goalId: json['goal'] as String,
+      plan: json['plan'] == null
+          ? null
+          : StudyPlan.fromJson(json['plan'] as Map<String, dynamic>),
+      sessionId: json['session'] as String,
+      seed: json['seed'] as int,
+      stepIndex: json['step'] as int,
+      questionIndex: json['question'] as int,
+      draft: json['draft'] as String,
+      hintCount: json['hints'] as int,
+      phase: StudyPhase.values.byName(json['phase'] as String),
+      remainingMilliseconds: json['remaining'] as int,
+      relatedEventId: json['related'] as String?,
+      serial: json['serial'] as int,
+      responseMilliseconds: json['response'] as int,
+    );
+    if (state.stepIndex < 0 ||
+        state.questionIndex < 0 ||
+        state.hintCount < 0 ||
+        state.hintCount > 4 ||
+        state.remainingMilliseconds < 0 ||
+        state.serial < 0 ||
+        state.responseMilliseconds < 0 ||
+        (state.plan != null && state.stepIndex >= state.plan!.steps.length)) {
+      throw const FormatException('Invalid study state');
+    }
+    return state;
+  }
   final String goalId;
   final StudyPlan? plan;
   final String sessionId;
@@ -307,38 +341,4 @@ final class StudyState {
     'serial': serial,
     'response': responseMilliseconds,
   });
-
-  factory StudyState.decode(String source) {
-    final json = jsonDecode(source) as Map<String, dynamic>;
-    if (json['version'] != 1)
-      throw const FormatException('Unsupported study state');
-    final state = StudyState(
-      goalId: json['goal'] as String,
-      plan: json['plan'] == null
-          ? null
-          : StudyPlan.fromJson(json['plan'] as Map<String, dynamic>),
-      sessionId: json['session'] as String,
-      seed: json['seed'] as int,
-      stepIndex: json['step'] as int,
-      questionIndex: json['question'] as int,
-      draft: json['draft'] as String,
-      hintCount: json['hints'] as int,
-      phase: StudyPhase.values.byName(json['phase'] as String),
-      remainingMilliseconds: json['remaining'] as int,
-      relatedEventId: json['related'] as String?,
-      serial: json['serial'] as int,
-      responseMilliseconds: json['response'] as int,
-    );
-    if (state.stepIndex < 0 ||
-        state.questionIndex < 0 ||
-        state.hintCount < 0 ||
-        state.hintCount > 4 ||
-        state.remainingMilliseconds < 0 ||
-        state.serial < 0 ||
-        state.responseMilliseconds < 0 ||
-        (state.plan != null && state.stepIndex >= state.plan!.steps.length)) {
-      throw const FormatException('Invalid study state');
-    }
-    return state;
-  }
 }
