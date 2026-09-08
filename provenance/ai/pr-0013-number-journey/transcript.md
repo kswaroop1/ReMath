@@ -197,3 +197,34 @@ fix and valid lifecycle fixture. Add existing-behaviour checks for oldest-due
 ordering, failed schema-six migration followed by retry, rejection of an unknown
 goal without overwriting saved state, and keyboard submission through correction.
 These are characterization tests with green-before evidence, not new behaviour.
+
+## Implementation verification and review handoff
+
+Run [34226609046](https://github.com/kswaroop1/ReMath/actions/runs/34226609046)
+passed formatting (`dart format --output=none --set-exit-if-changed lib test tool`),
+`flutter analyze --fatal-infos --fatal-warnings`, content-pack validation,
+`flutter test --coverage`, the unchanged 90% coverage gate, and the secret scan.
+Coverage is 99.91%; the merged PR12 base run 34162396702 was 100.00%.
+The coverage decrease is exactly two defensive lines:
+
+- `number_curriculum.dart:315`: unknown-generator fallback after catalogue lookup.
+  Every fixed catalogue skill has a tested generator; unknown IDs fail the earlier
+  lookup. Reaching this fallback would require editing the production catalogue.
+- `study_plan.dart:206`: prerequisite-redirection explanation. Both fixed goals
+  order every prerequisite before its dependent skill; first-unmastered selection
+  therefore already chooses the unmet prerequisite. Explicit exploration remains
+  advisory and is tested. This defensive branch supports future catalogue ordering
+  but cannot be selected by current goals. No coverage exclusions were added.
+
+The newly reachable boundaries all pass, including migration rollback and retry,
+oldest-due ordering, unknown-goal preservation and keyboard submission. No local
+Flutter success or real-device validation is claimed; verification ran in CI.
+
+Updated README, feature completion statuses and roadmap to describe the shipped
+number-journey scope precisely. MA-001/002 and broader goal/recommendation features
+remain partial. The timer has the documented last-unpersisted-checkpoint limit;
+atomic answer transitions retain their exact committed state. The algebra bridge
+is proposed follow-on work only. No version change, release or merge was made.
+
+Prepare the completed PR for the previously agreed single Codex review request
+once the documentation-only head passes CI. Review results are not yet claimed.
