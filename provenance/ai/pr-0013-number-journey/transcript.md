@@ -122,3 +122,11 @@ test: expected restored step 1, actual step 0 after checkpoint/pause and retry.
 The controller now preserves an uncertain-commit flag and blocks draft/timer/hint
 writes until submission retry resolves it. Retry uses the same immutable event
 identity and reloads the committed next state when already inserted.
+
+Cycle 5 green: run 34191324869 passed all checks, 98.93% coverage.
+
+## Cycle 6: learner-facing screen
+
+Widget tests first: reach the number journey from the existing home; enter and
+correct fractions while retaining focus; persist and submit a selected MCQ;
+read the offline lesson and finish a session into the progress overview.
