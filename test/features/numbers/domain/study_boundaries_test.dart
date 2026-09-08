@@ -56,7 +56,9 @@ void main() {
   test('mastered goals still offer a bounded useful plan', () {
     final events = <AttemptEvent>[];
     for (final skill in NumberCurriculum().skills) {
-      for (var i = 0; i < 3; i++) events.add(event(i, skill: skill.id));
+      for (var i = 0; i < 3; i++) {
+        events.add(event(i, skill: skill.id));
+      }
     }
     final plan = StudyPlanner().plan('proportions', events, now);
     expect(plan.steps.first.level, 1);
