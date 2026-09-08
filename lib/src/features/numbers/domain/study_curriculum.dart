@@ -22,8 +22,20 @@ final class StudyCurriculum {
     (s) => s.id == id,
     orElse: () => throw ArgumentError.value(id, 'skill'),
   );
-  StudyQuestion question(String skillId, int level, int seed, int index) =>
-      skillId.startsWith('algebra.')
-      ? _algebra.question(skillId, level, seed, index)
-      : _numbers.question(skillId, level, seed, index);
+  StudyQuestion question(
+    String skillId,
+    int level,
+    int seed,
+    int index, {
+    int templateVersion = 1,
+    int markingVersion = 1,
+    int scoringVersion = 1,
+  }) {
+    if (templateVersion != 1 || markingVersion != 1 || scoringVersion != 1) {
+      throw const FormatException('Unsupported question contract version');
+    }
+    return skillId.startsWith('algebra.')
+        ? _algebra.question(skillId, level, seed, index)
+        : _numbers.question(skillId, level, seed, index);
+  }
 }

@@ -74,3 +74,17 @@ versioned immutable evidence/replay, unsupported-score exclusion, old snapshot
 compatibility and unknown-contract preservation. Widget tests require text-keyboard
 entry, saved drafts, explicit grammar feedback and focus after correction.
 No production integration is included in this test-first commit.
+
+Cycle 3 red: run 34261551596 passed analysis and failed the intended journey
+contracts: algebra remained number-fluency, diagnostic had 19 rather than 10
+steps, sixty-second successes did not promote, unknown scoring events counted,
+and unsupported saved versions were accepted. The algebra goal widget was absent.
+
+Integrate the shared catalogue and question interface into the existing controller
+and UI. Algebra plans use symbolic entry throughout; numeric plans retain MCQs.
+Snapshot version two freezes template/marking/scoring versions; version-one
+numeric snapshots receive explicit defaults. Reject unsupported contracts and
+algebra snapshots claiming legacy format, retaining their stored bytes.
+Version-one algebra evidence permits sixty-second independent fluency; unknown
+versions remain visible in history without mastery credit. No SQL schema change
+is required because the existing atomic study snapshot is versioned JSON.

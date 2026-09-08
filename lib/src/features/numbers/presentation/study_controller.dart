@@ -5,7 +5,8 @@ import 'package:flutter/foundation.dart';
 import '../../learning/domain/attempt_event.dart';
 import '../../learning/domain/numeric_answer_contract.dart';
 import '../../learning/domain/progress_repository.dart';
-import '../domain/number_curriculum.dart';
+import '../domain/study_curriculum.dart';
+import '../domain/study_question.dart';
 import '../domain/study_plan.dart';
 
 final class StudyController extends ChangeNotifier {
@@ -20,7 +21,7 @@ final class StudyController extends ChangeNotifier {
   final ProgressRepository _repository;
   final DateTime Function() _clock;
   final String Function() _idFactory;
-  final curriculum = NumberCurriculum();
+  final curriculum = StudyCurriculum();
   StudyState _state = const StudyState();
   List<AttemptEvent> _attempts = [];
   Future<void> _pending = Future<void>.value();
@@ -40,7 +41,7 @@ final class StudyController extends ChangeNotifier {
       .map((s) => StudyProgress.forSkill(s.id, _attempts, _clock().toUtc()))
       .toList(growable: false);
 
-  NumberQuestion? get question {
+  StudyQuestion? get question {
     final step = _state.step;
     if (step == null ||
         step.kind == StudyStepKind.learn ||
@@ -52,6 +53,9 @@ final class StudyController extends ChangeNotifier {
       step.level,
       _state.seed,
       _state.questionIndex,
+      templateVersion: step.templateVersion,
+      markingVersion: step.markingVersion,
+      scoringVersion: step.scoringVersion,
     );
   }
 
@@ -171,9 +175,7 @@ final class StudyController extends ChangeNotifier {
         (isMultipleChoice && !q.choices.any((c) => c.value == before.draft))) {
       _error = isMultipleChoice
           ? 'Select one answer first.'
-          : q.format == NumberAnswerFormat.fraction
-          ? 'Enter a fraction such as 3/4.'
-          : 'Enter a valid number.';
+          : q.invalidInputMessage;
       return;
     }
     final correct = mark.verdict == AnswerVerdict.correct;

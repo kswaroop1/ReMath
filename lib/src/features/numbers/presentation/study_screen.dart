@@ -6,6 +6,7 @@ import '../../learning/domain/attempt_event.dart';
 import '../../learning/domain/progress_repository.dart';
 import '../domain/number_curriculum.dart';
 import '../domain/study_plan.dart';
+import '../domain/study_scoring.dart';
 import 'study_controller.dart';
 
 class StudyScreen extends StatefulWidget {
@@ -86,14 +87,14 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
       if (didPop) unawaited(_controller.pause());
     },
     child: Scaffold(
-      appBar: AppBar(title: const Text('Number learning')),
+      appBar: AppBar(title: const Text('Number and algebra learning')),
       body: FutureBuilder<void>(
         future: _ready,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Center(
               child: Text(
-                'Could not open your saved number session. '
+                'Could not open your saved learning session. '
                 'Your saved data has been kept.',
               ),
             );
@@ -172,7 +173,7 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
       style: Theme.of(context).textTheme.titleLarge,
     ),
     const Text(
-      'Numeric fluency and delayed retention are assessed separately. '
+      'Independent fluency and delayed retention are assessed separately. '
       'You can explore any skill.',
     ),
     for (final progress in _controller.progress) _skillTile(progress),
@@ -225,6 +226,9 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
   }
 
   String _eventDescription(AttemptEvent event) {
+    if (!StudyScoring.supports(event)) {
+      return 'Unsupported contract; kept in history without mastery credit.';
+    }
     if (!event.kind.contributesToMastery) {
       return event.kind == AttemptKind.hint
           ? 'Hint used; no independent mastery credit.'
@@ -301,6 +305,7 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
           Text(plan.isDiagnostic ? 'Starting-point check' : skill.title),
         const SizedBox(height: 8),
         Text(q.prompt, style: Theme.of(context).textTheme.headlineSmall),
+        if (q.inputGuidance != null) Text(q.inputGuidance!),
         const SizedBox(height: 12),
         if (_controller.isMultipleChoice)
           for (final choice in q.choices)
@@ -326,17 +331,14 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
             focusNode: _focus,
             autofocus: true,
             enabled: !_controller.busy && !_controller.needsRetry,
-            keyboardType: q.format == NumberAnswerFormat.fraction
+            keyboardType:
+                q.format == null || q.format == NumberAnswerFormat.fraction
                 ? TextInputType.text
                 : const TextInputType.numberWithOptions(
                     decimal: true,
                     signed: true,
                   ),
-            decoration: InputDecoration(
-              labelText: q.format == NumberAnswerFormat.fraction
-                  ? 'Answer as a fraction, e.g. 3/4'
-                  : 'Your answer',
-            ),
+            decoration: InputDecoration(labelText: q.answerLabel),
             onChanged: (value) {
               unawaited(_controller.updateDraft(value));
             },
