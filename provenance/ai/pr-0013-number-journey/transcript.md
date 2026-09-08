@@ -91,3 +91,12 @@ Implemented schema-six study state and atomic attempt/state writes. SQLite's
 transaction body is synchronous (no await while the transaction is open).
 Duplicates do not rewind the saved state. The legacy repository test double
 forwards the new interface methods without changing its existing blocking rule.
+
+Cycle 3 green: run 34190593356 passed all checks, 98.38% line coverage.
+
+## Cycle 4: complete learner session coordination
+
+Test-first scenarios cover goal persistence, exact interrupted question/draft/time,
+correction followed by independent retest, persisted hints, invalid input,
+duplicate submit, multiple chunks, diagnostic isolation, time expiry, protection
+of an unfinished plan, and retry after a persisted write loses acknowledgement.
