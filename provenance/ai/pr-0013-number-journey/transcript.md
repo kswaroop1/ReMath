@@ -107,3 +107,12 @@ committed state on duplicate retries, and records assistance separately. Wrong
 practice answers require correction and a fresh numeric retest. Diagnostics
 advance without coaching. The timer charges active time only; the ADR explicitly
 states the one-second UI-checkpoint limit for an abrupt process kill.
+
+Cycle 4 green: run 34190921363 passed full CI with 98.88% line coverage.
+
+## Cycle 5: uncertain acknowledgement and timer checkpoint
+
+Review found that a timer/pause snapshot could overwrite the already committed
+next state after an acknowledgement failure. Extend the existing lost-ack test
+with checkpoint and pause before retry; keep the single-event and next-step
+assertions. This is a compiling regression test against the current controller.
