@@ -177,4 +177,13 @@ final class _BlockingProgressRepository implements ProgressRepository {
   @override
   Future<void> saveSession(LearningSession session) =>
       _inner.saveSession(session);
+  @override
+  Future<String?> loadStudyState() => _inner.loadStudyState();
+
+  @override
+  Future<void> saveStudyState(String state) => _inner.saveStudyState(state);
+
+  @override
+  Future<bool> commitStudyAttempt(AttemptEvent event, String state) =>
+      _inner.commitStudyAttempt(event, state);
 }

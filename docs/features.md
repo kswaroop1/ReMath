@@ -17,7 +17,7 @@ This is the authoritative, numbered product and content backlog for ReMath.
 - Feature IDs are permanent. Retired features remain recorded rather than being
   renumbered.
 
-Last reviewed: 31 August 2026.
+Last reviewed: 8 September 2026 (PR13 number journey).
 
 ## 1. Product foundations
 
@@ -46,14 +46,19 @@ Last reviewed: 31 August 2026.
   samples addition, subtraction, and multiplication independently, resumes an
   interrupted question and draft, and explains each starting recommendation.
   Algebra, calculus, probability, and further tracks remain planned extensions.
-- [ ] **LX-002 — Goal selection.** Choose goals such as JEE fluency, quant
-  finance, AI-paper comprehension, engineering mathematics, or robotics.
-- [ ] **LX-003 — Fifteen-minute chunk planner.** Assemble a bounded session from
-  retrieval, explanation, focused practice, correction, and reflection.
-- [ ] **LX-004 — Multiple chunks per day.** Permit any number of independent
-  chunks without imposing one daily session.
-- [ ] **LX-005 — Exact pause and resume.** Persist question, timer, answer draft,
-  hint state, and remaining chunk plan.
+- [ ] **LX-002 — Goal selection.** **Foundation delivered:** persist a usable
+  number-fluency or proportional-reasoning goal. Broader JEE, quant-finance,
+  AI, engineering and robotics goal selection remains planned.
+- [x] **LX-003 — Fifteen-minute chunk planner.** The number journey freezes an
+  explainable plan with retrieval, teaching, focused numeric/MCQ practice,
+  correction/retest and reflection, bounded by fifteen active minutes.
+- [x] **LX-004 — Multiple chunks per day.** Number sessions may finish early
+  and another chunk can start immediately; there is no daily cap.
+- [ ] **LX-005 — Exact pause and resume.** **Number-journey foundation delivered:**
+  persist the plan, question, draft/choice, hints, correction state and active
+  budget, with atomic answer/transition writes. Lifecycle pause saves the budget;
+  an abrupt process kill can lose the last unpersisted one-second timer interval.
+  Legacy drill timing and a universal cross-mode plan remain separate.
 - [x] **LX-006 — Learn chunk.** Open an offline concept card directly or from a
   remediation recommendation, reveal staged help, and retain the active card
   and revealed state across interruption. Focused practice follows through the
@@ -130,8 +135,9 @@ Last reviewed: 31 August 2026.
   local arithmetic and distinguish incorrect from invalid input.
 - [ ] **QA-003 — Symbolic short answers.** Algebraic equivalence with explicit
   assumptions and domain restrictions.
-- [ ] **QA-004 — Single-answer MCQ.** Randomised distractors with misconception
-  metadata and guessing correction.
+- [x] **QA-004 — Single-answer MCQ.** Number questions offer four distinct
+  deterministically rotated choices, error metadata and chance-adjusted accuracy.
+  MCQs alone cannot promote numeric difficulty or confirm retained mastery.
 - [ ] **QA-005 — Multiple-select questions.** Partial-credit policy that does not
   reward indiscriminate selection.
 - [ ] **QA-006 — Ordered-step questions.** Arrange derivation, algorithm, or proof
@@ -229,8 +235,9 @@ Last reviewed: 31 August 2026.
   treating mastery as permanent. A deterministic arithmetic foundation now
   rises from zero to one across the current review interval and caps when due;
   evidence-calibrated forecasting remains planned.
-- [ ] **MP-015 — Session recommendation.** Balance current goal, overdue review,
-  fatigue, and available time.
+- [ ] **MP-015 — Session recommendation.** **Foundation delivered:** number
+  plans use the selected goal, due review, prerequisites and per-skill evidence.
+  Fatigue and configurable available time remain planned.
 - [x] **MP-016 — Progress dashboard.** Time, independent and assisted attempts,
   accuracy, knowledge, performance, retention, forgetting risk, and curriculum
   goal readiness are derived offline for each foundation skill.
@@ -415,9 +422,14 @@ Last reviewed: 31 August 2026.
 
 ## 11. Mathematics content modules
 
-- [ ] **MA-001 — Mental arithmetic.** Small-number operations, number bonds,
-  multiplication, division, estimation, and timed recall.
-- [ ] **MA-002 — Fractions, ratios, percentages, and units.**
+- [ ] **MA-001 — Mental arithmetic.** **Foundation expanded:** addition,
+  subtraction, multiplication, exact division, number bonds and rounding, with
+  three bounded difficulty levels, diagnostic/learn/practice/review and history.
+  Broader estimation strategies and complete arithmetic coverage remain planned.
+- [ ] **MA-002 — Fractions, ratios, percentages, and units.** **Foundation
+  delivered:** fraction addition, fraction-to-decimal conversion, ratio sharing,
+  percentages of amounts and metric conversions, throughout the number journey.
+  Other fraction operations, percentage change/reversal and broader units remain.
 - [ ] **MA-003 — Powers, roots, logarithms, scientific notation, and scale.**
 - [ ] **MA-004 — Algebraic expansion, factorisation, simplification, and
   rearrangement.**

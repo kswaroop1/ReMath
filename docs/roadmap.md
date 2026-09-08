@@ -95,3 +95,15 @@ installing the first real release:
 - Documentation warns that the current CI-generated Android signing identity is
   not suitable for reliable in-place upgrades; EN-013 remains incomplete until
   an owner-controlled keystore is configured.
+
+## PR #13 — Number fluency and proportional reasoning
+
+Deliver the next vertical slice across MA-001/002 and the supporting goal,
+planning, assessment, progression and persistence capabilities. See the exact
+[scope and acceptance criteria](slices/number-learning.md). Broader mathematical
+module completion is not implied by this bounded slice.
+
+The next proposed slice is the algebra bridge: powers/roots, scientific notation,
+basic manipulation and linear equations, adding constrained symbolic marking and
+structured steps when those learning journeys require them. It remains proposed,
+not part of PR13. No release is included in PR13.

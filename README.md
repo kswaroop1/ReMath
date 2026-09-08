@@ -30,7 +30,16 @@ separate occasions, records lapses, and offers resumable review chunks for
 overdue or approaching skills. An offline progress dashboard separates
 knowledge, performance, accuracy, assistance, retention, forgetting risk, and
 goal readiness, with per-skill history explaining how every event affected the
-displayed state. Cloud synchronisation and downloadable course
+displayed state.
+
+The number-learning journey now adds two persisted goals, eleven independently
+tracked skills, three bounded difficulty levels, exact fraction/decimal entry,
+four-choice questions, staged worked hints, and a planned recall/learn/practise/
+reflect session. Answers and session transitions commit atomically; paused time
+is not charged. Its skill history separates assisted, choice and numeric evidence.
+The original arithmetic drill and its saved sessions remain available.
+
+Cloud synchronisation and downloadable course
 packs remain deliberately separated behind interfaces so providers can be added
 without changing the learning engine.
 
@@ -67,6 +76,7 @@ generated changes before committing them.
 - [Architecture](docs/architecture.md)
 - [ADR 0001: local progress persistence](docs/adr/0001-local-progress-persistence.md)
 - [ADR 0002: adaptive fluency scheduling](docs/adr/0002-adaptive-fluency-scheduling.md)
+- [ADR 0003: planned number sessions](docs/adr/0003-planned-number-sessions.md)
 - [Numbered feature register](docs/features.md)
 - [Delivery roadmap](docs/roadmap.md)
 - [Testing strategy](docs/testing.md)

@@ -9,6 +9,7 @@ import '../../learning/domain/progress_dashboard.dart';
 import '../../learning/domain/progress_repository.dart';
 import '../../learning/domain/retained_mastery.dart';
 import '../../learning/presentation/learning_controller.dart';
+import '../../numbers/presentation/study_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -79,7 +80,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('ReMath')),
+    appBar: AppBar(
+      title: const Text('ReMath'),
+      actions: [
+        if (!_controller.hasActiveSession)
+          TextButton(
+            onPressed: () async {
+              await Navigator.of(context).push<void>(
+                MaterialPageRoute(
+                  builder: (_) => StudyScreen(repository: widget.repository),
+                ),
+              );
+              if (mounted) await _controller.initialise();
+            },
+            child: const Text('Number learning journey'),
+          ),
+      ],
+    ),
     body: FutureBuilder<void>(
       future: _initialised,
       builder: (context, snapshot) {

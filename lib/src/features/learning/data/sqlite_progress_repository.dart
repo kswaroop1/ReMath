@@ -10,7 +10,7 @@ final class SqliteProgressRepository implements ProgressRepository {
   }
 
   final CommonDatabase _database;
-  static const _currentSchemaVersion = 5;
+  static const _currentSchemaVersion = 6;
 
   void _migrate() {
     _database.execute('PRAGMA foreign_keys = ON');
@@ -184,6 +184,21 @@ final class SqliteProgressRepository implements ProgressRepository {
         rethrow;
       }
     }
+    if (version < 6) {
+      _database.execute('BEGIN IMMEDIATE');
+      try {
+        _database.execute(
+          'CREATE TABLE study_state ('
+          'singleton INTEGER NOT NULL PRIMARY KEY CHECK (singleton = 1), '
+          'state TEXT NOT NULL) STRICT',
+        );
+        _database.execute('UPDATE schema_version SET version = 6');
+        _database.execute('COMMIT');
+      } catch (_) {
+        _database.execute('ROLLBACK');
+        rethrow;
+      }
+    }
   }
 
   @override
@@ -226,7 +241,9 @@ final class SqliteProgressRepository implements ProgressRepository {
   }
 
   @override
-  Future<bool> recordAttempt(AttemptEvent event) async {
+  Future<bool> recordAttempt(AttemptEvent event) async => _insertAttempt(event);
+
+  bool _insertAttempt(AttemptEvent event) {
     _database.execute(
       '''
       INSERT OR IGNORE INTO attempt_events (
@@ -284,6 +301,41 @@ final class SqliteProgressRepository implements ProgressRepository {
         session.revealedHintCount,
       ],
     );
+  }
+
+  @override
+  Future<String?> loadStudyState() async {
+    final rows = _database.select(
+      'SELECT state FROM study_state WHERE singleton = 1',
+    );
+    return rows.isEmpty ? null : rows.single['state'] as String;
+  }
+
+  void _writeStudyState(String state) {
+    _database.execute(
+      'INSERT INTO study_state (singleton, state) VALUES (1, ?) '
+      'ON CONFLICT(singleton) DO UPDATE SET state = excluded.state',
+      [state],
+    );
+  }
+
+  @override
+  Future<void> saveStudyState(String state) async => _writeStudyState(state);
+
+  @override
+  Future<bool> commitStudyAttempt(AttemptEvent event, String state) async {
+    _database.execute('BEGIN IMMEDIATE');
+    try {
+      final inserted = _insertAttempt(event);
+      if (inserted) {
+        _writeStudyState(state);
+      }
+      _database.execute('COMMIT');
+      return inserted;
+    } catch (_) {
+      _database.execute('ROLLBACK');
+      rethrow;
+    }
   }
 
   AttemptEvent _attemptFromRow(Row row) => AttemptEvent(
