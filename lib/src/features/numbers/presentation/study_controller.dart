@@ -6,8 +6,8 @@ import '../../learning/domain/attempt_event.dart';
 import '../../learning/domain/numeric_answer_contract.dart';
 import '../../learning/domain/progress_repository.dart';
 import '../domain/study_curriculum.dart';
-import '../domain/study_question.dart';
 import '../domain/study_plan.dart';
+import '../domain/study_question.dart';
 
 final class StudyController extends ChangeNotifier {
   StudyController({

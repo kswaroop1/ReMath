@@ -88,3 +88,6 @@ algebra snapshots claiming legacy format, retaining their stored bytes.
 Version-one algebra evidence permits sixty-second independent fluency; unknown
 versions remain visible in history without mastery credit. No SQL schema change
 is required because the existing atomic study snapshot is versioned JSON.
+
+Run 34261955387 reported directives_ordering in the controller imports. Correct
+only import order; no assertions or production behaviour change.
