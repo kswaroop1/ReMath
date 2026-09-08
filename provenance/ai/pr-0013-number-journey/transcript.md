@@ -59,3 +59,17 @@ selection, due-review priority, two goal plans and independently sampled
 diagnostics. Frozen versioned JSON state preserves question and interaction
 identity. Numeric success is required for difficulty and delayed retention;
 MCQ accuracy is displayed but cannot establish these claims alone.
+
+Run 34164411157 reported constructor ordering and a missing conditional block.
+Corrected in local 46bbf0c; publication was blocked by an exhausted credit limit.
+No complete implementation or successful planner verification was claimed.
+
+## Resumption — 8 September 2026
+
+User: "We had run out of credits, pl continue now."
+
+Confirmed PR13 still at the planner implementation commit and published the
+pending style correction. Preserved uncommitted storage/controller/widget tests.
+Found that the lapse test's observation time preceded its simulated errors by
+four seconds. Corrected the fixture to observe after both errors, retaining all
+assertions; production review timing is not changed to satisfy that fixture.

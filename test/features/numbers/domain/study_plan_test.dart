@@ -57,7 +57,7 @@ void main() {
       final progress = StudyProgress.forSkill(
         'arithmetic.division',
         events,
-        now,
+        now.add(const Duration(seconds: 5)),
       );
       expect(progress.level, 0);
       expect(progress.retention.successfulOccasions, 0);
