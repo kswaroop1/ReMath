@@ -137,3 +137,8 @@ explainable plan, learn/practice/reflection stages, fraction/decimal entry,
 selected MCQ state, hint ladder, skill progress/history and pause behaviour.
 The UI checkpoints active time every second and persists on lifecycle pause.
 The existing drill is preserved, and its home progress refreshes on return.
+
+Run 34191706645: all new number-screen widget tests passed. Existing home tests
+failed because the added vertical button moved established controls outside the
+viewport. Move navigation into the app bar, preserving the legacy content layout;
+no existing test is weakened or changed to accommodate the regression.

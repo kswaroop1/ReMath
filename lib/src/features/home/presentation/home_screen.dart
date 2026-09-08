@@ -80,7 +80,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('ReMath')),
+    appBar: AppBar(
+      title: const Text('ReMath'),
+      actions: [
+        if (!_controller.hasActiveSession)
+          TextButton(
+            onPressed: () async {
+              await Navigator.of(context).push<void>(
+                MaterialPageRoute(
+                  builder: (_) => StudyScreen(repository: widget.repository),
+                ),
+              );
+              if (mounted) await _controller.initialise();
+            },
+            child: const Text('Number learning journey'),
+          ),
+      ],
+    ),
     body: FutureBuilder<void>(
       future: _initialised,
       builder: (context, snapshot) {
@@ -123,18 +139,6 @@ class _HomeScreenState extends State<HomeScreen> {
     mainAxisAlignment: MainAxisAlignment.center,
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      FilledButton.tonal(
-        onPressed: () async {
-          await Navigator.of(context).push<void>(
-            MaterialPageRoute(
-              builder: (_) => StudyScreen(repository: widget.repository),
-            ),
-          );
-          if (mounted) await _controller.initialise();
-        },
-        child: const Text('Number learning journey'),
-      ),
-      const SizedBox(height: 16),
       Text(
         'Mental arithmetic foundation',
         style: Theme.of(context).textTheme.headlineMedium,
