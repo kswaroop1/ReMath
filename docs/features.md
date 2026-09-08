@@ -17,7 +17,7 @@ This is the authoritative, numbered product and content backlog for ReMath.
 - Feature IDs are permanent. Retired features remain recorded rather than being
   renumbered.
 
-Last reviewed: 8 September 2026 (PR13 number journey).
+Last reviewed: 8 September 2026 (PR14 algebra solving increment).
 
 ## 1. Product foundations
 
@@ -45,9 +45,10 @@ Last reviewed: 8 September 2026 (PR13 number journey).
 - [x] **LX-001 — Diagnostic onboarding.** The offline arithmetic diagnostic
   samples addition, subtraction, and multiplication independently, resumes an
   interrupted question and draft, and explains each starting recommendation.
-  Algebra, calculus, probability, and further tracks remain planned extensions.
+  The shared journey also diagnoses collecting terms, expansion and linear
+  equations independently. Calculus, probability and further tracks remain planned.
 - [ ] **LX-002 — Goal selection.** **Foundation delivered:** persist a usable
-  number-fluency or proportional-reasoning goal. Broader JEE, quant-finance,
+  number-fluency, proportional-reasoning or algebra-solving goal. Broader JEE, quant-finance,
   AI, engineering and robotics goal selection remains planned.
 - [x] **LX-003 — Fifteen-minute chunk planner.** The number journey freezes an
   explainable plan with retrieval, teaching, focused numeric/MCQ practice,
@@ -58,7 +59,8 @@ Last reviewed: 8 September 2026 (PR13 number journey).
   persist the plan, question, draft/choice, hints, correction state and active
   budget, with atomic answer/transition writes. Lifecycle pause saves the budget;
   an abrupt process kill can lose the last unpersisted one-second timer interval.
-  Legacy drill timing and a universal cross-mode plan remain separate.
+  Algebra uses the same snapshot and adds pinned question-contract versions; old
+  numeric snapshots migrate on save. Legacy drill timing remains separate.
 - [x] **LX-006 — Learn chunk.** Open an offline concept card directly or from a
   remediation recommendation, reveal staged help, and retain the active card
   and revealed state across interruption. Focused practice follows through the
@@ -100,10 +102,12 @@ Last reviewed: 8 September 2026 (PR13 number journey).
   acyclic directed dependencies rather than one fixed linear course.
 - [x] **CG-003 — Multi-track placement foundation.** Arithmetic operations retain
   independent placement evidence, so weakness in one does not lower another.
-  Cross-subject placement remains planned.
+  Algebra placement now tracks collecting terms, expansion and linear equations
+  independently. Broader cross-subject placement remains planned.
 - [x] **CG-004 — Skill-level objectives foundation.** Arithmetic placement
   distinguishes rebuilding understanding from fluency practice and progression.
-  Derivation and technique-selection objectives remain planned.
+  Algebra adds independent symbolic fluency. Derivation and technique-selection
+  objectives remain planned.
 - [x] **CG-005 — Difficulty calibration.** A validated multidimensional profile
   preserves complexity, combined ideas, algebraic burden, abstraction, and time
   pressure without forcing incomparable burdens into one score.
@@ -133,8 +137,10 @@ Last reviewed: 8 September 2026 (PR13 number journey).
 - [x] **QA-002 — Numeric short answers.** Exact integer, reduced rational,
   exact decimal, absolute-tolerance, and significant-figure contracts use exact
   local arithmetic and distinguish incorrect from invalid input.
-- [ ] **QA-003 — Symbolic short answers.** Algebraic equivalence with explicit
-  assumptions and domain restrictions.
+- [ ] **QA-003 — Symbolic short answers.** **Bounded foundation delivered:**
+  exact real-x polynomial equivalence with rational coefficients, explicit grammar
+  and resource bounds, nonzero constant divisors and collected/expanded-form
+  requirements. Variable denominators, functions and broader domains remain planned.
 - [x] **QA-004 — Single-answer MCQ.** Number questions offer four distinct
   deterministically rotated choices, error metadata and chance-adjusted accuracy.
   MCQs alone cannot promote numeric difficulty or confirm retained mastery.
@@ -248,8 +254,11 @@ Last reviewed: 8 September 2026 (PR13 number journey).
   objective coverage and timed-performance estimates.
 - [ ] **MP-019 — Streaks without coercion.** Optional consistency information
   without penalising missed days.
-- [ ] **MP-020 — Algorithm versioning.** Rebuild derived mastery from events when
-  scoring logic changes.
+- [ ] **MP-020 — Algorithm versioning.** **Algebra foundation delivered:**
+  template/marking/scoring versions are frozen in plans and immutable algebra
+  identities. Deterministic replay uses a sixty-second v1 symbolic fluency policy;
+  unsupported algebra contracts remain history only. General policy migration and
+  richer scoring versions remain planned.
 
 ## 6. Lessons, refreshers, and reference library
 
@@ -432,8 +441,12 @@ Last reviewed: 8 September 2026 (PR13 number journey).
   Other fraction operations, percentage change/reversal and broader units remain.
 - [ ] **MA-003 — Powers, roots, logarithms, scientific notation, and scale.**
 - [ ] **MA-004 — Algebraic expansion, factorisation, simplification, and
-  rearrangement.**
+  rearrangement.** **Foundation delivered:** collect linear/quadratic terms and
+  expand a single bracket or a pair of monic linear brackets. General factorisation
+  and formula rearrangement remain planned.
 - [ ] **MA-005 — Equations, systems, inequalities, and approximations.**
+  **Foundation delivered:** solve bounded one-variable linear equations, including
+  x on both sides and rational solutions. Systems and inequalities remain planned.
 - [ ] **MA-006 — Functions, composition, inverses, graphs, and transformations.**
 - [ ] **MA-007 — Trigonometry, identities, equations, and geometry.**
 - [ ] **MA-008 — Complex numbers and geometric interpretation.**

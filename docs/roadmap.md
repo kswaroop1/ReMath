@@ -107,3 +107,24 @@ The next proposed slice is the algebra bridge: powers/roots, scientific notation
 basic manipulation and linear equations, adding constrained symbolic marking and
 structured steps when those learning journeys require them. It remains proposed,
 not part of PR13. No release is included in PR13.
+
+
+## Algebra reasoning programme — accepted after PR13
+
+Four sequential, independently usable increments:
+
+1. **PR14 — Solve algebra:** bounded exact symbolic marking, collecting terms,
+   expansion and linear equations, goal/diagnostic, original teaching,
+   correction/retest and resumable drafts through the shared journey. Begin
+   versioned marking/scoring evidence and preserve legacy numeric sessions.
+2. **Explain algebra:** ordered/missing/invalid steps, multiple-select assessment,
+   error classification and targeted remediation.
+3. **Apply algebra:** method/assumption selection, unlabelled mixed challenges,
+   application chunks and separate technique-selection progress.
+4. **Calibrate and continue:** optional confidence reporting, configurable session
+   lengths, complete end-of-session choices and verified scoring replay.
+
+The first increment's [acceptance criteria](slices/algebra-solving.md) are bounded;
+its completion does not mark later programme features complete. Every increment
+keeps separate red/green evidence and requests review explicitly after CI. No
+release is included in this programme's implementation requests.

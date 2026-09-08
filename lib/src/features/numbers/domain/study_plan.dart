@@ -2,7 +2,8 @@ import 'dart:convert';
 
 import '../../learning/domain/attempt_event.dart';
 import '../../learning/domain/retained_mastery.dart';
-import 'number_curriculum.dart';
+import 'study_curriculum.dart';
+import 'study_scoring.dart';
 
 final class StudyProgress {
   const StudyProgress({
@@ -13,6 +14,7 @@ final class StudyProgress {
     required this.assisted,
     required this.retention,
     required this.chanceAdjustedAccuracy,
+    this.unsupported = 0,
   });
 
   factory StudyProgress.forSkill(
@@ -20,7 +22,8 @@ final class StudyProgress {
     Iterable<AttemptEvent> attempts,
     DateTime now,
   ) {
-    final events = attempts.where((e) => e.skillId == skillId).toList()
+    final history = attempts.where((e) => e.skillId == skillId).toList();
+    final events = history.where(StudyScoring.supports).toList()
       ..sort((a, b) {
         final time = a.occurredAt.compareTo(b.occurredAt);
         return time == 0 ? a.eventId.compareTo(b.eventId) : time;
@@ -40,7 +43,7 @@ final class StudyProgress {
       if (attemptedLevel != level) continue;
       if (event.isCorrect) {
         errors = 0;
-        if (event.responseTime <= const Duration(seconds: 20)) {
+        if (event.responseTime <= StudyScoring.fluentWithin(skillId)) {
           streak++;
           if (streak >= 3 && level < 2) {
             level++;
@@ -60,6 +63,7 @@ final class StudyProgress {
     }
     return StudyProgress(
       skillId: skillId,
+      unsupported: history.length - events.length,
       level: level,
       independent: independent.length,
       correct: independent.where((e) => e.isCorrect).length,
@@ -86,6 +90,7 @@ final class StudyProgress {
   }
 
   final String skillId;
+  final int unsupported;
   final int level;
   final int independent;
   final int correct;
@@ -93,11 +98,18 @@ final class StudyProgress {
   final RetainedMastery retention;
   final double chanceAdjustedAccuracy;
   double get accuracy => independent == 0 ? 0 : correct / independent;
-  String get explanation => independent == 0
-      ? 'No independent evidence yet. Start with a diagnostic or guided practice.'
-      : '$correct of $independent independent answers correct; $assisted assisted '
-            'events. Difficulty ${level + 1} requires independent numeric fluency. '
-            '${retention.reason}';
+  String get explanation {
+    final summary = independent == 0
+        ? 'No independent evidence yet. Start with a diagnostic or guided practice.'
+        : '$correct of $independent independent answers correct; $assisted assisted '
+              'events. Difficulty ${level + 1} requires independent '
+              '${skillId.startsWith('algebra.') ? 'symbolic' : 'numeric'} fluency '
+              'within ${StudyScoring.fluentWithin(skillId).inSeconds} seconds. '
+              '${retention.reason}';
+    return unsupported == 0
+        ? summary
+        : '$summary $unsupported events use unsupported contracts; kept in history without mastery credit.';
+  }
 }
 
 enum StudyStepKind { retrieval, learn, practice, reflection }
@@ -110,22 +122,34 @@ final class StudyStep {
     this.skillId,
     this.level, {
     this.multipleChoice = false,
+    this.templateVersion = 1,
+    this.markingVersion = 1,
+    this.scoringVersion = 1,
   });
   factory StudyStep.fromJson(Map<String, dynamic> json) => StudyStep(
     StudyStepKind.values.byName(json['kind'] as String),
     json['skill'] as String,
     json['level'] as int,
     multipleChoice: json['mcq'] as bool,
+    templateVersion: json['templateVersion'] as int? ?? 1,
+    markingVersion: json['markingVersion'] as int? ?? 1,
+    scoringVersion: json['scoringVersion'] as int? ?? 1,
   );
   final StudyStepKind kind;
   final String skillId;
   final int level;
   final bool multipleChoice;
+  final int templateVersion;
+  final int markingVersion;
+  final int scoringVersion;
   Map<String, Object?> toJson() => {
     'kind': kind.name,
     'skill': skillId,
     'level': level,
     'mcq': multipleChoice,
+    'templateVersion': templateVersion,
+    'markingVersion': markingVersion,
+    'scoringVersion': scoringVersion,
   };
 }
 
@@ -154,7 +178,7 @@ final class StudyPlan {
 }
 
 final class StudyPlanner {
-  final NumberCurriculum _curriculum = NumberCurriculum();
+  final StudyCurriculum _curriculum = StudyCurriculum();
 
   List<String> _goalSkills(String id) {
     for (final goal in _curriculum.goals) {
@@ -224,7 +248,7 @@ final class StudyPlanner {
             StudyStepKind.practice,
             target,
             level,
-            multipleChoice: i % 3 == 1,
+            multipleChoice: !target.startsWith('algebra.') && i % 3 == 1,
           ),
         StudyStep(StudyStepKind.reflection, target, level),
       ],
@@ -232,8 +256,7 @@ final class StudyPlanner {
   }
 
   StudyPlan diagnostic(String goalId) => StudyPlan(
-    reason:
-        'Three independent numeric questions per skill establish a starting point.',
+    reason: 'Three independent answers per skill establish a starting point.',
     isDiagnostic: true,
     steps: [
       for (final id in _goalSkills(goalId))
@@ -262,8 +285,19 @@ final class StudyState {
   });
   factory StudyState.decode(String source) {
     final json = jsonDecode(source) as Map<String, dynamic>;
-    if (json['version'] != 1) {
+    if (json['version'] != 1 && json['version'] != 2) {
       throw const FormatException('Unsupported study state');
+    }
+    if (json['version'] == 2 && json['plan'] != null) {
+      final plan = json['plan'] as Map<String, dynamic>;
+      for (final raw in plan['steps'] as List<dynamic>) {
+        final step = raw as Map<String, dynamic>;
+        if (step['templateVersion'] != 1 ||
+            step['markingVersion'] != 1 ||
+            step['scoringVersion'] != 1) {
+          throw const FormatException('Unsupported saved question contract');
+        }
+      }
     }
     final state = StudyState(
       goalId: json['goal'] as String,
@@ -292,12 +326,17 @@ final class StudyState {
         (state.plan != null && state.stepIndex >= state.plan!.steps.length)) {
       throw const FormatException('Invalid study state');
     }
-    final curriculum = NumberCurriculum();
+    final curriculum = StudyCurriculum();
     if (!curriculum.goals.any((goal) => goal.id == state.goalId)) {
       throw const FormatException('Unknown saved goal');
     }
     for (final step in state.plan?.steps ?? const <StudyStep>[]) {
-      if (step.level < 0 ||
+      if (step.templateVersion != 1 ||
+          step.markingVersion != 1 ||
+          step.scoringVersion != 1 ||
+          (step.skillId.startsWith('algebra.') &&
+              (json['version'] == 1 || step.multipleChoice)) ||
+          step.level < 0 ||
           step.level > 2 ||
           !curriculum.skills.any((skill) => skill.id == step.skillId)) {
         throw const FormatException('Invalid saved skill or difficulty');
@@ -352,7 +391,7 @@ final class StudyState {
   );
 
   String encode() => jsonEncode({
-    'version': 1,
+    'version': 2,
     'goal': goalId,
     'plan': plan?.toJson(),
     'session': sessionId,

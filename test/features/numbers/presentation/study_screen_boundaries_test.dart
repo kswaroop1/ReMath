@@ -17,7 +17,7 @@ void main() {
       ReMathApp(contentPack: foundationPackForTest(), repository: repository),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Number learning journey'));
+    await tester.tap(find.text('Learning journey'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Use fractions, ratios and percentages'));
     await tester.pumpAndSettle();
@@ -32,7 +32,7 @@ void main() {
     final saved = StudyState.decode((await repository.loadStudyState())!);
     expect(saved.goalId, 'proportions');
     expect(saved.hintCount, 1);
-    await tester.tap(find.text('Number learning journey'));
+    await tester.tap(find.text('Learning journey'));
     await tester.pumpAndSettle();
     expect(find.text('Show next hint'), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
