@@ -91,6 +91,15 @@ void main() {
     },
   );
 
+  test('the oldest due skill is reviewed before newer overdue work', () {
+    final plan = StudyPlanner().plan('proportions', [
+      answer(-3600, skill: 'arithmetic.addition', correct: false),
+      answer(-7200, skill: 'number.fractions', correct: false),
+    ], now);
+    expect(plan.steps.first.skillId, 'number.fractions');
+    expect(plan.reason, contains('Fractions'));
+  });
+
   test('due reviews take priority and exploration remains available', () {
     final plan = StudyPlanner().plan('proportions', [
       answer(-3600, skill: 'number.fractions', correct: false),

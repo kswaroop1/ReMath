@@ -54,6 +54,33 @@ void main() {
     );
   }
 
+  test(
+    'failed schema six migration preserves version and legacy data for retry',
+    () async {
+      final database = sqlite3.openInMemory();
+      final initial = SqliteProgressRepository(database);
+      addTearDown(initial.close);
+      await initial.recordAttempt(event('legacy'));
+      database.execute('DROP TABLE study_state');
+      database.execute('UPDATE schema_version SET version = 5');
+      database.execute('CREATE VIEW study_state AS SELECT 1 AS singleton');
+      expect(
+        () => SqliteProgressRepository(database),
+        throwsA(isA<SqliteException>()),
+      );
+      expect(
+        database.select('SELECT version FROM schema_version').single['version'],
+        5,
+      );
+      expect((await initial.loadAttempts()).single.eventId, 'legacy');
+      database.execute('DROP VIEW study_state');
+      final retried = SqliteProgressRepository(database);
+      await retried.saveStudyState('recovered');
+      expect(await retried.loadStudyState(), 'recovered');
+      expect((await retried.loadAttempts()).single.eventId, 'legacy');
+    },
+  );
+
   test('failed state persistence rolls back the new attempt', () async {
     final database = sqlite3.openInMemory();
     final repository = SqliteProgressRepository(database);

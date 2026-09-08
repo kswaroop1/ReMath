@@ -191,3 +191,9 @@ across checkpoint/pause writes. The lifecycle fixture incorrectly jumped directl
 from paused to resumed, violating Flutter's transition assertion. Correct it to
 use inactive/hidden/paused/hidden/inactive/resumed, retaining the saved-session
 assertion. No production lifecycle rule is changed to accommodate that fixture.
+
+Run 34226317902 passed all checks with 99.64% line coverage after the checkpoint
+fix and valid lifecycle fixture. Add existing-behaviour checks for oldest-due
+ordering, failed schema-six migration followed by retry, rejection of an unknown
+goal without overwriting saved state, and keyboard submission through correction.
+These are characterization tests with green-before evidence, not new behaviour.

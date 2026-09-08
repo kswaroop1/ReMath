@@ -23,6 +23,15 @@ void main() {
   });
   tearDown(() => controller.dispose());
 
+  test('an unknown goal cannot overwrite the chosen goal', () async {
+    await controller.selectGoal('proportions');
+    final saved = await repository.loadStudyState();
+    await controller.selectGoal('unknown');
+    expect(controller.error, isNotNull);
+    expect(controller.state.goalId, 'proportions');
+    expect(await repository.loadStudyState(), saved);
+  });
+
   test(
     'goal and exact interrupted question survive reopening without consuming time away',
     () async {

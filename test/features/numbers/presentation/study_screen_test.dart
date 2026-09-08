@@ -55,7 +55,7 @@ void main() {
       expect(find.text('Correct this answer'), findsOneWidget);
       final q = NumberCurriculum().question('number.fractions', 0, 7, 0);
       await tester.enterText(find.byType(TextField), q.answer);
-      await tester.tap(find.text('Submit'));
+      await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pumpAndSettle();
       expect(find.text('Try another without help'), findsOneWidget);
       expect(
