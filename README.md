@@ -39,6 +39,13 @@ reflect session. Answers and session transitions commit atomically; paused time
 is not charged. Its skill history separates assisted, choice and numeric evidence.
 The original arithmetic drill and its saved sessions remain available.
 
+The shared journey also offers an algebra goal: collect terms, expand expressions
+and solve linear equations. Symbolic answers are marked locally with exact
+rational polynomial arithmetic and explicit input/form rules. Algebra drafts and
+question-contract versions resume through the same atomic session storage;
+unsupported historical contracts remain visible without establishing mastery.
+
+
 Cloud synchronisation and downloadable course
 packs remain deliberately separated behind interfaces so providers can be added
 without changing the learning engine.
@@ -77,6 +84,7 @@ generated changes before committing them.
 - [ADR 0001: local progress persistence](docs/adr/0001-local-progress-persistence.md)
 - [ADR 0002: adaptive fluency scheduling](docs/adr/0002-adaptive-fluency-scheduling.md)
 - [ADR 0003: planned number sessions](docs/adr/0003-planned-number-sessions.md)
+- [ADR 0004: bounded algebra marking](docs/adr/0004-bounded-algebra-marking.md)
 - [Numbered feature register](docs/features.md)
 - [Delivery roadmap](docs/roadmap.md)
 - [Testing strategy](docs/testing.md)
