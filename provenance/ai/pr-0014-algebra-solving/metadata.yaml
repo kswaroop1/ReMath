@@ -1,0 +1,12 @@
+schema_version: 1
+pull_request: 14
+title: Algebra solving journey
+human_owner: kswaroop1
+agents:
+  - product: OpenAI Codex
+    model: unknown
+started_at: 2026-09-08T00:00:00Z
+finalized_at: null
+scope: [code, tests, documentation]
+redactions: []
+ci_runs: []
