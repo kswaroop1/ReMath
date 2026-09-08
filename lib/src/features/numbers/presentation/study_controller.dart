@@ -134,7 +134,7 @@ final class StudyController extends ChangeNotifier {
     if (_state.plan != null && _running && !_uncertainCommit) {
       await _save(_timed());
     }
-  });
+  }, clearError: false);
 
   Future<void> pause() => _enqueue(() async {
     if (_state.plan != null) {
@@ -144,7 +144,7 @@ final class StudyController extends ChangeNotifier {
         await _save(next);
       }
     }
-  });
+  }, clearError: false);
 
   Future<void> resume() => _enqueue(() async {
     _lastTick = _clock().toUtc();
@@ -302,9 +302,12 @@ final class StudyController extends ChangeNotifier {
     });
   }
 
-  Future<void> _enqueue(Future<void> Function() action) {
+  Future<void> _enqueue(
+    Future<void> Function() action, {
+    bool clearError = true,
+  }) {
     final next = _pending.then((_) async {
-      if (!_uncertainCommit) {
+      if (clearError && !_uncertainCommit) {
         _error = null;
       }
       try {

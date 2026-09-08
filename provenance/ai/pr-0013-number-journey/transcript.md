@@ -184,3 +184,10 @@ lifecycle and skill-history explanations. These do not introduce new production
 behaviour or manufacture a red result. Coverage reporting now prints uncovered
 source lines; threshold calculation and enforcement are unchanged. This is
 verification telemetry, not a new product feature.
+
+Run 34225717619 exposed two final-check failures. The invalid-input widget test
+found that periodic checkpoints clear its validation message; preserve errors
+across checkpoint/pause writes. The lifecycle fixture incorrectly jumped directly
+from paused to resumed, violating Flutter's transition assertion. Correct it to
+use inactive/hidden/paused/hidden/inactive/resumed, retaining the saved-session
+assertion. No production lifecycle rule is changed to accommodate that fixture.
