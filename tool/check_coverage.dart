@@ -11,7 +11,17 @@ void main(List<String> arguments) {
 
   var found = 0;
   var hit = 0;
+  String? source;
+  final missing = <String, List<String>>{};
   for (final line in file.readAsLinesSync()) {
+    if (line.startsWith('SF:')) {
+      source = line.substring(3);
+    } else if (line.startsWith('DA:') && source != null) {
+      final values = line.substring(3).split(',');
+      if (int.parse(values[1]) == 0) {
+        missing.putIfAbsent(source, () => []).add(values[0]);
+      }
+    }
     if (line.startsWith('LF:')) {
       found += int.parse(line.substring(3));
     } else if (line.startsWith('LH:')) {
@@ -21,6 +31,9 @@ void main(List<String> arguments) {
 
   final coverage = found == 0 ? 100.0 : hit * 100 / found;
   stdout.writeln('Line coverage: ${coverage.toStringAsFixed(2)}%');
+  for (final entry in missing.entries) {
+    stdout.writeln('Uncovered ${entry.key}: ${entry.value.join(',')}');
+  }
   if (coverage < minimum) {
     stderr.writeln('Required minimum: ${minimum.toStringAsFixed(2)}%');
     exitCode = 1;

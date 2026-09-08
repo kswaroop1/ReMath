@@ -173,3 +173,14 @@ Implement four-choice chance adjustment (wrong choices subtract one third of a
 correct-answer unit, clamped to zero), validate saved goals/skills/levels, provide
 parameter-specific intermediate hints and solutions, and serialize resume with
 pause. Choice results still cannot establish numeric fluency or retention alone.
+
+Cycle 7 green: run 34225499862 passed all checks, 98.33% coverage.
+
+## Final verification coverage
+
+Add characterization widget tests for existing goal navigation, pause/return,
+four hints, invalid fraction input, corrupt-state preservation, diagnostic
+lifecycle and skill-history explanations. These do not introduce new production
+behaviour or manufacture a red result. Coverage reporting now prints uncovered
+source lines; threshold calculation and enforcement are unchanged. This is
+verification telemetry, not a new product feature.
