@@ -145,7 +145,7 @@ void main() {
     expect(attempts.single.misconceptionId, isNull);
     expect(
       database.select('SELECT version FROM schema_version').single['version'],
-      5,
+      6,
     );
     await migrated.close();
   });
@@ -241,7 +241,7 @@ void main() {
       expect(session?.focusSkillId, 'arithmetic.addition');
       expect(
         database.select('SELECT version FROM schema_version').single['version'],
-        5,
+        6,
       );
       await migrated.close();
     },

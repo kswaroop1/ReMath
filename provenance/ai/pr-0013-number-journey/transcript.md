@@ -73,3 +73,15 @@ pending style correction. Preserved uncommitted storage/controller/widget tests.
 Found that the lapse test's observation time preceded its simulated errors by
 four seconds. Corrected the fixture to observe after both errors, retaining all
 assertions; production review timing is not changed to satisfy that fixture.
+
+Cycle 2 green: run 34190317766 passed analysis/full tests with 98.41% coverage.
+Coverage is below cycle 1 because new planner/state branches need additional
+boundary tests; this remains an explicit final verification item.
+
+## Cycle 3: atomic persistence
+
+Test-first repository contracts exercise memory and SQLite implementations,
+duplicate delivery without state rewind, rollback on a forced write failure,
+and schema-five upgrade preserving old attempts and active drafts. Existing
+successful migration expectations advance to schema six; failure expectations
+remain unchanged.
