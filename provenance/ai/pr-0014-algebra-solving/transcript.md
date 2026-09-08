@@ -43,3 +43,14 @@ was rejected by automatic approval review because credits were exhausted. After
 the user resumed, confirmed the remote still held the test-only commit and
 published the saved implementation. Run 34260436411 reported a missing braced
 multiline if body; correct that lint without changing marking logic or tests.
+
+Cycle 1 green: run 34260703215 passed all CI checks, coverage 99.87%.
+
+## Cycle 2: reusable algebra question catalogue
+
+Add tests for the combined catalogue, preserving both number goal memberships
+and version-one number identities. Independently calculate expected answers from
+225 algebra prompts across collecting terms, expansion and linear equations.
+Require teaching/prerequisites, four hints, deterministic versioned identities,
+no fabricated symbolic MCQs and invalid-identity rejection. StudyCurriculum is a
+necessary new public seam; the test-first commit contains no catalogue behaviour.
