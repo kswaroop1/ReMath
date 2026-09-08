@@ -85,3 +85,9 @@ duplicate delivery without state rewind, rollback on a forced write failure,
 and schema-five upgrade preserving old attempts and active drafts. Existing
 successful migration expectations advance to schema six; failure expectations
 remain unchanged.
+
+Cycle 3 red: run 34190464303 failed for the three missing repository methods.
+Implemented schema-six study state and atomic attempt/state writes. SQLite's
+transaction body is synchronous (no await while the transaction is open).
+Duplicates do not rewind the saved state. The legacy repository test double
+forwards the new interface methods without changing its existing blocking rule.
