@@ -1,4 +1,5 @@
 import '../../algebra/domain/algebra_curriculum.dart';
+import '../../applications/domain/application_curriculum.dart';
 import '../../learning/domain/content_pack.dart';
 import '../../reasoning/domain/reasoning_curriculum.dart';
 import 'number_curriculum.dart';
@@ -11,9 +12,17 @@ final class StudyCurriculum {
     ..._numbers.skills,
     ...AlgebraCurriculum.skills,
     ...ReasoningCurriculum.skills,
+    ...ApplicationCurriculum.skills,
   ]);
   List<LearningGoal> get goals => [
     ..._numbers.goals,
+    LearningGoal(
+      id: 'applications',
+      title: 'Apply mathematics to scenarios',
+      skillIds: ApplicationCurriculum.skills
+          .map((s) => s.id)
+          .toList(growable: false),
+    ),
     LearningGoal(
       id: 'algebra',
       title: 'Rebuild algebra fluency',
@@ -44,6 +53,9 @@ final class StudyCurriculum {
   }) {
     if (templateVersion != 1 || markingVersion != 1 || scoringVersion != 1) {
       throw const FormatException('Unsupported question contract version');
+    }
+    if (skillId.startsWith('application.')) {
+      return ApplicationCurriculum().question(skillId, level, seed, index);
     }
     if (skillId.startsWith('reasoning.')) {
       return ReasoningCurriculum().question(skillId, level, seed, index);

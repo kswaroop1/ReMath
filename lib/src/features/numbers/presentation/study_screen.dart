@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../applications/domain/application_curriculum.dart';
+import '../../applications/presentation/application_answer_editor.dart';
 import '../../learning/domain/attempt_event.dart';
 import '../../learning/domain/progress_repository.dart';
 import '../../reasoning/domain/reasoning_curriculum.dart';
@@ -364,7 +366,14 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
             child: const Text('Review prerequisite'),
           ),
         ],
-        if (q is ReasoningQuestion && q.kind != ReasoningKind.missing)
+        if (q is ApplicationQuestion)
+          ApplicationAnswerEditor(
+            question: q,
+            draft: state.draft,
+            enabled: !_controller.busy && !_controller.needsRetry,
+            onChanged: (value) => unawaited(_controller.updateDraft(value)),
+          )
+        else if (q is ReasoningQuestion && q.kind != ReasoningKind.missing)
           ReasoningAnswerEditor(
             question: q,
             draft: state.draft,

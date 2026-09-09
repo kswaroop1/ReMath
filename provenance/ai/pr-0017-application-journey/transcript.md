@@ -11,3 +11,9 @@ Cycle 1 select/red: add compiling controller and screen regressions for the
 missing application goal, committed choice resume, full correction/retest and
 mixed scenarios without a lesson before the answer. Extend the catalogue count
 for four new skills, preserving exact membership assertions for older goals.
+
+Cycle 1 red: run 34407936754 passed analysis and five Chrome regressions;
+239 native tests passed and four failed for missing goal/skill routing, saved
+application controls and expected catalogue growth. Connect four application
+skills and their goal, typed persisted choice/calculation controls and a mixed
+plan that omits teaching before attempts. Existing contracts remain versioned.

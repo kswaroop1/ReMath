@@ -238,6 +238,16 @@ final class StudyPlanner {
         }
       }
     }
+    if (target == 'application.mixed') {
+      return StudyPlan(
+        reason: 'Choose a method for each unfamiliar scenario.',
+        steps: [
+          for (var i = 0; i < 9; i++)
+            StudyStep(StudyStepKind.practice, target, progress[target]!.level),
+          StudyStep(StudyStepKind.reflection, target, progress[target]!.level),
+        ],
+      );
+    }
     final level = StudyProgress.forSkill(target, attempts, now).level;
     final review = due.isEmpty ? target : due.first.skillId;
     return StudyPlan(
@@ -257,6 +267,7 @@ final class StudyPlanner {
             multipleChoice:
                 !target.startsWith('algebra.') &&
                 !target.startsWith('reasoning.') &&
+                !target.startsWith('application.') &&
                 i % 3 == 1,
           ),
         StudyStep(StudyStepKind.reflection, target, level),
@@ -344,7 +355,8 @@ final class StudyState {
           step.markingVersion != 1 ||
           step.scoringVersion != 1 ||
           ((step.skillId.startsWith('algebra.') ||
-                  step.skillId.startsWith('reasoning.')) &&
+                  step.skillId.startsWith('reasoning.') ||
+                  step.skillId.startsWith('application.')) &&
               (json['version'] == 1 || step.multipleChoice)) ||
           step.level < 0 ||
           step.level > 2 ||
