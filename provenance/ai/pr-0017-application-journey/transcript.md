@@ -55,3 +55,12 @@ repaired, so the Confirm choices action disappeared without explicit confirmatio
 Five Chrome tests and 244 native tests passed; the new repair case failed.
 Treat this as a new red/green correction: editing method or assumption resets
 confirmation, while editing the calculation preserves already confirmed choices.
+
+Final implementation verification: run 34409555025 passed formatting, analysis,
+five Chrome tests and 245 native tests with 99.90% line coverage. The inherited
+numeric-generator fallback and the editor's empty/malformed-JSON catch are the
+remaining lines; typed malformed saved confirmation is tested end to end, and
+domain malformed-JSON rejection is covered. No marking or scoring domain lines
+remain uncovered. Final handoff records this evidence, marks PR17 ready and
+requests one explicit @codex review. Follow up the two outstanding PR15 findings
+in a separate compatibility PR before calibration; neither is claimed fixed here.
