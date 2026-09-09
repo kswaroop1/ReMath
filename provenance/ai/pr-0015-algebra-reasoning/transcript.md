@@ -46,3 +46,10 @@ first invalid step plus category, and penalty-adjusted multiple-select credit.
 Require duplicate/unknown/incomplete selection rejection, deterministic replay,
 original worked hints and bounded identities. ReasoningCurriculum is the necessary
 new public seam. No reasoning production code is in this test-first commit.
+
+Cycle 2 red: run 34299839452 failed analysis for the missing ReasoningCurriculum
+public seam. Implement four original deterministic question kinds. Typed answers
+serialize stable option IDs as JSON; missing expressions reuse exact symbolic
+marking. Multiple-select credit is derived from immutable answer plus versioned
+question identity, not a mutable score stored separately. Human worked answers
+remain distinct from the serialized draft.
