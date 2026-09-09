@@ -108,3 +108,10 @@ regressions and 236 native tests with 99.93% line coverage. The only new
 uncovered line was the incomplete-answer history fallback; add characterization
 checks for that boundary and readable labels for all four answer formats,
 without changing production. Update the bounded feature completion record.
+
+Final characterization run 34326541560 passed formatting, analysis, 237 native
+tests and five Chrome tests, with 99.96% coverage. The sole uncovered line is
+the inherited numeric-generator fallback. Marked PR15 ready and posted one
+explicit @codex review request (comment 5598359091). User asked “Done?”;
+reported increment 2 complete and increments 3–4 still outstanding. Continue
+the accepted programme without waiting for a merge.
