@@ -230,8 +230,9 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
   Future<void> _reviewPrerequisite(ReasoningQuestion q) async {
     final before = _controller.state.hintCount;
     if (before < 4) await _controller.revealHint();
-    if (!mounted || (before < 4 && _controller.state.hintCount == before))
+    if (!mounted || (before < 4 && _controller.state.hintCount == before)) {
       return;
+    }
     final skill = _controller.curriculum.skill(q.remediationSkillId);
     await showDialog<void>(
       context: context,

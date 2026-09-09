@@ -82,3 +82,6 @@ Prerequisite help commits assistance before opening the lesson. Numeric template
 now use the same exact recurrence, preserving native identities while fixing web.
 Reasoning evidence is version-validated and its provisional fluent limit is 90
 seconds; reasoning mastery remains separate from algebra and number skills.
+
+Preflight inspection found two additional multiline-if bodies needing braces
+after formatting; correct those style issues while CI verifies the integration.
