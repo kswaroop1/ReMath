@@ -195,13 +195,15 @@ final class StudyPlanner {
   }) {
     final ids = _goalSkills(goalId);
     final progress = {
-      for (final id in ids) id: StudyProgress.forSkill(id, attempts, now),
+      for (final skill in _curriculum.skills)
+        skill.id: StudyProgress.forSkill(skill.id, attempts, now),
     };
-    final due = progress.values.where((p) => p.retention.isDue).toList()
-      ..sort(
-        (a, b) =>
-            a.retention.nextReviewAt!.compareTo(b.retention.nextReviewAt!),
-      );
+    final due =
+        ids.map((id) => progress[id]!).where((p) => p.retention.isDue).toList()
+          ..sort(
+            (a, b) =>
+                a.retention.nextReviewAt!.compareTo(b.retention.nextReviewAt!),
+          );
     String target;
     String reason;
     if (exploreSkillId != null) {

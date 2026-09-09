@@ -75,7 +75,11 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Rebuild algebra fluency'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Plan my next chunk'));
+      await tester.ensureVisible(find.text('Collecting terms'));
+      await tester.tap(find.text('Collecting terms'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Study Collecting terms'));
+      await tester.tap(find.text('Study Collecting terms'));
       await tester.pumpAndSettle();
       expect(find.text('Your expression'), findsOneWidget);
       expect(

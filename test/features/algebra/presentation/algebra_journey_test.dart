@@ -21,7 +21,7 @@ void main() {
       await c.initialise();
       await c.selectGoal('algebra');
       expect(c.state.goalId, 'algebra');
-      await c.start();
+      await c.start(exploreSkillId: 'algebra.collect');
       expect(c.question!.skillId, 'algebra.collect');
       expect(c.state.plan!.steps.any((s) => s.multipleChoice), isFalse);
       await c.updateDraft('x/x');

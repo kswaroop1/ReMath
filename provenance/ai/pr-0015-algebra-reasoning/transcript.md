@@ -23,3 +23,14 @@ Compiling regressions exercise the existing public interfaces. Add Chrome CI for
 these pure domain contracts to reproduce the real web precision fault, rather
 than simulating a different runtime. Preserve the native full-suite coverage gate.
 No production fix is in the test-first commit.
+
+Cycle 1 red: run 34299378856 passed analysis and reproduced all four findings in
+Chrome: constant-form and cancellation inputs incorrectly passed, seed zero
+produced 5x+2x instead of 2x+2x, and algebra skipped arithmetic.addition.
+
+Use BigInt for the unchanged algebra recurrence, enforce syntactic constant form,
+and retain syntactic variable-sum checks during multiplication. Planner progress
+includes all bundled skills but overdue selection remains within the chosen goal.
+Existing symbolic-journey tests now explicitly explore collecting terms so they
+continue testing symbolic interactions; the new regression separately asserts
+normal prerequisite-first planning. No behavioural assertion is removed.
