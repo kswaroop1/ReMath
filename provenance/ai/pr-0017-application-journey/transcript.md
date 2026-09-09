@@ -36,3 +36,6 @@ Read merged PR15 review: its provenance finding was already corrected in the
 merged final commit. Preserve two remaining findings for a dedicated compatibility
 fix after this journey: v1 web recurrence identity ambiguity and balance diagnosis
 remediation pointing to expansion. Do not claim those findings resolved here.
+
+Preflight formatting exposed two multiline guard bodies; add braces to comply
+with the existing lint gate before final verification. No scoring change.

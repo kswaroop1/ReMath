@@ -39,11 +39,13 @@ abstract final class StudyScoring {
     var count = 0;
     var credit = 0.0;
     for (final event in events) {
-      if (!seen.add(event.eventId) || !event.kind.contributesToMastery)
+      if (!seen.add(event.eventId) || !event.kind.contributesToMastery) {
         continue;
+      }
       final q = applicationQuestion(event);
-      if (q == null || q.mark(event.answer).verdict == AnswerVerdict.invalid)
+      if (q == null || q.mark(event.answer).verdict == AnswerVerdict.invalid) {
         continue;
+      }
       count++;
       credit += q.techniqueCredit(event.answer);
     }
