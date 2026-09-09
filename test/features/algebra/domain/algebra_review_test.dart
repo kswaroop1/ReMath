@@ -5,6 +5,22 @@ import 'package:remath/src/features/numbers/domain/study_curriculum.dart';
 import 'package:remath/src/features/numbers/domain/study_plan.dart';
 
 void main() {
+  test('number templates also preserve exact seeded replay on web', () {
+    final mask = BigInt.from(0x7fffffff);
+    for (final seed in [0, 7, 2147483647]) {
+      var state = (BigInt.from(seed) ^ BigInt.from(0x45d9f3b)) & mask;
+      int pick() {
+        state = (state * BigInt.from(1103515245) + BigInt.from(12345)) & mask;
+        return 1 + (state % BigInt.from(9)).toInt();
+      }
+
+      final a = pick();
+      final b = pick();
+      final q = StudyCurriculum().question('arithmetic.addition', 0, seed, 0);
+      expect(q.prompt, '$a + $b');
+    }
+  });
+
   test('linear answers cannot hide variable syntax in cancellation', () {
     final q = StudyCurriculum().question('algebra.linear', 0, 0, 0);
     expect(q.mark(q.answer).verdict, AnswerVerdict.correct);

@@ -25,13 +25,13 @@ void main() {
 
   test('algebra adds an independent goal without changing number goals', () {
     final c = StudyCurriculum();
-    expect(c.goals.last.id, 'algebra');
-    expect(c.goals.last.skillIds, [
+    expect(c.goals.any((g) => g.id == 'algebra'), isTrue);
+    expect(c.goals.firstWhere((g) => g.id == 'algebra').skillIds, [
       'algebra.collect',
       'algebra.expand',
       'algebra.linear',
     ]);
-    expect(c.skills.length, 14);
+    expect(c.skills.length, 18);
     for (final goal in NumberCurriculum().goals) {
       expect(
         c.goals.firstWhere((g) => g.id == goal.id).skillIds,
@@ -51,7 +51,8 @@ void main() {
     'original algebra questions have independently verified answers and replay',
     () {
       final c = StudyCurriculum();
-      for (final skill in c.goals.last.skillIds) {
+      for (final skill
+          in c.goals.firstWhere((g) => g.id == 'algebra').skillIds) {
         for (var level = 0; level < 3; level++) {
           for (var seed = 0; seed < 25; seed++) {
             final q = c.question(skill, level, seed, 2);

@@ -56,3 +56,18 @@ remain distinct from the serialized draft.
 
 Run 34300054221 reported three multiline-if brace lints. Correct the braces
 without changing assessment behaviour or assertions.
+
+Cycle 2 green: run 34300188753 passed Chrome and 228 native tests, 99.58%
+coverage; new uncovered lines are question input guidance pending UI integration.
+
+## Cycle 3: resumable reasoning and remediation
+
+Add compiling controller/widget contracts for all four reasoning drafts,
+correction/retest and separate progression; partial-credit feedback and recorded
+prerequisite assistance. Existing algebra catalogue tests now identify the algebra
+goal by stable ID, preserving its exact members while allowing the fourth goal.
+
+Extend the web recurrence regression to the legacy number generator, which uses
+the same imprecise multiplication. Keep native tests running even if Chrome fails
+so both independent regression results are visible; a Chrome failure still fails
+CI. No gate or assertion is weakened.
