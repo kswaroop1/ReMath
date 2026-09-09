@@ -53,3 +53,6 @@ serialize stable option IDs as JSON; missing expressions reuse exact symbolic
 marking. Multiple-select credit is derived from immutable answer plus versioned
 question identity, not a mutable score stored separately. Human worked answers
 remain distinct from the serialized draft.
+
+Run 34300054221 reported three multiline-if brace lints. Correct the braces
+without changing assessment behaviour or assertions.

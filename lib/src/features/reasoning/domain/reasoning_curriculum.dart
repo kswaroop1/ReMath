@@ -71,8 +71,9 @@ final class ReasoningQuestion implements StudyQuestion {
     final selected = value.cast<String>();
     if (selected.isEmpty ||
         selected.toSet().length != selected.length ||
-        selected.any((id) => !options.any((o) => o.id == id)))
+        selected.any((id) => !options.any((o) => o.id == id))) {
       return null;
+    }
     return selected;
   }
 
@@ -95,8 +96,9 @@ final class ReasoningQuestion implements StudyQuestion {
         final value = jsonDecode(input);
         if (value is! Map<String, dynamic> ||
             !categories.contains(value['category']) ||
-            !options.any((o) => o.id == value['step']))
+            !options.any((o) => o.id == value['step'])) {
           return null;
+        }
         final normalized = jsonEncode({
           'step': value['step'],
           'category': value['category'],
@@ -105,8 +107,9 @@ final class ReasoningQuestion implements StudyQuestion {
       }
       final selected = _selection(input);
       if (selected == null ||
-          (kind == ReasoningKind.order && selected.length != options.length))
+          (kind == ReasoningKind.order && selected.length != options.length)) {
         return null;
+      }
       if (kind == ReasoningKind.order) {
         final normalized = jsonEncode(selected);
         return (normalized == answer ? 1.0 : 0.0, normalized);
