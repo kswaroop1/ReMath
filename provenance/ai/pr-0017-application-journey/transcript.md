@@ -48,3 +48,10 @@ run: a malformed saved confirmation must not unlock calculation or record an
 answer; controls can repair it and still resume. Assert structured questions do
 not offer generic numeric/MCQ input. Update delivered feature scope without
 claiming broad application syllabus completion. No production change.
+
+The attempted characterization exposed a real defect in run 34409215583:
+a malformed saved confirmed=true draft kept that flag while its choices were
+repaired, so the Confirm choices action disappeared without explicit confirmation.
+Five Chrome tests and 244 native tests passed; the new repair case failed.
+Treat this as a new red/green correction: editing method or assumption resets
+confirmation, while editing the calculation preserves already confirmed choices.

@@ -34,8 +34,13 @@ class ApplicationAnswerEditor extends StatelessWidget {
         .firstOrNull;
     final confirmed =
         value['confirmed'] == true && method != null && assumption != null;
-    void change(String key, Object entry) =>
-        onChanged(jsonEncode({...value, key: entry}));
+    void change(String key, Object entry) => onChanged(
+      jsonEncode({
+        ...value,
+        key: entry,
+        if (key == 'method' || key == 'assumption') 'confirmed': false,
+      }),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
