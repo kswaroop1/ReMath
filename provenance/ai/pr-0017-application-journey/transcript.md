@@ -42,3 +42,9 @@ with the existing lint gate before final verification. No scoring change.
 
 Run 34408871697 passed 245 native tests but failed the alphabetic import-order
 lint in study_scoring.dart. Sort the two learning-domain imports; keep all gates.
+
+Characterize the remaining invalid-draft path using the native-green 245-test
+run: a malformed saved confirmation must not unlock calculation or record an
+answer; controls can repair it and still resume. Assert structured questions do
+not offer generic numeric/MCQ input. Update delivered feature scope without
+claiming broad application syllabus completion. No production change.

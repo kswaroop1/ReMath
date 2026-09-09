@@ -60,11 +60,20 @@ void main() {
           ),
           seed: 7,
           sessionId: 's',
+          draft: '{"confirmed":true,"method":99}',
         ).encode(),
       );
       await tester.pumpWidget(MaterialApp(home: StudyScreen(repository: repo)));
       await tester.pumpAndSettle();
       expect(find.byType(TextField), findsNothing);
+      await tester.ensureVisible(find.text('Submit'));
+      await tester.tap(find.text('Submit'));
+      await tester.pumpAndSettle();
+      expect(find.text(q.invalidInputMessage), findsOneWidget);
+      expect(await repo.loadAttempts(), isEmpty);
+      await tester.ensureVisible(
+        find.text(q.methods.firstWhere((o) => o.id == q.method).label),
+      );
       await tester.tap(
         find.text(q.methods.firstWhere((o) => o.id == q.method).label),
       );

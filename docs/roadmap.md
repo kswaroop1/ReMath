@@ -119,7 +119,7 @@ Four sequential, independently usable increments:
    versioned marking/scoring evidence and preserve legacy numeric sessions.
 2. **PR15 — Explain algebra (implemented):** ordered/missing/invalid steps, multiple-select assessment,
    error classification and targeted remediation.
-3. **Apply algebra:** method/assumption selection, unlabelled mixed challenges,
+3. **PR16 engine + PR17 journey — Apply algebra:** method/assumption selection, unlabelled mixed challenges,
    application chunks and separate technique-selection progress.
 4. **Calibrate and continue:** optional confidence reporting, configurable session
    lengths, complete end-of-session choices and verified scoring replay.

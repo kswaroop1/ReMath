@@ -22,3 +22,11 @@ This is engine coverage with a small original application set, not completion of
 finance/engineering/AI syllabuses. Existing goals and historical snapshots retain
 their meaning. Separate test-first and implementation commits and chronological CI
 evidence remain mandatory. User merges PRs; no release is included.
+
+Implemented through PR16 (engine) and PR17 (journey). Application answers store
+method, assumption, confirmation and numeric value together in the immutable
+attempt. Each independently correct method/assumption contributes half of
+technique credit; numeric correctness is separate. Unsupported versions and
+invalid answers are excluded, event IDs deduplicated, assistance excluded.
+The application goal adds four independent skill tracks; mixed challenges skip
+pre-answer teaching. No new database schema or network requirement.

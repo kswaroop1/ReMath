@@ -17,7 +17,7 @@ This is the authoritative, numbered product and content backlog for ReMath.
 - Feature IDs are permanent. Retired features remain recorded rather than being
   renumbered.
 
-Last reviewed: 9 September 2026 (PR15 structured reasoning increment).
+Last reviewed: 9 September 2026 (PR17 application journey).
 
 ## 1. Product foundations
 
@@ -72,9 +72,12 @@ Last reviewed: 9 September 2026 (PR15 structured reasoning increment).
   factors so mixed drills do not introduce two-digit factors prematurely.
 - [x] **LX-008 — Review chunk.** A resumable focused 15-minute chunk selects the
   most urgent overdue or approaching previously learned skill.
-- [ ] **LX-009 — Challenge chunk.** Unlabelled, unfamiliar, multi-topic problems.
-- [ ] **LX-010 — Application chunk.** Finance, AI, computing, engineering, or
-  robotics problem context.
+- [x] **LX-009 — Challenge chunk.** A mixed application session alternates
+  balance, scaling and rate scenarios without topic-specific teaching before
+  attempts. Broader advanced challenge content remains planned.
+- [x] **LX-010 — Application chunk.** Original break-even, scaling and flow
+  scenarios run through teaching, choice-before-calculation, correction/retest
+  and resume. Broader application domains remain planned.
 - [ ] **LX-011 — Paper-reading chunk.** Decode one equation, paragraph, figure, or
   modelling choice from a technical paper.
 - [ ] **LX-012 — End-of-chunk choices.** Stop, repeat, continue topic, review, or
@@ -166,9 +169,9 @@ Last reviewed: 9 September 2026 (PR15 structured reasoning increment).
   under constrained input.
 - [ ] **QA-014 — One-sentence intuition.** Rubric-guided self-assessment initially;
   optional local or external AI assessment later.
-- [ ] **QA-015 — Technique-selection scenarios.** Choose plausible methods before
+- [x] **QA-015 — Technique-selection scenarios.** Choose plausible methods before
   calculating.
-- [ ] **QA-016 — Assumption identification.** Determine missing conditions,
+- [x] **QA-016 — Assumption identification.** Determine missing conditions,
   modelling assumptions, and theorem applicability.
 - [x] **QA-017 — Parameterised generators.** Foundation arithmetic generation is
   operand-bounded, exactly marked, template-versioned, and deterministic.
@@ -229,8 +232,10 @@ Last reviewed: 9 September 2026 (PR15 structured reasoning increment).
   accurately under time pressure. The arithmetic foundation now exposes
   accuracy-and-speed performance separately from knowledge; unfamiliar advanced
   problems remain planned.
-- [ ] **MP-009 — Technique-selection score.** Identify appropriate tools without
-  topic labels.
+- [x] **MP-009 — Technique-selection score.** Independent method and
+  assumption choices are reconstructed from versioned application answers;
+  calculation slips retain technique credit, while assistance, duplicates and
+  unknown versions cannot inflate it. Mixed challenges omit technique labels.
 - [ ] **MP-010 — Confidence calibration score.** Agreement between confidence and
   actual performance.
 - [x] **MP-011 — Spaced-repetition scheduler.** Incorrect skills become immediately

@@ -68,6 +68,8 @@ void main() {
             expect(q.id, contains('.v1.mark1.score1.'));
             expect(c.question(skill.id, level, seed, 2).answer, q.answer);
             expect(q.hints.length, 4);
+            expect(q.choices, isEmpty);
+            expect(q.format, isNull);
             expect(q.describeAnswer(q.answer), contains('Method:'));
             expect(q.describeAnswer(q.answer), isNot(contains('confirmed')));
             expect(q.describeAnswer('bad json'), 'Incomplete answer');
