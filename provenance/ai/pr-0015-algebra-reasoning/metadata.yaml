@@ -1,0 +1,12 @@
+schema_version: 1
+pull_request: 15
+title: Structured algebra reasoning
+human_owner: kswaroop1
+agents:
+  - product: OpenAI Codex
+    model: unknown
+started_at: 2026-09-08T18:43:00Z
+finalized_at: null
+scope: [code, tests, documentation]
+redactions: []
+ci_runs: []
