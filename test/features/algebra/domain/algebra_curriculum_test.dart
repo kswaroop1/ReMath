@@ -31,7 +31,7 @@ void main() {
       'algebra.expand',
       'algebra.linear',
     ]);
-    expect(c.skills.length, 18);
+    expect(c.skills.length, 22);
     for (final goal in NumberCurriculum().goals) {
       expect(
         c.goals.firstWhere((g) => g.id == goal.id).skillIds,
