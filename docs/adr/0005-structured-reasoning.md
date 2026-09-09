@@ -1,6 +1,6 @@
 # ADR 0005: structured reasoning through the shared journey
 
-Status: selected for increment 2.
+Status: implemented in PR15 (increment 2).
 
 Structured questions implement StudyQuestion and retain the existing immutable
 attempt plus snapshot transaction. Order/select drafts are JSON arrays of stable

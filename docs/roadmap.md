@@ -117,7 +117,7 @@ Four sequential, independently usable increments:
    expansion and linear equations, goal/diagnostic, original teaching,
    correction/retest and resumable drafts through the shared journey. Begin
    versioned marking/scoring evidence and preserve legacy numeric sessions.
-2. **Explain algebra:** ordered/missing/invalid steps, multiple-select assessment,
+2. **PR15 — Explain algebra (implemented):** ordered/missing/invalid steps, multiple-select assessment,
    error classification and targeted remediation.
 3. **Apply algebra:** method/assumption selection, unlabelled mixed challenges,
    application chunks and separate technique-selection progress.

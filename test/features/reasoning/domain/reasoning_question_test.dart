@@ -6,6 +6,33 @@ import 'package:remath/src/features/reasoning/domain/reasoning_curriculum.dart';
 
 void main() {
   test(
+    'history labels preserve each chosen answer without exposing option IDs',
+    () {
+      final c = ReasoningCurriculum();
+      for (final kind in ReasoningKind.values) {
+        final q = c.question('reasoning.${kind.name}', 0, 7, 0);
+        expect(q.describeAnswer('bad json'), 'Incomplete answer');
+        if (kind == ReasoningKind.missing) {
+          expect(q.describeAnswer(q.answer), q.mark(q.answer).normalizedInput);
+        } else if (kind == ReasoningKind.diagnose) {
+          final selected = jsonDecode(q.answer) as Map<String, dynamic>;
+          expect(
+            q.describeAnswer(q.answer),
+            '${q.options.firstWhere((o) => o.id == selected['step']).label} — ${selected['category']}',
+          );
+        } else {
+          final ids = (jsonDecode(q.answer) as List<dynamic>).cast<String>();
+          expect(
+            q.describeAnswer(q.answer),
+            ids
+                .map((id) => q.options.firstWhere((o) => o.id == id).label)
+                .join(kind == ReasoningKind.order ? ' → ' : ', '),
+          );
+        }
+      }
+    },
+  );
+  test(
     'a derivation must subtract then divide then check, with every step once',
     () {
       final q = ReasoningCurriculum().question('reasoning.order', 0, 7, 0);
