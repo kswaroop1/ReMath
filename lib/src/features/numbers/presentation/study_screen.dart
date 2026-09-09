@@ -188,6 +188,7 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
     final events = _controller.history
         .where((e) => e.skillId == skill.id)
         .toList();
+    final technique = StudyScoring.techniqueSummary(events);
     return ExpansionTile(
       title: Text(skill.title),
       subtitle: Text(
@@ -198,6 +199,10 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
       expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(progress.explanation),
+        if (skill.id.startsWith('application.'))
+          Text(
+            '${(technique.$2 * 100).round()}% technique selection across ${technique.$1} independent answers. Method and assumption are scored separately from calculation.',
+          ),
         Text(
           '${(progress.chanceAdjustedAccuracy * 100).round()}% chance-adjusted accuracy. '
           'Four-choice answers are adjusted for guessing.',
@@ -255,6 +260,8 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
 
   String _answerDescription(AttemptEvent event) {
     if (event.kind == AttemptKind.hint) return 'Hint revealed';
+    final application = StudyScoring.applicationQuestion(event);
+    if (application != null) return application.describeAnswer(event.answer);
     return StudyScoring.reasoningQuestion(
           event,
         )?.describeAnswer(event.answer) ??

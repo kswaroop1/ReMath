@@ -26,3 +26,13 @@ Cycle 2 select/red: technique summary must retain method credit after calculatio
 slips, exclude assisted/invalid/future evidence and duplicate event IDs, and show
 readable history. Introduce a public deterministic scoring projection seam;
 compilation failure is expected until that necessary interface exists.
+
+Cycle 2 red: run 34408553130 failed at the missing public scoring seams and
+missing technique display; 243 existing native tests passed. Add version-checked
+application replay and a duplicate-safe independent technique projection, excluding
+invalid answers and assistance. Render answer labels from replayed templates.
+
+Read merged PR15 review: its provenance finding was already corrected in the
+merged final commit. Preserve two remaining findings for a dedicated compatibility
+fix after this journey: v1 web recurrence identity ambiguity and balance diagnosis
+remediation pointing to expansion. Do not claim those findings resolved here.
