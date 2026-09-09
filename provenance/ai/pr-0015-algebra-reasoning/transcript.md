@@ -34,3 +34,15 @@ includes all bundled skills but overdue selection remains within the chosen goal
 Existing symbolic-journey tests now explicitly explore collecting terms so they
 continue testing symbolic interactions; the new regression separately asserts
 normal prerequisite-first planning. No behavioural assertion is removed.
+
+Cycle 1 green: run 34299604614 passed all four regressions in Chrome and all
+223 native tests, 99.96% coverage. The formerly uncovered prerequisite path is
+now exercised; only the inherited number-generator fallback remains uncovered.
+
+## Cycle 2: structured reasoning contracts
+
+Add tests for ordered derivations, missing expanded expressions, identifying the
+first invalid step plus category, and penalty-adjusted multiple-select credit.
+Require duplicate/unknown/incomplete selection rejection, deterministic replay,
+original worked hints and bounded identities. ReasoningCurriculum is the necessary
+new public seam. No reasoning production code is in this test-first commit.
