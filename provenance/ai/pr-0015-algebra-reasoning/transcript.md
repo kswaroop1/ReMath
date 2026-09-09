@@ -85,3 +85,14 @@ seconds; reasoning mastery remains separate from algebra and number skills.
 
 Preflight inspection found two additional multiline-if bodies needing braces
 after formatting; correct those style issues while CI verifies the integration.
+
+Cycle 3 green: run 34300815601 passed five Chrome regressions and 233 native
+tests, 98.83% coverage. Remaining new coverage is chiefly diagnosis editing,
+selection revision and history presentation.
+
+## Cycle 4: repairable drafts and readable history
+
+Add regressions for a saved diagnosis whose category has the wrong JSON type,
+and for history displaying internal option IDs instead of the learner's selected
+steps. Characterize missing-expression input, ordering revision and checkbox
+unselection with green-before evidence. No production correction in this commit.

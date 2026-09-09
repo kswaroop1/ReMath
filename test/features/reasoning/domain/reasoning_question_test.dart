@@ -90,6 +90,7 @@ void main() {
             expect(q.mark(q.answer).verdict, AnswerVerdict.correct);
             expect(q.credit(q.answer), 1);
             expect(q.hints.length, 4);
+            expect(q.choices, isEmpty);
             expect(q.hints.last, contains(q.workedAnswer));
             expect(c.question(skill, level, seed, 2).prompt, q.prompt);
             expect(c.question(skill, level, seed, 3).id, isNot(q.id));
