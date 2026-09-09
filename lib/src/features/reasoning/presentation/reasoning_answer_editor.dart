@@ -89,7 +89,9 @@ class ReasoningAnswerEditor extends StatelessWidget {
               onPressed: enabled
                   ? () => choose(
                       option.id,
-                      diagnosis['category'] as String? ?? '',
+                      diagnosis['category'] is String
+                          ? diagnosis['category'] as String
+                          : '',
                     )
                   : null,
               style: OutlinedButton.styleFrom(
@@ -107,8 +109,12 @@ class ReasoningAnswerEditor extends StatelessWidget {
                   label: Text(category),
                   selected: diagnosis['category'] == category,
                   onSelected: enabled
-                      ? (_) =>
-                            choose(diagnosis['step'] as String? ?? '', category)
+                      ? (_) => choose(
+                          diagnosis['step'] is String
+                              ? diagnosis['step'] as String
+                              : '',
+                          category,
+                        )
                       : null,
                 ),
             ],

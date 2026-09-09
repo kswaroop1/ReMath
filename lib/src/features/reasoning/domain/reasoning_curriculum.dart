@@ -144,6 +144,22 @@ final class ReasoningQuestion implements StudyQuestion {
     );
   }
 
+  String describeAnswer(String input) {
+    final assessment = _assess(input);
+    if (assessment == null) return 'Incomplete answer';
+    if (kind == ReasoningKind.missing) return assessment.$2;
+    final value = jsonDecode(assessment.$2);
+    String label(String id) => options.firstWhere((o) => o.id == id).label;
+    if (kind == ReasoningKind.diagnose) {
+      final diagnosis = value as Map<String, dynamic>;
+      return '${label(diagnosis['step'] as String)} — ${diagnosis['category']}';
+    }
+    return (value as List<dynamic>)
+        .cast<String>()
+        .map(label)
+        .join(kind == ReasoningKind.order ? ' → ' : ', ');
+  }
+
   double credit(String input) => _assess(input)?.$1 ?? 0;
 }
 

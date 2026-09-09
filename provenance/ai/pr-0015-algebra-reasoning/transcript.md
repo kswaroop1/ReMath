@@ -96,3 +96,9 @@ Add regressions for a saved diagnosis whose category has the wrong JSON type,
 and for history displaying internal option IDs instead of the learner's selected
 steps. Characterize missing-expression input, ordering revision and checkbox
 unselection with green-before evidence. No production correction in this commit.
+
+Cycle 4 red: run 34301081683 passed analysis and five Chrome tests; native
+reported 234 passes and two intended failures: an integer category caused a
+String cast error and history exposed serialized step IDs. Repair diagnosis
+fields using type checks and reconstruct human-readable answers from the
+versioned reasoning question, keeping immutable stored answers unchanged.

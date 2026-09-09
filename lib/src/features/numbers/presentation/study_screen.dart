@@ -219,7 +219,7 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
             (event) => ListTile(
               title: Text(_eventDescription(event)),
               subtitle: Text(
-                '${event.occurredAt.toLocal()} · Answer: ${event.answer}',
+                '${event.occurredAt.toLocal()} · Answer: ${_answerDescription(event)}',
               ),
             ),
           ),
@@ -249,6 +249,14 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
         ],
       ),
     );
+  }
+
+  String _answerDescription(AttemptEvent event) {
+    if (event.kind == AttemptKind.hint) return 'Hint revealed';
+    return StudyScoring.reasoningQuestion(
+          event,
+        )?.describeAnswer(event.answer) ??
+        event.answer;
   }
 
   String _eventDescription(AttemptEvent event) {
