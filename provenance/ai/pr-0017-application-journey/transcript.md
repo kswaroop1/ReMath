@@ -1,0 +1,66 @@
+# Application journey continuation
+
+User: “Merged both.” Verified PR15 and PR16 merged into main. PR16 run
+34327484464 passed, but its merged scope is the question/scoring engine only.
+Continue accepted QA-015/016, LX-009/010 and MP-009 acceptance from
+ docs/slices/algebra-applications.md in a new PR on merged main. Complete
+catalogue routing, persisted choice controls, mixed challenge planning, readable
+history and independent technique progress before calibration. No release.
+
+Cycle 1 select/red: add compiling controller and screen regressions for the
+missing application goal, committed choice resume, full correction/retest and
+mixed scenarios without a lesson before the answer. Extend the catalogue count
+for four new skills, preserving exact membership assertions for older goals.
+
+Cycle 1 red: run 34407936754 passed analysis and five Chrome regressions;
+239 native tests passed and four failed for missing goal/skill routing, saved
+application controls and expected catalogue growth. Connect four application
+skills and their goal, typed persisted choice/calculation controls and a mixed
+plan that omits teaching before attempts. Existing contracts remain versioned.
+
+Cycle 1 green: run 34408272493 passed analysis, five Chrome tests and 243
+native tests; 99.86% coverage. Application controls resume confirmed choices,
+all four skills complete correction/retest, mixed plans omit prior teaching.
+
+Cycle 2 select/red: technique summary must retain method credit after calculation
+slips, exclude assisted/invalid/future evidence and duplicate event IDs, and show
+readable history. Introduce a public deterministic scoring projection seam;
+compilation failure is expected until that necessary interface exists.
+
+Cycle 2 red: run 34408553130 failed at the missing public scoring seams and
+missing technique display; 243 existing native tests passed. Add version-checked
+application replay and a duplicate-safe independent technique projection, excluding
+invalid answers and assistance. Render answer labels from replayed templates.
+
+Read merged PR15 review: its provenance finding was already corrected in the
+merged final commit. Preserve two remaining findings for a dedicated compatibility
+fix after this journey: v1 web recurrence identity ambiguity and balance diagnosis
+remediation pointing to expansion. Do not claim those findings resolved here.
+
+Preflight formatting exposed two multiline guard bodies; add braces to comply
+with the existing lint gate before final verification. No scoring change.
+
+Run 34408871697 passed 245 native tests but failed the alphabetic import-order
+lint in study_scoring.dart. Sort the two learning-domain imports; keep all gates.
+
+Characterize the remaining invalid-draft path using the native-green 245-test
+run: a malformed saved confirmation must not unlock calculation or record an
+answer; controls can repair it and still resume. Assert structured questions do
+not offer generic numeric/MCQ input. Update delivered feature scope without
+claiming broad application syllabus completion. No production change.
+
+The attempted characterization exposed a real defect in run 34409215583:
+a malformed saved confirmed=true draft kept that flag while its choices were
+repaired, so the Confirm choices action disappeared without explicit confirmation.
+Five Chrome tests and 244 native tests passed; the new repair case failed.
+Treat this as a new red/green correction: editing method or assumption resets
+confirmation, while editing the calculation preserves already confirmed choices.
+
+Final implementation verification: run 34409555025 passed formatting, analysis,
+five Chrome tests and 245 native tests with 99.90% line coverage. The inherited
+numeric-generator fallback and the editor's empty/malformed-JSON catch are the
+remaining lines; typed malformed saved confirmation is tested end to end, and
+domain malformed-JSON rejection is covered. No marking or scoring domain lines
+remain uncovered. Final handoff records this evidence, marks PR17 ready and
+requests one explicit @codex review. Follow up the two outstanding PR15 findings
+in a separate compatibility PR before calibration; neither is claimed fixed here.

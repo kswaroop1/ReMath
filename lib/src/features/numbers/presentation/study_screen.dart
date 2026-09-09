@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../applications/domain/application_curriculum.dart';
+import '../../applications/presentation/application_answer_editor.dart';
 import '../../learning/domain/attempt_event.dart';
 import '../../learning/domain/progress_repository.dart';
 import '../../reasoning/domain/reasoning_curriculum.dart';
@@ -186,6 +188,7 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
     final events = _controller.history
         .where((e) => e.skillId == skill.id)
         .toList();
+    final technique = StudyScoring.techniqueSummary(events);
     return ExpansionTile(
       title: Text(skill.title),
       subtitle: Text(
@@ -196,6 +199,10 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
       expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(progress.explanation),
+        if (skill.id.startsWith('application.'))
+          Text(
+            '${(technique.$2 * 100).round()}% technique selection across ${technique.$1} independent answers. Method and assumption are scored separately from calculation.',
+          ),
         Text(
           '${(progress.chanceAdjustedAccuracy * 100).round()}% chance-adjusted accuracy. '
           'Four-choice answers are adjusted for guessing.',
@@ -253,6 +260,8 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
 
   String _answerDescription(AttemptEvent event) {
     if (event.kind == AttemptKind.hint) return 'Hint revealed';
+    final application = StudyScoring.applicationQuestion(event);
+    if (application != null) return application.describeAnswer(event.answer);
     return StudyScoring.reasoningQuestion(
           event,
         )?.describeAnswer(event.answer) ??
@@ -364,7 +373,14 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
             child: const Text('Review prerequisite'),
           ),
         ],
-        if (q is ReasoningQuestion && q.kind != ReasoningKind.missing)
+        if (q is ApplicationQuestion)
+          ApplicationAnswerEditor(
+            question: q,
+            draft: state.draft,
+            enabled: !_controller.busy && !_controller.needsRetry,
+            onChanged: (value) => unawaited(_controller.updateDraft(value)),
+          )
+        else if (q is ReasoningQuestion && q.kind != ReasoningKind.missing)
           ReasoningAnswerEditor(
             question: q,
             draft: state.draft,
