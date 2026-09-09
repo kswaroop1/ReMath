@@ -103,7 +103,11 @@ final class StudyProgress {
         ? 'No independent evidence yet. Start with a diagnostic or guided practice.'
         : '$correct of $independent independent answers correct; $assisted assisted '
               'events. Difficulty ${level + 1} requires independent '
-              '${skillId.startsWith('algebra.') ? 'symbolic' : 'numeric'} fluency '
+              '${skillId.startsWith('reasoning.')
+                  ? 'reasoning'
+                  : skillId.startsWith('algebra.')
+                  ? 'symbolic'
+                  : 'numeric'} fluency '
               'within ${StudyScoring.fluentWithin(skillId).inSeconds} seconds. '
               '${retention.reason}';
     return unsupported == 0
@@ -250,7 +254,10 @@ final class StudyPlanner {
             StudyStepKind.practice,
             target,
             level,
-            multipleChoice: !target.startsWith('algebra.') && i % 3 == 1,
+            multipleChoice:
+                !target.startsWith('algebra.') &&
+                !target.startsWith('reasoning.') &&
+                i % 3 == 1,
           ),
         StudyStep(StudyStepKind.reflection, target, level),
       ],
@@ -336,7 +343,8 @@ final class StudyState {
       if (step.templateVersion != 1 ||
           step.markingVersion != 1 ||
           step.scoringVersion != 1 ||
-          (step.skillId.startsWith('algebra.') &&
+          ((step.skillId.startsWith('algebra.') ||
+                  step.skillId.startsWith('reasoning.')) &&
               (json['version'] == 1 || step.multipleChoice)) ||
           step.level < 0 ||
           step.level > 2 ||

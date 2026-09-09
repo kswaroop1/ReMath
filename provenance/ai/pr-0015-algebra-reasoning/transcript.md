@@ -71,3 +71,14 @@ Extend the web recurrence regression to the legacy number generator, which uses
 the same imprecise multiplication. Keep native tests running even if Chrome fails
 so both independent regression results are visible; a Chrome failure still fails
 CI. No gate or assertion is weakened.
+
+Cycle 3 red: run 34300428457 reproduced number web replay (2+6 instead of 3+7)
+and native missing reasoning goal, diagnostic, controls and catalogue entries.
+
+Integrate four reasoning skills and a separate goal, with typed controls and the
+existing atomic correction/retest loop. Record stable error IDs; reconstruct
+partial credit from immutable answer/template and display it during correction.
+Prerequisite help commits assistance before opening the lesson. Numeric templates
+now use the same exact recurrence, preserving native identities while fixing web.
+Reasoning evidence is version-validated and its provisional fluent limit is 90
+seconds; reasoning mastery remains separate from algebra and number skills.

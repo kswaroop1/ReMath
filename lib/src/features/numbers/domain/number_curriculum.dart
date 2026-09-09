@@ -1,3 +1,4 @@
+import '../../../core/domain/seeded_sequence.dart';
 import '../../learning/domain/content_pack.dart';
 import '../../learning/domain/numeric_answer_contract.dart';
 import 'study_question.dart';
@@ -216,11 +217,8 @@ final class NumberCurriculum {
     if (level < 0 || level > 2 || index < 0) {
       throw ArgumentError('Level must be 0–2 and index must be nonnegative');
     }
-    var state = ((seed & 0x7fffffff) ^ ((index + 1) * 0x45d9f3b)) & 0x7fffffff;
-    int pick(int limit) {
-      state = (state * 1103515245 + 12345) & 0x7fffffff;
-      return 1 + state % limit;
-    }
+    final sequence = SeededSequence(seed, index);
+    int pick(int limit) => sequence.pick(limit);
 
     final bound = [9, 19, 99][level];
     final a = pick(bound);

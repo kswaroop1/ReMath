@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../../learning/domain/attempt_event.dart';
 import '../../learning/domain/numeric_answer_contract.dart';
 import '../../learning/domain/progress_repository.dart';
+import '../../reasoning/domain/reasoning_curriculum.dart';
 import '../domain/study_curriculum.dart';
 import '../domain/study_plan.dart';
 import '../domain/study_question.dart';
@@ -199,6 +200,8 @@ final class StudyController extends ChangeNotifier {
       relatedEventId: before.relatedEventId,
       misconceptionId: isMultipleChoice
           ? q.choices.firstWhere((c) => c.value == before.draft).misconception
+          : q is ReasoningQuestion && !correct
+          ? 'reasoning.${q.errorCategory}'
           : null,
     );
     var next = before.copyWith(
