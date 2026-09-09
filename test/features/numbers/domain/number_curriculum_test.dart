@@ -75,7 +75,7 @@ void main() {
             expect(q.hints.length, 4);
             expect(q.hints.last, contains(q.answer));
             expect(q.mark('nonsense').verdict, AnswerVerdict.invalid);
-            expect(q.id, contains('.v1.'));
+            expect(q.id, contains('.v2.'));
             expect(
               q.id,
               isNot(curriculum.question(skill.id, level, seed, 2).id),

@@ -9,7 +9,7 @@ void main() {
     () {
       final c = StudyCurriculum();
       expect(
-        () => c.question('algebra.collect', 0, 7, 0, templateVersion: 2),
+        () => c.question('algebra.collect', 0, 7, 0, templateVersion: 3),
         throwsFormatException,
       );
       expect(
@@ -87,7 +87,7 @@ void main() {
             expect(q.hints.length, 4);
             expect(q.hints.last, contains(q.answer));
             expect(q.choices, isEmpty);
-            expect(q.id, contains('.v1.mark1.score1.'));
+            expect(q.id, contains('.v2.mark1.score1.'));
             final replay = c.question(skill, level, seed, 2);
             expect(replay.prompt, q.prompt);
             expect(replay.id, q.id);
