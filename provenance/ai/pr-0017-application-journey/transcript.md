@@ -17,3 +17,12 @@ Cycle 1 red: run 34407936754 passed analysis and five Chrome regressions;
 application controls and expected catalogue growth. Connect four application
 skills and their goal, typed persisted choice/calculation controls and a mixed
 plan that omits teaching before attempts. Existing contracts remain versioned.
+
+Cycle 1 green: run 34408272493 passed analysis, five Chrome tests and 243
+native tests; 99.86% coverage. Application controls resume confirmed choices,
+all four skills complete correction/retest, mixed plans omit prior teaching.
+
+Cycle 2 select/red: technique summary must retain method credit after calculation
+slips, exclude assisted/invalid/future evidence and duplicate event IDs, and show
+readable history. Introduce a public deterministic scoring projection seam;
+compilation failure is expected until that necessary interface exists.
