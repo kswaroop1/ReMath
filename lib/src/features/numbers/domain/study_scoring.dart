@@ -1,6 +1,6 @@
 import '../../applications/domain/application_curriculum.dart';
-import '../../learning/domain/numeric_answer_contract.dart';
 import '../../learning/domain/attempt_event.dart';
+import '../../learning/domain/numeric_answer_contract.dart';
 import '../../reasoning/domain/reasoning_curriculum.dart';
 
 /// Immutable v1 interpretation. Unknown algebra evidence remains history only.

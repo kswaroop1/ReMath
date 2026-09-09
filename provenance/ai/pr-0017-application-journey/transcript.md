@@ -39,3 +39,6 @@ remediation pointing to expansion. Do not claim those findings resolved here.
 
 Preflight formatting exposed two multiline guard bodies; add braces to comply
 with the existing lint gate before final verification. No scoring change.
+
+Run 34408871697 passed 245 native tests but failed the alphabetic import-order
+lint in study_scoring.dart. Sort the two learning-domain imports; keep all gates.
