@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 import '../../learning/domain/attempt_event.dart';
 import '../../learning/domain/progress_repository.dart';
+import '../../reasoning/domain/reasoning_curriculum.dart';
+import '../../reasoning/presentation/reasoning_answer_editor.dart';
 import '../domain/number_curriculum.dart';
 import '../domain/study_plan.dart';
 import '../domain/study_scoring.dart';
@@ -217,12 +219,44 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
             (event) => ListTile(
               title: Text(_eventDescription(event)),
               subtitle: Text(
-                '${event.occurredAt.toLocal()} · Answer: ${event.answer}',
+                '${event.occurredAt.toLocal()} · Answer: ${_answerDescription(event)}',
               ),
             ),
           ),
       ],
     );
+  }
+
+  Future<void> _reviewPrerequisite(ReasoningQuestion q) async {
+    final before = _controller.state.hintCount;
+    if (before < 4) await _controller.revealHint();
+    if (!mounted || (before < 4 && _controller.state.hintCount == before)) {
+      return;
+    }
+    final skill = _controller.curriculum.skill(q.remediationSkillId);
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(skill.title),
+        content: SingleChildScrollView(
+          child: Text('${skill.lesson}\n\n${skill.example}'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Return to question'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _answerDescription(AttemptEvent event) {
+    if (event.kind == AttemptKind.hint) return 'Hint revealed';
+    return StudyScoring.reasoningQuestion(
+          event,
+        )?.describeAnswer(event.answer) ??
+        event.answer;
   }
 
   String _eventDescription(AttemptEvent event) {
@@ -233,6 +267,10 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
       return event.kind == AttemptKind.hint
           ? 'Hint used; no independent mastery credit.'
           : 'Correction or assisted answer; no independent mastery credit.';
+    }
+    final reasoning = StudyScoring.reasoningQuestion(event);
+    if (reasoning != null) {
+      return '${event.isCorrect ? 'Correct' : 'Incorrect'} independent reasoning; ${(reasoning.credit(event.answer) * 100).round()}% credit. ${event.misconceptionId ?? ''}';
     }
     if (event.questionId.endsWith('.mcq')) {
       return '${event.isCorrect ? 'Correct' : 'Incorrect'} choice; '
@@ -307,7 +345,33 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
         Text(q.prompt, style: Theme.of(context).textTheme.headlineSmall),
         if (q.inputGuidance != null) Text(q.inputGuidance!),
         const SizedBox(height: 12),
-        if (_controller.isMultipleChoice)
+        if (q is ReasoningQuestion && state.phase == StudyPhase.correction) ...[
+          for (final event
+              in _controller.history
+                  .where(
+                    (e) => e.questionId == q.id && e.kind != AttemptKind.hint,
+                  )
+                  .toList()
+                  .reversed
+                  .take(1))
+            Text(
+              'Credit: ${(q.credit(event.answer) * 100).round()}% — complete the correction to continue.',
+            ),
+          TextButton(
+            onPressed: _controller.busy || _controller.needsRetry
+                ? null
+                : () => _reviewPrerequisite(q),
+            child: const Text('Review prerequisite'),
+          ),
+        ],
+        if (q is ReasoningQuestion && q.kind != ReasoningKind.missing)
+          ReasoningAnswerEditor(
+            question: q,
+            draft: state.draft,
+            enabled: !_controller.busy && !_controller.needsRetry,
+            onChanged: (value) => unawaited(_controller.updateDraft(value)),
+          )
+        else if (_controller.isMultipleChoice)
           for (final choice in q.choices)
             Padding(
               padding: const EdgeInsets.only(bottom: 4),

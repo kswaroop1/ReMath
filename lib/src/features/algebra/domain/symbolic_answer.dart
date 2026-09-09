@@ -1,6 +1,6 @@
 import '../../learning/domain/numeric_answer_contract.dart';
 
-enum SymbolicForm { equivalent, collected }
+enum SymbolicForm { equivalent, collected, constant }
 
 /// Version-one exact polynomials over real x; variable divisors are unsupported.
 final class SymbolicAnswer {
@@ -15,9 +15,14 @@ final class SymbolicAnswer {
       final equivalent = value.key == _expected.key;
       final collected =
           value.expanded && value.terms.toSet().length == value.terms.length;
+      final validForm = switch (form) {
+        SymbolicForm.equivalent => true,
+        SymbolicForm.collected => collected,
+        SymbolicForm.constant => !value.hasVariable,
+      };
       return AnswerMark(
         normalizedInput: input.trim(),
-        verdict: equivalent && (form == SymbolicForm.equivalent || collected)
+        verdict: equivalent && validForm
             ? AnswerVerdict.correct
             : AnswerVerdict.incorrect,
       );
@@ -69,7 +74,6 @@ final class _Value {
   final List<int> terms;
   final bool expanded;
   final bool hasVariable;
-  bool get variable => coefficients.keys.any((degree) => degree > 0);
   String get key {
     final degrees = coefficients.keys.toList()..sort();
     return degrees.map((d) => '$d:${coefficients[d]!.key}').join(',');
@@ -110,8 +114,8 @@ final class _Value {
       expanded:
           expanded &&
           other.expanded &&
-          !(variable && terms.length > 1) &&
-          !(other.variable && other.terms.length > 1),
+          !(hasVariable && terms.length > 1) &&
+          !(other.hasVariable && other.terms.length > 1),
       hasVariable: hasVariable || other.hasVariable,
     );
   }

@@ -17,7 +17,7 @@ This is the authoritative, numbered product and content backlog for ReMath.
 - Feature IDs are permanent. Retired features remain recorded rather than being
   renumbered.
 
-Last reviewed: 8 September 2026 (PR14 algebra solving increment).
+Last reviewed: 9 September 2026 (PR15 structured reasoning increment).
 
 ## 1. Product foundations
 
@@ -144,14 +144,16 @@ Last reviewed: 8 September 2026 (PR14 algebra solving increment).
 - [x] **QA-004 — Single-answer MCQ.** Number questions offer four distinct
   deterministically rotated choices, error metadata and chance-adjusted accuracy.
   MCQs alone cannot promote numeric difficulty or confirm retained mastery.
-- [ ] **QA-005 — Multiple-select questions.** Partial-credit policy that does not
+- [x] **QA-005 — Multiple-select questions.** Partial-credit policy that does not
   reward indiscriminate selection.
-- [ ] **QA-006 — Ordered-step questions.** Arrange derivation, algorithm, or proof
+- [x] **QA-006 — Ordered-step questions.** Arrange derivation, algorithm, or proof
   steps.
-- [ ] **QA-007 — Missing-step questions.** Supply an equation, justification, or
+- [x] **QA-007 — Missing-step questions.** Supply an equation, justification, or
   transformation in a structured derivation.
-- [ ] **QA-008 — Invalid-step diagnosis.** Identify the first incorrect inference
-  and classify the error.
+- [x] **QA-008 — Invalid-step diagnosis.** Identify the first incorrect inference
+  and classify the error. QA-005–008 now run offline through the shared
+  resumable algebra journey, with correction/retest and separate reasoning
+  progress. These assessment formats do not imply full mathematical module coverage.
 - [ ] **QA-009 — Matching questions.** Formula-to-condition, method-to-problem, or
   distribution-to-property mappings.
 - [ ] **QA-010 — Graph and diagram questions.** Read, manipulate, or annotate
@@ -214,7 +216,9 @@ Last reviewed: 8 September 2026 (PR14 algebra solving increment).
   events are immutable, typed, and linked without converting an original error
   or assisted learning into unaided success.
 - [ ] **MP-005 — Error taxonomy.** Arithmetic, algebra, concept, assumption,
-  notation, method selection, and careless error.
+  notation, method selection, and careless error. **Foundation delivered:**
+  structured algebra diagnosis records distribution, sign, balance and arithmetic
+  categories, with prerequisite help; broader taxonomy remains planned.
 - [x] **MP-006 — Fluency score.** Addition, subtraction, and multiplication derive
   separate recent-evidence scores from correctness and operation-specific speed.
 - [ ] **MP-007 — Knowledge mastery score.** Understanding and retained correctness.

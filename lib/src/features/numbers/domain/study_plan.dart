@@ -103,7 +103,11 @@ final class StudyProgress {
         ? 'No independent evidence yet. Start with a diagnostic or guided practice.'
         : '$correct of $independent independent answers correct; $assisted assisted '
               'events. Difficulty ${level + 1} requires independent '
-              '${skillId.startsWith('algebra.') ? 'symbolic' : 'numeric'} fluency '
+              '${skillId.startsWith('reasoning.')
+                  ? 'reasoning'
+                  : skillId.startsWith('algebra.')
+                  ? 'symbolic'
+                  : 'numeric'} fluency '
               'within ${StudyScoring.fluentWithin(skillId).inSeconds} seconds. '
               '${retention.reason}';
     return unsupported == 0
@@ -195,13 +199,15 @@ final class StudyPlanner {
   }) {
     final ids = _goalSkills(goalId);
     final progress = {
-      for (final id in ids) id: StudyProgress.forSkill(id, attempts, now),
+      for (final skill in _curriculum.skills)
+        skill.id: StudyProgress.forSkill(skill.id, attempts, now),
     };
-    final due = progress.values.where((p) => p.retention.isDue).toList()
-      ..sort(
-        (a, b) =>
-            a.retention.nextReviewAt!.compareTo(b.retention.nextReviewAt!),
-      );
+    final due =
+        ids.map((id) => progress[id]!).where((p) => p.retention.isDue).toList()
+          ..sort(
+            (a, b) =>
+                a.retention.nextReviewAt!.compareTo(b.retention.nextReviewAt!),
+          );
     String target;
     String reason;
     if (exploreSkillId != null) {
@@ -248,7 +254,10 @@ final class StudyPlanner {
             StudyStepKind.practice,
             target,
             level,
-            multipleChoice: !target.startsWith('algebra.') && i % 3 == 1,
+            multipleChoice:
+                !target.startsWith('algebra.') &&
+                !target.startsWith('reasoning.') &&
+                i % 3 == 1,
           ),
         StudyStep(StudyStepKind.reflection, target, level),
       ],
@@ -334,7 +343,8 @@ final class StudyState {
       if (step.templateVersion != 1 ||
           step.markingVersion != 1 ||
           step.scoringVersion != 1 ||
-          (step.skillId.startsWith('algebra.') &&
+          ((step.skillId.startsWith('algebra.') ||
+                  step.skillId.startsWith('reasoning.')) &&
               (json['version'] == 1 || step.multipleChoice)) ||
           step.level < 0 ||
           step.level > 2 ||

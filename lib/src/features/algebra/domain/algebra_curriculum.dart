@@ -1,3 +1,4 @@
+import '../../../core/domain/seeded_sequence.dart';
 import '../../learning/domain/numeric_answer_contract.dart';
 import '../../numbers/domain/number_curriculum.dart';
 import 'symbolic_answer.dart';
@@ -75,12 +76,8 @@ final class AlgebraCurriculum {
       throw ArgumentError('Unknown algebra skill, level or question index');
     }
     final skill = skills.firstWhere((s) => s.id == skillId);
-    var state = ((seed & 0x7fffffff) ^ ((index + 1) * 0x45d9f3b)) & 0x7fffffff;
-    int pick() {
-      state = (state * 1103515245 + 12345) & 0x7fffffff;
-      return 1 + state % (level == 0 ? 5 : 12);
-    }
-
+    final sequence = SeededSequence(seed, index);
+    int pick() => sequence.pick(level == 0 ? 5 : 12);
     final a = pick();
     final b = pick();
     final c = pick();
@@ -144,7 +141,7 @@ final class AlgebraCurriculum {
       prompt: prompt,
       answer: answer,
       form: skillId == 'algebra.linear'
-          ? SymbolicForm.equivalent
+          ? SymbolicForm.constant
           : SymbolicForm.collected,
       hints: [
         'Identify like terms and keep both sides of an equation equal.',

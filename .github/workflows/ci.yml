@@ -50,7 +50,10 @@ jobs:
         run: flutter analyze --fatal-infos --fatal-warnings
       - name: Validate content packs
         run: dart run tool/validate_content.dart assets/content/foundation_arithmetic/pack.json
+      - name: Verify algebra contracts in Chrome
+        run: flutter test --platform chrome test/features/algebra/domain/algebra_review_test.dart
       - name: Run tests with coverage
+        if: ${{ !cancelled() }}
         run: flutter test --coverage
       - name: Enforce coverage floor
         run: dart run tool/check_coverage.dart 90
