@@ -69,3 +69,9 @@ application drafts through the full choose, confirm, reopen and submit journey.
 The editor already treats all three as recoverable uncommitted work, so this is
 existing-behavior coverage: its CI result must be green before and after, not a
 manufactured red failure.
+
+Cycle 4 select/red: an application event with a reconstructible question but an
+invalid answer payload must remain immutable history and contribute no mastery,
+regardless of its stored correctness flag. Add a focused progress regression
+before changing scoring support; it should fail because identity-only support
+currently admits the invalid events.

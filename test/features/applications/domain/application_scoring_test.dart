@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/applications/domain/application_curriculum.dart';
 import 'package:remath/src/features/learning/domain/attempt_event.dart';
 import 'package:remath/src/features/numbers/domain/study_scoring.dart';
+import 'package:remath/src/features/numbers/domain/study_plan.dart';
 
 void main() {
   test(
@@ -66,6 +67,34 @@ void main() {
         isFalse,
       );
       expect(StudyScoring.applicationQuestion(good)!.answer, q.answer);
+    },
+  );
+
+  test(
+    'invalid application answers stay in history without mastery credit',
+    () {
+      final q = ApplicationCurriculum().question('application.mixed', 0, 7, 0);
+      AttemptEvent invalid(String id, bool storedCorrect) => AttemptEvent(
+        answer: '[]',
+        eventId: id,
+        isCorrect: storedCorrect,
+        occurredAt: DateTime.utc(2026),
+        questionId: q.id,
+        responseTime: const Duration(seconds: 1),
+        sessionId: 's',
+        skillId: q.skillId,
+      );
+
+      final progress = StudyProgress.forSkill(q.skillId, [
+        invalid('incorrect-flag', false),
+        invalid('correct-flag', true),
+      ], DateTime.utc(2026));
+
+      expect(progress.independent, 0);
+      expect(progress.correct, 0);
+      expect(progress.level, 0);
+      expect(progress.retention.successfulOccasions, 0);
+      expect(progress.unsupported, 2);
     },
   );
 }
