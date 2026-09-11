@@ -82,3 +82,7 @@ present. Cycle 4 red: run 34657066655 failed the focused regression with two
 invalid events counted as independent instead of zero. Require a valid replayed
 application answer before admitting answer/correction evidence; preserve hint
 events as visible assistance.
+
+Cycle 4 first green run 34657244632 passed all 253 native behavior tests but
+failed the fatal analyzer on directive ordering in the new test. Sort the two
+imports without changing behavior, then require a clean full-suite rerun.

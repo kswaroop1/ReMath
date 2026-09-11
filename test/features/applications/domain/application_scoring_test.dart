@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/applications/domain/application_curriculum.dart';
 import 'package:remath/src/features/learning/domain/attempt_event.dart';
-import 'package:remath/src/features/numbers/domain/study_scoring.dart';
 import 'package:remath/src/features/numbers/domain/study_plan.dart';
+import 'package:remath/src/features/numbers/domain/study_scoring.dart';
 
 void main() {
   test(
