@@ -7,7 +7,10 @@ import '../../reasoning/domain/reasoning_curriculum.dart';
 abstract final class StudyScoring {
   static bool supports(AttemptEvent event) {
     if (event.skillId.startsWith('application.')) {
-      return applicationQuestion(event) != null;
+      final question = applicationQuestion(event);
+      return question != null &&
+          (event.kind == AttemptKind.hint ||
+              question.mark(event.answer).verdict != AnswerVerdict.invalid);
     }
     if (event.skillId.startsWith('reasoning.')) {
       return reasoningQuestion(event) != null;

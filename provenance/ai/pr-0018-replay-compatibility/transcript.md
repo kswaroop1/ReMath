@@ -75,3 +75,10 @@ invalid answer payload must remain immutable history and contribute no mastery,
 regardless of its stored correctness flag. Add a focused progress regression
 before changing scoring support; it should fail because identity-only support
 currently admits the invalid events.
+
+Cycle 3 green-before: run 34656847651 passed the expanded empty, truncated and
+wrong-shape draft journeys with the full suite, confirming recovery was already
+present. Cycle 4 red: run 34657066655 failed the focused regression with two
+invalid events counted as independent instead of zero. Require a valid replayed
+application answer before admitting answer/correction evidence; preserve hint
+events as visible assistance.
