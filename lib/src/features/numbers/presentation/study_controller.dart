@@ -177,8 +177,11 @@ final class StudyController extends ChangeNotifier {
   });
 
   Future<void> continueStep() => _exclusive(() async {
-    if (_state.needsGeneratorChoice || _state.plan == null || question != null)
+    if (_state.needsGeneratorChoice ||
+        _state.plan == null ||
+        question != null) {
       return;
+    }
     _timed();
     if (_state.step!.kind == StudyStepKind.reflection) {
       await _save(StudyState(goalId: _state.goalId));

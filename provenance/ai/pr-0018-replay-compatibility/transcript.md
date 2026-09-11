@@ -61,3 +61,5 @@ preview possible questions and retain the saved draft. Qualify new legacy answer
 and hint identities with origin-browser/origin-portable; old events are unchanged.
 Posted PR17 commit-history evidence in comment 5641181557, without retriggering
 review or claiming its remaining findings fixed.
+
+Preflight: brace the multiline migration guard after formatting; no behavior change.
