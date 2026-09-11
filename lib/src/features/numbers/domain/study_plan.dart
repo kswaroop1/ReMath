@@ -183,6 +183,18 @@ final class StudyPlan {
 
 final class StudyPlanner {
   final StudyCurriculum _curriculum = StudyCurriculum();
+  StudyStep _step(
+    StudyStepKind kind,
+    String skillId,
+    int level, {
+    bool multipleChoice = false,
+  }) => StudyStep(
+    kind,
+    skillId,
+    level,
+    multipleChoice: multipleChoice,
+    templateVersion: StudyCurriculum.currentTemplateVersion(skillId),
+  );
 
   List<String> _goalSkills(String id) {
     for (final goal in _curriculum.goals) {
@@ -243,8 +255,8 @@ final class StudyPlanner {
         reason: 'Choose a method for each unfamiliar scenario.',
         steps: [
           for (var i = 0; i < 9; i++)
-            StudyStep(StudyStepKind.practice, target, progress[target]!.level),
-          StudyStep(StudyStepKind.reflection, target, progress[target]!.level),
+            _step(StudyStepKind.practice, target, progress[target]!.level),
+          _step(StudyStepKind.reflection, target, progress[target]!.level),
         ],
       );
     }
@@ -253,14 +265,14 @@ final class StudyPlanner {
     return StudyPlan(
       reason: reason,
       steps: [
-        StudyStep(
+        _step(
           StudyStepKind.retrieval,
           review,
           StudyProgress.forSkill(review, attempts, now).level,
         ),
-        StudyStep(StudyStepKind.learn, target, level),
+        _step(StudyStepKind.learn, target, level),
         for (var i = 0; i < 8; i++)
-          StudyStep(
+          _step(
             StudyStepKind.practice,
             target,
             level,
@@ -270,7 +282,7 @@ final class StudyPlanner {
                 !target.startsWith('application.') &&
                 i % 3 == 1,
           ),
-        StudyStep(StudyStepKind.reflection, target, level),
+        _step(StudyStepKind.reflection, target, level),
       ],
     );
   }
@@ -280,8 +292,8 @@ final class StudyPlanner {
     isDiagnostic: true,
     steps: [
       for (final id in _goalSkills(goalId))
-        for (var i = 0; i < 3; i++) StudyStep(StudyStepKind.retrieval, id, 0),
-      StudyStep(StudyStepKind.reflection, _goalSkills(goalId).first, 0),
+        for (var i = 0; i < 3; i++) _step(StudyStepKind.retrieval, id, 0),
+      _step(StudyStepKind.reflection, _goalSkills(goalId).first, 0),
     ],
   );
 }
@@ -312,7 +324,10 @@ final class StudyState {
       final plan = json['plan'] as Map<String, dynamic>;
       for (final raw in plan['steps'] as List<dynamic>) {
         final step = raw as Map<String, dynamic>;
-        if (step['templateVersion'] != 1 ||
+        if (!StudyCurriculum.supportsTemplate(
+              step['skill'] as String,
+              step['templateVersion'] as int,
+            ) ||
             step['markingVersion'] != 1 ||
             step['scoringVersion'] != 1) {
           throw const FormatException('Unsupported saved question contract');
@@ -351,7 +366,10 @@ final class StudyState {
       throw const FormatException('Unknown saved goal');
     }
     for (final step in state.plan?.steps ?? const <StudyStep>[]) {
-      if (step.templateVersion != 1 ||
+      if (!StudyCurriculum.supportsTemplate(
+            step.skillId,
+            step.templateVersion,
+          ) ||
           step.markingVersion != 1 ||
           step.scoringVersion != 1 ||
           ((step.skillId.startsWith('algebra.') ||

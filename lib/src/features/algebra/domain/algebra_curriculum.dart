@@ -68,7 +68,17 @@ final class AlgebraCurriculum {
     ),
   ];
 
-  AlgebraQuestion question(String skillId, int level, int seed, int index) {
+  AlgebraQuestion question(
+    String skillId,
+    int level,
+    int seed,
+    int index, {
+    int templateVersion = 2,
+    bool legacyBrowser = false,
+  }) {
+    if (templateVersion != 1 && templateVersion != 2) {
+      throw const FormatException('Unsupported template version');
+    }
     if (!skills.any((s) => s.id == skillId) ||
         level < 0 ||
         level > 2 ||
@@ -76,7 +86,11 @@ final class AlgebraCurriculum {
       throw ArgumentError('Unknown algebra skill, level or question index');
     }
     final skill = skills.firstWhere((s) => s.id == skillId);
-    final sequence = SeededSequence(seed, index);
+    final sequence = SeededSequence(
+      seed,
+      index,
+      legacyBrowser: templateVersion == 1 && legacyBrowser,
+    );
     int pick() => sequence.pick(level == 0 ? 5 : 12);
     final a = pick();
     final b = pick();
@@ -136,7 +150,7 @@ final class AlgebraCurriculum {
         }
     }
     return AlgebraQuestion(
-      id: 'algebra.$skillId.level$level.v1.mark1.score1.$seed.$index',
+      id: 'algebra.$skillId.level$level.v$templateVersion.mark1.score1.$seed.$index',
       skillId: skillId,
       prompt: prompt,
       answer: answer,

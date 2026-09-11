@@ -14,7 +14,7 @@ abstract final class StudyScoring {
     }
     return !event.skillId.startsWith('algebra.') ||
         RegExp(
-          '^algebra\\.${RegExp.escape(event.skillId)}\\.level[0-2]\\.v1\\.mark1\\.score1\\.-?[0-9]+\\.[0-9]+(?:\\.mcq)?\$',
+          '^algebra\\.${RegExp.escape(event.skillId)}\\.level[0-2]\\.v[12]\\.mark1\\.score1\\.-?[0-9]+\\.[0-9]+(?:\\.mcq)?\$',
         ).hasMatch(event.questionId);
   }
 
