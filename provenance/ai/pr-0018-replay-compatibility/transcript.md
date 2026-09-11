@@ -63,3 +63,9 @@ Posted PR17 commit-history evidence in comment 5641181557, without retriggering
 review or claiming its remaining findings fixed.
 
 Preflight: brace the multiline migration guard after formatting; no behavior change.
+
+Cycle 3 characterization: cover empty, truncated and structurally invalid
+application drafts through the full choose, confirm, reopen and submit journey.
+The editor already treats all three as recoverable uncommitted work, so this is
+existing-behavior coverage: its CI result must be green before and after, not a
+manufactured red failure.
