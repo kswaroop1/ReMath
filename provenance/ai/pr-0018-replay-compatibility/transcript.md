@@ -86,3 +86,9 @@ events as visible assistance.
 Cycle 4 first green run 34657244632 passed all 253 native behavior tests but
 failed the fatal analyzer on directive ordering in the new test. Sort the two
 imports without changing behavior, then require a clean full-suite rerun.
+
+Cycle 4 green/final verification: run 34657427510 passed formatting, fatal
+analysis, seven Chrome tests and 253 native tests at 99.80% line coverage.
+Invalid application answers now remain history-only, and the three malformed
+draft recovery journeys pass. PR18 is ready for independent review; no release
+or merge is performed.
