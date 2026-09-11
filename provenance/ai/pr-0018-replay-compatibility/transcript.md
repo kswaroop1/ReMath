@@ -31,3 +31,24 @@ approval review because the account usage limit was reached. Published the saved
 implementation after access resumed. No CI run appeared because the PR conflicted
 with PR17's squash merge. Merge current main and keep both the application mixed
 plan and the new version-pinning helper; no feature or assertion is removed.
+
+Cycle 1 green: run 34652105904 passed formatting, analysis, seven Chrome
+regressions and 247 native tests, with 99.90% coverage. Explicit legacy browser
+and native fixtures match on both platforms, future questions use v2, and balance
+remediation uses linear equations.
+
+Cycle 2 select/red: old v1 numeric/algebra active snapshots have no reliable
+origin. Require an explicit persisted choice before any answer or step advance,
+keep their draft and active budget intact, and preview both possible questions.
+New portable sessions require no choice. New attempts from a chosen legacy
+session must carry an origin suffix; historical events are untouched. Snapshot
+v3 carries the selected generator, and unknown generators must preserve data.
+The required new state/controller selection interface may initially fail compile.
+
+PR17 review follow-up: GitHub's PR commit list confirms nine separate commits,
+including test-only cc518dc0a8ab33737f129a6e4680c2eeefb28b4b and
+396dd1f1a536722e27bcd30db689fe9218de8c7d before their implementations.
+The history finding is contradicted by that source; no history rewrite is needed.
+Malformed JSON recovery and invalid application evidence still need focused
+checks, and an application-specific timing policy belongs with versioned scoring
+in the pending calibration increment. These are not yet claimed resolved.
