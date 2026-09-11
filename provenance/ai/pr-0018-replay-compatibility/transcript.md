@@ -24,3 +24,10 @@ an explicit browser floating-point recurrence for legacy v1 reconstruction and
 v2 for future exact portable numeric/algebra generation. Fresh plans pin current
 versions; frozen v1 plans remain supported. Balance diagnosis selects the linear
 prerequisite. Saved-session ambiguity is deliberately handled in the next cycle.
+
+11 September continuation: user confirmed PR17 merged and requested “Ok do
+proceed.” The previous implementation publish had been rejected by automatic
+approval review because the account usage limit was reached. Published the saved
+implementation after access resumed. No CI run appeared because the PR conflicted
+with PR17's squash merge. Merge current main and keep both the application mixed
+plan and the new version-pinning helper; no feature or assertion is removed.
