@@ -52,3 +52,12 @@ The history finding is contradicted by that source; no history rewrite is needed
 Malformed JSON recovery and invalid application evidence still need focused
 checks, and an application-specific timing policy belongs with versioned scoring
 in the pending calibration increment. These are not yet claimed resolved.
+
+Cycle 2 red: run 34652437777 failed for the absent origin-selection state/API
+and snapshot schema still being v2; 246 native tests passed. Implement snapshot
+v3 with an explicit nullable origin for unresolved old sessions. Block answering,
+step advance and active-time consumption until a persisted choice succeeds;
+preview possible questions and retain the saved draft. Qualify new legacy answer
+and hint identities with origin-browser/origin-portable; old events are unchanged.
+Posted PR17 commit-history evidence in comment 5641181557, without retriggering
+review or claiming its remaining findings fixed.

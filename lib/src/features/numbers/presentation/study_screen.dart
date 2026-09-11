@@ -9,6 +9,7 @@ import '../../learning/domain/progress_repository.dart';
 import '../../reasoning/domain/reasoning_curriculum.dart';
 import '../../reasoning/presentation/reasoning_answer_editor.dart';
 import '../domain/number_curriculum.dart';
+import '../domain/study_curriculum.dart';
 import '../domain/study_plan.dart';
 import '../domain/study_scoring.dart';
 import 'study_controller.dart';
@@ -293,6 +294,54 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
 
   List<Widget> _session(BuildContext context) {
     final state = _controller.state;
+    if (state.needsGeneratorChoice) {
+      final current = state.step!;
+      final legacy =
+          StudyCurriculum.currentTemplateVersion(current.skillId) == 2
+          ? current
+          : state.plan!.steps.firstWhere(
+              (s) =>
+                  s.templateVersion == 1 &&
+                  StudyCurriculum.currentTemplateVersion(s.skillId) == 2,
+            );
+      String preview(bool browser) => _controller.curriculum
+          .question(
+            legacy.skillId,
+            legacy.level,
+            state.seed,
+            state.questionIndex,
+            templateVersion: 1,
+            legacyBrowser: browser,
+          )
+          .prompt;
+      return [
+        Text(
+          'Choose the saved question version',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const Text(
+          'Your draft is safe. Older versions could produce two different questions from the same saved details. Choose the version you were using before continuing.',
+        ),
+        Text('Saved answer: ${state.draft}'),
+        for (final browser in [true, false]) ...[
+          Text(preview(browser)),
+          OutlinedButton(
+            onPressed: _controller.busy
+                ? null
+                : () => unawaited(
+                    _controller.selectLegacyGenerator(
+                      browser ? 'legacy-browser' : 'portable',
+                    ),
+                  ),
+            child: Text(
+              browser
+                  ? 'Use original browser question'
+                  : 'Use portable question',
+            ),
+          ),
+        ],
+      ];
+    }
     final step = state.step!;
     final plan = state.plan!;
     final skill = _controller.curriculum.skill(step.skillId);
