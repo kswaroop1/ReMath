@@ -180,3 +180,5 @@ Supported-calibration red run 34710344805 failed at that intended boundary:
 the unsupported application attempt was counted as rated calibration evidence.
 Filter learner calibration through the same versioned scoring-support predicate
 used by mastery and planning, while retaining unsupported events in history.
+The first green run, 34710588693, exposed a missing explicit scoring import at
+static analysis; add that compile-time dependency before rerunning verification.
