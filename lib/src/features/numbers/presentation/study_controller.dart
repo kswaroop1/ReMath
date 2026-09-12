@@ -114,30 +114,36 @@ final class StudyController extends ChangeNotifier {
     await _save(StudyState(goalId: goal));
   });
 
-  Future<void> start({bool diagnostic = false, String? exploreSkillId}) =>
-      _exclusive(() async {
-        if (_state.plan != null) return;
-        final now = _clock().toUtc();
-        final planner = StudyPlanner();
-        final plan = diagnostic
-            ? planner.diagnostic(_state.goalId)
-            : planner.plan(
-                _state.goalId,
-                _attempts,
-                now,
-                exploreSkillId: exploreSkillId,
-              );
-        await _save(
-          StudyState(
-            goalId: _state.goalId,
-            plan: plan,
-            sessionId: _idFactory(),
-            seed: now.microsecondsSinceEpoch & 0x7fffffff,
-          ),
-        );
-        _lastTick = now;
-        _running = true;
-      });
+  Future<void> start({
+    bool diagnostic = false,
+    String? exploreSkillId,
+    StudySessionKind session = StudySessionKind.standard,
+  }) => _exclusive(() async {
+    if (_state.plan != null) return;
+    final now = _clock().toUtc();
+    final planner = StudyPlanner();
+    final plan = diagnostic
+        ? planner.diagnostic(_state.goalId)
+        : planner.plan(
+            _state.goalId,
+            _attempts,
+            now,
+            exploreSkillId: exploreSkillId,
+          );
+    await _save(
+      StudyState(
+        goalId: _state.goalId,
+        plan: plan,
+        sessionId: _idFactory(),
+        seed: now.microsecondsSinceEpoch & 0x7fffffff,
+        sessionKind: session,
+        continuationBlocks: diagnostic ? 0 : session.additionalBlocks,
+        remainingMilliseconds: session.activeBudget.inMilliseconds,
+      ),
+    );
+    _lastTick = now;
+    _running = true;
+  });
 
   StudyState _timed() {
     final elapsed = _elapsed;
@@ -200,8 +206,34 @@ final class StudyController extends ChangeNotifier {
     }
     _timed();
     if (_state.step!.kind == StudyStepKind.reflection) {
-      await _save(StudyState(goalId: _state.goalId));
-      _running = false;
+      if (_state.continuationBlocks > 0) {
+        final now = _clock().toUtc();
+        final plan = StudyPlanner().plan(
+          _state.goalId,
+          _attempts,
+          now,
+          exploreSkillId: _state.step!.skillId,
+        );
+        await _save(
+          StudyState(
+            generator: _state.generator,
+            goalId: _state.goalId,
+            plan: plan,
+            sessionId: _state.sessionId,
+            seed: _state.seed + 1,
+            questionIndex: _state.questionIndex + 1,
+            serial: _state.serial,
+            sessionKind: _state.sessionKind,
+            continuationBlocks: _state.continuationBlocks - 1,
+            remainingMilliseconds:
+                _state.sessionKind.activeBudget.inMilliseconds,
+          ),
+        );
+        _lastTick = now;
+      } else {
+        await _save(StudyState(goalId: _state.goalId));
+        _running = false;
+      }
     } else {
       await _save(_advance(_state));
     }

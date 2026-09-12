@@ -120,6 +120,18 @@ enum StudyStepKind { retrieval, learn, practice, reflection }
 
 enum StudyPhase { question, correction, retest }
 
+enum StudySessionKind { drill, standard, chained }
+
+extension StudySessionKindBudget on StudySessionKind {
+  Duration get activeBudget => switch (this) {
+    StudySessionKind.drill => const Duration(minutes: 2),
+    StudySessionKind.standard ||
+    StudySessionKind.chained => const Duration(minutes: 15),
+  };
+
+  int get additionalBlocks => this == StudySessionKind.chained ? 2 : 0;
+}
+
 final class StudyStep {
   const StudyStep(
     this.kind,
@@ -305,6 +317,8 @@ final class StudyState {
     this.goalId = 'number-fluency',
     this.generator = 'portable',
     this.confidence,
+    this.sessionKind = StudySessionKind.standard,
+    this.continuationBlocks = 0,
     this.plan,
     this.sessionId = '',
     this.seed = 0,
@@ -321,7 +335,7 @@ final class StudyState {
   factory StudyState.decode(String source) {
     final json = jsonDecode(source) as Map<String, dynamic>;
     final version = json['version'] as int;
-    if (version != 1 && version != 2 && version != 3 && version != 4) {
+    if (version < 1 || version > 5) {
       throw const FormatException('Unsupported study state');
     }
     if (version != 1 && json['plan'] != null) {
@@ -365,9 +379,13 @@ final class StudyState {
       throw const FormatException('Missing generator for a current session');
     }
     final state = StudyState(
-      confidence: version == 4 && json['confidence'] != null
+      confidence: version >= 4 && json['confidence'] != null
           ? ConfidenceRating.values.byName(json['confidence'] as String)
           : null,
+      sessionKind: version >= 5
+          ? StudySessionKind.values.byName(json['sessionKind'] as String)
+          : StudySessionKind.standard,
+      continuationBlocks: version >= 5 ? json['continuationBlocks'] as int : 0,
       generator: generator,
       goalId: json['goal'] as String,
       plan: plan,
@@ -388,6 +406,9 @@ final class StudyState {
         state.hintCount < 0 ||
         state.hintCount > 4 ||
         state.remainingMilliseconds < 0 ||
+        state.continuationBlocks < 0 ||
+        (state.sessionKind != StudySessionKind.chained &&
+            state.continuationBlocks != 0) ||
         state.serial < 0 ||
         state.responseMilliseconds < 0 ||
         (state.plan != null && state.stepIndex >= state.plan!.steps.length)) {
@@ -419,6 +440,8 @@ final class StudyState {
   final String goalId;
   final String? generator;
   final ConfidenceRating? confidence;
+  final StudySessionKind sessionKind;
+  final int continuationBlocks;
   bool get needsGeneratorChoice => generator == null;
   final StudyPlan? plan;
   final String sessionId;
@@ -437,6 +460,8 @@ final class StudyState {
   StudyState copyWith({
     String? generator,
     ConfidenceRating? confidence,
+    StudySessionKind? sessionKind,
+    int? continuationBlocks,
     String? goalId,
     StudyPlan? plan,
     String? sessionId,
@@ -455,6 +480,8 @@ final class StudyState {
   }) => StudyState(
     generator: generator ?? this.generator,
     confidence: clearConfidence ? null : confidence ?? this.confidence,
+    sessionKind: sessionKind ?? this.sessionKind,
+    continuationBlocks: continuationBlocks ?? this.continuationBlocks,
     goalId: goalId ?? this.goalId,
     plan: plan ?? this.plan,
     sessionId: sessionId ?? this.sessionId,
@@ -470,22 +497,34 @@ final class StudyState {
     responseMilliseconds: responseMilliseconds ?? this.responseMilliseconds,
   );
 
-  String encode() => jsonEncode({
-    'version': 4,
-    'generator': generator,
-    'confidence': confidence?.name,
-    'goal': goalId,
-    'plan': plan?.toJson(),
-    'session': sessionId,
-    'seed': seed,
-    'step': stepIndex,
-    'question': questionIndex,
-    'draft': draft,
-    'hints': hintCount,
-    'phase': phase.name,
-    'remaining': remainingMilliseconds,
-    'related': relatedEventId,
-    'serial': serial,
-    'response': responseMilliseconds,
-  });
+  String encode() {
+    if (continuationBlocks < 0 ||
+        (sessionKind != StudySessionKind.chained && continuationBlocks != 0)) {
+      throw ArgumentError.value(
+        continuationBlocks,
+        'continuationBlocks',
+        'must be finite and belong to a chained session',
+      );
+    }
+    return jsonEncode({
+      'version': 5,
+      'generator': generator,
+      'confidence': confidence?.name,
+      'sessionKind': sessionKind.name,
+      'continuationBlocks': continuationBlocks,
+      'goal': goalId,
+      'plan': plan?.toJson(),
+      'session': sessionId,
+      'seed': seed,
+      'step': stepIndex,
+      'question': questionIndex,
+      'draft': draft,
+      'hints': hintCount,
+      'phase': phase.name,
+      'remaining': remainingMilliseconds,
+      'related': relatedEventId,
+      'serial': serial,
+      'response': responseMilliseconds,
+    });
+  }
 }

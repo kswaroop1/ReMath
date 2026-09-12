@@ -77,3 +77,9 @@ and domain tests specify a two-minute drill, the existing fifteen-minute
 default, persisted finite chaining metadata, and an atomic transition from a
 completed chained chunk into another bounded resumable plan. Production code
 has not yet been changed for this behavior.
+
+Red CI run 34691538138 failed at the intended public seams during static
+analysis: StudySessionKind and the session/continuation snapshot fields did not
+exist, and start did not accept the selected session kind. Implement the
+version-5 snapshot with backward-compatible standard defaults, finite chain
+metadata, active-time budgets, and persisted chained-plan transition.
