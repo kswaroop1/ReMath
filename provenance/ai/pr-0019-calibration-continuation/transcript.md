@@ -159,3 +159,9 @@ Final provenance verification run 34703580610 passed at corrected head
 ccd3256b41: 273 native tests, seven Chrome tests, formatting, analysis, content
 validation, coverage enforcement and secret scan. This final records-only
 update adds that run and closes the chronology; it changes no product behavior.
+
+Re-review reported five further behavior findings and one process finding. Begin
+separate focused cycles with lifecycle-safe surprise timing: extend the existing
+timing regression through pause/resume before the learner records surprise.
+Current resume behavior restarts the answer clock, so this test precedes its
+production fix. Subsequent findings will receive separate cycles.
