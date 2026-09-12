@@ -36,7 +36,7 @@ void main() {
       await c.pause();
       final saved = (await repository.loadStudyState())!;
       final data = jsonDecode(saved) as Map<String, dynamic>;
-      expect(data['version'], 4);
+      expect(data['version'], 5);
       final steps =
           (data['plan'] as Map<String, dynamic>)['steps'] as List<dynamic>;
       expect((steps.first as Map<String, dynamic>)['markingVersion'], 1);

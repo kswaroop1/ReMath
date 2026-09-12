@@ -83,3 +83,9 @@ analysis: StudySessionKind and the session/continuation snapshot fields did not
 exist, and start did not accept the selected session kind. Implement the
 version-5 snapshot with backward-compatible standard defaults, finite chain
 metadata, active-time budgets, and persisted chained-plan transition.
+
+The first bounded-session green run 34691688323 passed formatting, analysis,
+Chrome contracts, and 264 of 265 native tests. The sole failure was the algebra
+journey's explicit snapshot-schema assertion, which correctly observed version
+5 rather than its previous version-4 expectation. Align that compatibility
+assertion with the additive snapshot version and rerun the full suite.
