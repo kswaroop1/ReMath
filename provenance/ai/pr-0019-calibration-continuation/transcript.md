@@ -182,3 +182,9 @@ Filter learner calibration through the same versioned scoring-support predicate
 used by mastery and planning, while retaining unsupported events in history.
 The first green run, 34710588693, exposed a missing explicit scoring import at
 static analysis; add that compile-time dependency before rerunning verification.
+
+Supported-calibration green run 34710849148 passed the full suite after the
+explicit import. Begin the assisted-evidence cycle at both persistence seams:
+hint and correction events carrying confidence or surprise must be rejected
+before they can enter either in-memory or SQLite history, including atomic
+study commits.
