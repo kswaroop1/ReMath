@@ -215,3 +215,8 @@ state existed. Add backward-compatible version-six snapshots, persist the lock
 only after a valid offered answer is marked, freeze timing across restart, and
 reject answer, confidence and hint mutations until surprise is recorded and
 the immutable attempt commits.
+
+The first locked-feedback green run, 34720041703, showed that the existing
+public timing seam is also used without confidence, where no feedback dialog
+or durable lock is needed. Preserve its transient timing freeze while only
+persisting `awaitingSurprise` for opted-in confidence feedback.
