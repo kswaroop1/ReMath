@@ -155,6 +155,22 @@ final class StudyController extends ChangeNotifier {
     await _repository.saveStudyState(_state.encode());
   });
 
+  Future<void> selectConfidence(ConfidenceRating? confidence) =>
+      _exclusive(() async {
+        if (question == null ||
+            _state.hintCount > 0 ||
+            _state.phase == StudyPhase.correction ||
+            _uncertainCommit) {
+          return;
+        }
+        await _save(
+          _timed().copyWith(
+            confidence: confidence,
+            clearConfidence: confidence == null,
+          ),
+        );
+      });
+
   Future<void> checkpoint() => _enqueue(() async {
     if (_state.plan != null && _running && !_uncertainCommit) {
       await _save(_timed());
@@ -191,7 +207,7 @@ final class StudyController extends ChangeNotifier {
     }
   });
 
-  Future<void> submit() => _exclusive(() async {
+  Future<void> submit({SurpriseRating? surprise}) => _exclusive(() async {
     final q = question;
     if (q == null) return;
     final before = _timed();
@@ -227,11 +243,14 @@ final class StudyController extends ChangeNotifier {
           : q is ReasoningQuestion && !correct
           ? 'reasoning.${q.errorCategory}'
           : null,
+      confidence: assisted ? null : before.confidence,
+      surprise: assisted ? null : surprise,
     );
     var next = before.copyWith(
       draft: '',
       serial: before.serial + 1,
       responseMilliseconds: 0,
+      clearConfidence: true,
     );
     if (before.plan!.isDiagnostic) {
       next = _advance(next);
@@ -265,6 +284,7 @@ final class StudyController extends ChangeNotifier {
     final next = before.copyWith(
       hintCount: before.hintCount + 1,
       serial: before.serial + 1,
+      clearConfidence: true,
     );
     await _commit(
       AttemptEvent(
@@ -295,6 +315,7 @@ final class StudyController extends ChangeNotifier {
       hintCount: 0,
       clearRelated: true,
       responseMilliseconds: 0,
+      clearConfidence: true,
     );
   }
 

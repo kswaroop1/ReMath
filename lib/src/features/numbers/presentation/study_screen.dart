@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../applications/domain/application_curriculum.dart';
 import '../../applications/presentation/application_answer_editor.dart';
 import '../../learning/domain/attempt_event.dart';
+import '../../learning/domain/numeric_answer_contract.dart';
 import '../../learning/domain/progress_repository.dart';
 import '../../reasoning/domain/reasoning_curriculum.dart';
 import '../../reasoning/presentation/reasoning_answer_editor.dart';
@@ -78,7 +79,44 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _submit() async {
-    await _controller.submit();
+    SurpriseRating? surprise;
+    final q = _controller.question;
+    if (_controller.state.confidence != null && q != null) {
+      final mark = q.mark(_controller.state.draft);
+      final offeredChoice =
+          !_controller.isMultipleChoice ||
+          q.choices.any((choice) => choice.value == _controller.state.draft);
+      if (mark.verdict != AnswerVerdict.invalid && offeredChoice && mounted) {
+        surprise = await showDialog<SurpriseRating>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            title: Text(
+              mark.verdict == AnswerVerdict.correct
+                  ? 'Correct — was that expected?'
+                  : 'Not correct — was that expected?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () =>
+                    Navigator.pop(context, SurpriseRating.unsurprising),
+                child: const Text('Not surprising'),
+              ),
+              TextButton(
+                onPressed: () =>
+                    Navigator.pop(context, SurpriseRating.surprising),
+                child: const Text('Surprising'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Skip'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+    await _controller.submit(surprise: surprise);
     if (mounted &&
         _controller.question != null &&
         !_controller.isMultipleChoice) {
@@ -403,6 +441,29 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
         Text(q.prompt, style: Theme.of(context).textTheme.headlineSmall),
         if (q.inputGuidance != null) Text(q.inputGuidance!),
         const SizedBox(height: 12),
+        if (state.phase != StudyPhase.correction && state.hintCount == 0) ...[
+          const Text('Optional: how confident are you?'),
+          Wrap(
+            spacing: 8,
+            children: [
+              for (final rating in ConfidenceRating.values)
+                ChoiceChip(
+                  label: Text(
+                    '${rating.name[0].toUpperCase()}${rating.name.substring(1)} confidence',
+                  ),
+                  selected: state.confidence == rating,
+                  onSelected: _controller.busy || _controller.needsRetry
+                      ? null
+                      : (selected) => unawaited(
+                          _controller.selectConfidence(
+                            selected ? rating : null,
+                          ),
+                        ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+        ],
         if (q is ReasoningQuestion && state.phase == StudyPhase.correction) ...[
           for (final event
               in _controller.history

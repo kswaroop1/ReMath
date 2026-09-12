@@ -304,6 +304,7 @@ final class StudyState {
   const StudyState({
     this.goalId = 'number-fluency',
     this.generator = 'portable',
+    this.confidence,
     this.plan,
     this.sessionId = '',
     this.seed = 0,
@@ -319,7 +320,10 @@ final class StudyState {
   });
   factory StudyState.decode(String source) {
     final json = jsonDecode(source) as Map<String, dynamic>;
-    if (json['version'] != 1 && json['version'] != 2 && json['version'] != 3) {
+    if (json['version'] != 1 &&
+        json['version'] != 2 &&
+        json['version'] != 3 &&
+        json['version'] != 4) {
       throw const FormatException('Unsupported study state');
     }
     if (json['version'] != 1 && json['plan'] != null) {
@@ -351,10 +355,10 @@ final class StudyState {
         false;
     if ((json['generator'] != null &&
             !['portable', 'legacy-browser'].contains(json['generator'])) ||
-        (json['version'] == 3 && !json.containsKey('generator'))) {
+        (json['version'] >= 3 && !json.containsKey('generator'))) {
       throw const FormatException('Unsupported saved generator');
     }
-    final generator = json['version'] == 3
+    final generator = json['version'] >= 3
         ? json['generator'] as String?
         : hasLegacy
         ? null
@@ -363,6 +367,9 @@ final class StudyState {
       throw const FormatException('Missing generator for a current session');
     }
     final state = StudyState(
+      confidence: json['version'] == 4 && json['confidence'] != null
+          ? ConfidenceRating.values.byName(json['confidence'] as String)
+          : null,
       generator: generator,
       goalId: json['goal'] as String,
       plan: plan,
@@ -413,6 +420,7 @@ final class StudyState {
   }
   final String goalId;
   final String? generator;
+  final ConfidenceRating? confidence;
   bool get needsGeneratorChoice => generator == null;
   final StudyPlan? plan;
   final String sessionId;
@@ -430,6 +438,7 @@ final class StudyState {
 
   StudyState copyWith({
     String? generator,
+    ConfidenceRating? confidence,
     String? goalId,
     StudyPlan? plan,
     String? sessionId,
@@ -444,8 +453,10 @@ final class StudyState {
     int? serial,
     int? responseMilliseconds,
     bool clearRelated = false,
+    bool clearConfidence = false,
   }) => StudyState(
     generator: generator ?? this.generator,
+    confidence: clearConfidence ? null : confidence ?? this.confidence,
     goalId: goalId ?? this.goalId,
     plan: plan ?? this.plan,
     sessionId: sessionId ?? this.sessionId,
@@ -462,8 +473,9 @@ final class StudyState {
   );
 
   String encode() => jsonEncode({
-    'version': 3,
+    'version': 4,
     'generator': generator,
+    'confidence': confidence?.name,
     'goal': goalId,
     'plan': plan?.toJson(),
     'session': sessionId,

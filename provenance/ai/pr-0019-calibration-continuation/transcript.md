@@ -53,3 +53,9 @@ question must persist through restart, then join the same immutable attempt with
 the optional post-feedback surprise rating. Using a hint clears confidence.
 Learners who do not select confidence retain the existing one-action submit flow.
 Advance the study snapshot to v4 while decoding legacy v1-v3 snapshots.
+
+Cycle 3 red run 34687614402 failed for the absent state confidence, controller
+selection/submission seams and snapshot v4; the widget could not find the opt-in
+control. Persist confidence in v4, clear it when help is used or a question
+advances, and attach it with the dialog's optional surprise in the same atomic
+attempt commit. Only opting into confidence adds the post-feedback dialog.
