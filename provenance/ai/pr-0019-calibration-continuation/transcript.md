@@ -102,3 +102,10 @@ StudyCompletionChoice API and complete transition; the widget test also names
 the missing session entry points. Implement explicit completion planning and
 the three start choices, retaining stop as a plan-clearing action and preserving
 bounded chained continuation only when the learner chooses continue-topic.
+
+The first completion-workflow green run 34694924821 passed formatting,
+analysis, Chrome contracts and all controller route assertions. Its sole native
+failure was a widget assertion that required the live two-minute display to
+remain exactly 2:00 after asynchronous startup; the correct active timer may
+already display 1:59. Keep the exact persisted two-minute budget assertion and
+allow either honest initial display.

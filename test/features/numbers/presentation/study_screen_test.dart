@@ -43,7 +43,10 @@ void main() {
 
     await tester.tap(find.text('Two-minute drill'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('2:00 remaining'), findsOneWidget);
+    expect(
+      find.textContaining(RegExp(r'(1:59|2:00) remaining')),
+      findsOneWidget,
+    );
     expect(
       StudyState.decode((await repository.loadStudyState())!).sessionKind,
       StudySessionKind.drill,
