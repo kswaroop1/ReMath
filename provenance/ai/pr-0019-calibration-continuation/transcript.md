@@ -120,3 +120,10 @@ Red CI run 34699752001 failed solely at the intended widget expectation: no
 Confidence calibration heading or categorized counts were rendered. Expose the
 existing immutable-history summary through the controller and render it only
 when rated evidence exists, separately from mathematical progress.
+
+Final calibration green run 34699939848 passed formatting, zero-diagnostic
+analysis, content validation, 268 native tests, seven Chrome tests, and 99.44%
+line coverage. The accepted Solve, Explain, Apply, and Calibrate/continue
+programme is implementation-complete; update the durable feature register and
+roadmap before requesting independent review. No release, merge, or VERSION
+change is included.
