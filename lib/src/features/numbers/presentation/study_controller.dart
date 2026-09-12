@@ -279,9 +279,15 @@ final class StudyController extends ChangeNotifier {
         throw StateError('handled above');
       case StudyCompletionChoice.repeat:
         goal = before.goalId;
+        final fresh = StudyPlanner().plan(
+          goal,
+          _attempts,
+          now,
+          exploreSkillId: focus,
+        );
         plan = StudyPlan(
           reason: 'Repeat the completed focus with fresh questions.',
-          steps: before.plan!.steps,
+          steps: fresh.steps,
         );
         break;
       case StudyCompletionChoice.continueTopic:
