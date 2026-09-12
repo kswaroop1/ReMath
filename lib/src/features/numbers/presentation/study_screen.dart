@@ -500,7 +500,10 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
                     '${rating.name[0].toUpperCase()}${rating.name.substring(1)}',
                   ),
                   selected: state.confidence == rating,
-                  onSelected: _controller.busy || _controller.needsRetry
+                  onSelected:
+                      _controller.busy ||
+                          _controller.needsRetry ||
+                          state.awaitingSurprise
                       ? null
                       : (selected) => unawaited(
                           _controller.selectConfidence(
@@ -535,14 +538,20 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
           ApplicationAnswerEditor(
             question: q,
             draft: state.draft,
-            enabled: !_controller.busy && !_controller.needsRetry,
+            enabled:
+                !_controller.busy &&
+                !_controller.needsRetry &&
+                !state.awaitingSurprise,
             onChanged: (value) => unawaited(_controller.updateDraft(value)),
           )
         else if (q is ReasoningQuestion && q.kind != ReasoningKind.missing)
           ReasoningAnswerEditor(
             question: q,
             draft: state.draft,
-            enabled: !_controller.busy && !_controller.needsRetry,
+            enabled:
+                !_controller.busy &&
+                !_controller.needsRetry &&
+                !state.awaitingSurprise,
             onChanged: (value) => unawaited(_controller.updateDraft(value)),
           )
         else if (_controller.isMultipleChoice)
@@ -555,7 +564,10 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
                       ? Theme.of(context).colorScheme.secondaryContainer
                       : null,
                 ),
-                onPressed: _controller.busy || _controller.needsRetry
+                onPressed:
+                    _controller.busy ||
+                        _controller.needsRetry ||
+                        state.awaitingSurprise
                     ? null
                     : () {
                         unawaited(_controller.updateDraft(choice.value));
@@ -568,7 +580,10 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
             controller: _answer,
             focusNode: _focus,
             autofocus: true,
-            enabled: !_controller.busy && !_controller.needsRetry,
+            enabled:
+                !_controller.busy &&
+                !_controller.needsRetry &&
+                !state.awaitingSurprise,
             keyboardType:
                 q.format == null || q.format == NumberAnswerFormat.fraction
                 ? TextInputType.text

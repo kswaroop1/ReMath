@@ -209,3 +209,9 @@ feedback cycle: after answer timing finishes, persist an explicit pending
 surprise state. Restarting at that boundary must preserve the original answer,
 confidence, verdict and response time while rejecting edits and hints until
 the immutable attempt is committed.
+
+Locked-feedback red run 34719837568 failed because no durable pending-feedback
+state existed. Add backward-compatible version-six snapshots, persist the lock
+only after a valid offered answer is marked, freeze timing across restart, and
+reject answer, confidence and hint mutations until surprise is recorded and
+the immutable attempt commits.
