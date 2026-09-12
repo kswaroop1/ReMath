@@ -169,4 +169,20 @@ void main() {
       expect(() => StudyState.decode('{"version":999}'), throwsFormatException);
     },
   );
+
+  test('session kind and finite chain count survive serialization', () {
+    final state = StudyState(
+      sessionKind: StudySessionKind.chained,
+      continuationBlocks: 2,
+    );
+
+    final reopened = StudyState.decode(state.encode());
+
+    expect(reopened.sessionKind, StudySessionKind.chained);
+    expect(reopened.continuationBlocks, 2);
+    expect(
+      () => StudyState(continuationBlocks: -1).encode(),
+      throwsArgumentError,
+    );
+  });
 }

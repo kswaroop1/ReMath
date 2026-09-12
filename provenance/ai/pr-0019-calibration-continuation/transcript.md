@@ -69,3 +69,11 @@ meaning, then rerun all journeys.
 Cycle 3 second green run 34687923397 passed all behavior tests after the compact
 layout fix, but fatal analysis found two dynamic comparisons on snapshot version.
 Cast the decoded schema version once before validation and reuse the typed value.
+### Bounded session cycle
+
+After the calibration controls reached green in CI run 34688095449, the next
+test-first cycle selected the active-time session contract. Focused controller
+and domain tests specify a two-minute drill, the existing fifteen-minute
+default, persisted finite chaining metadata, and an atomic transition from a
+completed chained chunk into another bounded resumable plan. Production code
+has not yet been changed for this behavior.

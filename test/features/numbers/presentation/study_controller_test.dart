@@ -57,6 +57,59 @@ void main() {
     },
   );
 
+  test('two-minute drills preserve their chosen active-time budget', () async {
+    await controller.start(session: StudySessionKind.drill);
+    now = now.add(const Duration(seconds: 12));
+    await controller.pause();
+
+    final reopened = StudyController(repository: repository, clock: () => now);
+    addTearDown(reopened.dispose);
+    await reopened.initialise();
+
+    expect(reopened.state.sessionKind, StudySessionKind.drill);
+    expect(reopened.remaining, const Duration(minutes: 1, seconds: 48));
+    expect(reopened.state.continuationBlocks, 0);
+  });
+
+  test('standard chunks remain the fifteen-minute default', () async {
+    await controller.start();
+
+    expect(controller.state.sessionKind, StudySessionKind.standard);
+    expect(controller.remaining, const Duration(minutes: 15));
+    expect(controller.state.continuationBlocks, 0);
+  });
+
+  test('a chained block starts another bounded resumable plan', () async {
+    controller.dispose();
+    final plan = StudyPlanner().plan('number-fluency', [], now);
+    await repository.saveStudyState(
+      StudyState(
+        plan: plan,
+        sessionId: 'chain',
+        seed: 7,
+        stepIndex: plan.steps.length - 1,
+        sessionKind: StudySessionKind.chained,
+        continuationBlocks: 2,
+        remainingMilliseconds: 1,
+      ).encode(),
+    );
+    controller = StudyController(
+      repository: repository,
+      clock: () => now,
+      idFactory: () => 'unused',
+    );
+    await controller.initialise();
+
+    await controller.continueStep();
+
+    expect(controller.state.plan, isNotNull);
+    expect(controller.state.stepIndex, 0);
+    expect(controller.state.sessionId, 'chain');
+    expect(controller.state.sessionKind, StudySessionKind.chained);
+    expect(controller.state.continuationBlocks, 1);
+    expect(controller.remaining, const Duration(minutes: 15));
+  });
+
   test(
     'wrong answer persists correction and a new same-skill retest',
     () async {
