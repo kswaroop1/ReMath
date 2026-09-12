@@ -212,12 +212,26 @@ final class NumberCurriculum {
     throw ArgumentError.value(id, 'id', 'Unknown number skill');
   }
 
-  NumberQuestion question(String skillId, int level, int seed, int index) {
+  NumberQuestion question(
+    String skillId,
+    int level,
+    int seed,
+    int index, {
+    int templateVersion = 2,
+    bool legacyBrowser = false,
+  }) {
+    if (templateVersion != 1 && templateVersion != 2) {
+      throw const FormatException('Unsupported template version');
+    }
     final definition = skill(skillId);
     if (level < 0 || level > 2 || index < 0) {
       throw ArgumentError('Level must be 0–2 and index must be nonnegative');
     }
-    final sequence = SeededSequence(seed, index);
+    final sequence = SeededSequence(
+      seed,
+      index,
+      legacyBrowser: templateVersion == 1 && legacyBrowser,
+    );
     int pick(int limit) => sequence.pick(limit);
 
     final bound = [9, 19, 99][level];
@@ -327,7 +341,7 @@ final class NumberCurriculum {
         throw StateError('No generator for $skillId');
     }
     return NumberQuestion(
-      id: 'numbers.$skillId.level$level.v1.$seed.$index',
+      id: 'numbers.$skillId.level$level.v$templateVersion.$seed.$index',
       skillId: skillId,
       prompt: prompt,
       numerator: result,

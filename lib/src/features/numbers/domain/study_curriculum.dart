@@ -42,16 +42,27 @@ final class StudyCurriculum {
     (s) => s.id == id,
     orElse: () => throw ArgumentError.value(id, 'skill'),
   );
+  static int currentTemplateVersion(String skillId) =>
+      skillId.startsWith('reasoning.') || skillId.startsWith('application.')
+      ? 1
+      : 2;
+  static bool supportsTemplate(String skillId, int version) =>
+      version >= 1 && version <= currentTemplateVersion(skillId);
+
   StudyQuestion question(
     String skillId,
     int level,
     int seed,
     int index, {
-    int templateVersion = 1,
+    int? templateVersion,
+    bool legacyBrowser = false,
     int markingVersion = 1,
     int scoringVersion = 1,
   }) {
-    if (templateVersion != 1 || markingVersion != 1 || scoringVersion != 1) {
+    final version = templateVersion ?? currentTemplateVersion(skillId);
+    if (!supportsTemplate(skillId, version) ||
+        markingVersion != 1 ||
+        scoringVersion != 1) {
       throw const FormatException('Unsupported question contract version');
     }
     if (skillId.startsWith('application.')) {
@@ -61,7 +72,21 @@ final class StudyCurriculum {
       return ReasoningCurriculum().question(skillId, level, seed, index);
     }
     return skillId.startsWith('algebra.')
-        ? _algebra.question(skillId, level, seed, index)
-        : _numbers.question(skillId, level, seed, index);
+        ? _algebra.question(
+            skillId,
+            level,
+            seed,
+            index,
+            templateVersion: version,
+            legacyBrowser: legacyBrowser,
+          )
+        : _numbers.question(
+            skillId,
+            level,
+            seed,
+            index,
+            templateVersion: version,
+            legacyBrowser: legacyBrowser,
+          );
   }
 }

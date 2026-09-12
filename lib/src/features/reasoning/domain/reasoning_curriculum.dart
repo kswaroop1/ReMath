@@ -287,7 +287,9 @@ final class ReasoningCurriculum {
       workedAnswer: worked,
       options: options,
       errorCategory: error,
-      remediationSkillId: skill.prerequisites.first,
+      remediationSkillId: kind == ReasoningKind.diagnose && level == 2
+          ? 'algebra.linear'
+          : skill.prerequisites.first,
       hints: [
         'Check which operation changes each term.',
         skill.lesson,

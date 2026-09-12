@@ -43,69 +43,84 @@ void main() {
     expect(find.textContaining('confirmed'), findsNothing);
   });
 
-  testWidgets(
-    'commit choices before calculation and restore the locked choices',
-    (tester) async {
-      final repo = InMemoryProgressRepository();
-      final q = ApplicationCurriculum().question('application.mixed', 0, 7, 0);
-      await repo.saveStudyState(
-        StudyState(
-          goalId: 'applications',
-          plan: StudyPlan(
-            reason: 'Mixed application challenge',
-            steps: const [
-              StudyStep(StudyStepKind.practice, 'application.mixed', 0),
-              StudyStep(StudyStepKind.reflection, 'application.mixed', 0),
-            ],
+  for (final malformedDraft in ['', '{', '{"confirmed":true,"method":99}']) {
+    testWidgets(
+      'recover draft ${malformedDraft.isEmpty ? 'empty' : malformedDraft} before committing choices',
+      (tester) async {
+        final repo = InMemoryProgressRepository();
+        final q = ApplicationCurriculum().question(
+          'application.mixed',
+          0,
+          7,
+          0,
+        );
+        await repo.saveStudyState(
+          StudyState(
+            goalId: 'applications',
+            plan: StudyPlan(
+              reason: 'Mixed application challenge',
+              steps: const [
+                StudyStep(StudyStepKind.practice, 'application.mixed', 0),
+                StudyStep(StudyStepKind.reflection, 'application.mixed', 0),
+              ],
+            ),
+            seed: 7,
+            sessionId: 's',
+            draft: malformedDraft,
+          ).encode(),
+        );
+        await tester.pumpWidget(
+          MaterialApp(home: StudyScreen(repository: repo)),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byType(TextField), findsNothing);
+        await tester.ensureVisible(find.text('Submit'));
+        await tester.tap(find.text('Submit'));
+        await tester.pumpAndSettle();
+        expect(find.text(q.invalidInputMessage), findsOneWidget);
+        expect(await repo.loadAttempts(), isEmpty);
+        await tester.ensureVisible(
+          find.text(q.methods.firstWhere((o) => o.id == q.method).label),
+        );
+        await tester.tap(
+          find.text(q.methods.firstWhere((o) => o.id == q.method).label),
+        );
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.text(
+            q.assumptions.firstWhere((o) => o.id == q.assumption).label,
           ),
-          seed: 7,
-          sessionId: 's',
-          draft: '{"confirmed":true,"method":99}',
-        ).encode(),
-      );
-      await tester.pumpWidget(MaterialApp(home: StudyScreen(repository: repo)));
-      await tester.pumpAndSettle();
-      expect(find.byType(TextField), findsNothing);
-      await tester.ensureVisible(find.text('Submit'));
-      await tester.tap(find.text('Submit'));
-      await tester.pumpAndSettle();
-      expect(find.text(q.invalidInputMessage), findsOneWidget);
-      expect(await repo.loadAttempts(), isEmpty);
-      await tester.ensureVisible(
-        find.text(q.methods.firstWhere((o) => o.id == q.method).label),
-      );
-      await tester.tap(
-        find.text(q.methods.firstWhere((o) => o.id == q.method).label),
-      );
-      await tester.pumpAndSettle();
-      await tester.ensureVisible(
-        find.text(q.assumptions.firstWhere((o) => o.id == q.assumption).label),
-      );
-      await tester.tap(
-        find.text(q.assumptions.firstWhere((o) => o.id == q.assumption).label),
-      );
-      await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Confirm choices'));
-      await tester.tap(find.text('Confirm choices'));
-      await tester.pumpAndSettle();
-      expect(find.byType(TextField), findsOneWidget);
-      final saved = StudyState.decode((await repo.loadStudyState())!);
-      expect(
-        (jsonDecode(saved.draft) as Map<String, dynamic>)['confirmed'],
-        isTrue,
-      );
-      await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pumpAndSettle();
-      await tester.pumpWidget(MaterialApp(home: StudyScreen(repository: repo)));
-      await tester.pumpAndSettle();
-      expect(find.text('Confirm choices'), findsNothing);
-      await tester.enterText(find.byType(TextField), '${q.expectedValue}');
-      await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Submit'));
-      await tester.tap(find.text('Submit'));
-      await tester.pumpAndSettle();
-      expect((await repo.loadAttempts()).single.isCorrect, isTrue);
-      await tester.pumpWidget(const SizedBox.shrink());
-    },
-  );
+        );
+        await tester.tap(
+          find.text(
+            q.assumptions.firstWhere((o) => o.id == q.assumption).label,
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(find.text('Confirm choices'));
+        await tester.tap(find.text('Confirm choices'));
+        await tester.pumpAndSettle();
+        expect(find.byType(TextField), findsOneWidget);
+        final saved = StudyState.decode((await repo.loadStudyState())!);
+        expect(
+          (jsonDecode(saved.draft) as Map<String, dynamic>)['confirmed'],
+          isTrue,
+        );
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          MaterialApp(home: StudyScreen(repository: repo)),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Confirm choices'), findsNothing);
+        await tester.enterText(find.byType(TextField), '${q.expectedValue}');
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(find.text('Submit'));
+        await tester.tap(find.text('Submit'));
+        await tester.pumpAndSettle();
+        expect((await repo.loadAttempts()).single.isCorrect, isTrue);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
 }

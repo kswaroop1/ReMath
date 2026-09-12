@@ -44,7 +44,8 @@ final class StudyController extends ChangeNotifier {
 
   StudyQuestion? get question {
     final step = _state.step;
-    if (step == null ||
+    if (_state.needsGeneratorChoice ||
+        step == null ||
         step.kind == StudyStepKind.learn ||
         step.kind == StudyStepKind.reflection) {
       return null;
@@ -55,6 +56,7 @@ final class StudyController extends ChangeNotifier {
       _state.seed,
       _state.questionIndex,
       templateVersion: step.templateVersion,
+      legacyBrowser: _state.generator == 'legacy-browser',
       markingVersion: step.markingVersion,
       scoringVersion: step.scoringVersion,
     );
@@ -82,8 +84,26 @@ final class StudyController extends ChangeNotifier {
     }
     _attempts = await _repository.loadAttempts();
     _lastTick = _clock().toUtc();
-    _running = _state.plan != null;
+    _running = _state.plan != null && !_state.needsGeneratorChoice;
     _notify();
+  }
+
+  Future<void> selectLegacyGenerator(String generator) => _exclusive(() async {
+    if (!_state.needsGeneratorChoice) return;
+    if (!['portable', 'legacy-browser'].contains(generator)) {
+      throw ArgumentError.value(generator, 'generator');
+    }
+    await _save(_state.copyWith(generator: generator));
+    _lastTick = _clock().toUtc();
+    _running = true;
+  });
+
+  String _questionIdentity(StudyQuestion q) {
+    if (_state.step!.templateVersion == 1 &&
+        StudyCurriculum.currentTemplateVersion(q.skillId) == 2) {
+      return '${q.id}.origin-${_state.generator == 'legacy-browser' ? 'browser' : 'portable'}';
+    }
+    return q.id;
   }
 
   Future<void> selectGoal(String goal) => _exclusive(() async {
@@ -153,11 +173,15 @@ final class StudyController extends ChangeNotifier {
 
   Future<void> resume() => _enqueue(() async {
     _lastTick = _clock().toUtc();
-    _running = _state.plan != null;
+    _running = _state.plan != null && !_state.needsGeneratorChoice;
   });
 
   Future<void> continueStep() => _exclusive(() async {
-    if (_state.plan == null || question != null) return;
+    if (_state.needsGeneratorChoice ||
+        _state.plan == null ||
+        question != null) {
+      return;
+    }
     _timed();
     if (_state.step!.kind == StudyStepKind.reflection) {
       await _save(StudyState(goalId: _state.goalId));
@@ -188,7 +212,7 @@ final class StudyController extends ChangeNotifier {
       eventId: eventId,
       isCorrect: correct,
       occurredAt: _clock().toUtc(),
-      questionId: '${q.id}${isMultipleChoice ? '.mcq' : ''}',
+      questionId: '${_questionIdentity(q)}${isMultipleChoice ? '.mcq' : ''}',
       responseTime: Duration(milliseconds: before.responseMilliseconds),
       sessionId: before.sessionId,
       skillId: q.skillId,
@@ -249,7 +273,7 @@ final class StudyController extends ChangeNotifier {
         isCorrect: false,
         kind: AttemptKind.hint,
         occurredAt: _clock().toUtc(),
-        questionId: q.id,
+        questionId: _questionIdentity(q),
         responseTime: Duration(milliseconds: before.responseMilliseconds),
         sessionId: before.sessionId,
         skillId: q.skillId,

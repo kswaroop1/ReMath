@@ -1,0 +1,20 @@
+schema_version: 1
+pull_request: 18
+title: Preserve legacy seeded sessions
+human_owner: kswaroop1
+agents:
+  - product: OpenAI Codex
+    model: unknown
+started_at: 2026-09-09T22:01:24Z
+finalized_at: 2026-09-11T23:19:07Z
+scope: [code, tests, documentation]
+redactions: []
+ci_runs:
+  - 34410270340
+  - 34652105904
+  - 34652437777
+  - 34652761590
+  - 34656847651
+  - 34657066655
+  - 34657244632
+  - 34657427510

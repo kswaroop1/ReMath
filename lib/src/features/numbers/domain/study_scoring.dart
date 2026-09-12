@@ -7,14 +7,17 @@ import '../../reasoning/domain/reasoning_curriculum.dart';
 abstract final class StudyScoring {
   static bool supports(AttemptEvent event) {
     if (event.skillId.startsWith('application.')) {
-      return applicationQuestion(event) != null;
+      final question = applicationQuestion(event);
+      return question != null &&
+          (event.kind == AttemptKind.hint ||
+              question.mark(event.answer).verdict != AnswerVerdict.invalid);
     }
     if (event.skillId.startsWith('reasoning.')) {
       return reasoningQuestion(event) != null;
     }
     return !event.skillId.startsWith('algebra.') ||
         RegExp(
-          '^algebra\\.${RegExp.escape(event.skillId)}\\.level[0-2]\\.v1\\.mark1\\.score1\\.-?[0-9]+\\.[0-9]+(?:\\.mcq)?\$',
+          '^algebra\\.${RegExp.escape(event.skillId)}\\.level[0-2]\\.v[12]\\.mark1\\.score1\\.-?[0-9]+\\.[0-9]+(?:\\.origin-(?:browser|portable))?(?:\\.mcq)?\$',
         ).hasMatch(event.questionId);
   }
 
