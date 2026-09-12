@@ -232,6 +232,25 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
       'Independent fluency and delayed retention are assessed separately. '
       'You can explore any skill.',
     ),
+    if (_controller.calibration.ratedAttempts > 0 ||
+        _controller.calibration.surpriseRatedAttempts > 0) ...[
+      const SizedBox(height: 12),
+      Text(
+        'Confidence calibration',
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
+      Text(
+        '${_controller.calibration.calibrated} calibrated · '
+        '${_controller.calibration.overconfident} overconfident · '
+        '${_controller.calibration.underconfident} underconfident',
+      ),
+      Text(
+        'Calibration score '
+        '${(_controller.calibration.score * 100).round()}% · '
+        '${_controller.calibration.surprisingResults} of '
+        '${_controller.calibration.surpriseRatedAttempts} results surprising',
+      ),
+    ],
     for (final progress in _controller.progress) _skillTile(progress),
   ];
 

@@ -115,3 +115,8 @@ tests, analysis and coverage. Select the final learner-visible calibration
 cycle: a widget test seeds one calibrated, one overconfident and one
 underconfident independent answer plus a surprising result, and requires those
 counts to appear separately in progress. No presentation seam yet exists.
+
+Red CI run 34699752001 failed solely at the intended widget expectation: no
+Confidence calibration heading or categorized counts were rendered. Expose the
+existing immutable-history summary through the controller and render it only
+when rated evidence exists, separately from mathematical progress.

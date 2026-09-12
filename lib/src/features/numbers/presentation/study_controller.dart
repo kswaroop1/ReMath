@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 
 import '../../learning/domain/attempt_event.dart';
+import '../../learning/domain/calibration.dart';
 import '../../learning/domain/numeric_answer_contract.dart';
 import '../../learning/domain/progress_repository.dart';
 import '../../reasoning/domain/reasoning_curriculum.dart';
@@ -38,6 +39,8 @@ final class StudyController extends ChangeNotifier {
   bool get needsRetry => _uncertainCommit;
   String? get error => _error;
   List<AttemptEvent> get history => List.unmodifiable(_attempts);
+  CalibrationSummary get calibration =>
+      CalibrationSummary.fromEvents(_attempts);
   List<StudyProgress> get progress => curriculum.skills
       .map((s) => StudyProgress.forSkill(s.id, _attempts, _clock().toUtc()))
       .toList(growable: false);
