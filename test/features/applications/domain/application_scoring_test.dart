@@ -83,8 +83,8 @@ void main() {
           questionId: q.id.replaceFirst('.score1.', '.score2.'),
         ),
       ]);
-      expect(summary.$1, 2);
-      expect(summary.$2, 0.5);
+      expect(summary.$1, 3);
+      expect(summary.$2, closeTo(2 / 3, 0.0001));
       expect(StudyScoring.techniqueSummary([]), (0, 0.0));
       expect(
         StudyScoring.supports(

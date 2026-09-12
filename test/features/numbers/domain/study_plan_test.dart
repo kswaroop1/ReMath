@@ -92,7 +92,12 @@ void main() {
   );
 
   test('fresh application plans pin the current scoring contract', () {
-    final plan = StudyPlanner().plan('applications', [], now);
+    final plan = StudyPlanner().plan(
+      'applications',
+      [],
+      now,
+      exploreSkillId: 'application.mixed',
+    );
 
     expect(plan.steps.map((step) => step.scoringVersion).toSet(), {2});
   });

@@ -20,3 +20,10 @@ pinned score1 rather than score2, the generator lacked a scoringVersion seam,
 and valid 90-second score2 evidence did not advance. Clarify the pre-existing
 future-version assertion now that score2 is the selected supported contract;
 the branch remains red before production changes.
+
+Cycle 1 first green run 34683560957 exposed two stale test assumptions. A normal
+applications plan may correctly start with a non-application prerequisite, so
+pinning is asserted on an explicitly selected mixed application plan. The
+technique aggregate must count valid score2 evidence once it becomes supported,
+changing three-event mean credit to two-thirds. Align those assertions with the
+selected contract; no production behavior changes in this correction commit.
