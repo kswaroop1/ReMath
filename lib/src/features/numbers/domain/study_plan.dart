@@ -43,7 +43,7 @@ final class StudyProgress {
       if (attemptedLevel != level) continue;
       if (event.isCorrect) {
         errors = 0;
-        if (event.responseTime <= StudyScoring.fluentWithin(skillId)) {
+        if (event.responseTime <= StudyScoring.fluentWithinEvent(event)) {
           streak++;
           if (streak >= 3 && level < 2) {
             level++;
@@ -194,6 +194,7 @@ final class StudyPlanner {
     level,
     multipleChoice: multipleChoice,
     templateVersion: StudyCurriculum.currentTemplateVersion(skillId),
+    scoringVersion: StudyCurriculum.currentScoringVersion(skillId),
   );
 
   List<String> _goalSkills(String id) {
@@ -330,7 +331,10 @@ final class StudyState {
               step['templateVersion'] as int,
             ) ||
             step['markingVersion'] != 1 ||
-            step['scoringVersion'] != 1) {
+            !StudyCurriculum.supportsScoring(
+              step['skill'] as String,
+              step['scoringVersion'] as int,
+            )) {
           throw const FormatException('Unsupported saved question contract');
         }
       }
@@ -394,7 +398,7 @@ final class StudyState {
             step.templateVersion,
           ) ||
           step.markingVersion != 1 ||
-          step.scoringVersion != 1 ||
+          !StudyCurriculum.supportsScoring(step.skillId, step.scoringVersion) ||
           ((step.skillId.startsWith('algebra.') ||
                   step.skillId.startsWith('reasoning.') ||
                   step.skillId.startsWith('application.')) &&
