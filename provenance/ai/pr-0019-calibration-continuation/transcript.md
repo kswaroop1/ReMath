@@ -203,3 +203,9 @@ Legacy-repeat red run 34717410442 failed because repeat retained scoring
 version one. Re-plan the completed focus through the current curriculum and
 then retain only the repeat-facing reason, so template and scoring contracts
 advance while the learner receives a fresh bounded session.
+
+Legacy-repeat green run 34717594159 passed the full suite. Begin the locked
+feedback cycle: after answer timing finishes, persist an explicit pending
+surprise state. Restarting at that boundary must preserve the original answer,
+confidence, verdict and response time while rejecting edits and hints until
+the immutable attempt is committed.
