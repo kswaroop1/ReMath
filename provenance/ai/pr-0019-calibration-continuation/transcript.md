@@ -231,3 +231,8 @@ Independent review of verified head 7e1e923f94 found that the UI could still
 show verdict feedback when saving the pending lock failed, because the
 controller swallowed the error behind a void result. Begin a focused cycle in
 which failed persistence must return false and leave feedback unauthorized.
+
+Feedback-authorization red run 34726464746 failed at the intended return-value
+boundary. Make timing finalization explicitly report success only after the
+durable pending state saves, and have the UI return without revealing or
+submitting whenever authorization fails.
