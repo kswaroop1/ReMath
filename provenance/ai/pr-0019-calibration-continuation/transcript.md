@@ -165,3 +165,8 @@ separate focused cycles with lifecycle-safe surprise timing: extend the existing
 timing regression through pause/resume before the learner records surprise.
 Current resume behavior restarts the answer clock, so this test precedes its
 production fix. Subsequent findings will receive separate cycles.
+
+Lifecycle timing red run 34708288334 failed because pause/resume restarted
+charging after finishAnswerTiming. Keep a controller-level answer-finished
+latch through lifecycle transitions and clear it only when submission either
+commits or returns control after invalid input.

@@ -32,6 +32,7 @@ final class StudyController extends ChangeNotifier {
   bool _busy = false;
   bool _disposed = false;
   bool _uncertainCommit = false;
+  bool _answerTimingFinished = false;
   String? _error;
 
   StudyState get state => _state;
@@ -189,6 +190,7 @@ final class StudyController extends ChangeNotifier {
   Future<void> finishAnswerTiming() => _exclusive(() async {
     if (question == null || _uncertainCommit) return;
     await _save(_timed());
+    _answerTimingFinished = true;
     _running = false;
   });
 
@@ -204,7 +206,10 @@ final class StudyController extends ChangeNotifier {
 
   Future<void> resume() => _enqueue(() async {
     _lastTick = _clock().toUtc();
-    _running = _state.plan != null && !_state.needsGeneratorChoice;
+    _running =
+        _state.plan != null &&
+        !_state.needsGeneratorChoice &&
+        !_answerTimingFinished;
   });
 
   Future<void> continueStep() => _exclusive(() async {
@@ -338,6 +343,7 @@ final class StudyController extends ChangeNotifier {
           ? 'Select one answer first.'
           : q.invalidInputMessage;
       _lastTick = _clock().toUtc();
+      _answerTimingFinished = false;
       _running = true;
       return;
     }
@@ -393,6 +399,7 @@ final class StudyController extends ChangeNotifier {
     }
     await _commit(event, next);
     _lastTick = _clock().toUtc();
+    _answerTimingFinished = false;
     _running = true;
   });
 
