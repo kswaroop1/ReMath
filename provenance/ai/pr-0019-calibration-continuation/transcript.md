@@ -42,3 +42,7 @@ whose tables already contained the newly added columns: schema version was
 deliberately rewound while structure remained current. Make the additive v7
 migration inspect existing columns so retry is idempotent, while retaining its
 transaction and constraints.
+
+Cycle 2 first green run 34685385566 passed all 258 behavior tests, including
+migration retries and calibration scoring, but fatal analysis rejected two SQL
+string quote styles. Normalize those literals and rerun the full gate.
