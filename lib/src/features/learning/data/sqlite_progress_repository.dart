@@ -202,17 +202,24 @@ final class SqliteProgressRepository implements ProgressRepository {
     if (version < 7) {
       _database.execute('BEGIN IMMEDIATE');
       try {
-        _database
-          ..execute(
+        final columns = _database
+            .select('PRAGMA table_info(attempt_events)')
+            .map((row) => row['name'] as String)
+            .toSet();
+        if (!columns.contains('confidence')) {
+          _database.execute(
             "ALTER TABLE attempt_events ADD COLUMN confidence TEXT "
             "CHECK (confidence IN ('low', 'medium', 'high'))",
-          )
-          ..execute(
+          );
+        }
+        if (!columns.contains('surprise')) {
+          _database.execute(
             "ALTER TABLE attempt_events ADD COLUMN surprise TEXT "
             "CHECK (surprise IN ('unsurprising', 'surprising'))",
-          )
-          ..execute('UPDATE schema_version SET version = 7')
-          ..execute('COMMIT');
+          );
+        }
+        _database.execute('UPDATE schema_version SET version = 7');
+        _database.execute('COMMIT');
       } catch (_) {
         _database.execute('ROLLBACK');
         rethrow;

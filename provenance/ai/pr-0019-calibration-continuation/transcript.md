@@ -35,3 +35,10 @@ Independent rated attempts produce an agreement score and explicit calibrated,
 overconfident and underconfident counts; assistance and skipped ratings do not
 inflate them. SQLite schema v7 must round-trip both optional fields and legacy
 migrations must yield null ratings.
+
+Cycle 2 red run 34685132641 failed on the missing calibration model/fields as
+intended. The first implementation then exposed two downgrade/retry fixtures
+whose tables already contained the newly added columns: schema version was
+deliberately rewound while structure remained current. Make the additive v7
+migration inspect existing columns so retry is idempotent, while retaining its
+transaction and constraints.
