@@ -10,7 +10,7 @@ final class SqliteProgressRepository implements ProgressRepository {
   }
 
   final CommonDatabase _database;
-  static const _currentSchemaVersion = 6;
+  static const _currentSchemaVersion = 7;
 
   void _migrate() {
     _database.execute('PRAGMA foreign_keys = ON');
@@ -199,6 +199,25 @@ final class SqliteProgressRepository implements ProgressRepository {
         rethrow;
       }
     }
+    if (version < 7) {
+      _database.execute('BEGIN IMMEDIATE');
+      try {
+        _database
+          ..execute(
+            "ALTER TABLE attempt_events ADD COLUMN confidence TEXT "
+            "CHECK (confidence IN ('low', 'medium', 'high'))",
+          )
+          ..execute(
+            "ALTER TABLE attempt_events ADD COLUMN surprise TEXT "
+            "CHECK (surprise IN ('unsurprising', 'surprising'))",
+          )
+          ..execute('UPDATE schema_version SET version = 7')
+          ..execute('COMMIT');
+      } catch (_) {
+        _database.execute('ROLLBACK');
+        rethrow;
+      }
+    }
   }
 
   @override
@@ -249,8 +268,8 @@ final class SqliteProgressRepository implements ProgressRepository {
       INSERT OR IGNORE INTO attempt_events (
         event_id, session_id, question_id, answer, is_correct,
         response_ms, occurred_at, skill_id, event_kind, related_event_id,
-        misconception_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        misconception_id, confidence, surprise
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ''',
       [
         event.eventId,
@@ -264,6 +283,8 @@ final class SqliteProgressRepository implements ProgressRepository {
         event.kind.name,
         event.relatedEventId,
         event.misconceptionId,
+        event.confidence?.name,
+        event.surprise?.name,
       ],
     );
     return _database.updatedRows == 1;
@@ -350,5 +371,11 @@ final class SqliteProgressRepository implements ProgressRepository {
     relatedEventId: row['related_event_id'] as String?,
     sessionId: row['session_id'] as String,
     skillId: row['skill_id'] as String,
+    confidence: row['confidence'] == null
+        ? null
+        : ConfidenceRating.values.byName(row['confidence'] as String),
+    surprise: row['surprise'] == null
+        ? null
+        : SurpriseRating.values.byName(row['surprise'] as String),
   );
 }
