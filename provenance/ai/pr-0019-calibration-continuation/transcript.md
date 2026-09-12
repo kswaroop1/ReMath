@@ -175,3 +175,8 @@ Lifecycle timing green run 34710063577 passed the full CI suite. Begin the next
 focused cycle: an unsupported future application scoring contract carrying
 confidence and surprise must remain history-only and contribute zero
 calibration evidence. The controller currently forwards it to the summary.
+
+Supported-calibration red run 34710344805 failed at that intended boundary:
+the unsupported application attempt was counted as rated calibration evidence.
+Filter learner calibration through the same versioned scoring-support predicate
+used by mastery and planning, while retaining unsupported events in history.

@@ -41,7 +41,7 @@ final class StudyController extends ChangeNotifier {
   String? get error => _error;
   List<AttemptEvent> get history => List.unmodifiable(_attempts);
   CalibrationSummary get calibration =>
-      CalibrationSummary.fromEvents(_attempts);
+      CalibrationSummary.fromEvents(_attempts.where(StudyScoring.supports));
   List<StudyProgress> get progress => curriculum.skills
       .map((s) => StudyProgress.forSkill(s.id, _attempts, _clock().toUtc()))
       .toList(growable: false);
