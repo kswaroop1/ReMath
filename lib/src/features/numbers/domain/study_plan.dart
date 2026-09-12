@@ -311,6 +311,43 @@ final class StudyPlanner {
       _step(StudyStepKind.reflection, _goalSkills(goalId).first, 0),
     ],
   );
+
+  StudyPlan? review(String goalId, List<AttemptEvent> attempts, DateTime now) {
+    final candidates =
+        _goalSkills(goalId)
+            .map((id) => StudyProgress.forSkill(id, attempts, now))
+            .where((progress) => progress.retention.nextReviewAt != null)
+            .where(
+              (progress) =>
+                  progress.retention.isDue ||
+                  !progress.retention.nextReviewAt!.isAfter(
+                    now.add(const Duration(hours: 24)),
+                  ),
+            )
+            .toList()
+          ..sort((a, b) {
+            final priority = (a.retention.isDue ? 0 : 1).compareTo(
+              b.retention.isDue ? 0 : 1,
+            );
+            return priority != 0
+                ? priority
+                : a.retention.nextReviewAt!.compareTo(
+                    b.retention.nextReviewAt!,
+                  );
+          });
+    if (candidates.isEmpty) return null;
+    final target = candidates.first;
+    final status = target.retention.isDue ? 'overdue' : 'approaching';
+    return StudyPlan(
+      reason: '${_curriculum.skill(target.skillId).title} review is $status.',
+      steps: [
+        _step(StudyStepKind.retrieval, target.skillId, target.level),
+        for (var i = 0; i < 8; i++)
+          _step(StudyStepKind.practice, target.skillId, target.level),
+        _step(StudyStepKind.reflection, target.skillId, target.level),
+      ],
+    );
+  }
 }
 
 /// Frozen, versioned plan plus exact last persisted interaction state.
@@ -409,6 +446,9 @@ final class StudyState {
         state.hintCount > 4 ||
         state.remainingMilliseconds < 0 ||
         state.continuationBlocks < 0 ||
+        state.continuationBlocks > state.sessionKind.additionalBlocks ||
+        state.remainingMilliseconds >
+            state.sessionKind.activeBudget.inMilliseconds ||
         (state.sessionKind != StudySessionKind.chained &&
             state.continuationBlocks != 0) ||
         state.serial < 0 ||
@@ -501,6 +541,8 @@ final class StudyState {
 
   String encode() {
     if (continuationBlocks < 0 ||
+        continuationBlocks > sessionKind.additionalBlocks ||
+        remainingMilliseconds > sessionKind.activeBudget.inMilliseconds ||
         (sessionKind != StudySessionKind.chained && continuationBlocks != 0)) {
       throw ArgumentError.value(
         continuationBlocks,

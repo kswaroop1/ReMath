@@ -186,6 +186,12 @@ final class StudyController extends ChangeNotifier {
     }
   }, clearError: false);
 
+  Future<void> finishAnswerTiming() => _exclusive(() async {
+    if (question == null || _uncertainCommit) return;
+    await _save(_timed());
+    _running = false;
+  });
+
   Future<void> pause() => _enqueue(() async {
     if (_state.plan != null) {
       final next = _timed();
@@ -249,6 +255,9 @@ final class StudyController extends ChangeNotifier {
       return;
     }
     final before = _timed();
+    if (before.plan!.isDiagnostic && choice != StudyCompletionChoice.stop) {
+      return;
+    }
     if (choice == StudyCompletionChoice.stop) {
       await _save(StudyState(goalId: before.goalId));
       _running = false;
@@ -275,7 +284,12 @@ final class StudyController extends ChangeNotifier {
         break;
       case StudyCompletionChoice.review:
         goal = before.goalId;
-        plan = StudyPlanner().plan(goal, _attempts, now);
+        final review = StudyPlanner().review(goal, _attempts, now);
+        if (review == null) {
+          _error = 'No review is due or approaching yet.';
+          return;
+        }
+        plan = review;
         break;
       case StudyCompletionChoice.challenge:
         goal = 'applications';
@@ -305,6 +319,7 @@ final class StudyController extends ChangeNotifier {
             : now.microsecondsSinceEpoch & 0x7fffffff,
         sessionKind: sessionKind,
         continuationBlocks: continueChain ? before.continuationBlocks - 1 : 0,
+        serial: continueChain ? before.serial : 0,
         remainingMilliseconds: sessionKind.activeBudget.inMilliseconds,
       ),
     );
@@ -322,6 +337,8 @@ final class StudyController extends ChangeNotifier {
       _error = isMultipleChoice
           ? 'Select one answer first.'
           : q.invalidInputMessage;
+      _lastTick = _clock().toUtc();
+      _running = true;
       return;
     }
     final correct = mark.verdict == AnswerVerdict.correct;
@@ -375,6 +392,8 @@ final class StudyController extends ChangeNotifier {
       next = _advance(next);
     }
     await _commit(event, next);
+    _lastTick = _clock().toUtc();
+    _running = true;
   });
 
   Future<void> revealHint() => _exclusive(() async {

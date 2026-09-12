@@ -87,6 +87,8 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
           !_controller.isMultipleChoice ||
           q.choices.any((choice) => choice.value == _controller.state.draft);
       if (mark.verdict != AnswerVerdict.invalid && offeredChoice && mounted) {
+        await _controller.finishAnswerTiming();
+        if (!mounted) return;
         surprise = await showDialog<SurpriseRating>(
           context: context,
           barrierDismissible: false,
@@ -456,10 +458,12 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
         ),
         for (final choice in [
           (StudyCompletionChoice.stop, 'Stop for now'),
-          (StudyCompletionChoice.repeat, 'Repeat this focus'),
-          (StudyCompletionChoice.continueTopic, 'Continue this topic'),
-          (StudyCompletionChoice.review, 'Review what’s due'),
-          (StudyCompletionChoice.challenge, 'Mixed challenge'),
+          if (!plan.isDiagnostic) ...[
+            (StudyCompletionChoice.repeat, 'Repeat this focus'),
+            (StudyCompletionChoice.continueTopic, 'Continue this topic'),
+            (StudyCompletionChoice.review, 'Review what’s due'),
+            (StudyCompletionChoice.challenge, 'Mixed challenge'),
+          ],
         ])
           choice.$1 == StudyCompletionChoice.stop
               ? FilledButton(

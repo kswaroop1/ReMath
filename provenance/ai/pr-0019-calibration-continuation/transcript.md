@@ -135,3 +135,15 @@ could exceed advertised budget/chain bounds; diagnostic repeat changed
 assessment semantics; and the review route ignored approaching reviews. Add
 focused regression tests for each before fixing them. The sixth finding is
 provenance chronology and will be corrected through the eventual final run.
+
+Red CI run 34703257077 failed at the intended new boundaries: the timing-freeze
+API was absent, chain serial reset to zero, oversized snapshots decoded, a
+diagnostic accepted repeat, and the review route selected ordinary teaching
+instead of approaching arithmetic review.
+
+Review-regression tests were published before production fixes. Preserve the
+serial within a continued chain; freeze and persist answer timing before showing
+surprise then resume after submission; enforce session maximums on encode and
+decode; leave completed diagnostics unchanged for non-stop routes; and add a
+planner path that selects overdue reviews before reviews approaching within 24
+hours.

@@ -190,7 +190,14 @@ void main() {
 
   test('bounded snapshots reject enlarged budgets and chains', () {
     final drill =
-        jsonDecode(StudyState(sessionKind: StudySessionKind.drill).encode())
+        jsonDecode(
+              StudyState(
+                sessionKind: StudySessionKind.drill,
+                remainingMilliseconds: const Duration(
+                  minutes: 2,
+                ).inMilliseconds,
+              ).encode(),
+            )
             as Map<String, dynamic>;
     drill['remaining'] = const Duration(minutes: 3).inMilliseconds;
     expect(() => StudyState.decode(jsonEncode(drill)), throwsFormatException);
