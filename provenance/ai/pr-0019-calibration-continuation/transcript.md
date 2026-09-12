@@ -109,3 +109,9 @@ failure was a widget assertion that required the live two-minute display to
 remain exactly 2:00 after asynchronous startup; the correct active timer may
 already display 1:59. Keep the exact persisted two-minute budget assertion and
 allow either honest initial display.
+
+Completion-workflow rerun 34695098705 passed all 267 native tests, seven Chrome
+tests, analysis and coverage. Select the final learner-visible calibration
+cycle: a widget test seeds one calibrated, one overconfident and one
+underconfident independent answer plus a surprising result, and requires those
+counts to appear separately in progress. No presentation seam yet exists.

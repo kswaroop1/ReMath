@@ -28,6 +28,54 @@ void main() {
     expect(find.text('Build number fluency'), findsOneWidget);
   });
 
+  testWidgets('progress explains confidence calibration separately', (
+    tester,
+  ) async {
+    final repository = InMemoryProgressRepository();
+    Future<void> record(
+      String id, {
+      required bool correct,
+      required ConfidenceRating confidence,
+      SurpriseRating? surprise,
+    }) => repository.recordAttempt(
+      AttemptEvent(
+        answer: '1',
+        eventId: id,
+        isCorrect: correct,
+        occurredAt: DateTime.utc(2026, 9, 12),
+        questionId: 'numbers.arithmetic.addition.level0.v1.mark1.score1.1',
+        responseTime: const Duration(seconds: 2),
+        sessionId: 'calibration',
+        skillId: 'arithmetic.addition',
+        confidence: confidence,
+        surprise: surprise,
+      ),
+    );
+    await record(
+      'calibrated',
+      correct: true,
+      confidence: ConfidenceRating.high,
+    );
+    await record(
+      'over',
+      correct: false,
+      confidence: ConfidenceRating.high,
+      surprise: SurpriseRating.surprising,
+    );
+    await record('under', correct: true, confidence: ConfidenceRating.low);
+
+    await tester.pumpWidget(
+      MaterialApp(home: StudyScreen(repository: repository)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Confidence calibration'), findsOneWidget);
+    expect(find.textContaining('1 calibrated'), findsOneWidget);
+    expect(find.textContaining('1 overconfident'), findsOneWidget);
+    expect(find.textContaining('1 underconfident'), findsOneWidget);
+    expect(find.textContaining('1 of 1 results surprising'), findsOneWidget);
+  });
+
   testWidgets('learner chooses drill standard or chained study time', (
     tester,
   ) async {
