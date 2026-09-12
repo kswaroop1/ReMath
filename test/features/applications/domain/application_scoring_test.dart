@@ -94,7 +94,7 @@ void main() {
             questionId: q.id.replaceFirst('.score1.', '.score2.'),
           ),
         ),
-        isFalse,
+        isTrue,
       );
       expect(StudyScoring.applicationQuestion(good)!.answer, q.answer);
     },

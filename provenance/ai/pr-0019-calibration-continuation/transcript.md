@@ -14,3 +14,9 @@ Cycle 1 red: new application work must pin scoring v2 with a 90-second fluent
 threshold while historical score1 keeps its immutable 20-second interpretation.
 Unknown versions remain unsupported. Specify generated identity, fresh-plan
 pinning and observable level progression before adding the scoring-version seam.
+
+Cycle 1 red run 34683330874 failed at the intended boundaries: fresh plans
+pinned score1 rather than score2, the generator lacked a scoringVersion seam,
+and valid 90-second score2 evidence did not advance. Clarify the pre-existing
+future-version assertion now that score2 is the selected supported contract;
+the branch remains red before production changes.
