@@ -147,3 +147,10 @@ surprise then resume after submission; enforce session maximums on encode and
 decode; leave completed diagnostics unchanged for non-stop routes; and add a
 planner path that selects overdue reviews before reviews approaching within 24
 hours.
+
+Review-fix green run 34703385019 passed formatting, static analysis, content
+validation, all browser and native behavior tests, coverage enforcement and the
+secret scan. Update provenance through the review, its red regression run and
+this green result before requesting re-review. The fixes preserve immutable
+event IDs, honest response timing, bounded imported state, diagnostic semantics
+and review-queue intent.
