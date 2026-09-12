@@ -7,6 +7,36 @@ import 'package:remath/src/features/numbers/domain/study_plan.dart';
 import 'package:remath/src/features/numbers/domain/study_scoring.dart';
 
 void main() {
+  test('application fluency replays the scoring-version time contract', () {
+    final q = ApplicationCurriculum().question('application.mixed', 0, 7, 0);
+    StudyProgress progress(int scoringVersion, int seconds) {
+      final events = List.generate(
+        3,
+        (i) => AttemptEvent(
+          answer: q.answer,
+          eventId: '$scoringVersion-$seconds-$i',
+          isCorrect: true,
+          occurredAt: DateTime.utc(2026).add(Duration(hours: i)),
+          questionId: q.id.replaceFirst('.score1.', '.score$scoringVersion.'),
+          responseTime: Duration(seconds: seconds),
+          sessionId: 's',
+          skillId: q.skillId,
+        ),
+      );
+      return StudyProgress.forSkill(
+        q.skillId,
+        events,
+        DateTime.utc(2026, 1, 2),
+      );
+    }
+
+    expect(progress(1, 20).level, 1);
+    expect(progress(1, 21).level, 0);
+    expect(progress(2, 90).level, 1);
+    expect(progress(2, 91).level, 0);
+    expect(progress(99, 1).unsupported, 3);
+  });
+
   test(
     'technique evidence survives calculation slips and excludes assistance and duplicates',
     () {

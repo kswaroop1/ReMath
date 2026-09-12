@@ -91,6 +91,12 @@ void main() {
     },
   );
 
+  test('fresh application plans pin the current scoring contract', () {
+    final plan = StudyPlanner().plan('applications', [], now);
+
+    expect(plan.steps.map((step) => step.scoringVersion).toSet(), {2});
+  });
+
   test('the oldest due skill is reviewed before newer overdue work', () {
     final plan = StudyPlanner().plan('proportions', [
       answer(-3600, skill: 'arithmetic.addition', correct: false),

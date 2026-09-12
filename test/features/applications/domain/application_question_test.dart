@@ -3,8 +3,29 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/applications/domain/application_curriculum.dart';
 import 'package:remath/src/features/learning/domain/numeric_answer_contract.dart';
+import 'package:remath/src/features/numbers/domain/study_curriculum.dart';
 
 void main() {
+  test('fresh applications pin scoring v2 while score1 remains replayable', () {
+    final current = StudyCurriculum().question(
+      'application.breakEven',
+      0,
+      7,
+      0,
+    );
+    final legacy = ApplicationCurriculum().question(
+      'application.breakEven',
+      0,
+      7,
+      0,
+      scoringVersion: 1,
+    );
+
+    expect(current.id, contains('.score2.'));
+    expect(legacy.id, contains('.score1.'));
+    expect(current.answer, legacy.answer);
+  });
+
   test('method and assumption must be committed before calculation', () {
     final q = ApplicationCurriculum().question(
       'application.breakEven',
