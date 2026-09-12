@@ -154,3 +154,8 @@ secret scan. Update provenance through the review, its red regression run and
 this green result before requesting re-review. The fixes preserve immutable
 event IDs, honest response timing, bounded imported state, diagnostic semantics
 and review-queue intent.
+
+Final provenance verification run 34703580610 passed at corrected head
+ccd3256b41: 273 native tests, seven Chrome tests, formatting, analysis, content
+validation, coverage enforcement and secret scan. This final records-only
+update adds that run and closes the chronology; it changes no product behavior.
