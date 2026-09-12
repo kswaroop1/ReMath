@@ -220,3 +220,9 @@ The first locked-feedback green run, 34720041703, showed that the existing
 public timing seam is also used without confidence, where no feedback dialog
 or durable lock is needed. Preserve its transient timing freeze while only
 persisting `awaitingSurprise` for opted-in confidence feedback.
+
+Locked-feedback corrected green run 34723385426 passed formatting, static
+analysis, content validation, 277 native tests, seven Chrome tests, coverage
+enforcement and secret scanning. All five behavioral findings from re-review
+now have focused regression evidence and passing fixes; publish this final
+chronological record before requesting another independent review.
