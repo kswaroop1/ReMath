@@ -90,7 +90,7 @@ void main() {
         MaterialApp(home: StudyScreen(repository: repository)),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('High confidence'));
+      await tester.tap(find.text('High'));
       final q = NumberCurriculum().question('number.fractions', 0, 7, 0);
       await tester.enterText(find.byType(TextField), q.answer);
       await tester.tap(find.text('Submit'));

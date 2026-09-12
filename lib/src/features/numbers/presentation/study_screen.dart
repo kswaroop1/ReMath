@@ -442,14 +442,14 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
         if (q.inputGuidance != null) Text(q.inputGuidance!),
         const SizedBox(height: 12),
         if (state.phase != StudyPhase.correction && state.hintCount == 0) ...[
-          const Text('Optional: how confident are you?'),
+          const Text('Optional confidence'),
           Wrap(
             spacing: 8,
             children: [
               for (final rating in ConfidenceRating.values)
                 ChoiceChip(
                   label: Text(
-                    '${rating.name[0].toUpperCase()}${rating.name.substring(1)} confidence',
+                    '${rating.name[0].toUpperCase()}${rating.name.substring(1)}',
                   ),
                   selected: state.confidence == rating,
                   onSelected: _controller.busy || _controller.needsRetry

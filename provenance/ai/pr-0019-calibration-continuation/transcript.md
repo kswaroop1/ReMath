@@ -59,3 +59,9 @@ selection/submission seams and snapshot v4; the widget could not find the opt-in
 control. Persist confidence in v4, clear it when help is used or a question
 advances, and attach it with the dialog's optional surprise in the same atomic
 attempt commit. Only opting into confidence adds the post-feedback dialog.
+
+Cycle 3 first green run 34687797810 passed the new controller and calibration
+dialog behavior but exposed a compact-height regression: verbose confidence
+chip labels pushed the existing MCQ Submit action below an 800×600 viewport.
+Shorten the optional row to Low/Medium/High while retaining its heading and
+meaning, then rerun all journeys.
