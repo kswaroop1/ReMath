@@ -27,3 +27,11 @@ pinning is asserted on an explicitly selected mixed application plan. The
 technique aggregate must count valid score2 evidence once it becomes supported,
 changing three-event mean credit to two-thirds. Align those assertions with the
 selected contract; no production behavior changes in this correction commit.
+
+Cycle 1 green: run 34683728069 passed the full suite after the aligned
+version-two assertions. Cycle 2 select/red: optional low/medium/high confidence
+and unsurprising/surprising outcome ratings belong to the immutable attempt.
+Independent rated attempts produce an agreement score and explicit calibrated,
+overconfident and underconfident counts; assistance and skipped ratings do not
+inflate them. SQLite schema v7 must round-trip both optional fields and legacy
+migrations must yield null ratings.

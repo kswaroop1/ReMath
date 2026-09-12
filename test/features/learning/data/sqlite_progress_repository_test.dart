@@ -56,6 +56,8 @@ void main() {
         relatedEventId: 'wrong-attempt',
         sessionId: 'session-1',
         skillId: 'arithmetic.addition',
+        confidence: ConfidenceRating.high,
+        surprise: SurpriseRating.surprising,
       );
 
       expect(await repository.recordAttempt(event), isTrue);
@@ -69,6 +71,8 @@ void main() {
       expect(attempts.single.kind, AttemptKind.correction);
       expect(attempts.single.relatedEventId, 'wrong-attempt');
       expect(attempts.single.misconceptionId, 'arithmetic.used-addition');
+      expect(attempts.single.confidence, ConfidenceRating.high);
+      expect(attempts.single.surprise, SurpriseRating.surprising);
     },
   );
 
@@ -145,7 +149,7 @@ void main() {
     expect(attempts.single.misconceptionId, isNull);
     expect(
       database.select('SELECT version FROM schema_version').single['version'],
-      6,
+      7,
     );
     await migrated.close();
   });
@@ -241,7 +245,7 @@ void main() {
       expect(session?.focusSkillId, 'arithmetic.addition');
       expect(
         database.select('SELECT version FROM schema_version').single['version'],
-        6,
+        7,
       );
       await migrated.close();
     },
