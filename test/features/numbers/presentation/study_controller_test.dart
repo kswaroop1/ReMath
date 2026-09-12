@@ -91,6 +91,7 @@ void main() {
         sessionKind: StudySessionKind.chained,
         continuationBlocks: 2,
         remainingMilliseconds: 1,
+        serial: 3,
       ).encode(),
     );
     controller = StudyController(
@@ -107,7 +108,25 @@ void main() {
     expect(controller.state.sessionId, 'chain');
     expect(controller.state.sessionKind, StudySessionKind.chained);
     expect(controller.state.continuationBlocks, 1);
+    expect(controller.state.serial, 3);
     expect(controller.remaining, const Duration(minutes: 15));
+  });
+
+  test('surprise reflection time is not charged to answer fluency', () async {
+    await controller.start();
+    final answer = controller.question!.answer;
+    await controller.updateDraft(answer);
+    now = now.add(const Duration(seconds: 19));
+    await controller.finishAnswerTiming();
+    now = now.add(const Duration(seconds: 30));
+    await controller.submit(surprise: SurpriseRating.surprising);
+
+    expect(
+      (await repository.loadAttempts()).single.responseTime,
+      const Duration(seconds: 19),
+    );
+    now = now.add(const Duration(seconds: 1));
+    expect(controller.remaining, const Duration(minutes: 14, seconds: 40));
   });
 
   test(
@@ -276,6 +295,56 @@ void main() {
           .every((step) => step.skillId == 'application.mixed'),
       isTrue,
     );
+  });
+
+  test('diagnostic completion only permits stopping', () async {
+    final plan = StudyPlanner().diagnostic('number-fluency');
+    await repository.saveStudyState(
+      StudyState(
+        plan: plan,
+        sessionId: 'diagnostic',
+        stepIndex: plan.steps.length - 1,
+      ).encode(),
+    );
+    final learner = StudyController(repository: repository, clock: () => now);
+    addTearDown(learner.dispose);
+    await learner.initialise();
+
+    await learner.complete(StudyCompletionChoice.repeat);
+
+    expect(learner.state.sessionId, 'diagnostic');
+    expect(learner.state.plan!.isDiagnostic, isTrue);
+  });
+
+  test('review completion selects an approaching review', () async {
+    await repository.recordAttempt(
+      AttemptEvent(
+        answer: '1',
+        eventId: 'approaching',
+        isCorrect: true,
+        occurredAt: now,
+        questionId: 'numbers.arithmetic.addition.level0.v1.mark1.score1.1',
+        responseTime: const Duration(seconds: 2),
+        sessionId: 'old',
+        skillId: 'arithmetic.addition',
+      ),
+    );
+    final plan = StudyPlanner().plan('number-fluency', [], now);
+    await repository.saveStudyState(
+      StudyState(
+        plan: plan,
+        sessionId: 'completed',
+        stepIndex: plan.steps.length - 1,
+      ).encode(),
+    );
+    final learner = StudyController(repository: repository, clock: () => now);
+    addTearDown(learner.dispose);
+    await learner.initialise();
+
+    await learner.complete(StudyCompletionChoice.review);
+
+    expect(learner.state.plan!.reason, contains('approaching'));
+    expect(learner.state.plan!.steps.first.skillId, 'arithmetic.addition');
   });
   test(
     'diagnostic records wrong answers without revealing correction help',

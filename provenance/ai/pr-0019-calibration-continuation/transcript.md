@@ -127,3 +127,11 @@ line coverage. The accepted Solve, Explain, Apply, and Calibrate/continue
 programme is implementation-complete; update the durable feature register and
 roadmap before requesting independent review. No release, merge, or VERSION
 change is included.
+
+Independent Codex review of 7ea489a380 reported six blockers. Five affect
+behavior: chained continue-topic reset the serial while retaining its session
+ID; surprise-dialog time was charged to answer fluency; imported v5 snapshots
+could exceed advertised budget/chain bounds; diagnostic repeat changed
+assessment semantics; and the review route ignored approaching reviews. Add
+focused regression tests for each before fixing them. The sixth finding is
+provenance chronology and will be corrected through the eventual final run.
