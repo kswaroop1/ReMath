@@ -320,13 +320,11 @@ final class StudyState {
   });
   factory StudyState.decode(String source) {
     final json = jsonDecode(source) as Map<String, dynamic>;
-    if (json['version'] != 1 &&
-        json['version'] != 2 &&
-        json['version'] != 3 &&
-        json['version'] != 4) {
+    final version = json['version'] as int;
+    if (version != 1 && version != 2 && version != 3 && version != 4) {
       throw const FormatException('Unsupported study state');
     }
-    if (json['version'] != 1 && json['plan'] != null) {
+    if (version != 1 && json['plan'] != null) {
       final plan = json['plan'] as Map<String, dynamic>;
       for (final raw in plan['steps'] as List<dynamic>) {
         final step = raw as Map<String, dynamic>;
@@ -355,10 +353,10 @@ final class StudyState {
         false;
     if ((json['generator'] != null &&
             !['portable', 'legacy-browser'].contains(json['generator'])) ||
-        (json['version'] >= 3 && !json.containsKey('generator'))) {
+        (version >= 3 && !json.containsKey('generator'))) {
       throw const FormatException('Unsupported saved generator');
     }
-    final generator = json['version'] >= 3
+    final generator = version >= 3
         ? json['generator'] as String?
         : hasLegacy
         ? null
@@ -367,7 +365,7 @@ final class StudyState {
       throw const FormatException('Missing generator for a current session');
     }
     final state = StudyState(
-      confidence: json['version'] == 4 && json['confidence'] != null
+      confidence: version == 4 && json['confidence'] != null
           ? ConfidenceRating.values.byName(json['confidence'] as String)
           : null,
       generator: generator,
@@ -409,7 +407,7 @@ final class StudyState {
           ((step.skillId.startsWith('algebra.') ||
                   step.skillId.startsWith('reasoning.') ||
                   step.skillId.startsWith('application.')) &&
-              (json['version'] == 1 || step.multipleChoice)) ||
+              (version == 1 || step.multipleChoice)) ||
           step.level < 0 ||
           step.level > 2 ||
           !curriculum.skills.any((skill) => skill.id == step.skillId)) {

@@ -65,3 +65,7 @@ dialog behavior but exposed a compact-height regression: verbose confidence
 chip labels pushed the existing MCQ Submit action below an 800×600 viewport.
 Shorten the optional row to Low/Medium/High while retaining its heading and
 meaning, then rerun all journeys.
+
+Cycle 3 second green run 34687923397 passed all behavior tests after the compact
+layout fix, but fatal analysis found two dynamic comparisons on snapshot version.
+Cast the decoded schema version once before validation and reuse the typed value.
