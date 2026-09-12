@@ -96,3 +96,9 @@ workflow cycle: widget acceptance now requires visible two-minute, standard,
 and chained entry points; controller acceptance specifies stop, repeat,
 continue-topic, urgent-review, and mixed-challenge completion outcomes before
 their production seams exist.
+
+Red CI run 34694650100 failed during analysis on the deliberately absent
+StudyCompletionChoice API and complete transition; the widget test also names
+the missing session entry points. Implement explicit completion planning and
+the three start choices, retaining stop as a plan-clearing action and preserving
+bounded chained continuation only when the learner chooses continue-topic.

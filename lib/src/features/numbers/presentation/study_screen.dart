@@ -202,6 +202,19 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
             },
       child: const Text('Plan my next chunk'),
     ),
+    OutlinedButton(
+      onPressed: _controller.busy
+          ? null
+          : () => unawaited(_controller.start(session: StudySessionKind.drill)),
+      child: const Text('Two-minute drill'),
+    ),
+    OutlinedButton(
+      onPressed: _controller.busy
+          ? null
+          : () =>
+                unawaited(_controller.start(session: StudySessionKind.chained)),
+      child: const Text('Chained study block'),
+    ),
     TextButton(
       onPressed: _controller.busy
           ? null
@@ -422,14 +435,26 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
           'Which method helped? What would you try differently next time? '
           'Review your progress before choosing another chunk.',
         ),
-        FilledButton(
-          onPressed: _controller.busy
-              ? null
-              : () {
-                  unawaited(_controller.continueStep());
-                },
-          child: const Text('Finish session'),
-        ),
+        for (final choice in [
+          (StudyCompletionChoice.stop, 'Stop for now'),
+          (StudyCompletionChoice.repeat, 'Repeat this focus'),
+          (StudyCompletionChoice.continueTopic, 'Continue this topic'),
+          (StudyCompletionChoice.review, 'Review what’s due'),
+          (StudyCompletionChoice.challenge, 'Mixed challenge'),
+        ])
+          choice.$1 == StudyCompletionChoice.stop
+              ? FilledButton(
+                  onPressed: _controller.busy
+                      ? null
+                      : () => unawaited(_controller.complete(choice.$1)),
+                  child: Text(choice.$2),
+                )
+              : OutlinedButton(
+                  onPressed: _controller.busy
+                      ? null
+                      : () => unawaited(_controller.complete(choice.$1)),
+                  child: Text(choice.$2),
+                ),
       ] else if (q != null) ...[
         if (state.phase == StudyPhase.correction)
           const Text('Correct this answer')

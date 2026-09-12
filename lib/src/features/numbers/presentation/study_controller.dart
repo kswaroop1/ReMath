@@ -239,6 +239,76 @@ final class StudyController extends ChangeNotifier {
     }
   });
 
+  Future<void> complete(StudyCompletionChoice choice) => _exclusive(() async {
+    if (_state.plan == null ||
+        _state.needsGeneratorChoice ||
+        _state.step?.kind != StudyStepKind.reflection) {
+      return;
+    }
+    final before = _timed();
+    if (choice == StudyCompletionChoice.stop) {
+      await _save(StudyState(goalId: before.goalId));
+      _running = false;
+      return;
+    }
+
+    final now = _clock().toUtc();
+    final focus = before.step!.skillId;
+    late final String goal;
+    late final StudyPlan plan;
+    switch (choice) {
+      case StudyCompletionChoice.stop:
+        throw StateError('handled above');
+      case StudyCompletionChoice.repeat:
+        goal = before.goalId;
+        plan = StudyPlan(
+          reason: 'Repeat the completed focus with fresh questions.',
+          steps: before.plan!.steps,
+        );
+        break;
+      case StudyCompletionChoice.continueTopic:
+        goal = before.goalId;
+        plan = StudyPlanner().plan(goal, _attempts, now, exploreSkillId: focus);
+        break;
+      case StudyCompletionChoice.review:
+        goal = before.goalId;
+        plan = StudyPlanner().plan(goal, _attempts, now);
+        break;
+      case StudyCompletionChoice.challenge:
+        goal = 'applications';
+        plan = StudyPlanner().plan(
+          goal,
+          _attempts,
+          now,
+          exploreSkillId: 'application.mixed',
+        );
+        break;
+    }
+    final continueChain =
+        choice == StudyCompletionChoice.continueTopic &&
+        before.sessionKind == StudySessionKind.chained &&
+        before.continuationBlocks > 0;
+    final sessionKind = continueChain
+        ? StudySessionKind.chained
+        : StudySessionKind.standard;
+    await _save(
+      StudyState(
+        generator: before.generator,
+        goalId: goal,
+        plan: plan,
+        sessionId: continueChain ? before.sessionId : _idFactory(),
+        seed: continueChain
+            ? before.seed + 1
+            : now.microsecondsSinceEpoch & 0x7fffffff,
+        sessionKind: sessionKind,
+        continuationBlocks: continueChain ? before.continuationBlocks - 1 : 0,
+        remainingMilliseconds: sessionKind.activeBudget.inMilliseconds,
+      ),
+    );
+    _lastTick = now;
+    _running = true;
+  });
+
   Future<void> submit({SurpriseRating? surprise}) => _exclusive(() async {
     final q = question;
     if (q == null) return;

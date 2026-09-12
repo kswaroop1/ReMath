@@ -122,6 +122,8 @@ enum StudyPhase { question, correction, retest }
 
 enum StudySessionKind { drill, standard, chained }
 
+enum StudyCompletionChoice { stop, repeat, continueTopic, review, challenge }
+
 extension StudySessionKindBudget on StudySessionKind {
   Duration get activeBudget => switch (this) {
     StudySessionKind.drill => const Duration(minutes: 2),

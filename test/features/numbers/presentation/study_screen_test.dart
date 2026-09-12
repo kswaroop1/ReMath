@@ -165,7 +165,7 @@ void main() {
         endsWith('.mcq'),
       );
       expect(find.text('Reflect on your session'), findsOneWidget);
-      await tester.tap(find.text('Finish session'));
+      await tester.tap(find.text('Stop for now'));
       await tester.pumpAndSettle();
       expect(find.text('Plan my next chunk'), findsOneWidget);
     },
@@ -197,7 +197,7 @@ void main() {
     expect(find.textContaining('15% of £80'), findsOneWidget);
     await tester.tap(find.text('Continue to practice'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Finish session'));
+    await tester.tap(find.text('Stop for now'));
     await tester.pumpAndSettle();
     expect(find.text('Your skills and progress'), findsOneWidget);
   });
