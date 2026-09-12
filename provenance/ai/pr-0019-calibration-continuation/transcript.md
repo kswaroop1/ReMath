@@ -226,3 +226,8 @@ analysis, content validation, 277 native tests, seven Chrome tests, coverage
 enforcement and secret scanning. All five behavioral findings from re-review
 now have focused regression evidence and passing fixes; publish this final
 chronological record before requesting another independent review.
+
+Independent review of verified head 7e1e923f94 found that the UI could still
+show verdict feedback when saving the pending lock failed, because the
+controller swallowed the error behind a void result. Begin a focused cycle in
+which failed persistence must return false and leave feedback unauthorized.
