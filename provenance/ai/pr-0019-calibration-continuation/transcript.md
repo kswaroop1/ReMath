@@ -188,3 +188,8 @@ explicit import. Begin the assisted-evidence cycle at both persistence seams:
 hint and correction events carrying confidence or surprise must be rejected
 before they can enter either in-memory or SQLite history, including atomic
 study commits.
+
+Assisted-calibration red run 34713664256 failed because both repositories
+accepted the invalid events. Validate the event at every persistence entry
+point, before duplicate handling or a SQLite transaction, so hints and
+corrections can never persist confidence or surprise evidence.

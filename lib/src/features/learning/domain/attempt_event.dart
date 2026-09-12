@@ -39,4 +39,15 @@ final class AttemptEvent {
   final SurpriseRating? surprise;
   final String sessionId;
   final String skillId;
+
+  void validateCalibrationEvidence() {
+    if (!kind.contributesToMastery &&
+        (confidence != null || surprise != null)) {
+      throw ArgumentError.value(
+        kind,
+        'kind',
+        'assisted events cannot carry calibration evidence',
+      );
+    }
+  }
 }

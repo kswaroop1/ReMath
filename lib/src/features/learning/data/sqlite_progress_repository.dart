@@ -267,7 +267,10 @@ final class SqliteProgressRepository implements ProgressRepository {
   }
 
   @override
-  Future<bool> recordAttempt(AttemptEvent event) async => _insertAttempt(event);
+  Future<bool> recordAttempt(AttemptEvent event) async {
+    event.validateCalibrationEvidence();
+    return _insertAttempt(event);
+  }
 
   bool _insertAttempt(AttemptEvent event) {
     _database.execute(
@@ -352,6 +355,7 @@ final class SqliteProgressRepository implements ProgressRepository {
 
   @override
   Future<bool> commitStudyAttempt(AttemptEvent event, String state) async {
+    event.validateCalibrationEvidence();
     _database.execute('BEGIN IMMEDIATE');
     try {
       final inserted = _insertAttempt(event);
