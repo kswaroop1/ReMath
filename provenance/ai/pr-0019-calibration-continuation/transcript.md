@@ -89,3 +89,10 @@ Chrome contracts, and 264 of 265 native tests. The sole failure was the algebra
 journey's explicit snapshot-schema assertion, which correctly observed version
 5 rather than its previous version-4 expectation. Align that compatibility
 assertion with the additive snapshot version and rerun the full suite.
+
+Bounded-session green rerun 34691863848 passed formatting, static analysis,
+265 native tests, seven Chrome tests, and coverage. Select the final learner
+workflow cycle: widget acceptance now requires visible two-minute, standard,
+and chained entry points; controller acceptance specifies stop, repeat,
+continue-topic, urgent-review, and mixed-challenge completion outcomes before
+their production seams exist.

@@ -228,6 +228,55 @@ void main() {
       expect(controller.state.plan, isNotNull);
     },
   );
+
+  test('every completion route produces its promised next step', () async {
+    Future<StudyState> choose(StudyCompletionChoice choice) async {
+      final routeRepository = InMemoryProgressRepository();
+      final plan = StudyPlanner().plan('number-fluency', [], now);
+      await routeRepository.saveStudyState(
+        StudyState(
+          plan: plan,
+          sessionId: 'completed',
+          seed: 7,
+          stepIndex: plan.steps.length - 1,
+        ).encode(),
+      );
+      final learner = StudyController(
+        repository: routeRepository,
+        clock: () => now,
+        idFactory: () => 'next-${choice.name}',
+      );
+      addTearDown(learner.dispose);
+      await learner.initialise();
+      await learner.complete(choice);
+      final saved = await routeRepository.loadStudyState();
+      expect(saved, isNotNull);
+      return StudyState.decode(saved!);
+    }
+
+    expect((await choose(StudyCompletionChoice.stop)).plan, isNull);
+    final repeated = await choose(StudyCompletionChoice.repeat);
+    expect(repeated.plan, isNotNull);
+    expect(repeated.sessionId, 'next-repeat');
+    expect(repeated.plan!.reason, contains('Repeat'));
+
+    final continued = await choose(StudyCompletionChoice.continueTopic);
+    expect(continued.plan, isNotNull);
+    expect(continued.plan!.reason, contains('Exploring'));
+
+    final review = await choose(StudyCompletionChoice.review);
+    expect(review.plan, isNotNull);
+    expect(review.plan!.reason, isNotEmpty);
+
+    final challenge = await choose(StudyCompletionChoice.challenge);
+    expect(challenge.goalId, 'applications');
+    expect(
+      challenge.plan!.steps
+          .where((step) => step.kind != StudyStepKind.reflection)
+          .every((step) => step.skillId == 'application.mixed'),
+      isTrue,
+    );
+  });
   test(
     'diagnostic records wrong answers without revealing correction help',
     () async {

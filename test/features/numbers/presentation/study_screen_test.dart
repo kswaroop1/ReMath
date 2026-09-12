@@ -28,6 +28,28 @@ void main() {
     expect(find.text('Build number fluency'), findsOneWidget);
   });
 
+  testWidgets('learner chooses drill standard or chained study time', (
+    tester,
+  ) async {
+    final repository = InMemoryProgressRepository();
+    await tester.pumpWidget(
+      MaterialApp(home: StudyScreen(repository: repository)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Two-minute drill'), findsOneWidget);
+    expect(find.text('Plan my next chunk'), findsOneWidget);
+    expect(find.text('Chained study block'), findsOneWidget);
+
+    await tester.tap(find.text('Two-minute drill'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('2:00 remaining'), findsOneWidget);
+    expect(
+      StudyState.decode((await repository.loadStudyState())!).sessionKind,
+      StudySessionKind.drill,
+    );
+  });
+
   testWidgets(
     'learner submits a fraction and keeps answer focus through correction',
     (tester) async {
