@@ -46,3 +46,10 @@ transaction and constraints.
 Cycle 2 first green run 34685385566 passed all 258 behavior tests, including
 migration retries and calibration scoring, but fatal analysis rejected two SQL
 string quote styles. Normalize those literals and rerun the full gate.
+
+Cycle 2 green: run 34685497577 passed formatting, analysis and all persistence
+and calibration tests. Cycle 3 select/red: selecting confidence on an independent
+question must persist through restart, then join the same immutable attempt with
+the optional post-feedback surprise rating. Using a hint clears confidence.
+Learners who do not select confidence retain the existing one-action submit flow.
+Advance the study snapshot to v4 while decoding legacy v1-v3 snapshots.

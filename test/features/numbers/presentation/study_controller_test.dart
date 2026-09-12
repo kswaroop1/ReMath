@@ -106,6 +106,40 @@ void main() {
   );
 
   test(
+    'optional confidence survives restart and surprise joins the attempt',
+    () async {
+      await controller.start();
+      await controller.selectConfidence(ConfidenceRating.high);
+      final reopened = StudyController(
+        repository: repository,
+        clock: () => now,
+      );
+      addTearDown(reopened.dispose);
+      await reopened.initialise();
+      expect(reopened.state.confidence, ConfidenceRating.high);
+
+      await reopened.updateDraft(reopened.question!.answer);
+      await reopened.submit(surprise: SurpriseRating.surprising);
+
+      final event = (await repository.loadAttempts()).single;
+      expect(event.confidence, ConfidenceRating.high);
+      expect(event.surprise, SurpriseRating.surprising);
+      expect(reopened.state.confidence, isNull);
+    },
+  );
+
+  test(
+    'using help clears confidence instead of attaching it to assistance',
+    () async {
+      await controller.start();
+      await controller.selectConfidence(ConfidenceRating.high);
+      await controller.revealHint();
+
+      expect(controller.state.confidence, isNull);
+    },
+  );
+
+  test(
     'invalid input does not create evidence and repeated submit is guarded',
     () async {
       await controller.start();
