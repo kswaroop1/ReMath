@@ -122,12 +122,9 @@ void main() {
           ],
         ),
         seed: 7,
-        draft: NumberCurriculum().question(
-          'arithmetic.addition',
-          0,
-          7,
-          0,
-        ).answer,
+        draft: NumberCurriculum()
+            .question('arithmetic.addition', 0, 7, 0)
+            .answer,
       );
       expect(StudyState.decode(answerable.encode()).awaitingSurprise, isTrue);
 
@@ -158,9 +155,10 @@ void main() {
       for (var level = 0; level < 3; level++) {
         for (var seed = 0; seed < 12; seed++) {
           final q = curriculum.question(skill.id, level, seed, 2);
-          final n = RegExp(
-            r'\d+',
-          ).allMatches(q.prompt).map((m) => int.parse(m.group(0)!)).toList();
+          final n = RegExp(r'\d+')
+              .allMatches(q.prompt)
+              .map((m) => int.parse(m.group(0)!))
+              .toList();
           final answer = switch (skill.id) {
             'arithmetic.addition' => '${n[0] + n[1]}',
             'arithmetic.subtraction' => '${n[0] - n[1]}',
@@ -186,14 +184,16 @@ void main() {
     () {
       final c = NumberCurriculum();
       final division = c.question('arithmetic.division', 1, 7, 0);
-      final d = RegExp(
-        r'\d+',
-      ).allMatches(division.prompt).map((m) => int.parse(m.group(0)!)).toList();
+      final d = RegExp(r'\d+')
+          .allMatches(division.prompt)
+          .map((m) => int.parse(m.group(0)!))
+          .toList();
       expect(division.hints.last, contains('${d[1]} × ${d[0] ~/ d[1]}'));
       final ratio = c.question('number.ratios', 1, 7, 0);
-      final r = RegExp(
-        r'\d+',
-      ).allMatches(ratio.prompt).map((m) => int.parse(m.group(0)!)).toList();
+      final r = RegExp(r'\d+')
+          .allMatches(ratio.prompt)
+          .map((m) => int.parse(m.group(0)!))
+          .toList();
       expect(ratio.hints.last, contains('${r[0]} ÷ ${r[1] + r[2]}'));
     },
   );
