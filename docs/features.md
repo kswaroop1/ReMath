@@ -80,14 +80,15 @@ Last reviewed: 9 September 2026 (PR17 application journey).
   and resume. Broader application domains remain planned.
 - [ ] **LX-011 — Paper-reading chunk.** Decode one equation, paragraph, figure, or
   modelling choice from a technical paper.
-- [ ] **LX-012 — End-of-chunk choices.** Stop, repeat, continue topic, review, or
-  attempt a challenge. The foundation drill now offers stop, same-skill,
-  weakest-skill, and mixed-drill choices; explicit review and challenge routes
-  remain to complete this feature.
-- [ ] **LX-013 — Configurable intensity.** Two-minute drill, standard 15-minute
-  chunk, or chained study block.
-- [ ] **LX-014 — Confidence capture.** Optional pre-answer confidence and
-  post-answer surprise.
+- [x] **LX-012 — End-of-chunk choices.** Stop, repeat the completed focus,
+  continue its topic, review the most urgent work, or start a mixed application
+  challenge; each continuing route creates a fresh resumable plan.
+- [x] **LX-013 — Configurable intensity.** Two-minute drill, standard 15-minute
+  chunk, or a finite three-chunk chained study block. Active budgets and
+  remaining chain length survive pause and restart.
+- [x] **LX-014 — Confidence capture.** Optional low, medium or high pre-answer
+  confidence and optional post-answer surprise are attached to the same
+  immutable independent attempt.
 - [ ] **LX-015 — Distraction-safe mode.** Minimal full-screen question interface
   with optional sound and haptic feedback.
 - [ ] **LX-016 — Keyboard-first desktop operation.** Complete session without a
@@ -194,8 +195,9 @@ Last reviewed: 9 September 2026 (PR17 application journey).
   section heading.
 - [ ] **QA-025 — Calculator policy.** Per-question mental, paper, basic-calculator,
   symbolic-tool, or coding permission.
-- [ ] **QA-026 — Confidence-aware scoring.** Distinguish lucky guesses,
-  overconfidence, and well-calibrated knowledge.
+- [x] **QA-026 — Confidence-aware scoring.** Independent confidence evidence
+  distinguishes overconfidence, underconfidence and calibrated knowledge
+  without changing mathematical correctness or mastery.
 - [ ] **QA-027 — Question-quality review state.** Draft, reviewed, calibrated,
   challenged, and retired lifecycle.
 - [ ] **QA-028 — Source and licence metadata.** Original-author or compatible
@@ -236,8 +238,9 @@ Last reviewed: 9 September 2026 (PR17 application journey).
   assumption choices are reconstructed from versioned application answers;
   calculation slips retain technique credit, while assistance, duplicates and
   unknown versions cannot inflate it. Mixed challenges omit technique labels.
-- [ ] **MP-010 — Confidence calibration score.** Agreement between confidence and
-  actual performance.
+- [x] **MP-010 — Confidence calibration score.** Agreement between confidence and
+  actual performance is derived from immutable independent attempts and shown
+  separately from mastery.
 - [x] **MP-011 — Spaced-repetition scheduler.** Incorrect skills become immediately
   due, slow skills return after five minutes, fluent streaks expand intervals,
   and the review queue prioritises overdue work before approaching reviews.

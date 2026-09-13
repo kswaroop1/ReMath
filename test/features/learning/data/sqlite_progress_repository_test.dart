@@ -48,7 +48,7 @@ void main() {
         answer: '12',
         eventId: 'event-1',
         isCorrect: true,
-        kind: AttemptKind.correction,
+        kind: AttemptKind.answer,
         misconceptionId: 'arithmetic.used-addition',
         occurredAt: DateTime.utc(2026, 8, 27, 8, 1),
         questionId: 'question-1',
@@ -56,6 +56,8 @@ void main() {
         relatedEventId: 'wrong-attempt',
         sessionId: 'session-1',
         skillId: 'arithmetic.addition',
+        confidence: ConfidenceRating.high,
+        surprise: SurpriseRating.surprising,
       );
 
       expect(await repository.recordAttempt(event), isTrue);
@@ -66,11 +68,36 @@ void main() {
       expect(attempts.single.eventId, event.eventId);
       expect(attempts.single.responseTime, const Duration(seconds: 3));
       expect(attempts.single.skillId, 'arithmetic.addition');
-      expect(attempts.single.kind, AttemptKind.correction);
+      expect(attempts.single.kind, AttemptKind.answer);
       expect(attempts.single.relatedEventId, 'wrong-attempt');
       expect(attempts.single.misconceptionId, 'arithmetic.used-addition');
+      expect(attempts.single.confidence, ConfidenceRating.high);
+      expect(attempts.single.surprise, SurpriseRating.surprising);
     },
   );
+
+  test('rejects calibration metadata on assisted events', () async {
+    final assisted = AttemptEvent(
+      answer: '12',
+      eventId: 'assisted',
+      isCorrect: true,
+      kind: AttemptKind.correction,
+      occurredAt: DateTime.utc(2026, 8, 27, 8, 1),
+      questionId: 'question-1',
+      responseTime: const Duration(seconds: 3),
+      relatedEventId: 'wrong-attempt',
+      sessionId: 'session-1',
+      skillId: 'arithmetic.addition',
+      confidence: ConfidenceRating.high,
+    );
+
+    await expectLater(repository.recordAttempt(assisted), throwsArgumentError);
+    await expectLater(
+      repository.commitStudyAttempt(assisted, 'next'),
+      throwsArgumentError,
+    );
+    expect(await repository.loadAttempts(), isEmpty);
+  });
 
   test('persists and restores an interrupted focused review chunk', () async {
     final session = LearningSession(
@@ -145,7 +172,7 @@ void main() {
     expect(attempts.single.misconceptionId, isNull);
     expect(
       database.select('SELECT version FROM schema_version').single['version'],
-      6,
+      7,
     );
     await migrated.close();
   });
@@ -241,7 +268,7 @@ void main() {
       expect(session?.focusSkillId, 'arithmetic.addition');
       expect(
         database.select('SELECT version FROM schema_version').single['version'],
-        6,
+        7,
       );
       await migrated.close();
     },

@@ -3,12 +3,14 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 
 import '../../learning/domain/attempt_event.dart';
+import '../../learning/domain/calibration.dart';
 import '../../learning/domain/numeric_answer_contract.dart';
 import '../../learning/domain/progress_repository.dart';
 import '../../reasoning/domain/reasoning_curriculum.dart';
 import '../domain/study_curriculum.dart';
 import '../domain/study_plan.dart';
 import '../domain/study_question.dart';
+import '../domain/study_scoring.dart';
 
 final class StudyController extends ChangeNotifier {
   StudyController({
@@ -31,6 +33,7 @@ final class StudyController extends ChangeNotifier {
   bool _busy = false;
   bool _disposed = false;
   bool _uncertainCommit = false;
+  bool _answerTimingFinished = false;
   String? _error;
 
   StudyState get state => _state;
@@ -38,6 +41,8 @@ final class StudyController extends ChangeNotifier {
   bool get needsRetry => _uncertainCommit;
   String? get error => _error;
   List<AttemptEvent> get history => List.unmodifiable(_attempts);
+  CalibrationSummary get calibration =>
+      CalibrationSummary.fromEvents(_attempts.where(StudyScoring.supports));
   List<StudyProgress> get progress => curriculum.skills
       .map((s) => StudyProgress.forSkill(s.id, _attempts, _clock().toUtc()))
       .toList(growable: false);
@@ -114,30 +119,36 @@ final class StudyController extends ChangeNotifier {
     await _save(StudyState(goalId: goal));
   });
 
-  Future<void> start({bool diagnostic = false, String? exploreSkillId}) =>
-      _exclusive(() async {
-        if (_state.plan != null) return;
-        final now = _clock().toUtc();
-        final planner = StudyPlanner();
-        final plan = diagnostic
-            ? planner.diagnostic(_state.goalId)
-            : planner.plan(
-                _state.goalId,
-                _attempts,
-                now,
-                exploreSkillId: exploreSkillId,
-              );
-        await _save(
-          StudyState(
-            goalId: _state.goalId,
-            plan: plan,
-            sessionId: _idFactory(),
-            seed: now.microsecondsSinceEpoch & 0x7fffffff,
-          ),
-        );
-        _lastTick = now;
-        _running = true;
-      });
+  Future<void> start({
+    bool diagnostic = false,
+    String? exploreSkillId,
+    StudySessionKind session = StudySessionKind.standard,
+  }) => _exclusive(() async {
+    if (_state.plan != null) return;
+    final now = _clock().toUtc();
+    final planner = StudyPlanner();
+    final plan = diagnostic
+        ? planner.diagnostic(_state.goalId)
+        : planner.plan(
+            _state.goalId,
+            _attempts,
+            now,
+            exploreSkillId: exploreSkillId,
+          );
+    await _save(
+      StudyState(
+        goalId: _state.goalId,
+        plan: plan,
+        sessionId: _idFactory(),
+        seed: now.microsecondsSinceEpoch & 0x7fffffff,
+        sessionKind: session,
+        continuationBlocks: diagnostic ? 0 : session.additionalBlocks,
+        remainingMilliseconds: session.activeBudget.inMilliseconds,
+      ),
+    );
+    _lastTick = now;
+    _running = true;
+  });
 
   StudyState _timed() {
     final elapsed = _elapsed;
@@ -155,11 +166,34 @@ final class StudyController extends ChangeNotifier {
     await _repository.saveStudyState(_state.encode());
   });
 
+  Future<void> selectConfidence(ConfidenceRating? confidence) =>
+      _exclusive(() async {
+        if (question == null ||
+            _state.hintCount > 0 ||
+            _state.phase == StudyPhase.correction ||
+            _uncertainCommit) {
+          return;
+        }
+        await _save(
+          _timed().copyWith(
+            confidence: confidence,
+            clearConfidence: confidence == null,
+          ),
+        );
+      });
+
   Future<void> checkpoint() => _enqueue(() async {
     if (_state.plan != null && _running && !_uncertainCommit) {
       await _save(_timed());
     }
   }, clearError: false);
+
+  Future<void> finishAnswerTiming() => _exclusive(() async {
+    if (question == null || _uncertainCommit) return;
+    await _save(_timed());
+    _answerTimingFinished = true;
+    _running = false;
+  });
 
   Future<void> pause() => _enqueue(() async {
     if (_state.plan != null) {
@@ -173,7 +207,10 @@ final class StudyController extends ChangeNotifier {
 
   Future<void> resume() => _enqueue(() async {
     _lastTick = _clock().toUtc();
-    _running = _state.plan != null && !_state.needsGeneratorChoice;
+    _running =
+        _state.plan != null &&
+        !_state.needsGeneratorChoice &&
+        !_answerTimingFinished;
   });
 
   Future<void> continueStep() => _exclusive(() async {
@@ -184,14 +221,125 @@ final class StudyController extends ChangeNotifier {
     }
     _timed();
     if (_state.step!.kind == StudyStepKind.reflection) {
-      await _save(StudyState(goalId: _state.goalId));
-      _running = false;
+      if (_state.continuationBlocks > 0) {
+        final now = _clock().toUtc();
+        final plan = StudyPlanner().plan(
+          _state.goalId,
+          _attempts,
+          now,
+          exploreSkillId: _state.step!.skillId,
+        );
+        await _save(
+          StudyState(
+            generator: _state.generator,
+            goalId: _state.goalId,
+            plan: plan,
+            sessionId: _state.sessionId,
+            seed: _state.seed + 1,
+            questionIndex: _state.questionIndex + 1,
+            serial: _state.serial,
+            sessionKind: _state.sessionKind,
+            continuationBlocks: _state.continuationBlocks - 1,
+            remainingMilliseconds:
+                _state.sessionKind.activeBudget.inMilliseconds,
+          ),
+        );
+        _lastTick = now;
+      } else {
+        await _save(StudyState(goalId: _state.goalId));
+        _running = false;
+      }
     } else {
       await _save(_advance(_state));
     }
   });
 
-  Future<void> submit() => _exclusive(() async {
+  Future<void> complete(StudyCompletionChoice choice) => _exclusive(() async {
+    if (_state.plan == null ||
+        _state.needsGeneratorChoice ||
+        _state.step?.kind != StudyStepKind.reflection) {
+      return;
+    }
+    final before = _timed();
+    if (before.plan!.isDiagnostic && choice != StudyCompletionChoice.stop) {
+      return;
+    }
+    if (choice == StudyCompletionChoice.stop) {
+      await _save(StudyState(goalId: before.goalId));
+      _running = false;
+      return;
+    }
+
+    final now = _clock().toUtc();
+    final focus = before.step!.skillId;
+    late final String goal;
+    late final StudyPlan plan;
+    switch (choice) {
+      case StudyCompletionChoice.stop:
+        throw StateError('handled above');
+      case StudyCompletionChoice.repeat:
+        goal = before.goalId;
+        final fresh = StudyPlanner().plan(
+          goal,
+          _attempts,
+          now,
+          exploreSkillId: focus,
+        );
+        plan = StudyPlan(
+          reason: 'Repeat the completed focus with fresh questions.',
+          steps: fresh.steps,
+        );
+        break;
+      case StudyCompletionChoice.continueTopic:
+        goal = before.goalId;
+        plan = StudyPlanner().plan(goal, _attempts, now, exploreSkillId: focus);
+        break;
+      case StudyCompletionChoice.review:
+        goal = before.goalId;
+        final review = StudyPlanner().review(goal, _attempts, now);
+        if (review == null) {
+          _error = 'No review is due or approaching yet.';
+          return;
+        }
+        plan = review;
+        break;
+      case StudyCompletionChoice.challenge:
+        goal = 'applications';
+        plan = StudyPlanner().plan(
+          goal,
+          _attempts,
+          now,
+          exploreSkillId: 'application.mixed',
+        );
+        break;
+    }
+    final continueChain =
+        choice == StudyCompletionChoice.continueTopic &&
+        before.sessionKind == StudySessionKind.chained &&
+        before.continuationBlocks > 0;
+    final sessionKind = continueChain
+        ? StudySessionKind.chained
+        : StudySessionKind.standard;
+    await _save(
+      StudyState(
+        generator: before.generator,
+        goalId: goal,
+        plan: plan,
+        sessionId: continueChain ? before.sessionId : _idFactory(),
+        seed: continueChain
+            ? before.seed + 1
+            : now.microsecondsSinceEpoch & 0x7fffffff,
+        sessionKind: sessionKind,
+        continuationBlocks: continueChain ? before.continuationBlocks - 1 : 0,
+        serial: continueChain ? before.serial : 0,
+        remainingMilliseconds: sessionKind.activeBudget.inMilliseconds,
+      ),
+    );
+    _lastTick = now;
+    _running = true;
+  });
+
+  Future<void> submit({SurpriseRating? surprise}) => _exclusive(() async {
     final q = question;
     if (q == null) return;
     final before = _timed();
@@ -201,6 +349,9 @@ final class StudyController extends ChangeNotifier {
       _error = isMultipleChoice
           ? 'Select one answer first.'
           : q.invalidInputMessage;
+      _lastTick = _clock().toUtc();
+      _answerTimingFinished = false;
+      _running = true;
       return;
     }
     final correct = mark.verdict == AnswerVerdict.correct;
@@ -227,11 +378,14 @@ final class StudyController extends ChangeNotifier {
           : q is ReasoningQuestion && !correct
           ? 'reasoning.${q.errorCategory}'
           : null,
+      confidence: assisted ? null : before.confidence,
+      surprise: assisted ? null : surprise,
     );
     var next = before.copyWith(
       draft: '',
       serial: before.serial + 1,
       responseMilliseconds: 0,
+      clearConfidence: true,
     );
     if (before.plan!.isDiagnostic) {
       next = _advance(next);
@@ -251,6 +405,9 @@ final class StudyController extends ChangeNotifier {
       next = _advance(next);
     }
     await _commit(event, next);
+    _lastTick = _clock().toUtc();
+    _answerTimingFinished = false;
+    _running = true;
   });
 
   Future<void> revealHint() => _exclusive(() async {
@@ -265,6 +422,7 @@ final class StudyController extends ChangeNotifier {
     final next = before.copyWith(
       hintCount: before.hintCount + 1,
       serial: before.serial + 1,
+      clearConfidence: true,
     );
     await _commit(
       AttemptEvent(
@@ -295,6 +453,7 @@ final class StudyController extends ChangeNotifier {
       hintCount: 0,
       clearRelated: true,
       responseMilliseconds: 0,
+      clearConfidence: true,
     );
   }
 

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/domain/attempt_event.dart';
 import 'package:remath/src/features/numbers/domain/study_plan.dart';
@@ -91,6 +93,17 @@ void main() {
     },
   );
 
+  test('fresh application plans pin the current scoring contract', () {
+    final plan = StudyPlanner().plan(
+      'applications',
+      [],
+      now,
+      exploreSkillId: 'application.mixed',
+    );
+
+    expect(plan.steps.map((step) => step.scoringVersion).toSet(), {2});
+  });
+
   test('the oldest due skill is reviewed before newer overdue work', () {
     final plan = StudyPlanner().plan('proportions', [
       answer(-3600, skill: 'arithmetic.addition', correct: false),
@@ -158,4 +171,46 @@ void main() {
       expect(() => StudyState.decode('{"version":999}'), throwsFormatException);
     },
   );
+
+  test('session kind and finite chain count survive serialization', () {
+    final state = StudyState(
+      sessionKind: StudySessionKind.chained,
+      continuationBlocks: 2,
+    );
+
+    final reopened = StudyState.decode(state.encode());
+
+    expect(reopened.sessionKind, StudySessionKind.chained);
+    expect(reopened.continuationBlocks, 2);
+    expect(
+      () => StudyState(continuationBlocks: -1).encode(),
+      throwsArgumentError,
+    );
+  });
+
+  test('bounded snapshots reject enlarged budgets and chains', () {
+    final drill =
+        jsonDecode(
+              StudyState(
+                sessionKind: StudySessionKind.drill,
+                remainingMilliseconds: const Duration(
+                  minutes: 2,
+                ).inMilliseconds,
+              ).encode(),
+            )
+            as Map<String, dynamic>;
+    drill['remaining'] = const Duration(minutes: 3).inMilliseconds;
+    expect(() => StudyState.decode(jsonEncode(drill)), throwsFormatException);
+
+    final chain =
+        jsonDecode(
+              StudyState(
+                sessionKind: StudySessionKind.chained,
+                continuationBlocks: 2,
+              ).encode(),
+            )
+            as Map<String, dynamic>;
+    chain['continuationBlocks'] = 3;
+    expect(() => StudyState.decode(jsonEncode(chain)), throwsFormatException);
+  });
 }

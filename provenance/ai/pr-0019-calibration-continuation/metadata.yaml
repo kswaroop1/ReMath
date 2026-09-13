@@ -1,0 +1,31 @@
+schema_version: 1
+pull_request: 19
+title: Add calibration and flexible session continuation
+human_owner: kswaroop1
+agents:
+  - product: OpenAI Codex
+    model: unknown
+started_at: 2026-09-12T08:26:10Z
+finalized_at: 2026-09-12T14:42:00Z
+scope: [code, tests, documentation]
+redactions: []
+ci_runs:
+  - 34683330874
+  - 34683560957
+  - 34683728069
+  - 34685132641
+  - 34685267991
+  - 34685385566
+  - 34685497577
+  - 34687614402
+  - 34687797810
+  - 34687923397
+  - 34688095449
+  - 34691538138
+  - 34691688323
+  - 34691863848
+  - 34694650100
+  - 34694924821
+  - 34695098705
+  - 34699752001
+  - 34699939848

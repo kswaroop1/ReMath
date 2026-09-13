@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../applications/domain/application_curriculum.dart';
 import '../../applications/presentation/application_answer_editor.dart';
 import '../../learning/domain/attempt_event.dart';
+import '../../learning/domain/numeric_answer_contract.dart';
 import '../../learning/domain/progress_repository.dart';
 import '../../reasoning/domain/reasoning_curriculum.dart';
 import '../../reasoning/presentation/reasoning_answer_editor.dart';
@@ -78,7 +79,46 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _submit() async {
-    await _controller.submit();
+    SurpriseRating? surprise;
+    final q = _controller.question;
+    if (_controller.state.confidence != null && q != null) {
+      final mark = q.mark(_controller.state.draft);
+      final offeredChoice =
+          !_controller.isMultipleChoice ||
+          q.choices.any((choice) => choice.value == _controller.state.draft);
+      if (mark.verdict != AnswerVerdict.invalid && offeredChoice && mounted) {
+        await _controller.finishAnswerTiming();
+        if (!mounted) return;
+        surprise = await showDialog<SurpriseRating>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            title: Text(
+              mark.verdict == AnswerVerdict.correct
+                  ? 'Correct — was that expected?'
+                  : 'Not correct — was that expected?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () =>
+                    Navigator.pop(context, SurpriseRating.unsurprising),
+                child: const Text('Not surprising'),
+              ),
+              TextButton(
+                onPressed: () =>
+                    Navigator.pop(context, SurpriseRating.surprising),
+                child: const Text('Surprising'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Skip'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+    await _controller.submit(surprise: surprise);
     if (mounted &&
         _controller.question != null &&
         !_controller.isMultipleChoice) {
@@ -164,6 +204,19 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
             },
       child: const Text('Plan my next chunk'),
     ),
+    OutlinedButton(
+      onPressed: _controller.busy
+          ? null
+          : () => unawaited(_controller.start(session: StudySessionKind.drill)),
+      child: const Text('Two-minute drill'),
+    ),
+    OutlinedButton(
+      onPressed: _controller.busy
+          ? null
+          : () =>
+                unawaited(_controller.start(session: StudySessionKind.chained)),
+      child: const Text('Chained study block'),
+    ),
     TextButton(
       onPressed: _controller.busy
           ? null
@@ -181,6 +234,25 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
       'Independent fluency and delayed retention are assessed separately. '
       'You can explore any skill.',
     ),
+    if (_controller.calibration.ratedAttempts > 0 ||
+        _controller.calibration.surpriseRatedAttempts > 0) ...[
+      const SizedBox(height: 12),
+      Text(
+        'Confidence calibration',
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
+      Text(
+        '${_controller.calibration.calibrated} calibrated · '
+        '${_controller.calibration.overconfident} overconfident · '
+        '${_controller.calibration.underconfident} underconfident',
+      ),
+      Text(
+        'Calibration score '
+        '${(_controller.calibration.score * 100).round()}% · '
+        '${_controller.calibration.surprisingResults} of '
+        '${_controller.calibration.surpriseRatedAttempts} results surprising',
+      ),
+    ],
     for (final progress in _controller.progress) _skillTile(progress),
   ];
 
@@ -384,14 +456,28 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
           'Which method helped? What would you try differently next time? '
           'Review your progress before choosing another chunk.',
         ),
-        FilledButton(
-          onPressed: _controller.busy
-              ? null
-              : () {
-                  unawaited(_controller.continueStep());
-                },
-          child: const Text('Finish session'),
-        ),
+        for (final choice in [
+          (StudyCompletionChoice.stop, 'Stop for now'),
+          if (!plan.isDiagnostic) ...[
+            (StudyCompletionChoice.repeat, 'Repeat this focus'),
+            (StudyCompletionChoice.continueTopic, 'Continue this topic'),
+            (StudyCompletionChoice.review, 'Review what’s due'),
+            (StudyCompletionChoice.challenge, 'Mixed challenge'),
+          ],
+        ])
+          choice.$1 == StudyCompletionChoice.stop
+              ? FilledButton(
+                  onPressed: _controller.busy
+                      ? null
+                      : () => unawaited(_controller.complete(choice.$1)),
+                  child: Text(choice.$2),
+                )
+              : OutlinedButton(
+                  onPressed: _controller.busy
+                      ? null
+                      : () => unawaited(_controller.complete(choice.$1)),
+                  child: Text(choice.$2),
+                ),
       ] else if (q != null) ...[
         if (state.phase == StudyPhase.correction)
           const Text('Correct this answer')
@@ -403,6 +489,29 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
         Text(q.prompt, style: Theme.of(context).textTheme.headlineSmall),
         if (q.inputGuidance != null) Text(q.inputGuidance!),
         const SizedBox(height: 12),
+        if (state.phase != StudyPhase.correction && state.hintCount == 0) ...[
+          const Text('Optional confidence'),
+          Wrap(
+            spacing: 8,
+            children: [
+              for (final rating in ConfidenceRating.values)
+                ChoiceChip(
+                  label: Text(
+                    '${rating.name[0].toUpperCase()}${rating.name.substring(1)}',
+                  ),
+                  selected: state.confidence == rating,
+                  onSelected: _controller.busy || _controller.needsRetry
+                      ? null
+                      : (selected) => unawaited(
+                          _controller.selectConfidence(
+                            selected ? rating : null,
+                          ),
+                        ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+        ],
         if (q is ReasoningQuestion && state.phase == StudyPhase.correction) ...[
           for (final event
               in _controller.history
