@@ -298,3 +298,8 @@ to the durably locked answer. The isolated fix derives feedback only after the
 controller finishes and persists the lock. Green run 34790517522 passed the
 full suite. The provenance record was then moved to the required PR20 path and
 updated through the latest review response, diagnosis, corrections and builds.
+
+Records verification run 34790708909 passed after the move to the PR20 path,
+with formatting, analysis, content validation, 281 native tests, seven Chrome
+tests, coverage enforcement and secret scanning green. Record that verified
+head before requesting independent re-review.
