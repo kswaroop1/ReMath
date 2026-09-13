@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../../learning/domain/attempt_event.dart';
+import '../../learning/domain/numeric_answer_contract.dart';
 import '../../learning/domain/retained_mastery.dart';
 import 'study_curriculum.dart';
 import 'study_scoring.dart';
@@ -479,6 +480,31 @@ final class StudyState {
           step.level > 2 ||
           !curriculum.skills.any((skill) => skill.id == step.skillId)) {
         throw const FormatException('Invalid saved skill or difficulty');
+      }
+    }
+    if (state.awaitingSurprise) {
+      final step = state.step!;
+      final independentlyAnswerable =
+          (step.kind == StudyStepKind.retrieval ||
+              step.kind == StudyStepKind.practice) &&
+          state.phase != StudyPhase.correction &&
+          state.hintCount == 0;
+      final question = curriculum.question(
+        step.skillId,
+        step.level,
+        state.seed,
+        state.questionIndex,
+        templateVersion: step.templateVersion,
+        legacyBrowser: state.generator == 'legacy-browser',
+        markingVersion: step.markingVersion,
+        scoringVersion: step.scoringVersion,
+      );
+      final validDraft =
+          question.mark(state.draft).verdict != AnswerVerdict.invalid &&
+          (!step.multipleChoice ||
+              question.choices.any((choice) => choice.value == state.draft));
+      if (!independentlyAnswerable || !validDraft) {
+        throw const FormatException('Invalid persisted feedback lock');
       }
     }
     return state;
