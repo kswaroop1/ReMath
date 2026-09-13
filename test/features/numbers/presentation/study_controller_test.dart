@@ -355,6 +355,46 @@ void main() {
     expect(learner.state.plan!.isDiagnostic, isTrue);
   });
 
+  test('repeating a legacy application plan uses current scoring', () async {
+    final legacy = StudyPlan(
+      reason: 'Legacy application session.',
+      steps: const [
+        StudyStep(
+          StudyStepKind.practice,
+          'application.mixed',
+          0,
+          scoringVersion: 1,
+        ),
+        StudyStep(
+          StudyStepKind.reflection,
+          'application.mixed',
+          0,
+          scoringVersion: 1,
+        ),
+      ],
+    );
+    await repository.saveStudyState(
+      StudyState(
+        goalId: 'applications',
+        plan: legacy,
+        sessionId: 'legacy',
+        stepIndex: 1,
+      ).encode(),
+    );
+    final learner = StudyController(repository: repository, clock: () => now);
+    addTearDown(learner.dispose);
+    await learner.initialise();
+
+    await learner.complete(StudyCompletionChoice.repeat);
+
+    expect(
+      learner.state.plan!.steps
+          .where((step) => step.kind != StudyStepKind.reflection)
+          .every((step) => step.scoringVersion == 2),
+      isTrue,
+    );
+  });
+
   test('review completion selects an approaching review', () async {
     await repository.recordAttempt(
       AttemptEvent(

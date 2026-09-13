@@ -211,3 +211,8 @@ Assisted-calibration red run 34754544634 failed because both repositories
 accepted the invalid events. Validate the event at every persistence entry
 point, before duplicate handling or a SQLite transaction, so hints and
 corrections can never persist confidence or surprise evidence.
+
+Assisted-calibration green run 34757586514 passed the full suite. Begin the
+legacy-repeat cycle: completing and repeating an imported application plan
+whose questions use scoring version one must generate fresh questions under
+the current version-two fluency contract, rather than copying the frozen plan.
