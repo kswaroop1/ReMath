@@ -255,6 +255,9 @@ final class StudyController extends ChangeNotifier {
       return;
     }
     final before = _timed();
+    if (before.plan!.isDiagnostic && choice != StudyCompletionChoice.stop) {
+      return;
+    }
     if (choice == StudyCompletionChoice.stop) {
       await _save(StudyState(goalId: before.goalId));
       _running = false;

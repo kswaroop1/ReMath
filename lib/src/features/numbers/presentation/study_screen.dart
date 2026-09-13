@@ -458,10 +458,12 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
         ),
         for (final choice in [
           (StudyCompletionChoice.stop, 'Stop for now'),
-          (StudyCompletionChoice.repeat, 'Repeat this focus'),
-          (StudyCompletionChoice.continueTopic, 'Continue this topic'),
-          (StudyCompletionChoice.review, 'Review what’s due'),
-          (StudyCompletionChoice.challenge, 'Mixed challenge'),
+          if (!plan.isDiagnostic) ...[
+            (StudyCompletionChoice.repeat, 'Repeat this focus'),
+            (StudyCompletionChoice.continueTopic, 'Continue this topic'),
+            (StudyCompletionChoice.review, 'Review what’s due'),
+            (StudyCompletionChoice.challenge, 'Mixed challenge'),
+          ],
         ])
           choice.$1 == StudyCompletionChoice.stop
               ? FilledButton(

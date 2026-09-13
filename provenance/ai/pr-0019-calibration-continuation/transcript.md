@@ -162,3 +162,7 @@ session kind's maximum budget and finite chain count during encode and decode.
 Focused bounded-import green run 34743584553 passed the full CI suite. Select
 the next independent review boundary: a completed diagnostic must not expose or
 accept ordinary practice continuation routes; only stopping is valid.
+
+Focused diagnostic-completion red run 34743901000 failed because Repeat changed
+the completed diagnostic into ordinary practice. Reject every non-stop choice
+in the controller and omit those invalid controls from the diagnostic UI.
