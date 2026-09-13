@@ -175,3 +175,10 @@ Focused approaching-review red run 34746131046 failed because Review what’s du
 created a generic weakest-skill plan rather than selecting the approaching
 addition review. Add an explicit review planner that considers overdue and
 next-24-hour work, prioritising overdue items before approaching ones.
+
+Focused approaching-review green run 34746261899 passed the full CI suite and
+completes reconstruction of the five original findings as independent cycles.
+Begin the later edge-case cycles with lifecycle-safe surprise timing: extend the existing
+timing regression through pause/resume before the learner records surprise.
+Current resume behavior restarts the answer clock, so this test precedes its
+production fix. Subsequent findings will receive separate cycles.

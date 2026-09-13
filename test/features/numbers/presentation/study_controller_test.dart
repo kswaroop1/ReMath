@@ -118,6 +118,8 @@ void main() {
     await controller.updateDraft(answer);
     now = now.add(const Duration(seconds: 19));
     await controller.finishAnswerTiming();
+    await controller.pause();
+    await controller.resume();
     now = now.add(const Duration(seconds: 30));
     await controller.submit(surprise: SurpriseRating.surprising);
 
