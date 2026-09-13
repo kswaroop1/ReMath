@@ -150,3 +150,7 @@ Focused answer-timing red run 34739664232 failed during analysis because the
 test deliberately named the absent timing-freeze seam. Persist the elapsed
 answer time before showing surprise feedback, pause active timing during the
 dialog, and restart timing only after submission or invalid-input recovery.
+
+Focused answer-timing green run 34739788497 passed the full CI suite. Select the
+next independent review boundary: imported bounded-session snapshots must not
+claim more active time or chained blocks than their advertised session kind.

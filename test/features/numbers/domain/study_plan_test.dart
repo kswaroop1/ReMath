@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/domain/attempt_event.dart';
 import 'package:remath/src/features/numbers/domain/study_plan.dart';
@@ -184,5 +186,24 @@ void main() {
       () => StudyState(continuationBlocks: -1).encode(),
       throwsArgumentError,
     );
+  });
+
+  test('bounded snapshots reject enlarged budgets and chains', () {
+    final drill =
+        jsonDecode(StudyState(sessionKind: StudySessionKind.drill).encode())
+            as Map<String, dynamic>;
+    drill['remaining'] = const Duration(minutes: 3).inMilliseconds;
+    expect(() => StudyState.decode(jsonEncode(drill)), throwsFormatException);
+
+    final chain =
+        jsonDecode(
+              StudyState(
+                sessionKind: StudySessionKind.chained,
+                continuationBlocks: 2,
+              ).encode(),
+            )
+            as Map<String, dynamic>;
+    chain['continuationBlocks'] = 3;
+    expect(() => StudyState.decode(jsonEncode(chain)), throwsFormatException);
   });
 }
