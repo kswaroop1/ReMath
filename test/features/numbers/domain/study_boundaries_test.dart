@@ -108,6 +108,44 @@ void main() {
       );
     },
   );
+
+  test('persisted feedback locks require valid independent answer evidence', () {
+    final answerable = StudyState(
+      confidence: ConfidenceRating.high,
+      awaitingSurprise: true,
+      plan: StudyPlan(
+        reason: 'Restore feedback',
+        steps: const [
+          StudyStep(StudyStepKind.practice, 'arithmetic.addition', 0),
+        ],
+      ),
+      seed: 7,
+      draft: NumberCurriculum().question(
+        'arithmetic.addition',
+        0,
+        7,
+        0,
+      ).answer,
+    );
+    expect(StudyState.decode(answerable.encode()).awaitingSurprise, isTrue);
+
+    for (final invalid in <StudyState>[
+      answerable.copyWith(
+        plan: StudyPlan(
+          reason: 'Not independently answerable',
+          steps: const [
+            StudyStep(StudyStepKind.reflection, 'arithmetic.addition', 0),
+          ],
+        ),
+      ),
+      answerable.copyWith(draft: ''),
+      answerable.copyWith(hintCount: 1),
+      answerable.copyWith(phase: StudyPhase.correction),
+    ]) {
+      expect(() => StudyState.decode(invalid.encode()), throwsFormatException);
+    }
+  });
+
   test('all generated prompts agree with independently calculated answers', () {
     final curriculum = NumberCurriculum();
     for (final skill in curriculum.skills) {
