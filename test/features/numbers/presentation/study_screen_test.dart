@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/app.dart';
 import 'package:remath/src/features/learning/data/in_memory_progress_repository.dart';
 import 'package:remath/src/features/learning/domain/attempt_event.dart';
+import 'package:remath/src/features/learning/domain/learning_session.dart';
+import 'package:remath/src/features/learning/domain/progress_repository.dart';
 import 'package:remath/src/features/numbers/domain/number_curriculum.dart';
 import 'package:remath/src/features/numbers/domain/study_plan.dart';
 import 'package:remath/src/features/numbers/presentation/study_screen.dart';
@@ -179,6 +183,48 @@ void main() {
     },
   );
 
+  testWidgets('feedback verdict comes from the durably locked answer', (
+    tester,
+  ) async {
+    final inner = InMemoryProgressRepository();
+    final repository = _DelayedStudySave(inner);
+    final plan = StudyPlan(
+      reason: 'Lock feedback',
+      steps: const [
+        StudyStep(StudyStepKind.practice, 'number.fractions', 0),
+        StudyStep(StudyStepKind.reflection, 'number.fractions', 0),
+      ],
+    );
+    await repository.saveStudyState(
+      StudyState(
+        goalId: 'proportions',
+        plan: plan,
+        sessionId: 'locked-verdict',
+        seed: 7,
+      ).encode(),
+    );
+    await tester.pumpWidget(
+      MaterialApp(home: StudyScreen(repository: repository)),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('High'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '999/1');
+    await tester.pumpAndSettle();
+
+    repository.delayNextSave();
+    final answer = NumberCurriculum()
+        .question('number.fractions', 0, 7, 0)
+        .answer;
+    await tester.enterText(find.byType(TextField), answer);
+    await tester.tap(find.text('Submit'));
+    repository.releaseSave();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Correct — was that expected?'), findsOneWidget);
+    expect(find.text('Not correct — was that expected?'), findsNothing);
+  });
+
   testWidgets(
     'MCQ selection survives reopening and is recorded as choice evidence',
     (tester) async {
@@ -252,4 +298,43 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Your skills and progress'), findsOneWidget);
   });
+}
+
+final class _DelayedStudySave implements ProgressRepository {
+  _DelayedStudySave(this._inner);
+
+  final InMemoryProgressRepository _inner;
+  Completer<void>? _saveGate;
+
+  void delayNextSave() => _saveGate = Completer<void>();
+  void releaseSave() => _saveGate!.complete();
+
+  @override
+  Future<void> saveStudyState(String state) async {
+    final gate = _saveGate;
+    if (gate != null && !gate.isCompleted) {
+      await gate.future;
+      _saveGate = null;
+    }
+    await _inner.saveStudyState(state);
+  }
+
+  @override
+  Future<bool> commitStudyAttempt(AttemptEvent event, String state) =>
+      _inner.commitStudyAttempt(event, state);
+  @override
+  Future<void> close() => _inner.close();
+  @override
+  Future<void> completeSession(String id) => _inner.completeSession(id);
+  @override
+  Future<List<AttemptEvent>> loadAttempts() => _inner.loadAttempts();
+  @override
+  Future<LearningSession?> loadSession() => _inner.loadSession();
+  @override
+  Future<String?> loadStudyState() => _inner.loadStudyState();
+  @override
+  Future<bool> recordAttempt(AttemptEvent event) => _inner.recordAttempt(event);
+  @override
+  Future<void> saveSession(LearningSession session) =>
+      _inner.saveSession(session);
 }
