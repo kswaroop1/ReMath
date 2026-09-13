@@ -216,3 +216,8 @@ Assisted-calibration green run 34757586514 passed the full suite. Begin the
 legacy-repeat cycle: completing and repeating an imported application plan
 whose questions use scoring version one must generate fresh questions under
 the current version-two fluency contract, rather than copying the frozen plan.
+
+Legacy-repeat red run 34757740286 failed because repeat retained scoring
+version one. Re-plan the completed focus through the current curriculum and
+then retain only the repeat-facing reason, so template and scoring contracts
+advance while the learner receives a fresh bounded session.
