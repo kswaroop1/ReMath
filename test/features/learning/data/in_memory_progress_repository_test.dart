@@ -42,6 +42,30 @@ void main() {
     expect(() => loaded.add(attempt('event-3')), throwsUnsupportedError);
   });
 
+  test('rejects calibration metadata on assisted events', () async {
+    final repository = InMemoryProgressRepository();
+    final assisted = AttemptEvent(
+      answer: '4',
+      eventId: 'assisted',
+      isCorrect: true,
+      kind: AttemptKind.hint,
+      occurredAt: DateTime.utc(2026, 8, 27),
+      questionId: 'question-assisted',
+      responseTime: const Duration(seconds: 3),
+      sessionId: 'session',
+      skillId: 'arithmetic.addition',
+      confidence: ConfidenceRating.high,
+      surprise: SurpriseRating.surprising,
+    );
+
+    await expectLater(repository.recordAttempt(assisted), throwsArgumentError);
+    await expectLater(
+      repository.commitStudyAttempt(assisted, 'next'),
+      throwsArgumentError,
+    );
+    expect(await repository.loadAttempts(), isEmpty);
+  });
+
   test('only completing the active session clears resumable work', () async {
     final repository = InMemoryProgressRepository();
     await repository.saveSession(session('active'));
