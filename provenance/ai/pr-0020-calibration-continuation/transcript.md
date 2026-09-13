@@ -271,3 +271,30 @@ were rejected, with 279 native tests, seven Chrome tests, formatting, static
 analysis, content validation, coverage enforcement and secret scanning green.
 The replacement history now contains focused red/green evidence for every
 review correction while preserving the verified product behavior.
+
+PR20 supersedes PR19 because the first PR's early review fixes were batched in
+a way that did not provide the required focused red/green history. PR20 began
+from the implementation-complete pre-review head and reconstructed every fix as
+an independent cycle. Final pre-review run 34771205534 passed before requesting
+an independent review of commit 55085c6f7c.
+
+That review identified four blockers. Two concerned this record: it still used
+the PR19 path and omitted run 34771205534. Two were behavioral: imported version
+six feedback locks accepted invalid or assisted states, and the feedback dialog
+could derive its verdict from a stale draft while a later edit waited behind a
+queued save.
+
+Feedback-lock red run 34777907265 failed on corrupt restored locks. The initial
+green implementation passed all tests in run 34778237779 but failed formatting.
+Runs 34781889922 and 34783889288 documented two formatter corrections before
+run 34784080373 passed the complete suite. Restored locks now require a valid,
+offered draft on an independently answerable step with no assistance.
+
+The first stale-verdict characterization in run 34787855011 passed because it
+delayed the final save after the controller had already accepted the draft. The
+corrected test queued the final edit behind an earlier blocked save; red run
+34790047762 then failed because the dialog did not show the verdict belonging
+to the durably locked answer. The isolated fix derives feedback only after the
+controller finishes and persists the lock. Green run 34790517522 passed the
+full suite. The provenance record was then moved to the required PR20 path and
+updated through the latest review response, diagnosis, corrections and builds.
