@@ -127,3 +127,8 @@ line coverage. The accepted Solve, Explain, Apply, and Calibrate/continue
 programme is implementation-complete; update the durable feature register and
 roadmap before requesting independent review. No release, merge, or VERSION
 change is included.
+
+Independent review of the completed programme found five separate behavioral
+boundaries. Rebuild their proof as focused cycles, beginning with chained
+continuation: a new bounded block retaining its session ID must also retain the
+monotonic event serial so immutable attempt IDs cannot collide.

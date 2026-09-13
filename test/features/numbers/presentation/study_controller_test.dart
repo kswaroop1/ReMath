@@ -91,6 +91,7 @@ void main() {
         sessionKind: StudySessionKind.chained,
         continuationBlocks: 2,
         remainingMilliseconds: 1,
+        serial: 3,
       ).encode(),
     );
     controller = StudyController(
@@ -107,6 +108,7 @@ void main() {
     expect(controller.state.sessionId, 'chain');
     expect(controller.state.sessionKind, StudySessionKind.chained);
     expect(controller.state.continuationBlocks, 1);
+    expect(controller.state.serial, 3);
     expect(controller.remaining, const Duration(minutes: 15));
   });
 
