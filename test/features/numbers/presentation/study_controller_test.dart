@@ -159,6 +159,21 @@ void main() {
     expect(event.responseTime, const Duration(seconds: 19));
   });
 
+  test('failed pending-feedback save never authorizes feedback', () async {
+    final faulty = _SaveFailure();
+    final learner = StudyController(repository: faulty, clock: () => now);
+    addTearDown(learner.dispose);
+    await learner.initialise();
+    await learner.start();
+    await learner.selectConfidence(ConfidenceRating.high);
+    await learner.updateDraft(learner.question!.answer);
+    faulty.failNextSave = true;
+
+    expect(await learner.finishAnswerTiming(), isFalse);
+    expect(learner.state.awaitingSurprise, isFalse);
+    expect(learner.error, isNotNull);
+  });
+
   test(
     'wrong answer persists correction and a new same-skill retest',
     () async {
@@ -533,6 +548,39 @@ final class _AcknowledgementFailure implements ProgressRepository {
   Future<String?> loadStudyState() => _inner.loadStudyState();
   @override
   Future<void> saveStudyState(String state) => _inner.saveStudyState(state);
+  @override
+  Future<void> saveSession(LearningSession session) =>
+      _inner.saveSession(session);
+  @override
+  Future<bool> recordAttempt(AttemptEvent event) => _inner.recordAttempt(event);
+}
+
+final class _SaveFailure implements ProgressRepository {
+  final _inner = InMemoryProgressRepository();
+  bool failNextSave = false;
+
+  @override
+  Future<void> saveStudyState(String state) async {
+    if (failNextSave) {
+      failNextSave = false;
+      throw StateError('Save failed');
+    }
+    await _inner.saveStudyState(state);
+  }
+
+  @override
+  Future<bool> commitStudyAttempt(AttemptEvent event, String state) =>
+      _inner.commitStudyAttempt(event, state);
+  @override
+  Future<void> close() => _inner.close();
+  @override
+  Future<void> completeSession(String id) => _inner.completeSession(id);
+  @override
+  Future<List<AttemptEvent>> loadAttempts() => _inner.loadAttempts();
+  @override
+  Future<LearningSession?> loadSession() => _inner.loadSession();
+  @override
+  Future<String?> loadStudyState() => _inner.loadStudyState();
   @override
   Future<void> saveSession(LearningSession session) =>
       _inner.saveSession(session);

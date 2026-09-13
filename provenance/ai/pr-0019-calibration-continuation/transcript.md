@@ -238,3 +238,10 @@ The first locked-feedback green run, 34761436954, showed that the existing
 public timing seam is also used without confidence, where no feedback dialog
 or durable lock is needed. Preserve its transient timing freeze while only
 persisting `awaitingSurprise` for opted-in confidence feedback.
+Locked-feedback corrected green run 34761616626 passed formatting, static
+analysis, content validation, 277 native tests, seven Chrome tests, coverage
+enforcement and secret scanning.
+
+Begin the feedback-authorization cycle: the UI must not show verdict feedback
+when saving the pending lock fails. Failed persistence must return false and
+leave feedback unauthorized.
