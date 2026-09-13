@@ -311,6 +311,25 @@ void main() {
     },
   );
 
+  test('diagnostic completion only permits stopping', () async {
+    final plan = StudyPlanner().diagnostic('number-fluency');
+    await repository.saveStudyState(
+      StudyState(
+        plan: plan,
+        sessionId: 'diagnostic',
+        stepIndex: plan.steps.length - 1,
+      ).encode(),
+    );
+    final learner = StudyController(repository: repository, clock: () => now);
+    addTearDown(learner.dispose);
+    await learner.initialise();
+
+    await learner.complete(StudyCompletionChoice.repeat);
+
+    expect(learner.state.sessionId, 'diagnostic');
+    expect(learner.state.plan!.isDiagnostic, isTrue);
+  });
+
   test(
     'time expiry leads to reflection and never discards an answer',
     () async {

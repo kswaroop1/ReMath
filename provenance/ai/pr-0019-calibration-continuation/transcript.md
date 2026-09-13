@@ -158,3 +158,7 @@ claim more active time or chained blocks than their advertised session kind.
 Focused bounded-import red run 34743442817 failed both new assertions: enlarged
 drill time and excessive chained blocks decoded successfully. Enforce each
 session kind's maximum budget and finite chain count during encode and decode.
+
+Focused bounded-import green run 34743584553 passed the full CI suite. Select
+the next independent review boundary: a completed diagnostic must not expose or
+accept ordinary practice continuation routes; only stopping is valid.
