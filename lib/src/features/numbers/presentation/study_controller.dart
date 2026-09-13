@@ -193,19 +193,27 @@ final class StudyController extends ChangeNotifier {
     }
   }, clearError: false);
 
-  Future<void> finishAnswerTiming() => _exclusive(() async {
-    if (question == null || _uncertainCommit) return;
-    if (_state.awaitingSurprise) return;
-    final before = _timed();
-    final mark = question!.mark(before.draft);
-    final offeredChoice =
-        !isMultipleChoice ||
-        question!.choices.any((choice) => choice.value == before.draft);
-    if (mark.verdict == AnswerVerdict.invalid || !offeredChoice) return;
-    await _save(before.copyWith(awaitingSurprise: before.confidence != null));
-    _answerTimingFinished = true;
-    _running = false;
-  });
+  Future<bool> finishAnswerTiming() async {
+    var authorized = false;
+    await _exclusive(() async {
+      if (question == null || _uncertainCommit) return;
+      if (_state.awaitingSurprise) {
+        authorized = true;
+        return;
+      }
+      final before = _timed();
+      final mark = question!.mark(before.draft);
+      final offeredChoice =
+          !isMultipleChoice ||
+          question!.choices.any((choice) => choice.value == before.draft);
+      if (mark.verdict == AnswerVerdict.invalid || !offeredChoice) return;
+      await _save(before.copyWith(awaitingSurprise: before.confidence != null));
+      _answerTimingFinished = true;
+      _running = false;
+      authorized = true;
+    });
+    return authorized;
+  }
 
   Future<void> pause() => _enqueue(() async {
     if (_state.plan != null) {

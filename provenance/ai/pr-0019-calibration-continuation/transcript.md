@@ -245,3 +245,8 @@ enforcement and secret scanning.
 Begin the feedback-authorization cycle: the UI must not show verdict feedback
 when saving the pending lock fails. Failed persistence must return false and
 leave feedback unauthorized.
+
+Feedback-authorization red run 34761795332 failed at the intended return-value
+boundary. Make timing finalization explicitly report success only after the
+durable pending state saves, and have the UI return without revealing or
+submitting whenever authorization fails.
