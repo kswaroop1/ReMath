@@ -10,6 +10,7 @@ import '../../reasoning/domain/reasoning_curriculum.dart';
 import '../domain/study_curriculum.dart';
 import '../domain/study_plan.dart';
 import '../domain/study_question.dart';
+import '../domain/study_scoring.dart';
 
 final class StudyController extends ChangeNotifier {
   StudyController({
