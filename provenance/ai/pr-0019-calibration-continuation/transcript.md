@@ -166,3 +166,7 @@ accept ordinary practice continuation routes; only stopping is valid.
 Focused diagnostic-completion red run 34743901000 failed because Repeat changed
 the completed diagnostic into ordinary practice. Reject every non-stop choice
 in the controller and omit those invalid controls from the diagnostic UI.
+
+Focused diagnostic-completion green run 34744027591 passed the full CI suite.
+Select the final original review boundary independently: Review what’s due must
+include work approaching within 24 hours, while overdue work remains first.

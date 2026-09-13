@@ -330,6 +330,37 @@ void main() {
     expect(learner.state.plan!.isDiagnostic, isTrue);
   });
 
+  test('review completion selects an approaching review', () async {
+    await repository.recordAttempt(
+      AttemptEvent(
+        answer: '1',
+        eventId: 'approaching',
+        isCorrect: true,
+        occurredAt: now,
+        questionId: 'numbers.arithmetic.addition.level0.v1.mark1.score1.1',
+        responseTime: const Duration(seconds: 2),
+        sessionId: 'old',
+        skillId: 'arithmetic.addition',
+      ),
+    );
+    final plan = StudyPlanner().plan('number-fluency', [], now);
+    await repository.saveStudyState(
+      StudyState(
+        plan: plan,
+        sessionId: 'completed',
+        stepIndex: plan.steps.length - 1,
+      ).encode(),
+    );
+    final learner = StudyController(repository: repository, clock: () => now);
+    addTearDown(learner.dispose);
+    await learner.initialise();
+
+    await learner.complete(StudyCompletionChoice.review);
+
+    expect(learner.state.plan!.reason, contains('approaching'));
+    expect(learner.state.plan!.steps.first.skillId, 'arithmetic.addition');
+  });
+
   test(
     'time expiry leads to reflection and never discards an answer',
     () async {
