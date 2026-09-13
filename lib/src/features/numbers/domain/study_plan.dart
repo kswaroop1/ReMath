@@ -356,6 +356,7 @@ final class StudyState {
     this.goalId = 'number-fluency',
     this.generator = 'portable',
     this.confidence,
+    this.awaitingSurprise = false,
     this.sessionKind = StudySessionKind.standard,
     this.continuationBlocks = 0,
     this.plan,
@@ -374,7 +375,7 @@ final class StudyState {
   factory StudyState.decode(String source) {
     final json = jsonDecode(source) as Map<String, dynamic>;
     final version = json['version'] as int;
-    if (version < 1 || version > 5) {
+    if (version < 1 || version > 6) {
       throw const FormatException('Unsupported study state');
     }
     if (version != 1 && json['plan'] != null) {
@@ -418,6 +419,7 @@ final class StudyState {
       throw const FormatException('Missing generator for a current session');
     }
     final state = StudyState(
+      awaitingSurprise: version >= 6 ? json['awaitingSurprise'] as bool : false,
       confidence: version >= 4 && json['confidence'] != null
           ? ConfidenceRating.values.byName(json['confidence'] as String)
           : null,
@@ -453,6 +455,8 @@ final class StudyState {
             state.continuationBlocks != 0) ||
         state.serial < 0 ||
         state.responseMilliseconds < 0 ||
+        (state.awaitingSurprise &&
+            (state.plan == null || state.confidence == null)) ||
         (state.plan != null && state.stepIndex >= state.plan!.steps.length)) {
       throw const FormatException('Invalid study state');
     }
@@ -482,6 +486,7 @@ final class StudyState {
   final String goalId;
   final String? generator;
   final ConfidenceRating? confidence;
+  final bool awaitingSurprise;
   final StudySessionKind sessionKind;
   final int continuationBlocks;
   bool get needsGeneratorChoice => generator == null;
@@ -502,6 +507,7 @@ final class StudyState {
   StudyState copyWith({
     String? generator,
     ConfidenceRating? confidence,
+    bool? awaitingSurprise,
     StudySessionKind? sessionKind,
     int? continuationBlocks,
     String? goalId,
@@ -522,6 +528,7 @@ final class StudyState {
   }) => StudyState(
     generator: generator ?? this.generator,
     confidence: clearConfidence ? null : confidence ?? this.confidence,
+    awaitingSurprise: awaitingSurprise ?? this.awaitingSurprise,
     sessionKind: sessionKind ?? this.sessionKind,
     continuationBlocks: continuationBlocks ?? this.continuationBlocks,
     goalId: goalId ?? this.goalId,
@@ -543,7 +550,8 @@ final class StudyState {
     if (continuationBlocks < 0 ||
         continuationBlocks > sessionKind.additionalBlocks ||
         remainingMilliseconds > sessionKind.activeBudget.inMilliseconds ||
-        (sessionKind != StudySessionKind.chained && continuationBlocks != 0)) {
+        (sessionKind != StudySessionKind.chained && continuationBlocks != 0) ||
+        (awaitingSurprise && (plan == null || confidence == null))) {
       throw ArgumentError.value(
         continuationBlocks,
         'continuationBlocks',
@@ -551,9 +559,10 @@ final class StudyState {
       );
     }
     return jsonEncode({
-      'version': 5,
+      'version': 6,
       'generator': generator,
       'confidence': confidence?.name,
+      'awaitingSurprise': awaitingSurprise,
       'sessionKind': sessionKind.name,
       'continuationBlocks': continuationBlocks,
       'goal': goalId,

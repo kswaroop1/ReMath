@@ -89,7 +89,11 @@ final class StudyController extends ChangeNotifier {
     }
     _attempts = await _repository.loadAttempts();
     _lastTick = _clock().toUtc();
-    _running = _state.plan != null && !_state.needsGeneratorChoice;
+    _answerTimingFinished = _state.awaitingSurprise;
+    _running =
+        _state.plan != null &&
+        !_state.needsGeneratorChoice &&
+        !_state.awaitingSurprise;
     _notify();
   }
 
@@ -161,7 +165,7 @@ final class StudyController extends ChangeNotifier {
   }
 
   Future<void> updateDraft(String value) => _enqueue(() async {
-    if (question == null || _uncertainCommit) return;
+    if (question == null || _state.awaitingSurprise || _uncertainCommit) return;
     _state = _timed().copyWith(draft: value);
     await _repository.saveStudyState(_state.encode());
   });
@@ -169,6 +173,7 @@ final class StudyController extends ChangeNotifier {
   Future<void> selectConfidence(ConfidenceRating? confidence) =>
       _exclusive(() async {
         if (question == null ||
+            _state.awaitingSurprise ||
             _state.hintCount > 0 ||
             _state.phase == StudyPhase.correction ||
             _uncertainCommit) {
@@ -190,7 +195,14 @@ final class StudyController extends ChangeNotifier {
 
   Future<void> finishAnswerTiming() => _exclusive(() async {
     if (question == null || _uncertainCommit) return;
-    await _save(_timed());
+    if (_state.awaitingSurprise) return;
+    final before = _timed();
+    final mark = question!.mark(before.draft);
+    final offeredChoice =
+        !isMultipleChoice ||
+        question!.choices.any((choice) => choice.value == before.draft);
+    if (mark.verdict == AnswerVerdict.invalid || !offeredChoice) return;
+    await _save(before.copyWith(awaitingSurprise: true));
     _answerTimingFinished = true;
     _running = false;
   });
@@ -210,6 +222,7 @@ final class StudyController extends ChangeNotifier {
     _running =
         _state.plan != null &&
         !_state.needsGeneratorChoice &&
+        !_state.awaitingSurprise &&
         !_answerTimingFinished;
   });
 
@@ -382,6 +395,7 @@ final class StudyController extends ChangeNotifier {
       surprise: assisted ? null : surprise,
     );
     var next = before.copyWith(
+      awaitingSurprise: false,
       draft: '',
       serial: before.serial + 1,
       responseMilliseconds: 0,
@@ -413,6 +427,7 @@ final class StudyController extends ChangeNotifier {
   Future<void> revealHint() => _exclusive(() async {
     final q = question;
     if (q == null ||
+        _state.awaitingSurprise ||
         _state.plan!.isDiagnostic ||
         _state.hintCount >= 4 ||
         _uncertainCommit) {
