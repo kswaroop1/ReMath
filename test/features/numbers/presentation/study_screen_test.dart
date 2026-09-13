@@ -213,6 +213,7 @@ void main() {
     await tester.pumpAndSettle();
 
     repository.delayNextSave();
+    await tester.enterText(find.byType(TextField), '998/1');
     final answer = NumberCurriculum()
         .question('number.fractions', 0, 7, 0)
         .answer;
