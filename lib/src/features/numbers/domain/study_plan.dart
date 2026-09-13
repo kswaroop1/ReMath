@@ -329,11 +329,11 @@ final class StudyPlanner {
             final priority = (a.retention.isDue ? 0 : 1).compareTo(
               b.retention.isDue ? 0 : 1,
             );
-            return priority != 0
-                ? priority
-                : a.retention.nextReviewAt!.compareTo(
-                    b.retention.nextReviewAt!,
-                  );
+            if (priority != 0) return priority;
+            final deadline = a.retention.nextReviewAt!.compareTo(
+              b.retention.nextReviewAt!,
+            );
+            return deadline != 0 ? deadline : a.skillId.compareTo(b.skillId);
           });
     if (candidates.isEmpty) return null;
     final target = candidates.first;

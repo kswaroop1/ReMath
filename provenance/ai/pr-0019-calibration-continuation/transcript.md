@@ -255,3 +255,8 @@ Feedback-authorization green run 34766455099 passed the full suite. Begin the
 review-order cycle with two imported skills sharing the same due status and
 deadline; their selected persisted plan must use a stable skill-ID tie-break
 rather than runtime-dependent unstable-sort ordering.
+
+Review-order red run 34766632918 failed by selecting number.estimation ahead
+of the lexically earlier number.decimals at an identical deadline. After due
+priority and timestamp, compare the immutable skill ID so native and web build
+the same review plan from the same portable history.
