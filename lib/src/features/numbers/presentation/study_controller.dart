@@ -202,7 +202,7 @@ final class StudyController extends ChangeNotifier {
         !isMultipleChoice ||
         question!.choices.any((choice) => choice.value == before.draft);
     if (mark.verdict == AnswerVerdict.invalid || !offeredChoice) return;
-    await _save(before.copyWith(awaitingSurprise: true));
+    await _save(before.copyWith(awaitingSurprise: before.confidence != null));
     _answerTimingFinished = true;
     _running = false;
   });
