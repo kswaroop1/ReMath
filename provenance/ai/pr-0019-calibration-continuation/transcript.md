@@ -250,3 +250,8 @@ Feedback-authorization red run 34761795332 failed at the intended return-value
 boundary. Make timing finalization explicitly report success only after the
 durable pending state saves, and have the UI return without revealing or
 submitting whenever authorization fails.
+
+Feedback-authorization green run 34766455099 passed the full suite. Begin the
+review-order cycle with two imported skills sharing the same due status and
+deadline; their selected persisted plan must use a stable skill-ID tie-break
+rather than runtime-dependent unstable-sort ordering.

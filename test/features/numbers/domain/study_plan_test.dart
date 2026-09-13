@@ -213,4 +213,25 @@ void main() {
     chain['continuationBlocks'] = 3;
     expect(() => StudyState.decode(jsonEncode(chain)), throwsFormatException);
   });
+
+  test('equal review deadlines use a stable skill-id tie-break', () {
+    AttemptEvent tied(String skill) => AttemptEvent(
+      answer: '1',
+      eventId: skill,
+      isCorrect: true,
+      occurredAt: now,
+      questionId: 'numbers.$skill.level0.v2.mark1.score1.1',
+      responseTime: const Duration(seconds: 2),
+      sessionId: 'imported',
+      skillId: skill,
+    );
+
+    final plan = StudyPlanner().review('proportions', [
+      tied('number.estimation'),
+      tied('number.decimals'),
+    ], now);
+
+    expect(plan, isNotNull);
+    expect(plan!.steps.first.skillId, 'number.decimals');
+  });
 }
