@@ -131,6 +131,34 @@ void main() {
     expect(controller.remaining, const Duration(minutes: 14, seconds: 40));
   });
 
+  test('answered feedback survives restart as a locked result', () async {
+    await controller.start();
+    final answer = controller.question!.answer;
+    await controller.selectConfidence(ConfidenceRating.high);
+    await controller.updateDraft(answer);
+    now = now.add(const Duration(seconds: 19));
+    await controller.finishAnswerTiming();
+
+    final reopened = StudyController(repository: repository, clock: () => now);
+    addTearDown(reopened.dispose);
+    await reopened.initialise();
+    expect(reopened.state.awaitingSurprise, isTrue);
+    expect(reopened.state.draft, answer);
+
+    await reopened.updateDraft('999999');
+    await reopened.selectConfidence(ConfidenceRating.low);
+    await reopened.revealHint();
+    now = now.add(const Duration(seconds: 30));
+    await reopened.submit(surprise: SurpriseRating.surprising);
+
+    final event = (await repository.loadAttempts()).single;
+    expect(event.answer, answer);
+    expect(event.isCorrect, isTrue);
+    expect(event.confidence, ConfidenceRating.high);
+    expect(event.surprise, SurpriseRating.surprising);
+    expect(event.responseTime, const Duration(seconds: 19));
+  });
+
   test(
     'wrong answer persists correction and a new same-skill retest',
     () async {
