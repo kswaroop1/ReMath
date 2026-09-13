@@ -186,6 +186,12 @@ final class StudyController extends ChangeNotifier {
     }
   }, clearError: false);
 
+  Future<void> finishAnswerTiming() => _exclusive(() async {
+    if (question == null || _uncertainCommit) return;
+    await _save(_timed());
+    _running = false;
+  });
+
   Future<void> pause() => _enqueue(() async {
     if (_state.plan != null) {
       final next = _timed();
@@ -323,6 +329,8 @@ final class StudyController extends ChangeNotifier {
       _error = isMultipleChoice
           ? 'Select one answer first.'
           : q.invalidInputMessage;
+      _lastTick = _clock().toUtc();
+      _running = true;
       return;
     }
     final correct = mark.verdict == AnswerVerdict.correct;
@@ -376,6 +384,8 @@ final class StudyController extends ChangeNotifier {
       next = _advance(next);
     }
     await _commit(event, next);
+    _lastTick = _clock().toUtc();
+    _running = true;
   });
 
   Future<void> revealHint() => _exclusive(() async {

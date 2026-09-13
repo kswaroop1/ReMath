@@ -145,3 +145,8 @@ finite chained continuation and retain zero only for genuinely new sessions.
 Focused chained-route green run 34738707694 passed the full CI suite. Select
 the next independent review boundary: time spent reflecting on post-answer
 surprise must not inflate the immutable mathematical response-time evidence.
+
+Focused answer-timing red run 34739664232 failed during analysis because the
+test deliberately named the absent timing-freeze seam. Persist the elapsed
+answer time before showing surprise feedback, pause active timing during the
+dialog, and restart timing only after submission or invalid-input recovery.

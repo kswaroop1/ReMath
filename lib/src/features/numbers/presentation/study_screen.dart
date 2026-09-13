@@ -87,6 +87,8 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
           !_controller.isMultipleChoice ||
           q.choices.any((choice) => choice.value == _controller.state.draft);
       if (mark.verdict != AnswerVerdict.invalid && offeredChoice && mounted) {
+        await _controller.finishAnswerTiming();
+        if (!mounted) return;
         surprise = await showDialog<SurpriseRating>(
           context: context,
           barrierDismissible: false,
