@@ -112,6 +112,23 @@ void main() {
     expect(controller.remaining, const Duration(minutes: 15));
   });
 
+  test('surprise reflection time is not charged to answer fluency', () async {
+    await controller.start();
+    final answer = controller.question!.answer;
+    await controller.updateDraft(answer);
+    now = now.add(const Duration(seconds: 19));
+    await controller.finishAnswerTiming();
+    now = now.add(const Duration(seconds: 30));
+    await controller.submit(surprise: SurpriseRating.surprising);
+
+    expect(
+      (await repository.loadAttempts()).single.responseTime,
+      const Duration(seconds: 19),
+    );
+    now = now.add(const Duration(seconds: 1));
+    expect(controller.remaining, const Duration(minutes: 14, seconds: 40));
+  });
+
   test(
     'wrong answer persists correction and a new same-skill retest',
     () async {

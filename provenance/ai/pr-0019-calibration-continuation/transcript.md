@@ -141,3 +141,7 @@ review; that route builds a fresh state and is the collision boundary.
 Focused chained-route red run 34738552946 failed because Continue topic reset
 serial three to zero while retaining the chain session ID. Copy the serial for
 finite chained continuation and retain zero only for genuinely new sessions.
+
+Focused chained-route green run 34738707694 passed the full CI suite. Select
+the next independent review boundary: time spent reflecting on post-answer
+surprise must not inflate the immutable mathematical response-time evidence.
