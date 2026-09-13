@@ -284,7 +284,12 @@ final class StudyController extends ChangeNotifier {
         break;
       case StudyCompletionChoice.review:
         goal = before.goalId;
-        plan = StudyPlanner().plan(goal, _attempts, now);
+        final review = StudyPlanner().review(goal, _attempts, now);
+        if (review == null) {
+          _error = 'No review is due or approaching yet.';
+          return;
+        }
+        plan = review;
         break;
       case StudyCompletionChoice.challenge:
         goal = 'applications';

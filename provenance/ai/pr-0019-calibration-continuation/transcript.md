@@ -170,3 +170,8 @@ in the controller and omit those invalid controls from the diagnostic UI.
 Focused diagnostic-completion green run 34744027591 passed the full CI suite.
 Select the final original review boundary independently: Review what’s due must
 include work approaching within 24 hours, while overdue work remains first.
+
+Focused approaching-review red run 34746131046 failed because Review what’s due
+created a generic weakest-skill plan rather than selecting the approaching
+addition review. Add an explicit review planner that considers overdue and
+next-24-hour work, prioritising overdue items before approaching ones.
