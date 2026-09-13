@@ -5,10 +5,12 @@ import 'package:remath/src/features/learning/domain/learning_session.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  late Database database;
   late SqliteProgressRepository repository;
 
   setUp(() {
-    repository = SqliteProgressRepository(sqlite3.openInMemory());
+    database = sqlite3.openInMemory();
+    repository = SqliteProgressRepository(database);
   });
 
   tearDown(() => repository.close());
@@ -97,6 +99,38 @@ void main() {
       throwsArgumentError,
     );
     expect(await repository.loadAttempts(), isEmpty);
+  });
+
+  test('schema rejects invalid persisted calibration values', () async {
+    await repository.recordAttempt(
+      AttemptEvent(
+        answer: '12',
+        eventId: 'calibrated',
+        isCorrect: true,
+        occurredAt: DateTime.utc(2026, 8, 27, 8, 1),
+        questionId: 'question-1',
+        responseTime: const Duration(seconds: 3),
+        sessionId: 'session-1',
+        skillId: 'arithmetic.addition',
+        confidence: ConfidenceRating.high,
+        surprise: SurpriseRating.unsurprising,
+      ),
+    );
+
+    expect(
+      () => database.execute(
+        "UPDATE attempt_events SET confidence = 'certain' "
+        "WHERE event_id = 'calibrated'",
+      ),
+      throwsA(isA<SqliteException>()),
+    );
+    expect(
+      () => database.execute(
+        "UPDATE attempt_events SET surprise = 'astonished' "
+        "WHERE event_id = 'calibrated'",
+      ),
+      throwsA(isA<SqliteException>()),
+    );
   });
 
   test('persists and restores an interrupted focused review chunk', () async {

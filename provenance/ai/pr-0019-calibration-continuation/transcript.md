@@ -260,3 +260,8 @@ Review-order red run 34766632918 failed by selecting number.estimation ahead
 of the lexically earlier number.decimals at an identical deadline. After due
 priority and timestamp, compare the immutable skill ID so native and web build
 the same review plan from the same portable history.
+
+Review-order green run 34767777271 passed the full suite. Add direct SQLite
+characterization for the already-declared schema-v7 CHECK constraints: raw
+out-of-range confidence and surprise strings must both fail at the portable
+storage boundary, independently of enum-typed application callers.
