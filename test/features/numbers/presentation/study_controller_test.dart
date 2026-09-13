@@ -57,6 +57,123 @@ void main() {
     },
   );
 
+  test('two-minute drills preserve their chosen active-time budget', () async {
+    await controller.start(session: StudySessionKind.drill);
+    now = now.add(const Duration(seconds: 12));
+    await controller.pause();
+
+    final reopened = StudyController(repository: repository, clock: () => now);
+    addTearDown(reopened.dispose);
+    await reopened.initialise();
+
+    expect(reopened.state.sessionKind, StudySessionKind.drill);
+    expect(reopened.remaining, const Duration(minutes: 1, seconds: 48));
+    expect(reopened.state.continuationBlocks, 0);
+  });
+
+  test('standard chunks remain the fifteen-minute default', () async {
+    await controller.start();
+
+    expect(controller.state.sessionKind, StudySessionKind.standard);
+    expect(controller.remaining, const Duration(minutes: 15));
+    expect(controller.state.continuationBlocks, 0);
+  });
+
+  test('a chained block starts another bounded resumable plan', () async {
+    controller.dispose();
+    final plan = StudyPlanner().plan('number-fluency', [], now);
+    await repository.saveStudyState(
+      StudyState(
+        plan: plan,
+        sessionId: 'chain',
+        seed: 7,
+        stepIndex: plan.steps.length - 1,
+        sessionKind: StudySessionKind.chained,
+        continuationBlocks: 2,
+        remainingMilliseconds: 1,
+        serial: 3,
+      ).encode(),
+    );
+    controller = StudyController(
+      repository: repository,
+      clock: () => now,
+      idFactory: () => 'unused',
+    );
+    await controller.initialise();
+
+    await controller.continueStep();
+
+    expect(controller.state.plan, isNotNull);
+    expect(controller.state.stepIndex, 0);
+    expect(controller.state.sessionId, 'chain');
+    expect(controller.state.sessionKind, StudySessionKind.chained);
+    expect(controller.state.continuationBlocks, 1);
+    expect(controller.state.serial, 3);
+    expect(controller.remaining, const Duration(minutes: 15));
+  });
+
+  test('surprise reflection time is not charged to answer fluency', () async {
+    await controller.start();
+    final answer = controller.question!.answer;
+    await controller.updateDraft(answer);
+    now = now.add(const Duration(seconds: 19));
+    await controller.finishAnswerTiming();
+    await controller.pause();
+    await controller.resume();
+    now = now.add(const Duration(seconds: 30));
+    await controller.submit(surprise: SurpriseRating.surprising);
+
+    expect(
+      (await repository.loadAttempts()).single.responseTime,
+      const Duration(seconds: 19),
+    );
+    now = now.add(const Duration(seconds: 1));
+    expect(controller.remaining, const Duration(minutes: 14, seconds: 40));
+  });
+
+  test('answered feedback survives restart as a locked result', () async {
+    await controller.start();
+    final answer = controller.question!.answer;
+    await controller.selectConfidence(ConfidenceRating.high);
+    await controller.updateDraft(answer);
+    now = now.add(const Duration(seconds: 19));
+    await controller.finishAnswerTiming();
+
+    final reopened = StudyController(repository: repository, clock: () => now);
+    addTearDown(reopened.dispose);
+    await reopened.initialise();
+    expect(reopened.state.awaitingSurprise, isTrue);
+    expect(reopened.state.draft, answer);
+
+    await reopened.updateDraft('999999');
+    await reopened.selectConfidence(ConfidenceRating.low);
+    await reopened.revealHint();
+    now = now.add(const Duration(seconds: 30));
+    await reopened.submit(surprise: SurpriseRating.surprising);
+
+    final event = (await repository.loadAttempts()).single;
+    expect(event.answer, answer);
+    expect(event.isCorrect, isTrue);
+    expect(event.confidence, ConfidenceRating.high);
+    expect(event.surprise, SurpriseRating.surprising);
+    expect(event.responseTime, const Duration(seconds: 19));
+  });
+
+  test('failed pending-feedback save never authorizes feedback', () async {
+    final faulty = _SaveFailure();
+    final learner = StudyController(repository: faulty, clock: () => now);
+    addTearDown(learner.dispose);
+    await learner.initialise();
+    await learner.start();
+    await learner.selectConfidence(ConfidenceRating.high);
+    await learner.updateDraft(learner.question!.answer);
+    faulty.failNextSave = true;
+
+    expect(await learner.finishAnswerTiming(), isFalse);
+    expect(learner.state.awaitingSurprise, isFalse);
+    expect(learner.error, isNotNull);
+  });
+
   test(
     'wrong answer persists correction and a new same-skill retest',
     () async {
@@ -106,6 +223,63 @@ void main() {
   );
 
   test(
+    'optional confidence survives restart and surprise joins the attempt',
+    () async {
+      await controller.start();
+      await controller.selectConfidence(ConfidenceRating.high);
+      final reopened = StudyController(
+        repository: repository,
+        clock: () => now,
+      );
+      addTearDown(reopened.dispose);
+      await reopened.initialise();
+      expect(reopened.state.confidence, ConfidenceRating.high);
+
+      await reopened.updateDraft(reopened.question!.answer);
+      await reopened.submit(surprise: SurpriseRating.surprising);
+
+      final event = (await repository.loadAttempts()).single;
+      expect(event.confidence, ConfidenceRating.high);
+      expect(event.surprise, SurpriseRating.surprising);
+      expect(reopened.state.confidence, isNull);
+    },
+  );
+
+  test('unsupported contracts cannot change calibration', () async {
+    await repository.recordAttempt(
+      AttemptEvent(
+        answer: 'future',
+        eventId: 'future',
+        isCorrect: true,
+        occurredAt: now,
+        questionId: 'application.application.mixed.level0.v1.mark1.score99.7.0',
+        responseTime: const Duration(seconds: 1),
+        sessionId: 'future',
+        skillId: 'application.mixed',
+        confidence: ConfidenceRating.high,
+        surprise: SurpriseRating.surprising,
+      ),
+    );
+    final reopened = StudyController(repository: repository, clock: () => now);
+    addTearDown(reopened.dispose);
+    await reopened.initialise();
+
+    expect(reopened.calibration.ratedAttempts, 0);
+    expect(reopened.calibration.surpriseRatedAttempts, 0);
+  });
+
+  test(
+    'using help clears confidence instead of attaching it to assistance',
+    () async {
+      await controller.start();
+      await controller.selectConfidence(ConfidenceRating.high);
+      await controller.revealHint();
+
+      expect(controller.state.confidence, isNull);
+    },
+  );
+
+  test(
     'invalid input does not create evidence and repeated submit is guarded',
     () async {
       await controller.start();
@@ -141,6 +315,145 @@ void main() {
       expect(controller.state.plan, isNotNull);
     },
   );
+
+  test('every completion route produces its promised next step', () async {
+    Future<StudyState> choose(StudyCompletionChoice choice) async {
+      final routeRepository = InMemoryProgressRepository();
+      final plan = StudyPlanner().plan('number-fluency', [], now);
+      await routeRepository.saveStudyState(
+        StudyState(
+          plan: plan,
+          sessionId: 'completed',
+          seed: 7,
+          stepIndex: plan.steps.length - 1,
+        ).encode(),
+      );
+      final learner = StudyController(
+        repository: routeRepository,
+        clock: () => now,
+        idFactory: () => 'next-${choice.name}',
+      );
+      addTearDown(learner.dispose);
+      await learner.initialise();
+      await learner.complete(choice);
+      final saved = await routeRepository.loadStudyState();
+      expect(saved, isNotNull);
+      return StudyState.decode(saved!);
+    }
+
+    expect((await choose(StudyCompletionChoice.stop)).plan, isNull);
+    final repeated = await choose(StudyCompletionChoice.repeat);
+    expect(repeated.plan, isNotNull);
+    expect(repeated.sessionId, 'next-repeat');
+    expect(repeated.plan!.reason, contains('Repeat'));
+
+    final continued = await choose(StudyCompletionChoice.continueTopic);
+    expect(continued.plan, isNotNull);
+    expect(continued.plan!.reason, contains('Exploring'));
+
+    final review = await choose(StudyCompletionChoice.review);
+    expect(review.plan, isNotNull);
+    expect(review.plan!.reason, isNotEmpty);
+
+    final challenge = await choose(StudyCompletionChoice.challenge);
+    expect(challenge.goalId, 'applications');
+    expect(
+      challenge.plan!.steps
+          .where((step) => step.kind != StudyStepKind.reflection)
+          .every((step) => step.skillId == 'application.mixed'),
+      isTrue,
+    );
+  });
+
+  test('diagnostic completion only permits stopping', () async {
+    final plan = StudyPlanner().diagnostic('number-fluency');
+    await repository.saveStudyState(
+      StudyState(
+        plan: plan,
+        sessionId: 'diagnostic',
+        stepIndex: plan.steps.length - 1,
+      ).encode(),
+    );
+    final learner = StudyController(repository: repository, clock: () => now);
+    addTearDown(learner.dispose);
+    await learner.initialise();
+
+    await learner.complete(StudyCompletionChoice.repeat);
+
+    expect(learner.state.sessionId, 'diagnostic');
+    expect(learner.state.plan!.isDiagnostic, isTrue);
+  });
+
+  test('repeating a legacy application plan uses current scoring', () async {
+    final legacy = StudyPlan(
+      reason: 'Legacy application session.',
+      steps: const [
+        StudyStep(
+          StudyStepKind.practice,
+          'application.mixed',
+          0,
+          scoringVersion: 1,
+        ),
+        StudyStep(
+          StudyStepKind.reflection,
+          'application.mixed',
+          0,
+          scoringVersion: 1,
+        ),
+      ],
+    );
+    await repository.saveStudyState(
+      StudyState(
+        goalId: 'applications',
+        plan: legacy,
+        sessionId: 'legacy',
+        stepIndex: 1,
+      ).encode(),
+    );
+    final learner = StudyController(repository: repository, clock: () => now);
+    addTearDown(learner.dispose);
+    await learner.initialise();
+
+    await learner.complete(StudyCompletionChoice.repeat);
+
+    expect(
+      learner.state.plan!.steps
+          .where((step) => step.kind != StudyStepKind.reflection)
+          .every((step) => step.scoringVersion == 2),
+      isTrue,
+    );
+  });
+
+  test('review completion selects an approaching review', () async {
+    await repository.recordAttempt(
+      AttemptEvent(
+        answer: '1',
+        eventId: 'approaching',
+        isCorrect: true,
+        occurredAt: now,
+        questionId: 'numbers.arithmetic.addition.level0.v1.mark1.score1.1',
+        responseTime: const Duration(seconds: 2),
+        sessionId: 'old',
+        skillId: 'arithmetic.addition',
+      ),
+    );
+    final plan = StudyPlanner().plan('number-fluency', [], now);
+    await repository.saveStudyState(
+      StudyState(
+        plan: plan,
+        sessionId: 'completed',
+        stepIndex: plan.steps.length - 1,
+      ).encode(),
+    );
+    final learner = StudyController(repository: repository, clock: () => now);
+    addTearDown(learner.dispose);
+    await learner.initialise();
+
+    await learner.complete(StudyCompletionChoice.review);
+
+    expect(learner.state.plan!.reason, contains('approaching'));
+    expect(learner.state.plan!.steps.first.skillId, 'arithmetic.addition');
+  });
   test(
     'diagnostic records wrong answers without revealing correction help',
     () async {
@@ -235,6 +548,39 @@ final class _AcknowledgementFailure implements ProgressRepository {
   Future<String?> loadStudyState() => _inner.loadStudyState();
   @override
   Future<void> saveStudyState(String state) => _inner.saveStudyState(state);
+  @override
+  Future<void> saveSession(LearningSession session) =>
+      _inner.saveSession(session);
+  @override
+  Future<bool> recordAttempt(AttemptEvent event) => _inner.recordAttempt(event);
+}
+
+final class _SaveFailure implements ProgressRepository {
+  final _inner = InMemoryProgressRepository();
+  bool failNextSave = false;
+
+  @override
+  Future<void> saveStudyState(String state) async {
+    if (failNextSave) {
+      failNextSave = false;
+      throw StateError('Save failed');
+    }
+    await _inner.saveStudyState(state);
+  }
+
+  @override
+  Future<bool> commitStudyAttempt(AttemptEvent event, String state) =>
+      _inner.commitStudyAttempt(event, state);
+  @override
+  Future<void> close() => _inner.close();
+  @override
+  Future<void> completeSession(String id) => _inner.completeSession(id);
+  @override
+  Future<List<AttemptEvent>> loadAttempts() => _inner.loadAttempts();
+  @override
+  Future<LearningSession?> loadSession() => _inner.loadSession();
+  @override
+  Future<String?> loadStudyState() => _inner.loadStudyState();
   @override
   Future<void> saveSession(LearningSession session) =>
       _inner.saveSession(session);

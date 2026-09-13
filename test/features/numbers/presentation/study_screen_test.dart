@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/app.dart';
 import 'package:remath/src/features/learning/data/in_memory_progress_repository.dart';
+import 'package:remath/src/features/learning/domain/attempt_event.dart';
 import 'package:remath/src/features/numbers/domain/number_curriculum.dart';
 import 'package:remath/src/features/numbers/domain/study_plan.dart';
 import 'package:remath/src/features/numbers/presentation/study_screen.dart';
@@ -25,6 +26,79 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Choose your goal'), findsOneWidget);
     expect(find.text('Build number fluency'), findsOneWidget);
+  });
+
+  testWidgets('progress explains confidence calibration separately', (
+    tester,
+  ) async {
+    final repository = InMemoryProgressRepository();
+    Future<void> record(
+      String id, {
+      required bool correct,
+      required ConfidenceRating confidence,
+      SurpriseRating? surprise,
+    }) => repository.recordAttempt(
+      AttemptEvent(
+        answer: '1',
+        eventId: id,
+        isCorrect: correct,
+        occurredAt: DateTime.utc(2026, 9, 12),
+        questionId: 'numbers.arithmetic.addition.level0.v1.mark1.score1.1',
+        responseTime: const Duration(seconds: 2),
+        sessionId: 'calibration',
+        skillId: 'arithmetic.addition',
+        confidence: confidence,
+        surprise: surprise,
+      ),
+    );
+    await record(
+      'calibrated',
+      correct: true,
+      confidence: ConfidenceRating.high,
+    );
+    await record(
+      'over',
+      correct: false,
+      confidence: ConfidenceRating.high,
+      surprise: SurpriseRating.surprising,
+    );
+    await record('under', correct: true, confidence: ConfidenceRating.low);
+
+    await tester.pumpWidget(
+      MaterialApp(home: StudyScreen(repository: repository)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Confidence calibration'), findsOneWidget);
+    expect(find.textContaining('1 calibrated'), findsOneWidget);
+    expect(find.textContaining('1 overconfident'), findsOneWidget);
+    expect(find.textContaining('1 underconfident'), findsOneWidget);
+    expect(find.textContaining('1 of 1 results surprising'), findsOneWidget);
+  });
+
+  testWidgets('learner chooses drill standard or chained study time', (
+    tester,
+  ) async {
+    final repository = InMemoryProgressRepository();
+    await tester.pumpWidget(
+      MaterialApp(home: StudyScreen(repository: repository)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Two-minute drill'), findsOneWidget);
+    expect(find.text('Plan my next chunk'), findsOneWidget);
+    expect(find.text('Chained study block'), findsOneWidget);
+
+    await tester.tap(find.text('Two-minute drill'));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining(RegExp(r'(1:59|2:00) remaining')),
+      findsOneWidget,
+    );
+    expect(
+      StudyState.decode((await repository.loadStudyState())!).sessionKind,
+      StudySessionKind.drill,
+    );
   });
 
   testWidgets(
@@ -67,6 +141,45 @@ void main() {
   );
 
   testWidgets(
+    'confidence opts into post-answer surprise without blocking study',
+    (tester) async {
+      final repository = InMemoryProgressRepository();
+      final plan = StudyPlan(
+        reason: 'Calibrate',
+        steps: const [
+          StudyStep(StudyStepKind.practice, 'number.fractions', 0),
+          StudyStep(StudyStepKind.reflection, 'number.fractions', 0),
+        ],
+      );
+      await repository.saveStudyState(
+        StudyState(
+          goalId: 'proportions',
+          plan: plan,
+          sessionId: 'calibration',
+          seed: 7,
+        ).encode(),
+      );
+      await tester.pumpWidget(
+        MaterialApp(home: StudyScreen(repository: repository)),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('High'));
+      final q = NumberCurriculum().question('number.fractions', 0, 7, 0);
+      await tester.enterText(find.byType(TextField), q.answer);
+      await tester.tap(find.text('Submit'));
+      await tester.pumpAndSettle();
+      expect(find.text('Correct — was that expected?'), findsOneWidget);
+      await tester.tap(find.text('Surprising'));
+      await tester.pumpAndSettle();
+
+      final event = (await repository.loadAttempts()).single;
+      expect(event.confidence, ConfidenceRating.high);
+      expect(event.surprise, SurpriseRating.surprising);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets(
     'MCQ selection survives reopening and is recorded as choice evidence',
     (tester) async {
       final repository = InMemoryProgressRepository();
@@ -103,7 +216,7 @@ void main() {
         endsWith('.mcq'),
       );
       expect(find.text('Reflect on your session'), findsOneWidget);
-      await tester.tap(find.text('Finish session'));
+      await tester.tap(find.text('Stop for now'));
       await tester.pumpAndSettle();
       expect(find.text('Plan my next chunk'), findsOneWidget);
     },
@@ -135,7 +248,7 @@ void main() {
     expect(find.textContaining('15% of £80'), findsOneWidget);
     await tester.tap(find.text('Continue to practice'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Finish session'));
+    await tester.tap(find.text('Stop for now'));
     await tester.pumpAndSettle();
     expect(find.text('Your skills and progress'), findsOneWidget);
   });

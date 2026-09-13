@@ -121,8 +121,9 @@ Four sequential, independently usable increments:
    error classification and targeted remediation.
 3. **PR16 engine + PR17 journey — Apply algebra:** method/assumption selection, unlabelled mixed challenges,
    application chunks and separate technique-selection progress.
-4. **Calibrate and continue:** optional confidence reporting, configurable session
-   lengths, complete end-of-session choices and verified scoring replay.
+4. **Calibrate and continue (implemented):** optional confidence reporting,
+   configurable session lengths, complete end-of-session choices and verified
+   scoring replay.
 
 The first increment's [acceptance criteria](slices/algebra-solving.md) are bounded;
 its completion does not mark later programme features complete. Every increment

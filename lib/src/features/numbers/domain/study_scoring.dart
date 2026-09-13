@@ -23,17 +23,19 @@ abstract final class StudyScoring {
 
   static ApplicationQuestion? applicationQuestion(AttemptEvent event) {
     final match = RegExp(
-      r'^application\.(application\.(?:breakEven|scale|rate|mixed))\.level([0-2])\.v1\.mark1\.score1\.(-?[0-9]+)\.([0-9]+)$',
+      r'^application\.(application\.(?:breakEven|scale|rate|mixed))\.level([0-2])\.v1\.mark1\.score([12])\.(-?[0-9]+)\.([0-9]+)$',
     ).firstMatch(event.questionId);
     if (match == null || match.group(1) != event.skillId) return null;
-    final seed = int.tryParse(match.group(3)!);
-    final index = int.tryParse(match.group(4)!);
+    final scoringVersion = int.parse(match.group(3)!);
+    final seed = int.tryParse(match.group(4)!);
+    final index = int.tryParse(match.group(5)!);
     if (seed == null || index == null) return null;
     return ApplicationCurriculum().question(
       event.skillId,
       int.parse(match.group(2)!),
       seed,
       index,
+      scoringVersion: scoringVersion,
     );
   }
 
@@ -71,11 +73,24 @@ abstract final class StudyScoring {
     );
   }
 
-  static Duration fluentWithin(String skillId) => Duration(
-    seconds: skillId.startsWith('reasoning.')
-        ? 90
-        : skillId.startsWith('algebra.')
-        ? 60
-        : 20,
-  );
+  static Duration fluentWithinEvent(AttemptEvent event) {
+    final score = RegExp(r'\.score([0-9]+)\.').firstMatch(event.questionId);
+    return fluentWithin(
+      event.skillId,
+      scoringVersion: score == null ? 1 : int.parse(score.group(1)!),
+    );
+  }
+
+  static Duration fluentWithin(String skillId, {int? scoringVersion}) =>
+      Duration(
+        seconds: skillId.startsWith('reasoning.')
+            ? 90
+            : skillId.startsWith('application.')
+            ? (scoringVersion ?? 2) == 1
+                  ? 20
+                  : 90
+            : skillId.startsWith('algebra.')
+            ? 60
+            : 20,
+      );
 }
