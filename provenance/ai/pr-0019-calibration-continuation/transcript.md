@@ -179,7 +179,8 @@ next-24-hour work, prioritising overdue items before approaching ones.
 Focused approaching-review green run 34746261899 passed the full CI suite and
 completes reconstruction of the five original findings as independent cycles.
 Begin the later edge-case cycles with lifecycle-safe surprise timing: extend
-the existing timing regression through pause/resume before the learner records surprise.
+the existing timing regression through pause/resume before the learner records
+surprise.
 Current resume behavior restarts the answer clock, so this test precedes its
 production fix. Subsequent findings will receive separate cycles.
 
@@ -187,3 +188,8 @@ Lifecycle timing red run 34749541236 failed because pause/resume restarted
 charging after finishAnswerTiming. Keep a controller-level answer-finished
 latch through lifecycle transitions and clear it only when submission either
 commits or returns control after invalid input.
+
+Lifecycle timing green run 34749641680 passed the full CI suite. Begin the next
+focused cycle: an unsupported future application scoring contract carrying
+confidence and surprise must remain history-only and contribute zero
+calibration evidence. The controller currently forwards it to the summary.

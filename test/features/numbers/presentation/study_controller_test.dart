@@ -202,6 +202,29 @@ void main() {
     },
   );
 
+  test('unsupported contracts cannot change calibration', () async {
+    await repository.recordAttempt(
+      AttemptEvent(
+        answer: 'future',
+        eventId: 'future',
+        isCorrect: true,
+        occurredAt: now,
+        questionId: 'application.application.mixed.level0.v1.mark1.score99.7.0',
+        responseTime: const Duration(seconds: 1),
+        sessionId: 'future',
+        skillId: 'application.mixed',
+        confidence: ConfidenceRating.high,
+        surprise: SurpriseRating.surprising,
+      ),
+    );
+    final reopened = StudyController(repository: repository, clock: () => now);
+    addTearDown(reopened.dispose);
+    await reopened.initialise();
+
+    expect(reopened.calibration.ratedAttempts, 0);
+    expect(reopened.calibration.surpriseRatedAttempts, 0);
+  });
+
   test(
     'using help clears confidence instead of attaching it to assistance',
     () async {
