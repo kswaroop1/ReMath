@@ -132,3 +132,8 @@ Independent review of the completed programme found five separate behavioral
 boundaries. Rebuild their proof as focused cycles, beginning with chained
 continuation: a new bounded block retaining its session ID must also retain the
 monotonic event serial so immutable attempt IDs cannot collide.
+
+The first characterization run 34733519210 passed because it exercised the
+automatic end-of-block transition, which already preserved the serial. Refine
+the test to the distinct learner-selected Continue topic route identified by
+review; that route builds a fresh state and is the collision boundary.

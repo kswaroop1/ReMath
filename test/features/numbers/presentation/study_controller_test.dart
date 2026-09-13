@@ -101,7 +101,7 @@ void main() {
     );
     await controller.initialise();
 
-    await controller.continueStep();
+    await controller.complete(StudyCompletionChoice.continueTopic);
 
     expect(controller.state.plan, isNotNull);
     expect(controller.state.stepIndex, 0);
