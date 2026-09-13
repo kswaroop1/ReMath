@@ -409,6 +409,9 @@ final class StudyState {
         state.hintCount > 4 ||
         state.remainingMilliseconds < 0 ||
         state.continuationBlocks < 0 ||
+        state.continuationBlocks > state.sessionKind.additionalBlocks ||
+        state.remainingMilliseconds >
+            state.sessionKind.activeBudget.inMilliseconds ||
         (state.sessionKind != StudySessionKind.chained &&
             state.continuationBlocks != 0) ||
         state.serial < 0 ||
@@ -501,6 +504,8 @@ final class StudyState {
 
   String encode() {
     if (continuationBlocks < 0 ||
+        continuationBlocks > sessionKind.additionalBlocks ||
+        remainingMilliseconds > sessionKind.activeBudget.inMilliseconds ||
         (sessionKind != StudySessionKind.chained && continuationBlocks != 0)) {
       throw ArgumentError.value(
         continuationBlocks,

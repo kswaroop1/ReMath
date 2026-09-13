@@ -154,3 +154,7 @@ dialog, and restart timing only after submission or invalid-input recovery.
 Focused answer-timing green run 34739788497 passed the full CI suite. Select the
 next independent review boundary: imported bounded-session snapshots must not
 claim more active time or chained blocks than their advertised session kind.
+
+Focused bounded-import red run 34743442817 failed both new assertions: enlarged
+drill time and excessive chained blocks decoded successfully. Enforce each
+session kind's maximum budget and finite chain count during encode and decode.
