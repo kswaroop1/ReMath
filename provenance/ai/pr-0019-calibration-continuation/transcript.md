@@ -137,3 +137,7 @@ The first characterization run 34733519210 passed because it exercised the
 automatic end-of-block transition, which already preserved the serial. Refine
 the test to the distinct learner-selected Continue topic route identified by
 review; that route builds a fresh state and is the collision boundary.
+
+Focused chained-route red run 34738552946 failed because Continue topic reset
+serial three to zero while retaining the chain session ID. Copy the serial for
+finite chained continuation and retain zero only for genuinely new sessions.

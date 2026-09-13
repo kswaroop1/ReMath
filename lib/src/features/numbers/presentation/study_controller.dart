@@ -305,6 +305,7 @@ final class StudyController extends ChangeNotifier {
             : now.microsecondsSinceEpoch & 0x7fffffff,
         sessionKind: sessionKind,
         continuationBlocks: continueChain ? before.continuationBlocks - 1 : 0,
+        serial: continueChain ? before.serial : 0,
         remainingMilliseconds: sessionKind.activeBudget.inMilliseconds,
       ),
     );
