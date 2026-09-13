@@ -265,3 +265,9 @@ Review-order green run 34767777271 passed the full suite. Add direct SQLite
 characterization for the already-declared schema-v7 CHECK constraints: raw
 out-of-range confidence and surprise strings must both fail at the portable
 storage boundary, independently of enum-typed application callers.
+
+SQLite boundary run 34767953183 passed the full suite: both raw invalid values
+were rejected, with 279 native tests, seven Chrome tests, formatting, static
+analysis, content validation, coverage enforcement and secret scanning green.
+The replacement history now contains focused red/green evidence for every
+review correction while preserving the verified product behavior.
