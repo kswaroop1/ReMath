@@ -501,7 +501,8 @@ final class StudyState {
       );
       final validDraft =
           question.mark(state.draft).verdict != AnswerVerdict.invalid &&
-          (!step.multipleChoice ||
+          (state.phase != StudyPhase.question ||
+              !step.multipleChoice ||
               question.choices.any((choice) => choice.value == state.draft));
       if (!independentlyAnswerable || !validDraft) {
         throw const FormatException('Invalid persisted feedback lock');
