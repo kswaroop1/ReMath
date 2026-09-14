@@ -326,8 +326,7 @@ void main() {
             eventId: 'review-due',
             isCorrect: true,
             occurredAt: now,
-            questionId:
-                'numbers.arithmetic.addition.level0.v1.mark1.score1.1',
+            questionId: 'numbers.arithmetic.addition.level0.v1.mark1.score1.1',
             responseTime: const Duration(seconds: 2),
             sessionId: 'prior',
             skillId: 'arithmetic.addition',
