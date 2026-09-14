@@ -31,7 +31,12 @@ void main() {
     }
 
     expect(progress(1, 20).level, 1);
-    expect(progress(1, 21).level, 0);
+    final slowLegacy = progress(1, 21);
+    expect(slowLegacy.level, 0);
+    expect(
+      slowLegacy.explanation,
+      contains('historical score1 evidence retains its 20-second threshold'),
+    );
     expect(progress(2, 90).level, 1);
     expect(progress(2, 91).level, 0);
     expect(progress(99, 1).unsupported, 3);
