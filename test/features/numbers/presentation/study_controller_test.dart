@@ -510,6 +510,26 @@ void main() {
       expect(learner.state.stepIndex, 1);
     },
   );
+  test('locked feedback can retry a lost write acknowledgement', () async {
+    final faulty = _AcknowledgementFailure();
+    final learner = StudyController(repository: faulty, clock: () => now);
+    addTearDown(learner.dispose);
+    await learner.initialise();
+    await learner.start();
+    await learner.selectConfidence(ConfidenceRating.high);
+    await learner.updateDraft(learner.question!.answer);
+    expect(await learner.finishAnswerTiming(), isTrue);
+    await learner.submit(surprise: SurpriseRating.unsurprising);
+    expect(learner.needsRetry, isTrue);
+    expect(learner.state.awaitingSurprise, isTrue);
+
+    expect(await learner.finishAnswerTiming(), isTrue);
+    await learner.submit(surprise: SurpriseRating.unsurprising);
+
+    expect(learner.needsRetry, isFalse);
+    expect(learner.error, isNull);
+    expect((await faulty.loadAttempts()), hasLength(1));
+  });
   test(
     'rapid pause and resume preserve event ordering and charge resumed time',
     () async {
