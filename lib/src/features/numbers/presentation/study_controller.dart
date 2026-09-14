@@ -420,6 +420,8 @@ final class StudyController extends ChangeNotifier {
     );
     if (before.plan!.isDiagnostic) {
       next = _advance(next);
+    } else if (before.remainingMilliseconds == 0) {
+      next = _advance(next);
     } else if (!correct) {
       next = next.copyWith(
         phase: StudyPhase.correction,
