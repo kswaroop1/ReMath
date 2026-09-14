@@ -196,11 +196,12 @@ final class StudyController extends ChangeNotifier {
   Future<bool> finishAnswerTiming() async {
     var authorized = false;
     await _exclusive(() async {
-      if (question == null || _uncertainCommit) return;
+      if (question == null) return;
       if (_state.awaitingSurprise) {
         authorized = true;
         return;
       }
+      if (_uncertainCommit) return;
       final before = _timed();
       final mark = question!.mark(before.draft);
       final offeredChoice =
