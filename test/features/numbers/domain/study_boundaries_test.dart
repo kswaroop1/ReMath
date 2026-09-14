@@ -149,6 +149,29 @@ void main() {
     },
   );
 
+  test('persisted MCQ retests accept independently entered answers', () {
+    final state = StudyState(
+      confidence: ConfidenceRating.high,
+      awaitingSurprise: true,
+      plan: StudyPlan(
+        reason: 'Restore free-text retest feedback',
+        steps: const [
+          StudyStep(
+            StudyStepKind.practice,
+            'arithmetic.addition',
+            0,
+            multipleChoice: true,
+          ),
+        ],
+      ),
+      seed: 7,
+      draft: '999999',
+      phase: StudyPhase.retest,
+    );
+
+    expect(StudyState.decode(state.encode()).awaitingSurprise, isTrue);
+  });
+
   test('all generated prompts agree with independently calculated answers', () {
     final curriculum = NumberCurriculum();
     for (final skill in curriculum.skills) {
