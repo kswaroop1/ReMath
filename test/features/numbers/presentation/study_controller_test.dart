@@ -482,6 +482,19 @@ void main() {
     },
   );
 
+  test('time expiry records an incorrect answer before reflection', () async {
+    await controller.start(session: StudySessionKind.drill);
+    now = now.add(const Duration(minutes: 3));
+    await controller.updateDraft('999999999');
+    await controller.submit();
+
+    final attempts = await repository.loadAttempts();
+    expect(attempts, hasLength(1));
+    expect(attempts.single.isCorrect, isFalse);
+    expect(controller.state.step!.kind, StudyStepKind.reflection);
+    expect(controller.remaining, Duration.zero);
+  });
+
   test('a new goal cannot replace an unfinished plan', () async {
     await controller.start();
     final session = controller.state.sessionId;
