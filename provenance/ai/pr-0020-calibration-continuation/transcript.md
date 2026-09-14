@@ -303,3 +303,33 @@ Records verification run 34790708909 passed after the move to the PR20 path,
 with formatting, analysis, content validation, 281 native tests, seven Chrome
 tests, coverage enforcement and secret scanning green. Record that verified
 head before requesting independent re-review.
+
+Independent review 5192818234 of commit a3aae600afb identified four further
+behavioral boundaries. First, a durable pending-feedback lock whose atomic
+commit lost its acknowledgement could not be retried because the uncertain
+write guard ran before the existing-lock authorization path. Focused red run
+34791830834 reproduced the blocked retry. Move only the durable-lock retry
+path ahead of that guard; green run 34796287754 passed the complete suite and
+confirmed that retry commits exactly one attempt.
+
+The second finding concerned a restored free-text retest generated from an
+MCQ step. Focused red run 34796487853 showed that snapshot validation still
+required the retest answer to be one of the original choices, although the
+controller and UI correctly present retests as free text. Restrict the offered
+choice constraint to the initial question phase. Green run 34796660554 passed
+the complete suite.
+
+The third finding required malformed confidence-rated answers to show their
+normal validation message instead of silently returning before the surprise
+dialog. Focused red run 34798499065 reproduced the missing message. Apply the
+same invalid-input result in the timing-finalization boundary without saving a
+feedback lock or revealing a verdict. Green run 34798728518 passed the full
+suite.
+
+The final finding covered expired sessions after an incorrect answer. Focused
+red run 34798936565 recorded the attempt but entered correction at zero time,
+allowing an unbounded correction/retest loop. Route any non-diagnostic answer
+whose active budget has reached zero through the established reflection
+advance after preserving its evidence. Green run 34799129443 passed the full
+suite. All four findings now have isolated red/green evidence; update this
+chronology before the final records-only verification and re-review.
