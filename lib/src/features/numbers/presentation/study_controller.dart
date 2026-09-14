@@ -207,7 +207,15 @@ final class StudyController extends ChangeNotifier {
       final offeredChoice =
           !isMultipleChoice ||
           question!.choices.any((choice) => choice.value == before.draft);
-      if (mark.verdict == AnswerVerdict.invalid || !offeredChoice) return;
+      if (mark.verdict == AnswerVerdict.invalid || !offeredChoice) {
+        _error = isMultipleChoice
+            ? 'Select one answer first.'
+            : question!.invalidInputMessage;
+        _lastTick = _clock().toUtc();
+        _answerTimingFinished = false;
+        _running = true;
+        return;
+      }
       await _save(before.copyWith(awaitingSurprise: before.confidence != null));
       _answerTimingFinished = true;
       _running = false;
