@@ -183,6 +183,39 @@ void main() {
     },
   );
 
+  testWidgets('confidence-rated invalid answers show validation feedback', (
+    tester,
+  ) async {
+    final repository = InMemoryProgressRepository();
+    final plan = StudyPlan(
+      reason: 'Validate before feedback',
+      steps: const [
+        StudyStep(StudyStepKind.practice, 'number.fractions', 0),
+        StudyStep(StudyStepKind.reflection, 'number.fractions', 0),
+      ],
+    );
+    await repository.saveStudyState(
+      StudyState(
+        goalId: 'proportions',
+        plan: plan,
+        sessionId: 'invalid-confidence',
+        seed: 7,
+      ).encode(),
+    );
+    await tester.pumpWidget(
+      MaterialApp(home: StudyScreen(repository: repository)),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('High'));
+    await tester.enterText(find.byType(TextField), 'not a fraction');
+    await tester.tap(find.text('Submit'));
+    await tester.pumpAndSettle();
+
+    final question = NumberCurriculum().question('number.fractions', 0, 7, 0);
+    expect(find.text(question.invalidInputMessage), findsOneWidget);
+    expect(find.byType(AlertDialog), findsNothing);
+  });
+
   testWidgets('feedback verdict comes from the durably locked answer', (
     tester,
   ) async {
