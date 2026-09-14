@@ -338,3 +338,23 @@ Records verification run 34800711647 passed formatting, static analysis,
 content validation, 286 native tests, seven Chrome tests, 99.01% line coverage
 and secret scanning on commit 80d471f914. Record that verified head and run in
 the durable chronology before requesting the final independent review.
+
+Final records-only run 34800943926 passed the same complete suite on verified
+head 1095fc3af9. Independent review 5193579067 then identified one records
+omission, one ineffective completion-route assertion, and one learner-facing
+legacy-scoring explanation mismatch.
+
+Correct the completion-route test by seeding approaching review evidence and
+asserting that Review creates a new session targeting that skill. Run
+34809876674 confirmed all 286 native tests passed but failed the formatting
+gate; the formatting-only correction then passed the full suite in run
+34810054570. This is a test-strengthening correction rather than a production
+behavior change.
+
+Focused legacy-explanation red run 34810278475 proved that a 21-second score1
+application answer remained below the historical 20-second fluency threshold
+while the learner-facing explanation described only the current 90-second
+target. Explain both contracts explicitly: current application practice uses
+90 seconds, while replayed score1 evidence retains 20 seconds. Green run
+34810517609 passed the complete suite. Record the review, all corrective runs,
+and the previously omitted final records run before final verification.
