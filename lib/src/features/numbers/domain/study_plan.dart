@@ -100,6 +100,9 @@ final class StudyProgress {
   final double chanceAdjustedAccuracy;
   double get accuracy => independent == 0 ? 0 : correct / independent;
   String get explanation {
+    final fluencyExpectation = skillId.startsWith('application.')
+        ? 'under the current 90-second target; historical score1 evidence retains its 20-second threshold. '
+        : 'within ${StudyScoring.fluentWithin(skillId).inSeconds} seconds. ';
     final summary = independent == 0
         ? 'No independent evidence yet. Start with a diagnostic or guided practice.'
         : '$correct of $independent independent answers correct; $assisted assisted '
@@ -109,7 +112,7 @@ final class StudyProgress {
                   : skillId.startsWith('algebra.')
                   ? 'symbolic'
                   : 'numeric'} fluency '
-              'within ${StudyScoring.fluentWithin(skillId).inSeconds} seconds. '
+              '$fluencyExpectation'
               '${retention.reason}';
     return unsupported == 0
         ? summary
