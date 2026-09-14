@@ -154,11 +154,18 @@ final class ApplicationCurriculum {
     ApplicationOption('constant', 'The flow rate stays constant'),
   ];
 
-  ApplicationQuestion question(String skillId, int level, int seed, int index) {
+  ApplicationQuestion question(
+    String skillId,
+    int level,
+    int seed,
+    int index, {
+    int scoringVersion = 1,
+  }) {
     if (!skills.any((s) => s.id == skillId) ||
         level < 0 ||
         level > 2 ||
-        index < 0) {
+        index < 0 ||
+        (scoringVersion != 1 && scoringVersion != 2)) {
       throw ArgumentError('Unsupported application identity');
     }
     final random = SeededSequence(seed, index);
@@ -197,7 +204,7 @@ final class ApplicationCurriculum {
     };
     final rotation = random.pick(3) - 1;
     return ApplicationQuestion(
-      id: 'application.$skillId.level$level.v1.mark1.score1.$seed.$index',
+      id: 'application.$skillId.level$level.v1.mark1.score$scoringVersion.$seed.$index',
       skillId: skillId,
       prompt: prompt,
       expectedValue: result,

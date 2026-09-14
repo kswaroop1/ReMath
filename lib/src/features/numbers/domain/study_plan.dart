@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../../learning/domain/attempt_event.dart';
+import '../../learning/domain/numeric_answer_contract.dart';
 import '../../learning/domain/retained_mastery.dart';
 import 'study_curriculum.dart';
 import 'study_scoring.dart';
@@ -43,7 +44,7 @@ final class StudyProgress {
       if (attemptedLevel != level) continue;
       if (event.isCorrect) {
         errors = 0;
-        if (event.responseTime <= StudyScoring.fluentWithin(skillId)) {
+        if (event.responseTime <= StudyScoring.fluentWithinEvent(event)) {
           streak++;
           if (streak >= 3 && level < 2) {
             level++;
@@ -99,6 +100,9 @@ final class StudyProgress {
   final double chanceAdjustedAccuracy;
   double get accuracy => independent == 0 ? 0 : correct / independent;
   String get explanation {
+    final fluencyExpectation = skillId.startsWith('application.')
+        ? 'under the current 90-second target; historical score1 evidence retains its 20-second threshold. '
+        : 'within ${StudyScoring.fluentWithin(skillId).inSeconds} seconds. ';
     final summary = independent == 0
         ? 'No independent evidence yet. Start with a diagnostic or guided practice.'
         : '$correct of $independent independent answers correct; $assisted assisted '
@@ -108,7 +112,7 @@ final class StudyProgress {
                   : skillId.startsWith('algebra.')
                   ? 'symbolic'
                   : 'numeric'} fluency '
-              'within ${StudyScoring.fluentWithin(skillId).inSeconds} seconds. '
+              '$fluencyExpectation'
               '${retention.reason}';
     return unsupported == 0
         ? summary
@@ -119,6 +123,20 @@ final class StudyProgress {
 enum StudyStepKind { retrieval, learn, practice, reflection }
 
 enum StudyPhase { question, correction, retest }
+
+enum StudySessionKind { drill, standard, chained }
+
+enum StudyCompletionChoice { stop, repeat, continueTopic, review, challenge }
+
+extension StudySessionKindBudget on StudySessionKind {
+  Duration get activeBudget => switch (this) {
+    StudySessionKind.drill => const Duration(minutes: 2),
+    StudySessionKind.standard ||
+    StudySessionKind.chained => const Duration(minutes: 15),
+  };
+
+  int get additionalBlocks => this == StudySessionKind.chained ? 2 : 0;
+}
 
 final class StudyStep {
   const StudyStep(
@@ -194,6 +212,7 @@ final class StudyPlanner {
     level,
     multipleChoice: multipleChoice,
     templateVersion: StudyCurriculum.currentTemplateVersion(skillId),
+    scoringVersion: StudyCurriculum.currentScoringVersion(skillId),
   );
 
   List<String> _goalSkills(String id) {
@@ -296,6 +315,43 @@ final class StudyPlanner {
       _step(StudyStepKind.reflection, _goalSkills(goalId).first, 0),
     ],
   );
+
+  StudyPlan? review(String goalId, List<AttemptEvent> attempts, DateTime now) {
+    final candidates =
+        _goalSkills(goalId)
+            .map((id) => StudyProgress.forSkill(id, attempts, now))
+            .where((progress) => progress.retention.nextReviewAt != null)
+            .where(
+              (progress) =>
+                  progress.retention.isDue ||
+                  !progress.retention.nextReviewAt!.isAfter(
+                    now.add(const Duration(hours: 24)),
+                  ),
+            )
+            .toList()
+          ..sort((a, b) {
+            final priority = (a.retention.isDue ? 0 : 1).compareTo(
+              b.retention.isDue ? 0 : 1,
+            );
+            if (priority != 0) return priority;
+            final deadline = a.retention.nextReviewAt!.compareTo(
+              b.retention.nextReviewAt!,
+            );
+            return deadline != 0 ? deadline : a.skillId.compareTo(b.skillId);
+          });
+    if (candidates.isEmpty) return null;
+    final target = candidates.first;
+    final status = target.retention.isDue ? 'overdue' : 'approaching';
+    return StudyPlan(
+      reason: '${_curriculum.skill(target.skillId).title} review is $status.',
+      steps: [
+        _step(StudyStepKind.retrieval, target.skillId, target.level),
+        for (var i = 0; i < 8; i++)
+          _step(StudyStepKind.practice, target.skillId, target.level),
+        _step(StudyStepKind.reflection, target.skillId, target.level),
+      ],
+    );
+  }
 }
 
 /// Frozen, versioned plan plus exact last persisted interaction state.
@@ -303,6 +359,10 @@ final class StudyState {
   const StudyState({
     this.goalId = 'number-fluency',
     this.generator = 'portable',
+    this.confidence,
+    this.awaitingSurprise = false,
+    this.sessionKind = StudySessionKind.standard,
+    this.continuationBlocks = 0,
     this.plan,
     this.sessionId = '',
     this.seed = 0,
@@ -318,10 +378,11 @@ final class StudyState {
   });
   factory StudyState.decode(String source) {
     final json = jsonDecode(source) as Map<String, dynamic>;
-    if (json['version'] != 1 && json['version'] != 2 && json['version'] != 3) {
+    final version = json['version'] as int;
+    if (version < 1 || version > 6) {
       throw const FormatException('Unsupported study state');
     }
-    if (json['version'] != 1 && json['plan'] != null) {
+    if (version != 1 && json['plan'] != null) {
       final plan = json['plan'] as Map<String, dynamic>;
       for (final raw in plan['steps'] as List<dynamic>) {
         final step = raw as Map<String, dynamic>;
@@ -330,7 +391,10 @@ final class StudyState {
               step['templateVersion'] as int,
             ) ||
             step['markingVersion'] != 1 ||
-            step['scoringVersion'] != 1) {
+            !StudyCurriculum.supportsScoring(
+              step['skill'] as String,
+              step['scoringVersion'] as int,
+            )) {
           throw const FormatException('Unsupported saved question contract');
         }
       }
@@ -347,10 +411,10 @@ final class StudyState {
         false;
     if ((json['generator'] != null &&
             !['portable', 'legacy-browser'].contains(json['generator'])) ||
-        (json['version'] == 3 && !json.containsKey('generator'))) {
+        (version >= 3 && !json.containsKey('generator'))) {
       throw const FormatException('Unsupported saved generator');
     }
-    final generator = json['version'] == 3
+    final generator = version >= 3
         ? json['generator'] as String?
         : hasLegacy
         ? null
@@ -359,6 +423,14 @@ final class StudyState {
       throw const FormatException('Missing generator for a current session');
     }
     final state = StudyState(
+      awaitingSurprise: version >= 6 ? json['awaitingSurprise'] as bool : false,
+      confidence: version >= 4 && json['confidence'] != null
+          ? ConfidenceRating.values.byName(json['confidence'] as String)
+          : null,
+      sessionKind: version >= 5
+          ? StudySessionKind.values.byName(json['sessionKind'] as String)
+          : StudySessionKind.standard,
+      continuationBlocks: version >= 5 ? json['continuationBlocks'] as int : 0,
       generator: generator,
       goalId: json['goal'] as String,
       plan: plan,
@@ -379,8 +451,16 @@ final class StudyState {
         state.hintCount < 0 ||
         state.hintCount > 4 ||
         state.remainingMilliseconds < 0 ||
+        state.continuationBlocks < 0 ||
+        state.continuationBlocks > state.sessionKind.additionalBlocks ||
+        state.remainingMilliseconds >
+            state.sessionKind.activeBudget.inMilliseconds ||
+        (state.sessionKind != StudySessionKind.chained &&
+            state.continuationBlocks != 0) ||
         state.serial < 0 ||
         state.responseMilliseconds < 0 ||
+        (state.awaitingSurprise &&
+            (state.plan == null || state.confidence == null)) ||
         (state.plan != null && state.stepIndex >= state.plan!.steps.length)) {
       throw const FormatException('Invalid study state');
     }
@@ -394,21 +474,51 @@ final class StudyState {
             step.templateVersion,
           ) ||
           step.markingVersion != 1 ||
-          step.scoringVersion != 1 ||
+          !StudyCurriculum.supportsScoring(step.skillId, step.scoringVersion) ||
           ((step.skillId.startsWith('algebra.') ||
                   step.skillId.startsWith('reasoning.') ||
                   step.skillId.startsWith('application.')) &&
-              (json['version'] == 1 || step.multipleChoice)) ||
+              (version == 1 || step.multipleChoice)) ||
           step.level < 0 ||
           step.level > 2 ||
           !curriculum.skills.any((skill) => skill.id == step.skillId)) {
         throw const FormatException('Invalid saved skill or difficulty');
       }
     }
+    if (state.awaitingSurprise) {
+      final step = state.step!;
+      final independentlyAnswerable =
+          (step.kind == StudyStepKind.retrieval ||
+              step.kind == StudyStepKind.practice) &&
+          state.phase != StudyPhase.correction &&
+          state.hintCount == 0;
+      final question = curriculum.question(
+        step.skillId,
+        step.level,
+        state.seed,
+        state.questionIndex,
+        templateVersion: step.templateVersion,
+        legacyBrowser: state.generator == 'legacy-browser',
+        markingVersion: step.markingVersion,
+        scoringVersion: step.scoringVersion,
+      );
+      final validDraft =
+          question.mark(state.draft).verdict != AnswerVerdict.invalid &&
+          (state.phase != StudyPhase.question ||
+              !step.multipleChoice ||
+              question.choices.any((choice) => choice.value == state.draft));
+      if (!independentlyAnswerable || !validDraft) {
+        throw const FormatException('Invalid persisted feedback lock');
+      }
+    }
     return state;
   }
   final String goalId;
   final String? generator;
+  final ConfidenceRating? confidence;
+  final bool awaitingSurprise;
+  final StudySessionKind sessionKind;
+  final int continuationBlocks;
   bool get needsGeneratorChoice => generator == null;
   final StudyPlan? plan;
   final String sessionId;
@@ -426,6 +536,10 @@ final class StudyState {
 
   StudyState copyWith({
     String? generator,
+    ConfidenceRating? confidence,
+    bool? awaitingSurprise,
+    StudySessionKind? sessionKind,
+    int? continuationBlocks,
     String? goalId,
     StudyPlan? plan,
     String? sessionId,
@@ -440,8 +554,13 @@ final class StudyState {
     int? serial,
     int? responseMilliseconds,
     bool clearRelated = false,
+    bool clearConfidence = false,
   }) => StudyState(
     generator: generator ?? this.generator,
+    confidence: clearConfidence ? null : confidence ?? this.confidence,
+    awaitingSurprise: awaitingSurprise ?? this.awaitingSurprise,
+    sessionKind: sessionKind ?? this.sessionKind,
+    continuationBlocks: continuationBlocks ?? this.continuationBlocks,
     goalId: goalId ?? this.goalId,
     plan: plan ?? this.plan,
     sessionId: sessionId ?? this.sessionId,
@@ -457,21 +576,38 @@ final class StudyState {
     responseMilliseconds: responseMilliseconds ?? this.responseMilliseconds,
   );
 
-  String encode() => jsonEncode({
-    'version': 3,
-    'generator': generator,
-    'goal': goalId,
-    'plan': plan?.toJson(),
-    'session': sessionId,
-    'seed': seed,
-    'step': stepIndex,
-    'question': questionIndex,
-    'draft': draft,
-    'hints': hintCount,
-    'phase': phase.name,
-    'remaining': remainingMilliseconds,
-    'related': relatedEventId,
-    'serial': serial,
-    'response': responseMilliseconds,
-  });
+  String encode() {
+    if (continuationBlocks < 0 ||
+        continuationBlocks > sessionKind.additionalBlocks ||
+        remainingMilliseconds > sessionKind.activeBudget.inMilliseconds ||
+        (sessionKind != StudySessionKind.chained && continuationBlocks != 0) ||
+        (awaitingSurprise && (plan == null || confidence == null))) {
+      throw ArgumentError.value(
+        continuationBlocks,
+        'continuationBlocks',
+        'must be finite and belong to a chained session',
+      );
+    }
+    return jsonEncode({
+      'version': 6,
+      'generator': generator,
+      'confidence': confidence?.name,
+      'awaitingSurprise': awaitingSurprise,
+      'sessionKind': sessionKind.name,
+      'continuationBlocks': continuationBlocks,
+      'goal': goalId,
+      'plan': plan?.toJson(),
+      'session': sessionId,
+      'seed': seed,
+      'step': stepIndex,
+      'question': questionIndex,
+      'draft': draft,
+      'hints': hintCount,
+      'phase': phase.name,
+      'remaining': remainingMilliseconds,
+      'related': relatedEventId,
+      'serial': serial,
+      'response': responseMilliseconds,
+    });
+  }
 }

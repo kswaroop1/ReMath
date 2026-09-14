@@ -48,6 +48,10 @@ final class StudyCurriculum {
       : 2;
   static bool supportsTemplate(String skillId, int version) =>
       version >= 1 && version <= currentTemplateVersion(skillId);
+  static int currentScoringVersion(String skillId) =>
+      skillId.startsWith('application.') ? 2 : 1;
+  static bool supportsScoring(String skillId, int version) =>
+      version >= 1 && version <= currentScoringVersion(skillId);
 
   StudyQuestion question(
     String skillId,
@@ -57,16 +61,23 @@ final class StudyCurriculum {
     int? templateVersion,
     bool legacyBrowser = false,
     int markingVersion = 1,
-    int scoringVersion = 1,
+    int? scoringVersion,
   }) {
     final version = templateVersion ?? currentTemplateVersion(skillId);
+    final score = scoringVersion ?? currentScoringVersion(skillId);
     if (!supportsTemplate(skillId, version) ||
         markingVersion != 1 ||
-        scoringVersion != 1) {
+        !supportsScoring(skillId, score)) {
       throw const FormatException('Unsupported question contract version');
     }
     if (skillId.startsWith('application.')) {
-      return ApplicationCurriculum().question(skillId, level, seed, index);
+      return ApplicationCurriculum().question(
+        skillId,
+        level,
+        seed,
+        index,
+        scoringVersion: score,
+      );
     }
     if (skillId.startsWith('reasoning.')) {
       return ReasoningCurriculum().question(skillId, level, seed, index);

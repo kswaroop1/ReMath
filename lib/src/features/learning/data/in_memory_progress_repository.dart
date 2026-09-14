@@ -17,6 +17,7 @@ final class InMemoryProgressRepository implements ProgressRepository {
 
   @override
   Future<bool> commitStudyAttempt(AttemptEvent event, String state) async {
+    event.validateCalibrationEvidence();
     if (_attempts.containsKey(event.eventId)) {
       return false;
     }
@@ -44,6 +45,7 @@ final class InMemoryProgressRepository implements ProgressRepository {
 
   @override
   Future<bool> recordAttempt(AttemptEvent event) async {
+    event.validateCalibrationEvidence();
     if (_attempts.containsKey(event.eventId)) {
       return false;
     }
