@@ -319,6 +319,21 @@ void main() {
   test('every completion route produces its promised next step', () async {
     Future<StudyState> choose(StudyCompletionChoice choice) async {
       final routeRepository = InMemoryProgressRepository();
+      if (choice == StudyCompletionChoice.review) {
+        await routeRepository.recordAttempt(
+          AttemptEvent(
+            answer: '1',
+            eventId: 'review-due',
+            isCorrect: true,
+            occurredAt: now,
+            questionId:
+                'numbers.arithmetic.addition.level0.v1.mark1.score1.1',
+            responseTime: const Duration(seconds: 2),
+            sessionId: 'prior',
+            skillId: 'arithmetic.addition',
+          ),
+        );
+      }
       final plan = StudyPlanner().plan('number-fluency', [], now);
       await routeRepository.saveStudyState(
         StudyState(
@@ -353,7 +368,9 @@ void main() {
 
     final review = await choose(StudyCompletionChoice.review);
     expect(review.plan, isNotNull);
-    expect(review.plan!.reason, isNotEmpty);
+    expect(review.sessionId, 'next-review');
+    expect(review.plan!.reason, contains('review is'));
+    expect(review.plan!.steps.first.skillId, 'arithmetic.addition');
 
     final challenge = await choose(StudyCompletionChoice.challenge);
     expect(challenge.goalId, 'applications');
