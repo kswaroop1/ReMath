@@ -31,6 +31,37 @@ jobs:
           GITLEAKS_ENABLE_COMMENTS: "false"
           GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
 
+  baseline-source:
+    name: Generate baseline source
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate platform projects and lock file
+        run: >-
+          flutter create --org com.kswaroop --project-name remath
+          --platforms=android,ios,linux,macos,web,windows .
+      - name: Archive generated source
+        uses: actions/upload-artifact@v7
+        with:
+          name: engineering-baseline-source
+          path: |
+            android
+            ios
+            linux
+            macos
+            web
+            windows
+            pubspec.lock
+          if-no-files-found: error
+          retention-days: 1
+
   quality:
     name: Build and test
     runs-on: ubuntu-latest
