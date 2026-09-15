@@ -32,3 +32,11 @@ green. Select the engineering baseline before behavioral work: record exact
 learner/owner outcomes, platform-runner and dependency-lock invariants, the
 bounded integration and performance foundations, failure behavior, and explicit
 out-of-scope boundaries in `docs/slices/engineering-baseline.md` and the roadmap.
+
+Cycle 1 select/red: EN-011 and EN-012 require reviewed platform projects and an
+application dependency lock to exist at checkout, before dependency installation
+or packaging can silently generate them. Add a CI structure check naming the
+minimum Android, iOS, Linux, macOS, web, and Windows entry files plus
+`pubspec.lock`. The current repository should fail this technical invariant at
+the intended missing-file boundary; no runner or lock production files are added
+in the red commit.
