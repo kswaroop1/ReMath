@@ -54,3 +54,19 @@ artifact action's default omitted the platform `.gitignore` files. Preserve
 those generated exclusions in the review input by enabling hidden-file upload
 for the explicitly bounded platform directories; root metadata and repository
 state remain outside the artifact paths.
+
+Cycle 1 green implementation: generation run 34994408835 successfully archived
+the stable-toolchain platform sources including their exclusions. Review the
+archive and omit ignored machine-local or ephemeral output: Android local
+properties/IDE files and wrapper binaries, Apple generated configuration and
+ephemeral packages, and Flutter ephemeral directories. Commit the remaining
+reviewed Android, iOS, Linux, macOS, web, and Windows projects plus
+`pubspec.lock`. Remove the temporary archive job so ordinary CI consumes the
+committed projects. After dependency installation, CI must also reject any
+lock-file diff.
+
+The repository write guard rejected replacing the existing release workflow
+because that file contains publication permissions. Do not retry or circumvent
+the denial. Leave the release workflow unchanged in this cycle; removing its
+now-redundant `flutter create` steps is deferred until the owner explicitly
+authorizes that workflow edit.
