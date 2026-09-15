@@ -12,8 +12,8 @@ void main() {
       final database = sqlite3.openInMemory();
       final repository = SqliteProgressRepository(database);
       addTearDown(repository.close);
-      final contentPack =
-          await AssetContentPackRepository().loadFoundationPack();
+      final contentPack = await AssetContentPackRepository()
+          .loadFoundationPack();
 
       await tester.pumpWidget(
         ReMathApp(contentPack: contentPack, repository: repository),
