@@ -40,3 +40,11 @@ minimum Android, iOS, Linux, macOS, web, and Windows entry files plus
 `pubspec.lock`. The current repository should fail this technical invariant at
 the intended missing-file boundary; no runner or lock production files are added
 in the red commit.
+
+Cycle 1 red: CI run 34971033181 failed at the intended committed-structure
+check before dependency installation. The missing boundary includes
+`pubspec.lock` and the required Android, iOS, Linux, macOS, web, and Windows
+runner entry files. Add a temporary pull-request-only CI job that uses the same
+Flutter stable action as repository CI to generate and archive those sources.
+The quality job remains red until the generated sources themselves are reviewed
+and committed; this job is generation transport, not the EN-011/EN-012 fix.
