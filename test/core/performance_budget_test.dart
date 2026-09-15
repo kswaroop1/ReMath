@@ -46,4 +46,24 @@ void main() {
       throwsArgumentError,
     );
   });
+
+  test(
+    'measurement runs warm-ups before collecting declared samples',
+    () async {
+      var executions = 0;
+      final budget = PerformanceBudget(
+        name: 'question transition',
+        maximum: const Duration(minutes: 1),
+        warmUpRuns: 2,
+        sampleRuns: 5,
+      );
+
+      final result = await budget.measure(() async {
+        executions++;
+      });
+
+      expect(executions, 7);
+      expect(result.isWithinBudget, isTrue);
+    },
+  );
 }
