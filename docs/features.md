@@ -17,12 +17,13 @@ This is the authoritative, numbered product and content backlog for ReMath.
 - Feature IDs are permanent. Retired features remain recorded rather than being
   renumbered.
 
-Last reviewed: 9 September 2026 (PR17 application journey).
+Last reviewed: 14 September 2026 (post-PR20 infrastructure reconciliation).
 
 ## 1. Product foundations
 
-- [x] **PF-001 — Cross-platform Flutter foundation.** Flutter application shell
-  committed for Android, iOS, Windows, macOS, and optional web generation.
+- [x] **PF-001 — Cross-platform Flutter foundation.** The portable Flutter
+  application shell is verified against generated Android, iOS, Windows, macOS,
+  Linux, and web runners. Committing reviewed platform projects remains EN-011.
 - [x] **PF-002 — Responsive foundation screen.** Minimal Material 3 screen that
   renders under widget test and constrains content on wide displays.
 - [x] **PF-003 — Repository working contract.** Repository-wide `AGENTS.md`
@@ -37,8 +38,10 @@ Last reviewed: 9 September 2026 (PR17 application journey).
   checkboxes and durable IDs.
 - [ ] **PF-008 — Product terminology glossary.** **Planned.** Canonical meanings
   for skill, concept, template, question instance, attempt, mastery, and chunk.
-- [ ] **PF-009 — Architecture decision records.** **Planned.** Record material
-  package, database, sync, marking, and security choices as ADRs.
+- [ ] **PF-009 — Architecture decision records.** **Foundation delivered:** five
+  ADRs record local persistence, adaptive scheduling, planned sessions, bounded
+  algebra marking, and structured reasoning. Sync, content trust, backup
+  encryption, package selection, and further security decisions remain planned.
 
 ## 2. Learning experience and 15-minute chunks
 
@@ -305,14 +308,21 @@ Last reviewed: 9 September 2026 (PR17 application journey).
 
 ## 7. Content-pack platform
 
-- [ ] **CP-001 — Foundation pack bundled with app.** Small offline arithmetic and
-  algebra starting set.
-- [ ] **CP-002 — Pack manifest parser.** Schema, compatibility, sizes, dependencies,
-  digests, and signatures.
+- [ ] **CP-001 — Foundation pack bundled with app.** **Arithmetic foundation
+  delivered:** the app loads a bundled schema-v3 pack containing stable skills,
+  deterministic templates, concept cards, hint ladders, prerequisites, goals,
+  and licence metadata. Algebra currently uses compiled application contracts;
+  moving its starting set into the pack platform remains planned.
+- [ ] **CP-002 — Pack manifest parser.** **Foundation delivered:** schemas v1-v3,
+  stable IDs, semantic pack versions, licences, skills, templates, concept cards,
+  prerequisites, and goals are parsed locally. App compatibility, sizes, pack
+  dependencies, digests, and signatures remain planned.
 - [ ] **CP-003 — Pack compiler.** Convert human-editable source into validated
   distribution form.
-- [ ] **CP-004 — Pack validator.** References, IDs, equations, assets, generators,
-  licences, and schema.
+- [ ] **CP-004 — Pack validator.** **Foundation delivered:** schema range, IDs,
+  versions, licences, required collections, template bounds, graph cycles, and
+  cross-references are rejected before use. Equation, asset, full generator,
+  source/licence provenance, and distribution validation remain planned.
 - [ ] **CP-005 — Signed releases.** Verify publisher signature and SHA-256 before
   activation.
 - [ ] **CP-006 — Transactional installation.** Activate only after complete
@@ -329,21 +339,31 @@ Last reviewed: 9 September 2026 (PR17 application journey).
 - [ ] **CP-013 — Pack rollback.** Restore previous version after validation or
   runtime failure.
 - [ ] **CP-014 — Authoring preview.** Render lessons and questions before release.
-- [ ] **CP-015 — Content CI.** Schema, link, generator, answer, licence, and
-  statistical-distribution tests.
+- [ ] **CP-015 — Content CI.** **Foundation delivered:** CI parses and validates
+  the bundled pack, including schema, identifiers, references, HTTPS link shape,
+  template bounds, graph integrity, and licences; seeded generator sweeps verify
+  current arithmetic identities and answers. External-link health, source and
+  asset checks, compiler tests, and statistical-distribution tests remain planned.
 
 ## 8. Local data, sync, and portability
 
 - [x] **DS-001 — Local progress database.** SQLite persists native-platform
   attempts and resumable sessions without network access.
-- [x] **DS-002 — Database migrations.** Transactional v1-to-v2 migration preserves
-  legacy attempts, assigns explicit legacy metadata, and is forward-tested.
+- [x] **DS-002 — Database migrations.** Transactional migrations through schema
+  v7 preserve legacy attempts and resumable state, assign explicit compatibility
+  metadata, enforce current event constraints, roll back on failure, and are
+  forward-tested from supported historical schemas.
 - [ ] **DS-003 — Local content cache.** Independently managed from personal data.
 - [ ] **DS-004 — Event merge engine.** Union immutable events instead of replacing
   whole databases.
-- [ ] **DS-005 — Idempotent sync.** Duplicate delivery has no effect.
-- [ ] **DS-006 — Compact snapshots.** Fast startup while events remain
-  authoritative.
+- [ ] **DS-005 — Idempotent sync.** **Persistence foundation delivered:** duplicate
+  immutable event IDs have no effect in local repositories and atomic study
+  commits. Transport, outbox acknowledgement, and cross-device replay remain
+  planned.
+- [ ] **DS-006 — Compact snapshots.** **Session foundation delivered:** one
+  versioned active-study snapshot provides bounded resume while immutable events
+  remain authoritative for progress. General progress snapshots, compaction, and
+  measured startup behaviour remain planned.
 - [ ] **DS-007 — Offline outbox.** Queue local events until connectivity returns.
 - [ ] **DS-008 — Sync status.** Last success, pending events, provider, and errors.
 - [ ] **DS-009 — Conflict policy.** Deterministic handling of mutable preferences
@@ -374,8 +394,9 @@ Last reviewed: 9 September 2026 (PR17 application journey).
 
 - [x] **SP-001 — No mandatory AI service.** Foundation question generation,
   integer marking, progress, and resume operate locally.
-- [ ] **SP-002 — No behavioural analytics by default.** Explicit opt-in if
-  diagnostics are ever added.
+- [x] **SP-002 — No behavioural analytics by default.** The application contains
+  no analytics or telemetry dependency and sends no learning behaviour off-device.
+  Explicit opt-in remains mandatory if diagnostics are ever introduced.
 - [x] **SP-003 — Secret scanning.** Gitleaks blocks staged secrets before commit,
   scans full history before push, and runs independently in CI.
 - [ ] **SP-004 — Least-privilege provider scopes.** App-folder access rather than
@@ -433,8 +454,10 @@ Last reviewed: 9 September 2026 (PR17 application journey).
 - [ ] **EN-017 — Build provenance.** Cryptographic artifact attestation where the
   repository plan supports it.
 - [ ] **EN-018 — Branch protection.** Require CI and review rules on `main`.
-- [ ] **EN-019 — Integration test farm.** Critical journeys on representative
-  devices and desktop platforms.
+- [ ] **EN-019 — Integration test farm.** **Foundation delivered:** domain,
+  repository, widget, and selected Chrome contract tests exercise critical
+  journeys in CI. Installable-app journeys on representative mobile and desktop
+  platforms remain planned.
 - [ ] **EN-020 — Performance budgets.** Startup, question transition, database,
   download, and memory thresholds.
 - [x] **EN-021 — Cross-platform installation guidance.** Verified

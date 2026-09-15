@@ -129,3 +129,13 @@ The first increment's [acceptance criteria](slices/algebra-solving.md) are bound
 its completion does not mark later programme features complete. Every increment
 keeps separate red/green evidence and requests review explicitly after CI. No
 release is included in this programme's implementation requests.
+
+## PR #21 — Reproducible engineering baseline
+
+Pause new mathematics content and implement EN-011, EN-012, and bounded
+foundations for EN-019 and EN-020. Commit reviewed platform runners and the
+application dependency lock, prove a production-composed critical journey, and
+introduce stable initial performance measurements. The exact
+[scope and acceptance criteria](slices/engineering-baseline.md) preserve the
+boundary between this foundation and later device-farm, signing, supply-chain,
+sync, and content-pack work. No release or `VERSION` change is included.
