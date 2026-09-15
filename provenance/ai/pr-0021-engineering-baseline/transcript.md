@@ -70,3 +70,26 @@ because that file contains publication permissions. Do not retry or circumvent
 the denial. Leave the release workflow unchanged in this cycle; removing its
 now-redundant `flutter create` steps is deferred until the owner explicitly
 authorizes that workflow edit.
+
+Cycle 1 green: CI run 34997125517 passed the committed structure check,
+dependency installation, unchanged-lock check, formatting, analysis, content
+validation, Chrome contracts, native tests, coverage, and secret scan. The
+checkout is now reproducible from reviewed platform projects and the committed
+application lock. The release workflow remains intentionally unchanged under
+the recorded write-guard boundary.
+
+Cycle 2 characterization: EN-019 requires one production-composed critical
+journey without claiming a full device farm. Add a widget integration
+characterization that loads the shipped foundation asset through
+`AssetContentPackRepository`, uses the real schema-v7
+`SqliteProgressRepository`, starts the real app, records an incorrect answer,
+rebuilds the app, and verifies the exact correction journey and immutable
+attempt restore. This is existing-behavior coverage, so do not manufacture a
+red production failure.
+
+CI run 34997671946 executed all 287 native tests successfully, including the new
+journey, but failed the formatting gate because the submitted test did not match
+the CI Dart formatter. Publish a formatting-only correction. In corrected run
+34998014550, structure, lock reproducibility, formatting, analysis, content
+validation, Chrome contracts, 287 native tests, coverage, and secret scanning
+all passed; GitHub job bookkeeping was still completing when recorded.
