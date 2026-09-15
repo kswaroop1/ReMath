@@ -42,6 +42,8 @@ jobs:
         with:
           channel: stable
           cache: true
+      - name: Verify committed application structure
+        run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
         run: flutter pub get
       - name: Verify formatting
