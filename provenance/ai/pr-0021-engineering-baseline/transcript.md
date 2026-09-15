@@ -48,3 +48,9 @@ runner entry files. Add a temporary pull-request-only CI job that uses the same
 Flutter stable action as repository CI to generate and archive those sources.
 The quality job remains red until the generated sources themselves are reviewed
 and committed; this job is generation transport, not the EN-011/EN-012 fix.
+
+Generation run 34994064139 produced the expected projects and lock file, but the
+artifact action's default omitted the platform `.gitignore` files. Preserve
+those generated exclusions in the review input by enabling hidden-file upload
+for the explicitly bounded platform directories; root metadata and repository
+state remain outside the artifact paths.
