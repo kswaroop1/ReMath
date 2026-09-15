@@ -24,3 +24,11 @@ as the first checkpoint of draft PR21. Its planned bounded implementation scope
 is EN-011, EN-012, an EN-019 critical-journey integration foundation, and EN-020
 performance-budget foundations. No release, signing credential, cloud sync,
 content expansion, or VERSION change is included.
+
+After the user asked whether work was continuing, clarify that the prior
+continuation automation ended with PR20 and that no background work occurred
+between messages. Resume PR21 and verify reconciliation CI run 34893291023 is
+green. Select the engineering baseline before behavioral work: record exact
+learner/owner outcomes, platform-runner and dependency-lock invariants, the
+bounded integration and performance foundations, failure behavior, and explicit
+out-of-scope boundaries in `docs/slices/engineering-baseline.md` and the roadmap.
