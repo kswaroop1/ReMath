@@ -440,10 +440,12 @@ Last reviewed: 14 September 2026 (post-PR20 infrastructure reconciliation).
   before the GitHub Release is published.
 - [x] **EN-010 — Current dependency monitoring.** Dependabot checks pub and GitHub
   Actions ecosystems.
-- [ ] **EN-011 — Committed platform runners.** **Planned.** Generate, review, and
-  retain platform projects rather than generating them only in CI.
-- [ ] **EN-012 — Reproducible dependency lock.** **Planned.** Commit
-  `pubspec.lock` for this application.
+- [x] **EN-011 — Committed platform runners.** Android, iOS, Linux, macOS, web,
+  and Windows projects are reviewed source, with CI checking their entry files.
+  The release workflow's redundant compatibility generation remains separately
+  deferred under the repository write-permission boundary.
+- [x] **EN-012 — Reproducible dependency lock.** `pubspec.lock` is application
+  source and CI rejects dependency resolution that changes it.
 - [ ] **EN-013 — Android production signing.** Secure release keystore and signed
   APK/AAB.
 - [ ] **EN-014 — Apple production signing.** Developer identity, provisioning,
@@ -454,12 +456,14 @@ Last reviewed: 14 September 2026 (post-PR20 infrastructure reconciliation).
 - [ ] **EN-017 — Build provenance.** Cryptographic artifact attestation where the
   repository plan supports it.
 - [ ] **EN-018 — Branch protection.** Require CI and review rules on `main`.
-- [ ] **EN-019 — Integration test farm.** **Foundation delivered:** domain,
-  repository, widget, and selected Chrome contract tests exercise critical
-  journeys in CI. Installable-app journeys on representative mobile and desktop
-  platforms remain planned.
-- [ ] **EN-020 — Performance budgets.** Startup, question transition, database,
-  download, and memory thresholds.
+- [ ] **EN-019 — Integration test farm.** **Foundation expanded:** CI now runs a
+  production-composed journey through shipped content, the real SQLite schema,
+  answer persistence, interruption and exact correction restoration. Installable
+  mobile and desktop journeys remain planned.
+- [ ] **EN-020 — Performance budgets.** **Foundation delivered:** CI enforces
+  warmed five-sample median budgets for foundation-content load, application
+  startup, SQLite attempt persistence, and correct-answer transition. Downloads,
+  memory, large packs and representative physical devices remain planned.
 - [x] **EN-021 — Cross-platform installation guidance.** Verified
   Android and Windows installation instructions and signing limitations on each
   release page and in repository documentation.
