@@ -14,6 +14,40 @@ void main() {
     );
   });
 
+  test('budget failures retain fractional millisecond differences', () {
+    const result = PerformanceBudgetResult(
+      name: 'SQLite write',
+      maximum: Duration(milliseconds: 100),
+      median: Duration(microseconds: 100500),
+    );
+    expect(result.isWithinBudget, isFalse);
+    expect(
+      result.failureMessage,
+      'SQLite write median 100.5ms exceeded allowed 100ms',
+    );
+  });
+
+  test('budget equality passes and sample counts cannot change silently', () {
+    final budget = PerformanceBudget(
+      name: 'startup',
+      maximum: const Duration(milliseconds: 100),
+      warmUpRuns: 0,
+      sampleRuns: 3,
+    );
+    expect(
+      () => budget.evaluate(const [Duration(milliseconds: 100)]),
+      throwsArgumentError,
+    );
+    expect(
+      budget.evaluate(const [
+        Duration(milliseconds: 99),
+        Duration(milliseconds: 100),
+        Duration(milliseconds: 101),
+      ]).isWithinBudget,
+      isTrue,
+    );
+  });
+
   test('performance budgets use a stable median and explain failures', () {
     final budget = PerformanceBudget(
       name: 'SQLite attempt write',

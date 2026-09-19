@@ -173,3 +173,16 @@ Formatting, analysis, lock guard, Chrome tests and secret scan passed. The next
 implementation adds only the non-negative guard for this behavior. Production
 bootstrap remains unchanged; the disk-backed journey/benchmarks are explicitly
 existing-behavior characterization, with green-before evidence at 3b6004f.
+
+### CI — first correction verification
+
+Commit 290486f, run [35438935397](https://github.com/kswaroop1/ReMath/actions/runs/35438935397)
+passed the complete native suite, including negative warm-up rejection, production
+main startup, file-backed correction restoration and disk-backed performance
+budgets. The lock no-diff guard passed. Formatting failed, so analysis/Chrome and
+coverage-floor steps were skipped; this is not a fully green CI claim.
+
+The next test-first commit reproduces fractional-millisecond diagnostic loss and
+adds characterization of exact-threshold acceptance and invalid sample counts.
+It also makes formatting failures print the canonical diff, while retaining a
+failing exit status. No formatting threshold or test assertion is weakened.
