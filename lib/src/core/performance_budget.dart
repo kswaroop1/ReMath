@@ -1,3 +1,5 @@
+import 'dart:async';
+
 final class PerformanceBudget {
   PerformanceBudget({
     required this.name,
@@ -18,6 +20,22 @@ final class PerformanceBudget {
   final Duration maximum;
   final int warmUpRuns;
   final int sampleRuns;
+
+  Future<PerformanceBudgetResult> measure(
+    FutureOr<void> Function() operation,
+  ) async {
+    for (var index = 0; index < warmUpRuns; index++) {
+      await operation();
+    }
+    final samples = <Duration>[];
+    for (var index = 0; index < sampleRuns; index++) {
+      final stopwatch = Stopwatch()..start();
+      await operation();
+      stopwatch.stop();
+      samples.add(stopwatch.elapsed);
+    }
+    return evaluate(samples);
+  }
 
   PerformanceBudgetResult evaluate(List<Duration> samples) {
     if (samples.length != sampleRuns) {
