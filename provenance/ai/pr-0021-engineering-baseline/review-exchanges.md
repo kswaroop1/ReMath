@@ -96,3 +96,31 @@ Both durations are truncated with `inMilliseconds`, so a median of 100.5 ms agai
 
 Useful? React with 👍 / 👎.
 
+
+
+## Assistant
+
+> The latest CI is the intended red boundary: all new production/durability work runs, and the single behavioral failure is exactly the fractional-millisecond diagnostic under test. I’m now applying that minimal fix plus the CI-compatible formatter output, then I’ll republish and verify.
+
+## CI — run 35439081562
+
+> Expected: 'SQLite write median 100.5ms exceeded allowed 100ms'
+
+> Actual: 'SQLite write median 100ms exceeded allowed 100ms'
+
+> 293 tests passed, 1 failed.
+
+## Assistant
+
+> The focused green fix is published as commit `73ccd38`: fractional timing is now preserved, the exact CI formatter changes are applied, and the temporary formatting diagnostic has been removed. I’m waiting for the full GitHub verification before updating the final provenance/review record.
+
+## CI — run 35449955466
+
+> 294 tests passed.
+
+> 7 tests passed (Chrome).
+
+> Line coverage: 98.99%.
+
+All required jobs, including formatting, analysis, content validation, the
+dependency-lock no-diff guard, and secret scanning, completed successfully.

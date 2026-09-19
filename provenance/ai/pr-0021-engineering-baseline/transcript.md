@@ -186,3 +186,25 @@ The next test-first commit reproduces fractional-millisecond diagnostic loss and
 adds characterization of exact-threshold acceptance and invalid sample counts.
 It also makes formatting failures print the canonical diff, while retaining a
 failing exit status. No formatting threshold or test assertion is weakened.
+
+
+### CI — precise-diagnostic red phase
+
+Commit 621c44e, run [35439081562](https://github.com/kswaroop1/ReMath/actions/runs/35439081562)
+failed at the focused performance-budget assertion: a measured 100.5 ms median
+was reported as 100 ms against an allowed 100 ms. The run also printed the
+canonical Dart formatter diff. The other 293 native tests passed; secret
+scanning passed.
+
+### Agent — precise-diagnostic correction
+
+Commit 73ccd38 preserves fractional milliseconds in failure messages, applies
+the exact CI formatter output, and removes the temporary formatting diagnostic.
+No budget, sample count, or acceptance threshold changed.
+
+### CI — review-correction verification
+
+Run [35449955466](https://github.com/kswaroop1/ReMath/actions/runs/35449955466)
+passed all checks: committed structure, dependency-lock no-diff, formatting,
+static analysis, content validation, 7 Chrome tests, 294 native tests, 98.99%
+line coverage, and secret scanning.
