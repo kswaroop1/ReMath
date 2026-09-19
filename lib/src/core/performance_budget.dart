@@ -7,6 +7,9 @@ final class PerformanceBudget {
     required this.warmUpRuns,
     required this.sampleRuns,
   }) {
+    if (warmUpRuns < 0) {
+      throw ArgumentError.value(warmUpRuns, 'warmUpRuns', 'must be non-negative');
+    }
     if (sampleRuns < 3 || sampleRuns.isEven) {
       throw ArgumentError.value(
         sampleRuns,

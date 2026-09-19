@@ -17,13 +17,14 @@ This is the authoritative, numbered product and content backlog for ReMath.
 - Feature IDs are permanent. Retired features remain recorded rather than being
   renumbered.
 
-Last reviewed: 14 September 2026 (post-PR20 infrastructure reconciliation).
+Last reviewed: 19 September 2026 (PR21 review corrections after PR20).
 
 ## 1. Product foundations
 
 - [x] **PF-001 — Cross-platform Flutter foundation.** The portable Flutter
   application shell is verified against generated Android, iOS, Windows, macOS,
-  Linux, and web runners. Committing reviewed platform projects remains EN-011.
+  Linux, and web runners. Projects are now committed; EN-011 remains open until
+  release builds consume them without regeneration.
 - [x] **PF-002 — Responsive foundation screen.** Minimal Material 3 screen that
   renders under widget test and constrains content on wide displays.
 - [x] **PF-003 — Repository working contract.** Repository-wide `AGENTS.md`
@@ -440,10 +441,11 @@ Last reviewed: 14 September 2026 (post-PR20 infrastructure reconciliation).
   before the GitHub Release is published.
 - [x] **EN-010 — Current dependency monitoring.** Dependabot checks pub and GitHub
   Actions ecosystems.
-- [x] **EN-011 — Committed platform runners.** Android, iOS, Linux, macOS, web,
+- [ ] **EN-011 — Committed platform runners.** Android, iOS, Linux, macOS, web,
   and Windows projects are reviewed source, with CI checking their entry files.
-  The release workflow's redundant compatibility generation remains separately
-  deferred under the repository write-permission boundary.
+  **Foundation only:** release jobs still regenerate projects. Completion requires
+  successful builds from unchanged committed runners and removal of generation;
+  that workflow change remains deferred under the recorded permission boundary.
 - [x] **EN-012 — Reproducible dependency lock.** `pubspec.lock` is application
   source and CI rejects dependency resolution that changes it.
 - [ ] **EN-013 — Android production signing.** Secure release keystore and signed

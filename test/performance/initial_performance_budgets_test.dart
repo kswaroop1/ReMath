@@ -1,17 +1,17 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:remath/src/app.dart';
 import 'package:remath/src/core/performance_budget.dart';
 import 'package:remath/src/features/learning/data/asset_content_pack_repository.dart';
-import 'package:remath/src/features/learning/data/sqlite_progress_repository.dart';
+import 'package:remath/src/features/learning/data/open_progress_repository.dart';
 import 'package:remath/src/features/learning/domain/attempt_event.dart';
 import 'package:remath/src/features/learning/presentation/learning_controller.dart';
-import 'package:sqlite3/sqlite3.dart';
+import '../support/production_app_fixture.dart';
 
 void main() {
   testWidgets('critical offline operations stay within initial CI budgets', (
     tester,
   ) async {
+    final fixture = await tester.runAsync(ProductionAppFixture.create);
+    addTearDown(fixture!.dispose);
     final assetRepository = AssetContentPackRepository();
     final contentLoad = await _budget(
       'foundation content load',
@@ -29,20 +29,14 @@ void main() {
           'application startup',
           const Duration(seconds: 2),
         ).measure(() async {
-          final repository = SqliteProgressRepository(sqlite3.openInMemory());
-          await tester.pumpWidget(
-            ReMathApp(contentPack: contentPack, repository: repository),
-          );
-          await tester.pumpAndSettle();
-          await tester.pumpWidget(const SizedBox.shrink());
-          await tester.pumpAndSettle();
-          await repository.close();
+          await fixture.launch(tester);
+          await fixture.stop(tester);
         });
     expect(startup.isWithinBudget, isTrue, reason: startup.failureMessage);
 
-    final persistenceRepository = SqliteProgressRepository(
-      sqlite3.openInMemory(),
-    );
+    final persistenceRepository = (await tester.runAsync(
+      openProgressRepository,
+    ))!;
     addTearDown(persistenceRepository.close);
     var eventSerial = 0;
     final persistence =
@@ -71,13 +65,17 @@ void main() {
       reason: persistence.failureMessage,
     );
 
+    expect(await persistenceRepository.loadAttempts(), hasLength(7));
+
     var controllerSerial = 0;
     final transition =
         await _budget(
           'question transition',
           const Duration(milliseconds: 500),
         ).measure(() async {
-          final repository = SqliteProgressRepository(sqlite3.openInMemory());
+          final repository = (await tester.runAsync(
+            openProgressRepository,
+          ))!;
           final serial = controllerSerial++;
           var idSerial = 0;
           final controller = LearningController(

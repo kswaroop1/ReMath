@@ -11,7 +11,9 @@ scope:
   - documentation
   - code
   - tests
-redactions: []
+redactions:
+  - category: unavailable_historical_exchanges
+    reason: Exact pre-review exports are unavailable; retained narrative is not a verbatim transcript.
 ci_runs:
   - 34893291023
   - 34971033181

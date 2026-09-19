@@ -125,3 +125,51 @@ incomplete but its initial four enforced budgets are delivered; downloads,
 memory, larger packs, physical devices, and representative installable-app
 journeys remain future work. The redundant release-workflow generation remains
 deferred under the previously recorded write-permission denial.
+
+## 19 September 2026 — provenance correction and disclosure
+
+The preceding narrative is retained unchanged as historical evidence, not
+a verbatim transcript. Its earlier assertion that EN-011 was complete is
+withdrawn: release generation remains. Its restoration/startup claims were
+also too broad because the tests retained in-memory storage.
+
+Exact pre-review user/agent exports are unavailable in this checkout and current
+session. Those exchanges are explicitly omitted; the earlier narrative must not
+be represented as their exact text. No missing quotations have been invented.
+The earlier `redactions: []` did not disclose this omission. Reviewers should
+assess that historical limitation before approving provenance integrity.
+
+Available current user/agent and linked reviewer exchanges are preserved in
+[review-exchanges.md](review-exchanges.md). Routine retrieval output is omitted.
+The original review was against 3b6004f; CI run 35436081227 succeeded on that head.
+
+### Assistant — correction approach
+
+> I’ll keep the application’s startup wiring unchanged and substitute only the OS directory provider in tests. That will exercise `main()`, shipped assets, directory creation, SQLite initialization, and restoration after closing and reopening the database. The historical provenance also lacks exact exchanges; I’ll preserve it, append the available review and user messages, and explicitly identify the missing exports.
+
+### Local validation restriction
+
+Automatic approval review rejected local Flutter polling/execution because the
+Flutter command targeted the cloud metadata endpoint. No successful local Flutter
+validation is claimed. GitHub Actions is used for executable verification.
+
+Direct HTTPS git push had no credentials; the authorized GitHub connector is
+used to publish commits. This is an authentication transport change, not a
+change to the repository permission boundary. Release workflow remains untouched.
+
+### CI — negative warm-up regression
+
+Test-first commit 6a6b97a, run [35438756404](https://github.com/kswaroop1/ReMath/actions/runs/35438756404):
+`flutter test --coverage` failed specifically in
+`negative warm-up counts cannot silently change sampling policy`.
+
+```text
+Expected: throws <Instance of 'ArgumentError'>
+Actual: <Closure: () => PerformanceBudget>
+Which: returned <Instance of 'PerformanceBudget'>
+```
+
+Formatting, analysis, lock guard, Chrome tests and secret scan passed. The next
+implementation adds only the non-negative guard for this behavior. Production
+bootstrap remains unchanged; the disk-backed journey/benchmarks are explicitly
+existing-behavior characterization, with green-before evidence at 3b6004f.

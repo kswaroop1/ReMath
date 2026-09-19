@@ -1,24 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:remath/src/app.dart';
-import 'package:remath/src/features/learning/data/asset_content_pack_repository.dart';
-import 'package:remath/src/features/learning/data/sqlite_progress_repository.dart';
-import 'package:sqlite3/sqlite3.dart';
+import '../support/production_app_fixture.dart';
 
 void main() {
   testWidgets(
     'shipped content and SQLite restore an interrupted correction journey',
     (tester) async {
-      final database = sqlite3.openInMemory();
-      final repository = SqliteProgressRepository(database);
-      addTearDown(repository.close);
-      final contentPack = await AssetContentPackRepository()
-          .loadFoundationPack();
-
-      await tester.pumpWidget(
-        ReMathApp(contentPack: contentPack, repository: repository),
-      );
-      await tester.pumpAndSettle();
+      final fixture = await tester.runAsync(ProductionAppFixture.create);
+      addTearDown(fixture!.dispose);
+      final firstApp = await fixture.launch(tester);
+      final repository = firstApp.repository;
       await tester.tap(find.text('Start 15-minute drill'));
       await tester.pumpAndSettle();
       final prompt = tester
@@ -32,12 +23,11 @@ void main() {
       expect(await repository.loadAttempts(), hasLength(1));
       expect(find.text('Correct this answer'), findsOneWidget);
 
-      await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pumpAndSettle();
-      await tester.pumpWidget(
-        ReMathApp(contentPack: contentPack, repository: repository),
-      );
-      await tester.pumpAndSettle();
+      final originalAttempts = await repository.loadAttempts();
+      await fixture.stop(tester);
+      final restoredApp = await fixture.launch(tester);
+      expect(identical(restoredApp.repository, repository), isFalse);
+      expect(identical(restoredApp.contentPack, firstApp.contentPack), isFalse);
 
       expect(find.text('Correct this answer'), findsOneWidget);
       expect(
@@ -45,7 +35,10 @@ void main() {
         prompt,
       );
       expect(find.textContaining('Correct answer:'), findsOneWidget);
-      expect(await repository.loadAttempts(), hasLength(1));
+      final restoredAttempts = await restoredApp.repository.loadAttempts();
+      expect(restoredAttempts, hasLength(1));
+      expect(restoredAttempts.single.eventId, originalAttempts.single.eventId);
+      await fixture.stop(tester);
     },
   );
 }

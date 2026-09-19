@@ -1,14 +1,15 @@
 # Engineering baseline slice
 
 PR21 pauses new mathematics content to establish a reproducible application
-baseline. It completes EN-011 and EN-012 and delivers explicitly bounded
-foundations for EN-019 and EN-020. It does not imply production signing, a full
+baseline. It completes EN-012 and delivers explicitly bounded
+foundations for EN-011, EN-019 and EN-020. It does not imply production signing, a full
 device farm, cloud sync, or completion of every performance budget.
 
 ## Learner and owner outcomes
 
 - A checkout contains reviewed Android, iOS, macOS, Windows, Linux, and web
-  projects; builds no longer depend on silently generating platform runners.
+  projects; ordinary CI checks their presence. Release builds still regenerate
+  runners, so EN-011 is incomplete.
 - Dependency resolution starts from a committed application lock file, and CI
   fails if dependency installation changes it.
 - CI launches the real application through at least one end-to-end critical
@@ -78,3 +79,28 @@ device farm, cloud sync, or completion of every performance budget.
 - EN-011 remains incomplete pending builds from unchanged committed runners.
 - Preserve the historical provenance and append attributable available exchanges;
   explicitly disclose unavailable earlier exports rather than inventing them.
+
+## Initial performance measurement contract
+
+Runtime: Flutter debug widget tests on the shared Ubuntu CI runner. Fixture:
+shipped foundation asset and temporary file-backed schema-v7 SQLite, with only
+the OS application-support-directory lookup replaced. Two warm-ups precede five
+measured samples; the median must not exceed the budget.
+
+| Operation | Limit | Measured boundary and rationale |
+| --- | --- | --- |
+| Content load | 250 ms | Asset read and parse; generous headroom for the small shipped pack |
+| Application startup | 2 s | Production main, asset load, directory lookup/create, SQLite open/migrate and settled first UI; includes teardown, making the bound conservative |
+| Attempt persistence | 100 ms | Real file-backed SQLite attempt write; bounds interactive write latency |
+| Question transition | 500 ms | File-backed controller initialization, session start, answer and teardown; conservative bound for the transition |
+
+Startup samples reuse the directory after the first warm-up, so this is warmed
+startup, not a fresh-install or cold OS-cache budget. These are broad regression
+guards, not release-mode device latency claims. The integration journey separately
+starts with a missing support directory.
+
+Test dependency: path_provider_platform_interface 2.1.3 is already locked as a
+transitive Flutter-maintained BSD-3-Clause package. Declaring it directly for
+tests allows an OS-directory substitute across native targets without changing
+production wiring. It makes no network calls and carries no user data in this
+fixture; no provider package is introduced into domain code.
