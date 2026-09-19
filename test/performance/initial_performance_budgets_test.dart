@@ -37,7 +37,11 @@ void main() {
       await tester.pumpAndSettle();
       await repository.close();
     });
-    expect(startup.isWithinBudget, isTrue, reason: startup.failureMessage);
+    expect(
+      startup.isWithinBudget,
+      isTrue,
+      reason: startup.failureMessage,
+    );
 
     final persistenceRepository = SqliteProgressRepository(
       sqlite3.openInMemory(),
