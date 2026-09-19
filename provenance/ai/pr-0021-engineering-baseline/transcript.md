@@ -93,3 +93,35 @@ the CI Dart formatter. Publish a formatting-only correction. In corrected run
 34998014550, structure, lock reproducibility, formatting, analysis, content
 validation, Chrome contracts, 287 native tests, coverage, and secret scanning
 all passed; GitHub job bookkeeping was still completing when recorded.
+
+Cycle 3 select/red: EN-020 needs a shared measurement policy before individual
+operations receive thresholds. Require an odd sample count of at least three,
+median evaluation, explicit measured-versus-allowed failure text, and a runner
+that performs declared warm-ups before collecting exactly the declared samples.
+CI run 34998437602 failed at the missing evaluator boundary. The first green
+implementation passed in run 34998636778. The separate runner test then failed
+as intended in run 35006521053 because `measure` did not exist. Implement only
+the warm-up and measured-sample loop; CI run 35434742167 passed.
+
+Cycle 3 characterization: add initial shared-runner budgets for the shipped
+foundation-content load, production-composed application startup, SQLite
+attempt persistence, and a correct-answer question transition. Each operation
+uses two warm-ups, five measured samples, the median, and deliberately broad
+headroom suitable for debug-mode shared CI. The first run, 35434903122, passed
+all 291 tests but failed formatting. A guessed formatting correction still
+failed in run 35435005902. Because local Flutter execution is prohibited, add a
+temporary CI diagnostic that runs the repository formatter and prints its diff;
+run 35435079350 produced the canonical formatting while all tests passed.
+Apply that exact result, remove the diagnostic completely, and verify the clean
+workflow. Final run 35435264259 passed structure, lock reproducibility,
+formatting, analysis, content validation, Chrome contracts, 291 native tests,
+98.90% line coverage, and secret scanning.
+
+Reconcile the feature register against the verified head. EN-011 and EN-012 are
+complete: reviewed cross-platform projects and the application lock are
+committed and checked in CI. EN-019 remains incomplete but its foundation now
+includes the production-composed persistence/restoration journey. EN-020 remains
+incomplete but its initial four enforced budgets are delivered; downloads,
+memory, larger packs, physical devices, and representative installable-app
+journeys remain future work. The redundant release-workflow generation remains
+deferred under the previously recorded write-permission denial.
