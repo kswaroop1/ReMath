@@ -73,9 +73,7 @@ void main() {
           'question transition',
           const Duration(milliseconds: 500),
         ).measure(() async {
-          final repository = (await tester.runAsync(
-            openProgressRepository,
-          ))!;
+          final repository = (await tester.runAsync(openProgressRepository))!;
           final serial = controllerSerial++;
           var idSerial = 0;
           final controller = LearningController(

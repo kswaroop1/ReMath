@@ -8,7 +8,11 @@ final class PerformanceBudget {
     required this.sampleRuns,
   }) {
     if (warmUpRuns < 0) {
-      throw ArgumentError.value(warmUpRuns, 'warmUpRuns', 'must be non-negative');
+      throw ArgumentError.value(
+        warmUpRuns,
+        'warmUpRuns',
+        'must be non-negative',
+      );
     }
     if (sampleRuns < 3 || sampleRuns.isEven) {
       throw ArgumentError.value(
@@ -71,6 +75,14 @@ final class PerformanceBudgetResult {
   bool get isWithinBudget => median <= maximum;
 
   String get failureMessage =>
-      '$name median ${median.inMilliseconds}ms exceeded allowed '
-      '${maximum.inMilliseconds}ms';
+      '$name median ${_milliseconds(median)} exceeded allowed '
+      '${_milliseconds(maximum)}';
+
+  static String _milliseconds(Duration duration) {
+    final microseconds = duration.inMicroseconds;
+    if (microseconds % Duration.microsecondsPerMillisecond == 0) {
+      return '${microseconds ~/ Duration.microsecondsPerMillisecond}ms';
+    }
+    return '${microseconds / Duration.microsecondsPerMillisecond}ms';
+  }
 }
