@@ -63,3 +63,18 @@ device farm, cloud sync, or completion of every performance budget.
 - All learning remains offline and no telemetry, account, OAuth, signing key, or
   paid service is introduced.
 - No release, tag, or `VERSION` change is part of PR21.
+
+## Review correction acceptance (19 September 2026)
+
+- EN-020 rejects negative warm-up counts and reports fractional milliseconds
+  accurately when a near-boundary measurement fails. Each gets a separate
+  regression-first commit.
+- EN-019 characterizes existing production main/bootstrap with a temporary
+  application-support directory, closes storage, reopens it, and restores the
+  same correction and immutable attempt. This is characterization, not new
+  learner behavior.
+- EN-020 measures that same bootstrap and file-backed writes.
+- EN-012 declares the Dart 3.11 minimum required by its committed resolution.
+- EN-011 remains incomplete pending builds from unchanged committed runners.
+- Preserve the historical provenance and append attributable available exchanges;
+  explicitly disclose unavailable earlier exports rather than inventing them.

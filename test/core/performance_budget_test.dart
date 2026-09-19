@@ -2,6 +2,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/core/performance_budget.dart';
 
 void main() {
+  test('negative warm-up counts cannot silently change sampling policy', () {
+    expect(
+      () => PerformanceBudget(
+        name: 'startup',
+        maximum: const Duration(seconds: 2),
+        warmUpRuns: -1,
+        sampleRuns: 5,
+      ),
+      throwsArgumentError,
+    );
+  });
+
   test('performance budgets use a stable median and explain failures', () {
     final budget = PerformanceBudget(
       name: 'SQLite attempt write',
