@@ -48,11 +48,6 @@ jobs:
         run: flutter pub get
       - name: Verify dependency lock is unchanged
         run: git diff --exit-code -- pubspec.lock
-      - name: Show CI formatter diff
-        run: |
-          dart format test/performance/initial_performance_budgets_test.dart
-          git diff -- test/performance/initial_performance_budgets_test.dart
-          exit 1
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed lib test tool
       - name: Static analysis
