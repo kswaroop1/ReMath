@@ -17,3 +17,16 @@ Selected DS-004, DS-016, DS-017, SP-005 and SP-012 foundations. The slice uses
 encrypted versioned export, read-only preview, transactional idempotent event
 merge and a provider-neutral file boundary. It excludes cloud sync, OAuth,
 content-pack transfer, release and VERSION changes.
+
+## Cycle 1 select/red — portable payload
+
+Acceptance: a version-one payload reproduces every immutable attempt field,
+orders events canonically, normalizes persisted times to UTC, preserves Unicode
+answers and the optional study snapshot, and re-encodes identically. Unsupported
+versions, duplicate event IDs and invalid negative response times fail before
+any import can occur.
+
+The red commit adds only behavior tests importing the required public payload
+seam. The expected red failure is the missing
+`features/backup/domain/backup_payload.dart` library; no production behavior is
+included in that commit.
