@@ -42,7 +42,13 @@ final class BackupCoordinator {
     final plaintext = await _cipher.decrypt(encrypted, password: password);
     final payload = BackupPayload.decode(plaintext);
     final studyState = payload.studyState;
-    if (studyState != null) StudyState.decode(studyState);
+    if (studyState != null) {
+      try {
+        StudyState.decode(studyState);
+      } catch (_) {
+        throw const FormatException('Invalid active study snapshot');
+      }
+    }
     final preview = BackupPreview.create(
       payload: payload,
       localAttempts: await _repository.loadAttempts(),
