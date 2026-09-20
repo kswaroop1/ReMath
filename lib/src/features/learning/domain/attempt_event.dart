@@ -50,4 +50,19 @@ final class AttemptEvent {
       );
     }
   }
+
+  bool hasSameImmutableContentAs(AttemptEvent other) =>
+      answer == other.answer &&
+      eventId == other.eventId &&
+      isCorrect == other.isCorrect &&
+      kind == other.kind &&
+      confidence == other.confidence &&
+      misconceptionId == other.misconceptionId &&
+      occurredAt == other.occurredAt &&
+      questionId == other.questionId &&
+      responseTime == other.responseTime &&
+      relatedEventId == other.relatedEventId &&
+      surprise == other.surprise &&
+      sessionId == other.sessionId &&
+      skillId == other.skillId;
 }

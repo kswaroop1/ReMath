@@ -44,6 +44,37 @@ final class InMemoryProgressRepository implements ProgressRepository {
   Future<LearningSession?> loadSession() async => _session;
 
   @override
+  Future<ProgressMergeResult> mergeProgress({
+    required List<AttemptEvent> attempts,
+    required String? studyState,
+  }) async {
+    final incomingIds = <String>{};
+    var duplicateAttemptCount = 0;
+    for (final attempt in attempts) {
+      attempt.validateCalibrationEvidence();
+      if (!incomingIds.add(attempt.eventId)) {
+        throw ArgumentError.value(attempts, 'attempts', 'IDs must be unique');
+      }
+      final existing = _attempts[attempt.eventId];
+      if (existing == null) continue;
+      if (!existing.hasSameImmutableContentAs(attempt)) {
+        throw ProgressConflictException(attempt.eventId);
+      }
+      duplicateAttemptCount++;
+    }
+    for (final attempt in attempts) {
+      _attempts.putIfAbsent(attempt.eventId, () => attempt);
+    }
+    final importStudyState = studyState != null && _studyState == null;
+    if (importStudyState) _studyState = studyState;
+    return ProgressMergeResult(
+      duplicateAttemptCount: duplicateAttemptCount,
+      importedStudyState: importStudyState,
+      insertedAttemptCount: attempts.length - duplicateAttemptCount,
+    );
+  }
+
+  @override
   Future<bool> recordAttempt(AttemptEvent event) async {
     event.validateCalibrationEvidence();
     if (_attempts.containsKey(event.eventId)) {

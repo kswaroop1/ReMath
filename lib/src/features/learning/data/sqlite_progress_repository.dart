@@ -267,6 +267,54 @@ final class SqliteProgressRepository implements ProgressRepository {
   }
 
   @override
+  Future<ProgressMergeResult> mergeProgress({
+    required List<AttemptEvent> attempts,
+    required String? studyState,
+  }) async {
+    final incomingIds = <String>{};
+    for (final attempt in attempts) {
+      attempt.validateCalibrationEvidence();
+      if (!incomingIds.add(attempt.eventId)) {
+        throw ArgumentError.value(attempts, 'attempts', 'IDs must be unique');
+      }
+    }
+    _database.execute('BEGIN IMMEDIATE');
+    try {
+      var duplicateAttemptCount = 0;
+      final newAttempts = <AttemptEvent>[];
+      for (final attempt in attempts) {
+        final rows = _database.select(
+          'SELECT * FROM attempt_events WHERE event_id = ?',
+          [attempt.eventId],
+        );
+        if (rows.isEmpty) {
+          newAttempts.add(attempt);
+          continue;
+        }
+        if (!_attemptFromRow(rows.single).hasSameImmutableContentAs(attempt)) {
+          throw ProgressConflictException(attempt.eventId);
+        }
+        duplicateAttemptCount++;
+      }
+      for (final attempt in newAttempts) {
+        _insertAttempt(attempt);
+      }
+      final importStudyState = studyState != null &&
+          _database.select('SELECT 1 FROM study_state LIMIT 1').isEmpty;
+      if (importStudyState) _writeStudyState(studyState);
+      _database.execute('COMMIT');
+      return ProgressMergeResult(
+        duplicateAttemptCount: duplicateAttemptCount,
+        importedStudyState: importStudyState,
+        insertedAttemptCount: newAttempts.length,
+      );
+    } catch (_) {
+      _database.execute('ROLLBACK');
+      rethrow;
+    }
+  }
+
+  @override
   Future<bool> recordAttempt(AttemptEvent event) async {
     event.validateCalibrationEvidence();
     return _insertAttempt(event);

@@ -29,7 +29,7 @@ final class BackupPreview {
       final local = localById[incoming.eventId];
       if (local == null) {
         newAttemptCount++;
-      } else if (_sameImmutableEvent(local, incoming)) {
+      } else if (local.hasSameImmutableContentAs(incoming)) {
         duplicateAttemptCount++;
       } else {
         conflictingAttemptCount++;
@@ -66,18 +66,3 @@ final class BackupPreview {
 
   bool get canApply => conflictingAttemptCount == 0;
 }
-
-bool _sameImmutableEvent(AttemptEvent left, AttemptEvent right) =>
-    left.answer == right.answer &&
-    left.eventId == right.eventId &&
-    left.isCorrect == right.isCorrect &&
-    left.kind == right.kind &&
-    left.confidence == right.confidence &&
-    left.misconceptionId == right.misconceptionId &&
-    left.occurredAt == right.occurredAt &&
-    left.questionId == right.questionId &&
-    left.responseTime == right.responseTime &&
-    left.relatedEventId == right.relatedEventId &&
-    left.surprise == right.surprise &&
-    left.sessionId == right.sessionId &&
-    left.skillId == right.skillId;
