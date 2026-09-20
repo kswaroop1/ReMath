@@ -6,37 +6,43 @@ import 'package:remath/src/features/learning/data/in_memory_progress_repository.
 
 void main() {
   group('provider-neutral backup file transfer', () {
-    test('writes encrypted export through the supplied file boundary', () async {
-      final files = _MemoryBackupFiles();
-      final transfer = BackupFileTransfer(
-        coordinator: _coordinator(),
-        files: files,
-      );
+    test(
+      'writes encrypted export through the supplied file boundary',
+      () async {
+        final files = _MemoryBackupFiles();
+        final transfer = BackupFileTransfer(
+          coordinator: _coordinator(),
+          files: files,
+        );
 
-      final saved = await transfer.export(password: 'password');
+        final saved = await transfer.export(password: 'password');
 
-      expect(saved, isTrue);
-      expect(files.savedName, 'remath-progress.remath-backup');
-      expect(files.savedContents, contains('ciphertext'));
-      expect(files.savedContents, isNot(contains('attempts')));
-    });
+        expect(saved, isTrue);
+        expect(files.savedName, 'remath-progress.remath-backup');
+        expect(files.savedContents, contains('ciphertext'));
+        expect(files.savedContents, isNot(contains('attempts')));
+      },
+    );
 
-    test('reads for preview without applying and treats cancellation safely', () async {
-      final encrypted = await _coordinator().export(password: 'password');
-      final files = _MemoryBackupFiles()..contentsToOpen = encrypted;
-      final target = InMemoryProgressRepository();
-      final transfer = BackupFileTransfer(
-        coordinator: _coordinator(repository: target),
-        files: files,
-      );
+    test(
+      'reads for preview without applying and treats cancellation safely',
+      () async {
+        final encrypted = await _coordinator().export(password: 'password');
+        final files = _MemoryBackupFiles()..contentsToOpen = encrypted;
+        final target = InMemoryProgressRepository();
+        final transfer = BackupFileTransfer(
+          coordinator: _coordinator(repository: target),
+          files: files,
+        );
 
-      final pending = await transfer.previewImport(password: 'password');
+        final pending = await transfer.previewImport(password: 'password');
 
-      expect(pending, isNotNull);
-      expect(await target.loadAttempts(), isEmpty);
-      files.contentsToOpen = null;
-      expect(await transfer.previewImport(password: 'password'), isNull);
-    });
+        expect(pending, isNotNull);
+        expect(await target.loadAttempts(), isEmpty);
+        files.contentsToOpen = null;
+        expect(await transfer.previewImport(password: 'password'), isNull);
+      },
+    );
   });
 }
 
