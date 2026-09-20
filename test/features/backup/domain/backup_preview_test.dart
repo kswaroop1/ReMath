@@ -5,42 +5,45 @@ import 'package:remath/src/features/learning/domain/attempt_event.dart';
 
 void main() {
   group('backup import preview', () {
-    test('classifies immutable events and summarizes the validated payload', () {
-      final duplicate = _attempt(
-        eventId: 'duplicate',
-        occurredAt: DateTime.utc(2026, 9, 18, 8),
-        skillId: 'numbers.fractions',
-      );
-      final incoming = BackupPayload(
-        attempts: [
-          duplicate,
-          _attempt(
-            eventId: 'new',
-            occurredAt: DateTime.utc(2026, 9, 20, 10),
-            skillId: 'numbers.decimals',
-          ),
-        ],
-        createdAt: DateTime.utc(2026, 9, 20, 11),
-        studyState: '{"phase":"question"}',
-      );
+    test(
+      'classifies immutable events and summarizes the validated payload',
+      () {
+        final duplicate = _attempt(
+          eventId: 'duplicate',
+          occurredAt: DateTime.utc(2026, 9, 18, 8),
+          skillId: 'numbers.fractions',
+        );
+        final incoming = BackupPayload(
+          attempts: [
+            duplicate,
+            _attempt(
+              eventId: 'new',
+              occurredAt: DateTime.utc(2026, 9, 20, 10),
+              skillId: 'numbers.decimals',
+            ),
+          ],
+          createdAt: DateTime.utc(2026, 9, 20, 11),
+          studyState: '{"phase":"question"}',
+        );
 
-      final preview = BackupPreview.create(
-        payload: BackupPayload.decode(incoming.encode()),
-        localAttempts: [duplicate],
-      );
+        final preview = BackupPreview.create(
+          payload: BackupPayload.decode(incoming.encode()),
+          localAttempts: [duplicate],
+        );
 
-      expect(preview.createdAt, DateTime.utc(2026, 9, 20, 11));
-      expect(preview.formatVersion, BackupPayload.formatVersion);
-      expect(preview.attemptCount, 2);
-      expect(preview.newAttemptCount, 1);
-      expect(preview.duplicateAttemptCount, 1);
-      expect(preview.conflictingAttemptCount, 0);
-      expect(preview.skillIds, ['numbers.decimals', 'numbers.fractions']);
-      expect(preview.earliestAttemptAt, DateTime.utc(2026, 9, 18, 8));
-      expect(preview.latestAttemptAt, DateTime.utc(2026, 9, 20, 10));
-      expect(preview.hasStudyState, isTrue);
-      expect(preview.canApply, isTrue);
-    });
+        expect(preview.createdAt, DateTime.utc(2026, 9, 20, 11));
+        expect(preview.formatVersion, BackupPayload.formatVersion);
+        expect(preview.attemptCount, 2);
+        expect(preview.newAttemptCount, 1);
+        expect(preview.duplicateAttemptCount, 1);
+        expect(preview.conflictingAttemptCount, 0);
+        expect(preview.skillIds, ['numbers.decimals', 'numbers.fractions']);
+        expect(preview.earliestAttemptAt, DateTime.utc(2026, 9, 18, 8));
+        expect(preview.latestAttemptAt, DateTime.utc(2026, 9, 20, 10));
+        expect(preview.hasStudyState, isTrue);
+        expect(preview.canApply, isTrue);
+      },
+    );
 
     test('same event ID with changed immutable content blocks apply', () {
       final local = _attempt(
@@ -98,13 +101,15 @@ AttemptEvent _attempt({
   required String eventId,
   required DateTime occurredAt,
   required String skillId,
-}) => AttemptEvent(
-  answer: '4',
-  eventId: eventId,
-  isCorrect: true,
-  occurredAt: occurredAt,
-  questionId: 'question-$eventId',
-  responseTime: const Duration(milliseconds: 500),
-  sessionId: 'session-1',
-  skillId: skillId,
-);
+}) {
+  return AttemptEvent(
+    answer: '4',
+    eventId: eventId,
+    isCorrect: true,
+    occurredAt: occurredAt,
+    questionId: 'question-$eventId',
+    responseTime: const Duration(milliseconds: 500),
+    sessionId: 'session-1',
+    skillId: skillId,
+  );
+}
