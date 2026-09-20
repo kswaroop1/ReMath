@@ -7,7 +7,7 @@ import '../domain/backup_preview.dart';
 typedef BackupClock = DateTime Function();
 
 final class PendingBackupImport {
-  const PendingBackupImport._({required this.preview, required this._payload});
+  const PendingBackupImport._(this._payload, {required this.preview});
 
   final BackupPreview preview;
   final BackupPayload _payload;
@@ -47,7 +47,7 @@ final class BackupCoordinator {
       payload: payload,
       localAttempts: await _repository.loadAttempts(),
     );
-    return PendingBackupImport._(preview: preview, _payload: payload);
+    return PendingBackupImport._(payload, preview: preview);
   }
 
   Future<ProgressMergeResult> apply(PendingBackupImport pending) {
