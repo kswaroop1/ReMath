@@ -6,10 +6,7 @@ import 'package:cryptography/cryptography.dart';
 typedef RandomBytes = List<int> Function(int length);
 
 abstract interface class BackupCipher {
-  Future<String> encrypt({
-    required String plaintext,
-    required String password,
-  });
+  Future<String> encrypt({required String plaintext, required String password});
   Future<String> decrypt(String source, {required String password});
 }
 
