@@ -43,8 +43,9 @@ void main() {
 
       expect(jsonDecode(encoded)['formatVersion'], 1);
       expect(
-        (jsonDecode(encoded)['attempts'] as List)
-            .map((attempt) => attempt['eventId']),
+        (jsonDecode(encoded)['attempts'] as List).map(
+          (attempt) => attempt['eventId'],
+        ),
         ['event-a', 'event-z'],
       );
       expect(decoded.createdAt, DateTime.utc(2026, 9, 20, 9, 45));
@@ -54,7 +55,10 @@ void main() {
       expect(decoded.attempts.last.confidence, ConfidenceRating.low);
       expect(decoded.attempts.last.kind, AttemptKind.answer);
       expect(decoded.attempts.last.misconceptionId, 'decimal-place');
-      expect(decoded.attempts.last.occurredAt, DateTime.utc(2026, 9, 20, 8, 30));
+      expect(
+        decoded.attempts.last.occurredAt,
+        DateTime.utc(2026, 9, 20, 8, 30),
+      );
       expect(decoded.attempts.last.relatedEventId, 'event-a');
       expect(
         decoded.attempts.last.responseTime,
@@ -105,7 +109,10 @@ void main() {
       )..['responseMilliseconds'] = -1;
       expect(
         () => BackupPayload.decode(
-          jsonEncode({...valid, 'attempts': [invalidAttempt]}),
+          jsonEncode({
+            ...valid,
+            'attempts': [invalidAttempt],
+          }),
         ),
         throwsFormatException,
       );

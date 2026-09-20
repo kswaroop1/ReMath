@@ -163,7 +163,9 @@ String _string(
 }) {
   final value = source[key];
   if (value is! String || (!allowEmpty && value.isEmpty)) {
-    throw FormatException('$key must be ${allowEmpty ? 'a string' : 'non-empty'}');
+    throw FormatException(
+      '$key must be ${allowEmpty ? 'a string' : 'non-empty'}',
+    );
   }
   return value;
 }
@@ -185,8 +187,7 @@ DateTime _utcInstant(Object? value, String key) {
   if (value is! String) throw FormatException('$key must be an ISO instant');
   final parsed = DateTime.tryParse(value);
   if (parsed == null ||
-      !value.endsWith('Z') &&
-          !value.contains(RegExp(r'[+-]\d\d:\d\d$'))) {
+      !value.endsWith('Z') && !value.contains(RegExp(r'[+-]\d\d:\d\d$'))) {
     throw FormatException('$key must include a timezone');
   }
   return parsed.toUtc();
@@ -200,8 +201,5 @@ T _enumValue<T extends Enum>(List<T> values, Object? value, String key) {
   throw FormatException('$key has unsupported value $value');
 }
 
-T? _optionalEnum<T extends Enum>(
-  List<T> values,
-  Object? value,
-  String key,
-) => value == null ? null : _enumValue(values, value, key);
+T? _optionalEnum<T extends Enum>(List<T> values, Object? value, String key) =>
+    value == null ? null : _enumValue(values, value, key);
