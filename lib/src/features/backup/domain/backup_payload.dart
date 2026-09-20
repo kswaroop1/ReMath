@@ -23,7 +23,7 @@ final class BackupPayload {
     'studyState': studyState,
   });
 
-  factory BackupPayload.decode(String source) {
+  static BackupPayload decode(String source) {
     final Object? decoded;
     try {
       decoded = jsonDecode(source);

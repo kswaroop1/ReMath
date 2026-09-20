@@ -40,11 +40,14 @@ void main() {
         studyState: '{"phase":"question"}',
       ).encode();
       final decoded = BackupPayload.decode(encoded);
+      final encodedObject = (jsonDecode(encoded) as Map)
+          .cast<String, Object?>();
+      final encodedAttempts = encodedObject['attempts']! as List;
 
-      expect(jsonDecode(encoded)['formatVersion'], 1);
+      expect(encodedObject['formatVersion'], 1);
       expect(
-        (jsonDecode(encoded)['attempts'] as List).map(
-          (attempt) => attempt['eventId'],
+        encodedAttempts.map(
+          (attempt) => (attempt as Map).cast<String, Object?>()['eventId'],
         ),
         ['event-a', 'event-z'],
       );
