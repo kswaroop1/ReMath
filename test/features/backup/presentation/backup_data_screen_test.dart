@@ -14,9 +14,7 @@ void main() {
     ) async {
       final files = _MemoryBackupFiles();
       await tester.pumpWidget(
-        MaterialApp(
-          home: BackupDataScreen(transfer: _transfer(files: files)),
-        ),
+        MaterialApp(home: BackupDataScreen(transfer: _transfer(files: files))),
       );
 
       await tester.enterText(
@@ -38,7 +36,7 @@ void main() {
         'password',
       );
       await tester.tap(find.text('Export encrypted backup'));
-      await tester.pumpAndSettle();
+      await _pumpUntilFound(tester, find.text('Backup saved.'));
 
       expect(files.savedContents, contains('ciphertext'));
       expect(find.text('Backup saved.'), findsOneWidget);
@@ -49,9 +47,9 @@ void main() {
     ) async {
       final source = InMemoryProgressRepository();
       await source.recordAttempt(_attempt('event-1'));
-      final encrypted = await _coordinator(repository: source).export(
-        password: 'password',
-      );
+      final encrypted = await _coordinator(
+        repository: source,
+      ).export(password: 'password');
       final files = _MemoryBackupFiles()..contentsToOpen = encrypted;
       final target = InMemoryProgressRepository();
       await tester.pumpWidget(
@@ -67,7 +65,7 @@ void main() {
         'password',
       );
       await tester.tap(find.text('Preview backup'));
-      await tester.pumpAndSettle();
+      await _pumpUntilFound(tester, find.text('1 new'));
 
       expect(find.text('1 new'), findsOneWidget);
       expect(find.text('0 duplicates'), findsOneWidget);
@@ -81,6 +79,16 @@ void main() {
       expect(find.text('1 attempt restored.'), findsOneWidget);
     });
   });
+}
+
+Future<void> _pumpUntilFound(WidgetTester tester, Finder finder) async {
+  for (var attempt = 0; attempt < 300 && finder.evaluate().isEmpty; attempt++) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 100)),
+    );
+    await tester.pump();
+  }
+  expect(finder, findsOneWidget);
 }
 
 BackupFileTransfer _transfer({
