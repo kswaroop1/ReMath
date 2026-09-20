@@ -1,0 +1,36 @@
+schema_version: 1
+pull_request: 21
+title: Establish a reproducible engineering baseline
+human_owner: kswaroop1
+agents:
+  - product: OpenAI Codex
+    model: unknown
+started_at: 2026-09-14T20:20:00Z
+finalized_at: null
+scope:
+  - documentation
+  - code
+  - tests
+redactions:
+  - category: unavailable_historical_exchanges
+    reason: Exact pre-review exports are unavailable; retained narrative is not a verbatim transcript.
+ci_runs:
+  - 34893291023
+  - 34971033181
+  - 34994064139
+  - 34994408835
+  - 34997125517
+  - 34997671946
+  - 34998014550
+  - 34998437602
+  - 34998636778
+  - 35006521053
+  - 35434742167
+  - 35434903122
+  - 35435005902
+  - 35435079350
+  - 35435264259
+  - 35438756404
+  - 35438935397
+  - 35439081562
+  - 35449955466

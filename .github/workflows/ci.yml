@@ -42,8 +42,12 @@ jobs:
         with:
           channel: stable
           cache: true
+      - name: Verify committed application structure
+        run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
         run: flutter pub get
+      - name: Verify dependency lock is unchanged
+        run: git diff --exit-code -- pubspec.lock
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed lib test tool
       - name: Static analysis
