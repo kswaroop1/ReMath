@@ -1,3 +1,4 @@
+import '../../learning/domain/progress_repository.dart';
 import 'backup_coordinator.dart';
 
 abstract interface class BackupFileBoundary {
@@ -32,5 +33,9 @@ final class BackupFileTransfer {
     final encrypted = await _files.openText();
     if (encrypted == null) return null;
     return _coordinator.preview(encrypted, password: password);
+  }
+
+  Future<ProgressMergeResult> apply(PendingBackupImport pending) {
+    return _coordinator.apply(pending);
   }
 }
