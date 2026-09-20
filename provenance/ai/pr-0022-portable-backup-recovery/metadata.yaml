@@ -1,0 +1,15 @@
+schema_version: 1
+pull_request: 22
+title: Add portable backup and recovery
+human_owner: kswaroop1
+agents:
+  - product: OpenAI Codex
+    model: GPT-5.6 Sol
+started_at: 2026-09-20T00:00:00Z
+finalized_at: null
+scope:
+  - documentation
+  - code
+  - tests
+redactions: []
+ci_runs: []

@@ -1,0 +1,59 @@
+# Portable backup and recovery
+
+## Scope and acceptance (selected before implementation)
+
+PR22 delivers bounded foundations for DS-004, DS-016, DS-017, SP-005 and
+SP-012. A learner can create a password-encrypted portable backup of personal
+progress, inspect it without changing local data, and recover immutable attempts
+through an idempotent merge.
+
+## Backup contract
+
+- Export a canonical, versioned payload containing immutable attempt events and
+  the optional active study snapshot. Standard curriculum content is excluded.
+- Encrypt before the bytes leave the application boundary. Use a random salt
+  and nonce, a password-derived key, and authenticated encryption so an incorrect
+  password or any modified metadata/ciphertext fails closed.
+- Include only non-secret preview metadata outside encryption: format/version,
+  creation time, algorithm identifiers, salt, nonce, ciphertext and counts that
+  are authenticated as associated data. Never store the password or derived key.
+- Reject unsupported versions, algorithms, malformed encodings, invalid event
+  values, duplicate IDs with conflicting content, and unsafe snapshot data.
+
+## Recovery contract
+
+- Preview decrypts and validates the complete payload, then reports creation
+  time, format version, attempt count, new/duplicate/conflicting event counts,
+  skill/time range, and whether an active snapshot is present. Preview writes
+  nothing.
+- Apply merges new immutable events by event ID. Byte-for-byte equivalent events
+  are duplicates; the same ID with different immutable content blocks the entire
+  import. Retrying an applied backup adds nothing.
+- Apply is transactional for SQLite. A validation or write failure leaves local
+  attempts and active state unchanged.
+- An imported active snapshot is offered only when local active state is empty;
+  applying it must not overwrite a local in-progress journey.
+
+## User journey
+
+- A data screen reachable from Home supports export and import on the current
+  platform through a provider-neutral file boundary.
+- Export requires password entry and confirmation. Import asks for the password,
+  shows the preview, requires explicit apply, and reports the result.
+- Empty data, Unicode answers, calibration fields, related event IDs, UTC times,
+  interruption, wrong passwords, tampering, duplicate delivery and conflicting
+  IDs have focused tests.
+
+## Dependency decision boundary
+
+Cryptography and file-access packages require a recorded maintenance, licence,
+platform, privacy and architecture assessment before addition. Crypto remains in
+the data layer behind a provider-neutral backup interface; domain rules do not
+import packages. No network access or telemetry is introduced.
+
+## Verification
+
+Use separate test-first and implementation commits for each behavior. Record the
+red failure, green result, full format/analyse/test/coverage evidence and the
+independent Codex review in the PR22 provenance record. Target meaningful line
+and branch coverage as close to 100% as practical.
