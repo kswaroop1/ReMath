@@ -30,3 +30,14 @@ The red commit adds only behavior tests importing the required public payload
 seam. The expected red failure is the missing
 `features/backup/domain/backup_payload.dart` library; no production behavior is
 included in that commit.
+
+CI run 35499113853 failed at the intended missing-library boundary:
+
+```text
+Error when reading 'lib/src/features/backup/domain/backup_payload.dart':
+No such file or directory
+```
+
+The same run also identified canonical formatter changes required in the test.
+The green implementation adds only the package-neutral payload codec and its
+validation; it adds no encryption, file or import behavior prematurely.
