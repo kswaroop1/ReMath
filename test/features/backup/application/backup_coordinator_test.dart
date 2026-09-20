@@ -28,10 +28,7 @@ void main() {
         clock: () => DateTime.utc(2026, 9, 20, 13),
         repository: target,
       );
-      final pending = await importer.preview(
-        encrypted,
-        password: password,
-      );
+      final pending = await importer.preview(encrypted, password: password);
 
       expect(pending.preview.createdAt, DateTime.utc(2026, 9, 20, 12));
       expect(pending.preview.newAttemptCount, 1);
