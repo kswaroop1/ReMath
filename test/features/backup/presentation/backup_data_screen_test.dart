@@ -14,7 +14,9 @@ void main() {
     ) async {
       final files = _MemoryBackupFiles();
       await tester.pumpWidget(
-        MaterialApp(home: BackupDataScreen(transfer: _transfer(files: files))),
+        MaterialApp(
+          home: BackupDataScreen(transfer: _transfer(files: files)),
+        ),
       );
 
       await tester.enterText(
