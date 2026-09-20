@@ -14,7 +14,7 @@ final class BackupDecryptionException implements Exception {
 
 final class PasswordBackupCipher {
   PasswordBackupCipher({RandomBytes? randomBytes})
-      : _randomBytes = randomBytes ?? _secureRandomBytes;
+    : _randomBytes = randomBytes ?? _secureRandomBytes;
 
   static const _formatVersion = 1;
   static const _keyDerivation = 'argon2id-v1';
