@@ -299,7 +299,8 @@ final class SqliteProgressRepository implements ProgressRepository {
       for (final attempt in newAttempts) {
         _insertAttempt(attempt);
       }
-      final importStudyState = studyState != null &&
+      final importStudyState =
+          studyState != null &&
           _database.select('SELECT 1 FROM study_state LIMIT 1').isEmpty;
       if (importStudyState) _writeStudyState(studyState);
       _database.execute('COMMIT');

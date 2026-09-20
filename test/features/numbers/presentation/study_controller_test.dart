@@ -594,6 +594,11 @@ final class _AcknowledgementFailure implements ProgressRepository {
   @override
   Future<LearningSession?> loadSession() => _inner.loadSession();
   @override
+  Future<ProgressMergeResult> mergeProgress({
+    required List<AttemptEvent> attempts,
+    required String? studyState,
+  }) => _inner.mergeProgress(attempts: attempts, studyState: studyState);
+  @override
   Future<String?> loadStudyState() => _inner.loadStudyState();
   @override
   Future<void> saveStudyState(String state) => _inner.saveStudyState(state);
@@ -628,6 +633,11 @@ final class _SaveFailure implements ProgressRepository {
   Future<List<AttemptEvent>> loadAttempts() => _inner.loadAttempts();
   @override
   Future<LearningSession?> loadSession() => _inner.loadSession();
+  @override
+  Future<ProgressMergeResult> mergeProgress({
+    required List<AttemptEvent> attempts,
+    required String? studyState,
+  }) => _inner.mergeProgress(attempts: attempts, studyState: studyState);
   @override
   Future<String?> loadStudyState() => _inner.loadStudyState();
   @override
