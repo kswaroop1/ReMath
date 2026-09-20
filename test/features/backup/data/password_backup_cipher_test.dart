@@ -20,7 +20,10 @@ void main() {
       );
 
       expect(encrypted, isNot(contains('π ≈ 3.14')));
-      expect(await cipher.decrypt(encrypted, password: password), contains('π'));
+      expect(
+        await cipher.decrypt(encrypted, password: password),
+        contains('π'),
+      );
       final envelope = (jsonDecode(encrypted) as Map).cast<String, Object?>();
       expect(envelope['formatVersion'], 1);
       expect(envelope['keyDerivation'], 'argon2id-v1');
@@ -31,42 +34,46 @@ void main() {
       expect(envelope['authenticationTag'], isNotEmpty);
     });
 
-    test('rejects wrong passwords and any changed authenticated field', () async {
-      final cipher = PasswordBackupCipher(
-        randomBytes: (length) => length == 16 ? salt : nonce,
-      );
-      final encrypted = await cipher.encrypt(
-        plaintext: '{"formatVersion":1,"attempts":[]}',
-        password: password,
-      );
-
-      await expectLater(
-        cipher.decrypt(encrypted, password: 'wrong password'),
-        throwsA(isA<BackupDecryptionException>()),
-      );
-      for (final field in [
-        'formatVersion',
-        'keyDerivation',
-        'cipher',
-        'salt',
-        'nonce',
-        'ciphertext',
-        'authenticationTag',
-      ]) {
-        final envelope = (jsonDecode(encrypted) as Map).cast<String, Object?>();
-        envelope[field] = switch (field) {
-          'formatVersion' => 2,
-          'keyDerivation' => 'pbkdf2',
-          'cipher' => 'none',
-          _ => base64Encode(List<int>.filled(16, 255)),
-        };
-        await expectLater(
-          cipher.decrypt(jsonEncode(envelope), password: password),
-          throwsA(isA<BackupDecryptionException>()),
-          reason: '$field must be authenticated or rejected',
+    test(
+      'rejects wrong passwords and any changed authenticated field',
+      () async {
+        final cipher = PasswordBackupCipher(
+          randomBytes: (length) => length == 16 ? salt : nonce,
         );
-      }
-    });
+        final encrypted = await cipher.encrypt(
+          plaintext: '{"formatVersion":1,"attempts":[]}',
+          password: password,
+        );
+
+        await expectLater(
+          cipher.decrypt(encrypted, password: 'wrong password'),
+          throwsA(isA<BackupDecryptionException>()),
+        );
+        for (final field in [
+          'formatVersion',
+          'keyDerivation',
+          'cipher',
+          'salt',
+          'nonce',
+          'ciphertext',
+          'authenticationTag',
+        ]) {
+          final envelope = (jsonDecode(encrypted) as Map)
+              .cast<String, Object?>();
+          envelope[field] = switch (field) {
+            'formatVersion' => 2,
+            'keyDerivation' => 'pbkdf2',
+            'cipher' => 'none',
+            _ => base64Encode(List<int>.filled(16, 255)),
+          };
+          await expectLater(
+            cipher.decrypt(jsonEncode(envelope), password: password),
+            throwsA(isA<BackupDecryptionException>()),
+            reason: '$field must be authenticated or rejected',
+          );
+        }
+      },
+    );
 
     test('rejects empty passwords and malformed envelopes', () async {
       final cipher = PasswordBackupCipher(

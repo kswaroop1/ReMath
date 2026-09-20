@@ -14,7 +14,7 @@ final class BackupDecryptionException implements Exception {
 
 final class PasswordBackupCipher {
   PasswordBackupCipher({RandomBytes? randomBytes})
-    : _randomBytes = randomBytes ?? _secureRandomBytes;
+      : _randomBytes = randomBytes ?? _secureRandomBytes;
 
   static const _formatVersion = 1;
   static const _keyDerivation = 'argon2id-v1';
@@ -76,11 +76,7 @@ final class PasswordBackupCipher {
       final metadata = _metadata(salt: salt, nonce: nonce);
       final key = await _deriveKey(password, salt);
       final plaintext = await _cipher.decrypt(
-        SecretBox(
-          ciphertext,
-          nonce: nonce,
-          mac: Mac(authenticationTag),
-        ),
+        SecretBox(ciphertext, nonce: nonce, mac: Mac(authenticationTag)),
         secretKey: key,
         aad: utf8.encode(jsonEncode(metadata)),
       );
@@ -92,8 +88,8 @@ final class PasswordBackupCipher {
     }
   }
 
-  Future<SecretKey> _deriveKey(String password, List<int> salt) => _keyDeriver
-      .deriveKeyFromPassword(password: password, nonce: salt);
+  Future<SecretKey> _deriveKey(String password, List<int> salt) =>
+      _keyDeriver.deriveKeyFromPassword(password: password, nonce: salt);
 
   static Map<String, Object?> _metadata({
     required List<int> salt,
