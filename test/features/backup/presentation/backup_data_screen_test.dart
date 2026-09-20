@@ -13,9 +13,8 @@ void main() {
       tester,
     ) async {
       final files = _MemoryBackupFiles();
-      await tester.pumpWidget(
-        MaterialApp(home: BackupDataScreen(transfer: _transfer(files: files))),
-      );
+      final screen = BackupDataScreen(transfer: _transfer(files: files));
+      await tester.pumpWidget(MaterialApp(home: screen));
 
       await tester.enterText(
         find.byKey(const ValueKey('backup-password')),
@@ -36,7 +35,7 @@ void main() {
         'password',
       );
       await tester.tap(find.text('Export encrypted backup'));
-      await _pumpUntilFound(tester, find.text('Backup saved.'));
+      await tester.pumpAndSettle();
 
       expect(files.savedContents, contains('ciphertext'));
       expect(find.text('Backup saved.'), findsOneWidget);
@@ -47,9 +46,8 @@ void main() {
     ) async {
       final source = InMemoryProgressRepository();
       await source.recordAttempt(_attempt('event-1'));
-      final encrypted = await _coordinator(
-        repository: source,
-      ).export(password: 'password');
+      final sourceCoordinator = _coordinator(repository: source);
+      final encrypted = await sourceCoordinator.export(password: 'password');
       final files = _MemoryBackupFiles()..contentsToOpen = encrypted;
       final target = InMemoryProgressRepository();
       await tester.pumpWidget(
@@ -65,7 +63,7 @@ void main() {
         'password',
       );
       await tester.tap(find.text('Preview backup'));
-      await _pumpUntilFound(tester, find.text('1 new'));
+      await tester.pumpAndSettle();
 
       expect(find.text('1 new'), findsOneWidget);
       expect(find.text('0 duplicates'), findsOneWidget);
@@ -81,16 +79,6 @@ void main() {
   });
 }
 
-Future<void> _pumpUntilFound(WidgetTester tester, Finder finder) async {
-  for (var attempt = 0; attempt < 300 && finder.evaluate().isEmpty; attempt++) {
-    await tester.runAsync(
-      () => Future<void>.delayed(const Duration(milliseconds: 100)),
-    );
-    await tester.pump();
-  }
-  expect(finder, findsOneWidget);
-}
-
 BackupFileTransfer _transfer({
   required _MemoryBackupFiles files,
   InMemoryProgressRepository? repository,
@@ -103,12 +91,27 @@ BackupFileTransfer _transfer({
 
 BackupCoordinator _coordinator({InMemoryProgressRepository? repository}) {
   return BackupCoordinator(
-    cipher: PasswordBackupCipher(
-      randomBytes: (length) => List<int>.generate(length, (index) => index),
-    ),
+    cipher: const _TestBackupCipher(),
     clock: () => DateTime.utc(2026, 9, 20, 12),
     repository: repository ?? InMemoryProgressRepository(),
   );
+}
+
+final class _TestBackupCipher implements BackupCipher {
+  const _TestBackupCipher();
+
+  @override
+  Future<String> decrypt(String source, {required String password}) async {
+    return source.substring('ciphertext:'.length);
+  }
+
+  @override
+  Future<String> encrypt({
+    required String plaintext,
+    required String password,
+  }) async {
+    return 'ciphertext:$plaintext';
+  }
 }
 
 AttemptEvent _attempt(String id) {

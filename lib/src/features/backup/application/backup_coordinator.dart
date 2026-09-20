@@ -15,14 +15,14 @@ final class PendingBackupImport {
 
 final class BackupCoordinator {
   const BackupCoordinator({
-    required PasswordBackupCipher cipher,
+    required BackupCipher cipher,
     required BackupClock clock,
     required ProgressRepository repository,
   }) : _cipher = cipher,
        _clock = clock,
        _repository = repository;
 
-  final PasswordBackupCipher _cipher;
+  final BackupCipher _cipher;
   final BackupClock _clock;
   final ProgressRepository _repository;
 

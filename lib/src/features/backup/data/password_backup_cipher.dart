@@ -5,6 +5,14 @@ import 'package:cryptography/cryptography.dart';
 
 typedef RandomBytes = List<int> Function(int length);
 
+abstract interface class BackupCipher {
+  Future<String> encrypt({
+    required String plaintext,
+    required String password,
+  });
+  Future<String> decrypt(String source, {required String password});
+}
+
 final class BackupDecryptionException implements Exception {
   const BackupDecryptionException();
 
@@ -12,7 +20,7 @@ final class BackupDecryptionException implements Exception {
   String toString() => 'The backup password or encrypted data is invalid.';
 }
 
-final class PasswordBackupCipher {
+final class PasswordBackupCipher implements BackupCipher {
   PasswordBackupCipher({RandomBytes? randomBytes})
     : _randomBytes = randomBytes ?? _secureRandomBytes;
 
@@ -29,6 +37,7 @@ final class PasswordBackupCipher {
 
   final RandomBytes _randomBytes;
 
+  @override
   Future<String> encrypt({
     required String plaintext,
     required String password,
@@ -53,6 +62,7 @@ final class PasswordBackupCipher {
     });
   }
 
+  @override
   Future<String> decrypt(String source, {required String password}) async {
     if (password.isEmpty) throw const BackupDecryptionException();
     try {
