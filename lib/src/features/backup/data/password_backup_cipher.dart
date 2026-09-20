@@ -94,13 +94,15 @@ final class PasswordBackupCipher {
   static Map<String, Object?> _metadata({
     required List<int> salt,
     required List<int> nonce,
-  }) => {
-    'formatVersion': _formatVersion,
-    'keyDerivation': _keyDerivation,
-    'cipher': _cipherName,
-    'salt': base64Encode(salt),
-    'nonce': base64Encode(nonce),
-  };
+  }) {
+    return {
+      'formatVersion': _formatVersion,
+      'keyDerivation': _keyDerivation,
+      'cipher': _cipherName,
+      'salt': base64Encode(salt),
+      'nonce': base64Encode(nonce),
+    };
+  }
 }
 
 List<int> _decodedBytes(Object? value, [int? requiredLength]) {
