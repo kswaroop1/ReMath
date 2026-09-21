@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/backup/domain/backup_payload.dart';
 import 'package:remath/src/features/backup/domain/backup_preview.dart';
 import 'package:remath/src/features/learning/domain/attempt_event.dart';
+import 'package:remath/src/features/numbers/domain/study_plan.dart';
 
 void main() {
   group('backup import preview', () {
@@ -93,6 +94,19 @@ void main() {
       expect(preview.earliestAttemptAt, isNull);
       expect(preview.latestAttemptAt, isNull);
       expect(preview.canApply, isTrue);
+    });
+
+    test('completed study state is not presented as active', () {
+      final preview = BackupPreview.create(
+        payload: BackupPayload(
+          attempts: const [],
+          createdAt: DateTime.utc(2026, 9, 21, 20),
+          studyState: const StudyState().encode(),
+        ),
+        localAttempts: const [],
+      );
+
+      expect(preview.hasStudyState, isFalse);
     });
   });
 }
