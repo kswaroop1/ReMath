@@ -102,11 +102,7 @@ LearningSession _decodeSession(Map<String, Object?> value) {
     currentQuestionIndex: currentQuestionIndex,
     focusSkillId: _optionalString(value, 'focusSkillId'),
     id: _string(value, 'id'),
-    phase: _enumValue(
-      LearningSessionPhase.values,
-      value['phase'],
-      'phase',
-    ),
+    phase: _enumValue(LearningSessionPhase.values, value['phase'], 'phase'),
     revealedHintCount: revealedHintCount,
     seed: seed,
     startedAt: _utcInstant(value['startedAt'], 'startedAt'),

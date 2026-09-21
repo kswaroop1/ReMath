@@ -368,7 +368,12 @@ final class _DelayedStudySave implements ProgressRepository {
   Future<ProgressMergeResult> mergeProgress({
     required List<AttemptEvent> attempts,
     required String? studyState,
-  }) => _inner.mergeProgress(attempts: attempts, studyState: studyState);
+    LearningSession? session,
+  }) => _inner.mergeProgress(
+    attempts: attempts,
+    session: session,
+    studyState: studyState,
+  );
   @override
   Future<String?> loadStudyState() => _inner.loadStudyState();
   @override
