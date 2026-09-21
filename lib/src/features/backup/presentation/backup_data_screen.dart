@@ -42,6 +42,7 @@ final class _BackupDataScreenState extends State<BackupDataScreen> {
   }
 
   Future<void> _preview() async {
+    setState(() => _pending = null);
     await _run(() async {
       final pending = await widget.transfer.previewImport(
         password: _password.text,
@@ -114,6 +115,23 @@ final class _BackupDataScreenState extends State<BackupDataScreen> {
           ),
           if (preview != null) ...[
             const SizedBox(height: 16),
+            Text('Format version ${preview.formatVersion}'),
+            Text('Created ${preview.createdAt.toIso8601String()}'),
+            Text(
+              '${preview.attemptCount} total '
+              'attempt${preview.attemptCount == 1 ? '' : 's'}',
+            ),
+            Text(
+              preview.skillIds.isEmpty
+                  ? 'Skills: none'
+                  : 'Skills: ${preview.skillIds.join(', ')}',
+            ),
+            Text(
+              'Attempt range: '
+              '${preview.earliestAttemptAt?.toIso8601String() ?? 'none'} — '
+              '${preview.latestAttemptAt?.toIso8601String() ?? 'none'}',
+            ),
+            Text('Active study: ${preview.hasStudyState ? 'yes' : 'no'}'),
             Text('${preview.newAttemptCount} new'),
             Text('${preview.duplicateAttemptCount} duplicates'),
             Text('${preview.conflictingAttemptCount} conflicts'),

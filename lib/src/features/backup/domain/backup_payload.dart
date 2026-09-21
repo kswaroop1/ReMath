@@ -83,7 +83,7 @@ Map<String, Object?> _encodeAttempt(AttemptEvent attempt) => {
   'kind': attempt.kind.name,
   'occurredAt': attempt.occurredAt.toUtc().toIso8601String(),
   'questionId': attempt.questionId,
-  'responseMilliseconds': attempt.responseTime.inMilliseconds,
+  'responseMicroseconds': attempt.responseTime.inMicroseconds,
   'sessionId': attempt.sessionId,
   'skillId': attempt.skillId,
   if (attempt.confidence != null) 'confidence': attempt.confidence!.name,
@@ -94,10 +94,15 @@ Map<String, Object?> _encodeAttempt(AttemptEvent attempt) => {
 };
 
 AttemptEvent _decodeAttempt(Map<String, Object?> value) {
-  final responseMilliseconds = value['responseMilliseconds'];
-  if (responseMilliseconds is! int || responseMilliseconds < 0) {
+  final responseMicroseconds = switch (value['responseMicroseconds']) {
+    final int microseconds => microseconds,
+    null when value['responseMilliseconds'] is int =>
+      (value['responseMilliseconds']! as int) * 1000,
+    _ => -1,
+  };
+  if (responseMicroseconds < 0) {
     throw const FormatException(
-      'responseMilliseconds must be a non-negative integer',
+      'response duration must be a non-negative integer',
     );
   }
   final event = AttemptEvent(
@@ -107,7 +112,7 @@ AttemptEvent _decodeAttempt(Map<String, Object?> value) {
     kind: _enumValue(AttemptKind.values, value['kind'], 'kind'),
     occurredAt: _utcInstant(value['occurredAt'], 'occurredAt'),
     questionId: _string(value, 'questionId'),
-    responseTime: Duration(milliseconds: responseMilliseconds),
+    responseTime: Duration(microseconds: responseMicroseconds),
     sessionId: _string(value, 'sessionId'),
     skillId: _string(value, 'skillId'),
     confidence: _optionalEnum(
