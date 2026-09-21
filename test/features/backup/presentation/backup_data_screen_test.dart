@@ -9,6 +9,20 @@ import 'package:remath/src/features/learning/domain/attempt_event.dart';
 
 void main() {
   group('backup data screen', () {
+    testWidgets('warns that forgotten backup passwords cannot be recovered', (
+      tester,
+    ) async {
+      final screen = BackupDataScreen(
+        transfer: _transfer(files: _MemoryBackupFiles()),
+      );
+      await tester.pumpWidget(MaterialApp(home: screen));
+
+      expect(
+        find.text('Keep this password safe. ReMath cannot recover it.'),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('requires password confirmation before encrypted export', (
       tester,
     ) async {
