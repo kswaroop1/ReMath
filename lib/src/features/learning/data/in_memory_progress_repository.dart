@@ -1,3 +1,4 @@
+import '../../numbers/domain/study_plan.dart';
 import '../domain/attempt_event.dart';
 import '../domain/learning_session.dart';
 import '../domain/progress_repository.dart';
@@ -65,7 +66,8 @@ final class InMemoryProgressRepository implements ProgressRepository {
     for (final attempt in attempts) {
       _attempts.putIfAbsent(attempt.eventId, () => attempt);
     }
-    final importStudyState = studyState != null && _studyState == null;
+    final importStudyState =
+        studyState != null && !_hasActiveStudyState(_studyState);
     if (importStudyState) _studyState = studyState;
     return ProgressMergeResult(
       duplicateAttemptCount: duplicateAttemptCount,
@@ -87,5 +89,14 @@ final class InMemoryProgressRepository implements ProgressRepository {
   @override
   Future<void> saveSession(LearningSession session) async {
     _session = session;
+  }
+}
+
+bool _hasActiveStudyState(String? source) {
+  if (source == null) return false;
+  try {
+    return StudyState.decode(source).plan != null;
+  } on Object {
+    return true;
   }
 }

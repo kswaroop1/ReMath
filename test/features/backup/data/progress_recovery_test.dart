@@ -78,29 +78,32 @@ void main() {
       }
     });
 
-    test('an inactive local study row does not block active recovery', () async {
-      final incoming = StudyState(
-        plan: StudyPlanner().plan(
-          'number-fluency',
-          const [],
-          DateTime.utc(2026, 9, 20),
-        ),
-        sessionId: 'recovered-study',
-      ).encode();
-      for (final fixture in _fixtures()) {
-        final repository = fixture.repository;
-        addTearDown(fixture.close);
-        await repository.saveStudyState(const StudyState().encode());
+    test(
+      'an inactive local study row does not block active recovery',
+      () async {
+        final incoming = StudyState(
+          plan: StudyPlanner().plan(
+            'number-fluency',
+            const [],
+            DateTime.utc(2026, 9, 20),
+          ),
+          sessionId: 'recovered-study',
+        ).encode();
+        for (final fixture in _fixtures()) {
+          final repository = fixture.repository;
+          addTearDown(fixture.close);
+          await repository.saveStudyState(const StudyState().encode());
 
-        final result = await repository.mergeProgress(
-          attempts: const [],
-          studyState: incoming,
-        );
+          final result = await repository.mergeProgress(
+            attempts: const [],
+            studyState: incoming,
+          );
 
-        expect(result.importedStudyState, isTrue);
-        expect(await repository.loadStudyState(), incoming);
-      }
-    });
+          expect(result.importedStudyState, isTrue);
+          expect(await repository.loadStudyState(), incoming);
+        }
+      },
+    );
 
     test(
       'a SQLite write interruption rolls back attempts and study state',

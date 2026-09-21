@@ -1,5 +1,6 @@
 import 'package:sqlite3/common.dart';
 
+import '../../numbers/domain/study_plan.dart';
 import '../domain/attempt_event.dart';
 import '../domain/learning_session.dart';
 import '../domain/progress_repository.dart';
@@ -299,9 +300,9 @@ final class SqliteProgressRepository implements ProgressRepository {
       for (final attempt in newAttempts) {
         _insertAttempt(attempt);
       }
+      final localStudyState = await loadStudyState();
       final importStudyState =
-          studyState != null &&
-          _database.select('SELECT 1 FROM study_state LIMIT 1').isEmpty;
+          studyState != null && !_hasActiveStudyState(localStudyState);
       if (importStudyState) _writeStudyState(studyState);
       _database.execute('COMMIT');
       return ProgressMergeResult(
@@ -438,4 +439,13 @@ final class SqliteProgressRepository implements ProgressRepository {
         ? null
         : SurpriseRating.values.byName(row['surprise'] as String),
   );
+}
+
+bool _hasActiveStudyState(String? source) {
+  if (source == null) return false;
+  try {
+    return StudyState.decode(source).plan != null;
+  } on Object {
+    return true;
+  }
 }
