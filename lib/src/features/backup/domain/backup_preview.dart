@@ -51,7 +51,7 @@ final class BackupPreview {
       hasStudyState:
           payload.studyState != null &&
           StudyState.decode(payload.studyState!).plan != null,
-      hasLearningSession: false,
+      hasLearningSession: payload.session != null,
       latestAttemptAt: payload.attempts.lastOrNull?.occurredAt,
       newAttemptCount: newAttemptCount,
       skillIds: sortedSkillIds,

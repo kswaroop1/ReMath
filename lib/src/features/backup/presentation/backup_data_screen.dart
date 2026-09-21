@@ -132,6 +132,10 @@ final class _BackupDataScreenState extends State<BackupDataScreen> {
               '${preview.latestAttemptAt?.toIso8601String() ?? 'none'}',
             ),
             Text('Active study: ${preview.hasStudyState ? 'yes' : 'no'}'),
+            Text(
+              'Active Home session: '
+              '${preview.hasLearningSession ? 'yes' : 'no'}',
+            ),
             Text('${preview.newAttemptCount} new'),
             Text('${preview.duplicateAttemptCount} duplicates'),
             Text('${preview.conflictingAttemptCount} conflicts'),
