@@ -355,8 +355,10 @@ Last reviewed: 19 September 2026 (PR21 review corrections after PR20).
   metadata, enforce current event constraints, roll back on failure, and are
   forward-tested from supported historical schemas.
 - [ ] **DS-003 — Local content cache.** Independently managed from personal data.
-- [ ] **DS-004 — Event merge engine.** Union immutable events instead of replacing
-  whole databases.
+- [x] **DS-004 — Event merge engine.** Portable recovery unions immutable attempt
+  events by event ID, treats equivalent events as duplicates, blocks conflicting
+  IDs, and applies SQLite recovery transactionally instead of replacing the
+  database. Cloud transport and replay remain separate sync work.
 - [ ] **DS-005 — Idempotent sync.** **Persistence foundation delivered:** duplicate
   immutable event IDs have no effect in local repositories and atomic study
   commits. Transport, outbox acknowledgement, and cross-device replay remain
@@ -381,9 +383,12 @@ Last reviewed: 19 September 2026 (PR21 review corrections after PR20).
   import into another.
 - [x] **DS-015 — Local-only mode.** The implemented learning loop requires no
   account, cloud provider, AI service, or network access.
-- [ ] **DS-016 — Encrypted export.** Portable backup with integrity metadata.
-- [ ] **DS-017 — Import preview.** Show identity, versions, counts, and conflicts
-  before applying.
+- [x] **DS-016 — Encrypted export.** Versioned portable backups use Argon2id
+  password derivation and AES-256-GCM authenticated encryption, with validated
+  algorithm, salt, nonce, ciphertext and authentication-tag metadata.
+- [x] **DS-017 — Import preview.** A read-only preview validates the decrypted
+  payload and reports version, time/skill range, snapshot presence, and
+  new/duplicate/conflicting attempt counts before explicit application.
 - [ ] **DS-018 — Secure token storage.** Platform keystore/keychain-backed OAuth
   credentials.
 - [ ] **DS-019 — Data deletion.** Clear local data and optionally remove the app
@@ -402,8 +407,9 @@ Last reviewed: 19 September 2026 (PR21 review corrections after PR20).
   scans full history before push, and runs independently in CI.
 - [ ] **SP-004 — Least-privilege provider scopes.** App-folder access rather than
   general drive access.
-- [ ] **SP-005 — Backup encryption.** Modern authenticated encryption with a
-  recovery warning.
+- [x] **SP-005 — Backup encryption.** Password-derived authenticated encryption
+  fails closed for wrong passwords, malformed envelopes and tampering; the UI
+  warns that forgotten backup passwords cannot be recovered.
 - [ ] **SP-006 — Content signature trust store.** Explicit trusted publishers and
   key rotation.
 - [ ] **SP-007 — Optional on-device explanations.** Local model only when it adds
@@ -416,8 +422,9 @@ Last reviewed: 19 September 2026 (PR21 review corrections after PR20).
   as the mathematical marking authority.
 - [ ] **SP-011 — Threat model.** Device compromise, token theft, malicious packs,
   sync replay, and supply-chain risks.
-- [ ] **SP-012 — Dependency and licence review.** Record maintenance, platform,
-  privacy, and licence implications before adding packages.
+- [x] **SP-012 — Dependency and licence review.** The cryptography and file-picker
+  additions record maintenance, licence, platform, privacy and architecture
+  implications before adoption; future packages require the same assessment.
 
 ## 10. Platform and engineering delivery
 
