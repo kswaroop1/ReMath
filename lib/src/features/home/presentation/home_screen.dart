@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../backup/application/backup_file_transfer.dart';
+import '../../backup/presentation/backup_data_screen.dart';
 import '../../learning/domain/arithmetic_question.dart';
 import '../../learning/domain/content_pack.dart';
 import '../../learning/domain/curriculum_graph.dart';
@@ -13,11 +15,13 @@ import '../../numbers/presentation/study_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
+    this.backupTransfer,
     required this.contentPack,
     required this.repository,
     super.key,
   });
 
+  final BackupFileTransfer? backupTransfer;
   final ContentPack contentPack;
   final ProgressRepository repository;
 
@@ -83,6 +87,15 @@ class _HomeScreenState extends State<HomeScreen> {
     appBar: AppBar(
       title: const Text('ReMath'),
       actions: [
+        if (widget.backupTransfer case final transfer?)
+          TextButton(
+            onPressed: () => Navigator.of(context).push<void>(
+              MaterialPageRoute(
+                builder: (_) => BackupDataScreen(transfer: transfer),
+              ),
+            ),
+            child: const Text('Backup and recovery'),
+          ),
         if (!_controller.hasActiveSession)
           TextButton(
             onPressed: () async {

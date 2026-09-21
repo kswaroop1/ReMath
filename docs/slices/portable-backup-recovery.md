@@ -51,6 +51,15 @@ platform, privacy and architecture assessment before addition. Crypto remains in
 the data layer behind a provider-neutral backup interface; domain rules do not
 import packages. No network access or telemetry is introduced.
 
+`file_picker` 13.1.0 is used only by the data-layer adapter. It is actively
+maintained, MIT licensed, and supports native open and save journeys on Android,
+iOS, Linux, macOS, Windows and web. Selected backup bytes pass directly between
+the operating-system picker and the provider-neutral `BackupFileBoundary`; the
+package receives no password, derived key, network permission or telemetry.
+Flutter's `file_selector` was rejected because save-location selection is not
+supported on Android, iOS or web. macOS receives only the user-selected-file
+read/write entitlement required for this journey.
+
 ## Verification
 
 Use separate test-first and implementation commits for each behavior. Record the
