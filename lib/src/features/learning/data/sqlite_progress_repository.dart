@@ -306,7 +306,7 @@ final class SqliteProgressRepository implements ProgressRepository {
           studyState != null && !_hasActiveStudyState(localStudyState);
       if (importStudyState) _writeStudyState(studyState);
       final importSession = session != null && await loadSession() == null;
-      if (importSession) _writeSession(session!);
+      if (importSession) _writeSession(session);
       _database.execute('COMMIT');
       return ProgressMergeResult(
         duplicateAttemptCount: duplicateAttemptCount,
