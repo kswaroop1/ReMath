@@ -11,6 +11,7 @@ final class BackupPreview {
     required this.earliestAttemptAt,
     required this.formatVersion,
     required this.hasStudyState,
+    required this.hasLearningSession,
     required this.latestAttemptAt,
     required this.newAttemptCount,
     required List<String> skillIds,
@@ -50,6 +51,7 @@ final class BackupPreview {
       hasStudyState:
           payload.studyState != null &&
           StudyState.decode(payload.studyState!).plan != null,
+      hasLearningSession: false,
       latestAttemptAt: payload.attempts.lastOrNull?.occurredAt,
       newAttemptCount: newAttemptCount,
       skillIds: sortedSkillIds,
@@ -63,6 +65,7 @@ final class BackupPreview {
   final DateTime? earliestAttemptAt;
   final int formatVersion;
   final bool hasStudyState;
+  final bool hasLearningSession;
   final DateTime? latestAttemptAt;
   final int newAttemptCount;
   final List<String> skillIds;

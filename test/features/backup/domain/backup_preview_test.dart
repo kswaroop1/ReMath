@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/backup/domain/backup_payload.dart';
 import 'package:remath/src/features/backup/domain/backup_preview.dart';
 import 'package:remath/src/features/learning/domain/attempt_event.dart';
+import 'package:remath/src/features/learning/domain/learning_session.dart';
 import 'package:remath/src/features/numbers/domain/study_plan.dart';
 
 void main() {
@@ -112,6 +113,26 @@ void main() {
         localAttempts: const [],
       );
 
+      expect(preview.hasStudyState, isFalse);
+    });
+
+    test('reports a resumable Home learning session separately', () {
+      final preview = BackupPreview.create(
+        payload: BackupPayload(
+          attempts: const [],
+          createdAt: DateTime.utc(2026, 9, 21, 20),
+          session: LearningSession(
+            currentQuestionIndex: 2,
+            id: 'session-1',
+            seed: 42,
+            startedAt: DateTime.utc(2026, 9, 21, 19),
+          ),
+          studyState: null,
+        ),
+        localAttempts: const [],
+      );
+
+      expect(preview.hasLearningSession, isTrue);
       expect(preview.hasStudyState, isFalse);
     });
   });
