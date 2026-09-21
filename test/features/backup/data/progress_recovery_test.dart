@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/data/in_memory_progress_repository.dart';
 import 'package:remath/src/features/learning/data/sqlite_progress_repository.dart';
 import 'package:remath/src/features/learning/domain/attempt_event.dart';
+import 'package:remath/src/features/learning/domain/learning_session.dart';
 import 'package:remath/src/features/learning/domain/progress_repository.dart';
 import 'package:remath/src/features/numbers/domain/study_plan.dart';
 import 'package:sqlite3/sqlite3.dart';
@@ -139,8 +140,66 @@ void main() {
         expect(await repository.loadStudyState(), isNull);
       },
     );
+
+    test('SQLite restores a session only when local work is absent', () async {
+      final database = sqlite3.openInMemory();
+      final repository = SqliteProgressRepository(database);
+      addTearDown(repository.close);
+      final imported = _session('imported');
+
+      final restored = await repository.mergeProgress(
+        attempts: const [],
+        studyState: null,
+        session: imported,
+      );
+      expect(restored.importedSession, isTrue);
+      expect((await repository.loadSession())?.id, 'imported');
+
+      final protected = await repository.mergeProgress(
+        attempts: const [],
+        studyState: null,
+        session: _session('replacement'),
+      );
+      expect(protected.importedSession, isFalse);
+      expect((await repository.loadSession())?.id, 'imported');
+    });
+
+    test('SQLite rolls back all writes when session import fails', () async {
+      final database = sqlite3.openInMemory();
+      final repository = SqliteProgressRepository(database);
+      addTearDown(repository.close);
+      database.execute('''
+        CREATE TRIGGER interrupt_session_recovery
+        BEFORE INSERT ON active_session
+        BEGIN
+          SELECT RAISE(ABORT, 'simulated session interruption');
+        END
+      ''');
+
+      await expectLater(
+        repository.mergeProgress(
+          attempts: [_attempt('rolled-back')],
+          studyState: const StudyState().encode(),
+          session: _session('interrupted'),
+        ),
+        throwsA(anything),
+      );
+
+      expect(await repository.loadAttempts(), isEmpty);
+      expect(await repository.loadStudyState(), isNull);
+      expect(await repository.loadSession(), isNull);
+    });
   });
 }
+
+LearningSession _session(String id) => LearningSession(
+  answerDraft: '12',
+  currentQuestionIndex: 3,
+  focusSkillId: 'arithmetic.addition',
+  id: id,
+  seed: 42,
+  startedAt: DateTime.utc(2026, 9, 20, 9),
+);
 
 List<({ProgressRepository repository, Future<void> Function() close})>
 _fixtures() {
