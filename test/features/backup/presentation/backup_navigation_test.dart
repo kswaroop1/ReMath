@@ -59,7 +59,7 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
 
-    expect(find.text('1 attempt • 100% accuracy'), findsOneWidget);
+    expect(find.text('1 attempts • 100% accuracy'), findsOneWidget);
   });
 }
 
