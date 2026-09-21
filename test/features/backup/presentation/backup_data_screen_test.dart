@@ -82,6 +82,11 @@ void main() {
       expect(find.text('1 new'), findsOneWidget);
       expect(find.text('0 duplicates'), findsOneWidget);
       expect(find.text('0 conflicts'), findsOneWidget);
+      expect(find.text('Format version 1'), findsOneWidget);
+      expect(find.text('Created 2026-09-20T12:00:00.000Z'), findsOneWidget);
+      expect(find.text('1 total attempt'), findsOneWidget);
+      expect(find.text('Skills: arithmetic.addition'), findsOneWidget);
+      expect(find.text('Active study: no'), findsOneWidget);
       expect(await target.loadAttempts(), isEmpty);
 
       await tester.tap(find.text('Apply backup'));
@@ -89,6 +94,40 @@ void main() {
 
       expect((await target.loadAttempts()).single.eventId, 'event-1');
       expect(find.text('1 attempt restored.'), findsOneWidget);
+    });
+
+    testWidgets('a failed second preview clears the prior applicable backup', (
+      tester,
+    ) async {
+      final source = InMemoryProgressRepository();
+      await source.recordAttempt(_attempt('event-1'));
+      final encrypted = await _coordinator(
+        repository: source,
+      ).export(password: 'password');
+      final files = _MemoryBackupFiles()..contentsToOpen = encrypted;
+      final target = InMemoryProgressRepository();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: BackupDataScreen(
+            transfer: _transfer(files: files, repository: target),
+          ),
+        ),
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('backup-password')),
+        'password',
+      );
+      await tester.tap(find.text('Preview backup'));
+      await tester.pumpAndSettle();
+      expect(find.text('Apply backup'), findsOneWidget);
+
+      files.contentsToOpen = 'malformed';
+      await tester.tap(find.text('Preview backup'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Backup could not be processed.'), findsOneWidget);
+      expect(find.text('Apply backup'), findsNothing);
+      expect(await target.loadAttempts(), isEmpty);
     });
   });
 }

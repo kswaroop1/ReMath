@@ -17,7 +17,7 @@ void main() {
         occurredAt: DateTime.parse('2026-09-20T09:30:00+01:00'),
         questionId: 'question-2',
         relatedEventId: 'event-a',
-        responseTime: const Duration(microseconds: 1250000),
+        responseTime: const Duration(microseconds: 1250001),
         sessionId: 'session-1',
         skillId: 'numbers.decimals',
         surprise: SurpriseRating.surprising,
@@ -65,7 +65,7 @@ void main() {
       expect(decoded.attempts.last.relatedEventId, 'event-a');
       expect(
         decoded.attempts.last.responseTime,
-        const Duration(milliseconds: 1250),
+        const Duration(microseconds: 1250001),
       );
       expect(decoded.attempts.last.surprise, SurpriseRating.surprising);
       expect(decoded.encode(), encoded);
