@@ -85,6 +85,12 @@ LearningSession _decodeSession(Map<String, Object?> value) {
   final currentQuestionIndex = value['currentQuestionIndex'];
   final revealedHintCount = value['revealedHintCount'];
   final seed = value['seed'];
+  final focusSkillId = _optionalString(value, 'focusSkillId');
+  final phase = _enumValue(
+    LearningSessionPhase.values,
+    value['phase'],
+    'phase',
+  );
   if (currentQuestionIndex is! int || currentQuestionIndex < 0) {
     throw const FormatException(
       'currentQuestionIndex must be a non-negative integer',
@@ -96,13 +102,16 @@ LearningSession _decodeSession(Map<String, Object?> value) {
     );
   }
   if (seed is! int) throw const FormatException('seed must be an integer');
+  if (phase == LearningSessionPhase.learn && focusSkillId == null) {
+    throw const FormatException('learn sessions require a focus skill');
+  }
   return LearningSession(
     answerDraft: _string(value, 'answerDraft', allowEmpty: true),
     correctionOfEventId: _optionalString(value, 'correctionOfEventId'),
     currentQuestionIndex: currentQuestionIndex,
-    focusSkillId: _optionalString(value, 'focusSkillId'),
+    focusSkillId: focusSkillId,
     id: _string(value, 'id'),
-    phase: _enumValue(LearningSessionPhase.values, value['phase'], 'phase'),
+    phase: phase,
     revealedHintCount: revealedHintCount,
     seed: seed,
     startedAt: _utcInstant(value['startedAt'], 'startedAt'),
