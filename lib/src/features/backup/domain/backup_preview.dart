@@ -1,4 +1,5 @@
 import '../../learning/domain/attempt_event.dart';
+import '../../numbers/domain/study_plan.dart';
 import 'backup_payload.dart';
 
 final class BackupPreview {
@@ -46,7 +47,9 @@ final class BackupPreview {
       duplicateAttemptCount: duplicateAttemptCount,
       earliestAttemptAt: payload.attempts.firstOrNull?.occurredAt,
       formatVersion: BackupPayload.formatVersion,
-      hasStudyState: payload.studyState != null,
+      hasStudyState:
+          payload.studyState != null &&
+          StudyState.decode(payload.studyState!).plan != null,
       latestAttemptAt: payload.attempts.lastOrNull?.occurredAt,
       newAttemptCount: newAttemptCount,
       skillIds: sortedSkillIds,

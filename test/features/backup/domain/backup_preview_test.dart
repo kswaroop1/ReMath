@@ -24,7 +24,13 @@ void main() {
             ),
           ],
           createdAt: DateTime.utc(2026, 9, 20, 11),
-          studyState: '{"phase":"question"}',
+          studyState: StudyState(
+            plan: StudyPlanner().plan(
+              'number-fluency',
+              const [],
+              DateTime.utc(2026, 9, 20),
+            ),
+          ).encode(),
         );
 
         final preview = BackupPreview.create(
