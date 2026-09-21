@@ -1,12 +1,14 @@
 import 'dart:convert';
 
 import '../../learning/domain/attempt_event.dart';
+import '../../learning/domain/learning_session.dart';
 
 final class BackupPayload {
   BackupPayload({
     required List<AttemptEvent> attempts,
     required DateTime createdAt,
     required this.studyState,
+    this.session,
   }) : attempts = List.unmodifiable(_canonicalAttempts(attempts)),
        createdAt = createdAt.toUtc();
 
@@ -14,12 +16,14 @@ final class BackupPayload {
 
   final List<AttemptEvent> attempts;
   final DateTime createdAt;
+  final LearningSession? session;
   final String? studyState;
 
   String encode() => jsonEncode({
     'formatVersion': formatVersion,
     'createdAt': createdAt.toIso8601String(),
     'attempts': attempts.map(_encodeAttempt).toList(growable: false),
+    'session': session == null ? null : _encodeSession(session!),
     'studyState': studyState,
   });
 
@@ -52,12 +56,61 @@ final class BackupPayload {
     if (studyState != null && studyState is! String) {
       throw const FormatException('studyState must be a string or null');
     }
+    final rawSession = root['session'];
+    final session = rawSession == null
+        ? null
+        : _decodeSession(_objectMap(rawSession, 'session'));
     return BackupPayload(
       attempts: attempts,
       createdAt: createdAt,
+      session: session,
       studyState: studyState as String?,
     );
   }
+}
+
+Map<String, Object?> _encodeSession(LearningSession session) => {
+  'answerDraft': session.answerDraft,
+  'correctionOfEventId': session.correctionOfEventId,
+  'currentQuestionIndex': session.currentQuestionIndex,
+  'focusSkillId': session.focusSkillId,
+  'id': session.id,
+  'phase': session.phase.name,
+  'revealedHintCount': session.revealedHintCount,
+  'seed': session.seed,
+  'startedAt': session.startedAt.toUtc().toIso8601String(),
+};
+
+LearningSession _decodeSession(Map<String, Object?> value) {
+  final currentQuestionIndex = value['currentQuestionIndex'];
+  final revealedHintCount = value['revealedHintCount'];
+  final seed = value['seed'];
+  if (currentQuestionIndex is! int || currentQuestionIndex < 0) {
+    throw const FormatException(
+      'currentQuestionIndex must be a non-negative integer',
+    );
+  }
+  if (revealedHintCount is! int || revealedHintCount < 0) {
+    throw const FormatException(
+      'revealedHintCount must be a non-negative integer',
+    );
+  }
+  if (seed is! int) throw const FormatException('seed must be an integer');
+  return LearningSession(
+    answerDraft: _string(value, 'answerDraft', allowEmpty: true),
+    correctionOfEventId: _optionalString(value, 'correctionOfEventId'),
+    currentQuestionIndex: currentQuestionIndex,
+    focusSkillId: _optionalString(value, 'focusSkillId'),
+    id: _string(value, 'id'),
+    phase: _enumValue(
+      LearningSessionPhase.values,
+      value['phase'],
+      'phase',
+    ),
+    revealedHintCount: revealedHintCount,
+    seed: seed,
+    startedAt: _utcInstant(value['startedAt'], 'startedAt'),
+  );
 }
 
 List<AttemptEvent> _canonicalAttempts(List<AttemptEvent> attempts) {

@@ -48,6 +48,7 @@ final class InMemoryProgressRepository implements ProgressRepository {
   Future<ProgressMergeResult> mergeProgress({
     required List<AttemptEvent> attempts,
     required String? studyState,
+    LearningSession? session,
   }) async {
     final incomingIds = <String>{};
     var duplicateAttemptCount = 0;
@@ -69,9 +70,12 @@ final class InMemoryProgressRepository implements ProgressRepository {
     final importStudyState =
         studyState != null && !_hasActiveStudyState(_studyState);
     if (importStudyState) _studyState = studyState;
+    final importSession = session != null && _session == null;
+    if (importSession) _session = session;
     return ProgressMergeResult(
       duplicateAttemptCount: duplicateAttemptCount,
       importedStudyState: importStudyState,
+      importedSession: importSession,
       insertedAttemptCount: attempts.length - duplicateAttemptCount,
     );
   }

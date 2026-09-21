@@ -14,6 +14,7 @@ abstract interface class ProgressRepository {
   Future<ProgressMergeResult> mergeProgress({
     required List<AttemptEvent> attempts,
     required String? studyState,
+    LearningSession? session,
   });
   Future<bool> recordAttempt(AttemptEvent event);
   Future<void> saveSession(LearningSession session);
@@ -24,10 +25,12 @@ final class ProgressMergeResult {
     required this.duplicateAttemptCount,
     required this.importedStudyState,
     required this.insertedAttemptCount,
+    this.importedSession = false,
   });
 
   final int duplicateAttemptCount;
   final bool importedStudyState;
+  final bool importedSession;
   final int insertedAttemptCount;
 }
 

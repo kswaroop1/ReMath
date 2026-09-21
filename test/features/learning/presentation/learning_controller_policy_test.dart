@@ -170,7 +170,12 @@ final class _BlockingProgressRepository implements ProgressRepository {
   Future<ProgressMergeResult> mergeProgress({
     required List<AttemptEvent> attempts,
     required String? studyState,
-  }) => _inner.mergeProgress(attempts: attempts, studyState: studyState);
+    LearningSession? session,
+  }) => _inner.mergeProgress(
+    attempts: attempts,
+    session: session,
+    studyState: studyState,
+  );
 
   @override
   Future<bool> recordAttempt(AttemptEvent event) async {

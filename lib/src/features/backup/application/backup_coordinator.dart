@@ -30,6 +30,7 @@ final class BackupCoordinator {
     final payload = BackupPayload(
       attempts: await _repository.loadAttempts(),
       createdAt: _clock().toUtc(),
+      session: await _repository.loadSession(),
       studyState: await _repository.loadStudyState(),
     );
     return _cipher.encrypt(plaintext: payload.encode(), password: password);
@@ -62,6 +63,7 @@ final class BackupCoordinator {
     }
     return _repository.mergeProgress(
       attempts: pending._payload.attempts,
+      session: pending._payload.session,
       studyState: pending._payload.studyState,
     );
   }

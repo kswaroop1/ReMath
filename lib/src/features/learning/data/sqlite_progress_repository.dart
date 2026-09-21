@@ -271,6 +271,7 @@ final class SqliteProgressRepository implements ProgressRepository {
   Future<ProgressMergeResult> mergeProgress({
     required List<AttemptEvent> attempts,
     required String? studyState,
+    LearningSession? session,
   }) async {
     final incomingIds = <String>{};
     for (final attempt in attempts) {
@@ -304,10 +305,13 @@ final class SqliteProgressRepository implements ProgressRepository {
       final importStudyState =
           studyState != null && !_hasActiveStudyState(localStudyState);
       if (importStudyState) _writeStudyState(studyState);
+      final importSession = session != null && await loadSession() == null;
+      if (importSession) _writeSession(session!);
       _database.execute('COMMIT');
       return ProgressMergeResult(
         duplicateAttemptCount: duplicateAttemptCount,
         importedStudyState: importStudyState,
+        importedSession: importSession,
         insertedAttemptCount: newAttempts.length,
       );
     } catch (_) {
@@ -352,6 +356,10 @@ final class SqliteProgressRepository implements ProgressRepository {
 
   @override
   Future<void> saveSession(LearningSession session) async {
+    _writeSession(session);
+  }
+
+  void _writeSession(LearningSession session) {
     _database.execute(
       '''
       INSERT INTO active_session (
