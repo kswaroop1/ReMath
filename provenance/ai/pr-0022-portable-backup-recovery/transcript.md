@@ -136,6 +136,12 @@ the previous pending import, complete learner-visible preview metadata and
 microsecond response precision. The implementation was verified while a widget
 harness correction was identified in run 35558151778.
 
+Those three independent behaviors were batched in one red commit and one green
+commit. That history does not satisfy the repository's preferred one-cycle-per-
+behavior discipline and cannot be reconstructed honestly after the fact. The
+review finding is therefore retained as an explicit process deviation rather
+than described as three separate compliant cycles.
+
 Run 35561097077 recorded the rollback and inactive-study-state red boundary.
 Run 35561462113 verified simulated interrupted-write rollback and restoration of
 a genuinely active imported snapshot when the local row is inactive. Run
@@ -158,3 +164,32 @@ The dependency assessment now records `cryptography` 2.7.0 specifically:
 Apache 2.0 licensing, maintained cross-platform upstream, pure-Dart use behind
 `BackupCipher`, no network or telemetry surface, deterministic randomness only
 through tests, and a separate review requirement for future upgrades.
+
+## Material review exchange
+
+The exact first-review findings and repository responses remain available in
+the pull-request threads: [stale preview][r1], [cryptography assessment][r2],
+[rollback evidence][r3], [inactive study state][r4], [cached Home state][r5],
+[preview metadata][r6], [web durability][r7], [response precision][r8],
+[browser evidence][r9], and [active Home session][r10]. The re-review exchange
+is likewise preserved verbatim: [session invariants][r11], [inactive preview
+state][r12], [Home-session preview][r13], [review provenance][r14], [question
+identity][r15], [TDD batching][r16], and [SQLite session recovery][r17].
+
+[r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
+[r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
+[r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
+[r4]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815405
+[r5]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815410
+[r6]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815415
+[r7]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815418
+[r8]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815427
+[r9]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815429
+[r10]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815431
+[r11]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4064359838
+[r12]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4064359846
+[r13]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4064359850
+[r14]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4064359857
+[r15]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4064359867
+[r16]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4064359876
+[r17]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4064359882
