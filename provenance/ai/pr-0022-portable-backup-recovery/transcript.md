@@ -121,3 +121,40 @@ cannot be recovered after a password is forgotten. CI run 35551231469 recorded
 the focused widget test failing before implementation. The separate green
 commit added the visible warning next to the password controls; CI run
 35551472718 verifies that final behavior.
+
+## Independent review and correction cycles
+
+Independent `@codex review` at head `9cf2b76` found ten substantive issues.
+All findings were accepted: stale pending imports after a failed preview,
+incomplete preview metadata, response-time precision loss, missing rollback
+evidence, inactive study rows blocking recovery, stale cached Home state,
+misleading web availability, missing Chrome coverage, omitted active learning
+sessions and an incomplete cryptography dependency assessment.
+
+The first correction red run 35554216125 required failed previews to invalidate
+the previous pending import, complete learner-visible preview metadata and
+microsecond response precision. The implementation was verified while a widget
+harness correction was identified in run 35558151778.
+
+Run 35561097077 recorded the rollback and inactive-study-state red boundary.
+Run 35561462113 verified simulated interrupted-write rollback and restoration of
+a genuinely active imported snapshot when the local row is inactive. Run
+35563686217 recorded the cached-state red boundary; after compatibility and
+assertion corrections, run 35568242006 verified that Home reloads persisted
+state after recovery.
+
+Run 35568583495 recorded the web platform-boundary red result. After canonical
+Dart 3.13 formatting corrections, run 35589340047 verified in Chrome that
+backup/recovery is omitted on web until progress storage is durable while native
+platforms retain the file-picker journey.
+
+Run 35592039942 recorded the missing active-session behavior. The green change
+added complete session payload encoding and protected, transactional repository
+merge semantics. Runs 35601541171 and 35605045558 exposed test-double,
+formatting and analysis integration corrections; run 35613006975 verified the
+final behavior with 321 native tests plus the Chrome contract suite.
+
+The dependency assessment now records `cryptography` 2.7.0 specifically:
+Apache 2.0 licensing, maintained cross-platform upstream, pure-Dart use behind
+`BackupCipher`, no network or telemetry surface, deterministic randomness only
+through tests, and a separate review requirement for future upgrades.
