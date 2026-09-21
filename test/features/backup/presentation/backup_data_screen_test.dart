@@ -89,6 +89,7 @@ void main() {
       expect(find.text('Active study: no'), findsOneWidget);
       expect(await target.loadAttempts(), isEmpty);
 
+      await tester.ensureVisible(find.text('Apply backup'));
       await tester.tap(find.text('Apply backup'));
       await tester.pumpAndSettle();
 
