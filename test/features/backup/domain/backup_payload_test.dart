@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/backup/domain/backup_payload.dart';
 import 'package:remath/src/features/learning/domain/attempt_event.dart';
+import 'package:remath/src/features/learning/domain/learning_session.dart';
 
 void main() {
   group('portable backup payload', () {
@@ -141,6 +142,28 @@ void main() {
       });
 
       expect(() => BackupPayload.decode(encoded), throwsFormatException);
+    });
+
+    test('preserves the exact generated question identity', () {
+      final payload = BackupPayload(
+        attempts: const [],
+        createdAt: DateTime.utc(2026, 9, 21, 22),
+        session: LearningSession(
+          answerDraft: '17',
+          currentQuestionIndex: 4,
+          id: 'session-1',
+          questionId: 'core.addition.v2.42.4',
+          questionSkillId: 'arithmetic.addition',
+          seed: 42,
+          startedAt: DateTime.utc(2026, 9, 21, 21),
+        ),
+        studyState: null,
+      );
+
+      final restored = BackupPayload.decode(payload.encode()).session!;
+
+      expect(restored.questionId, 'core.addition.v2.42.4');
+      expect(restored.questionSkillId, 'arithmetic.addition');
     });
   });
 }
