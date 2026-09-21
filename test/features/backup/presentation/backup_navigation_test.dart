@@ -4,7 +4,7 @@ import 'package:remath/src/app.dart';
 import 'package:remath/src/features/backup/application/backup_file_transfer.dart';
 import 'package:remath/src/features/learning/data/in_memory_progress_repository.dart';
 
-import '../../../support/foundation_content.dart';
+import '../../../support/foundation_pack.dart';
 
 void main() {
   testWidgets('home opens the portable backup and recovery journey', (
