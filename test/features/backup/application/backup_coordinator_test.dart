@@ -4,6 +4,7 @@ import 'package:remath/src/features/backup/data/password_backup_cipher.dart';
 import 'package:remath/src/features/backup/domain/backup_payload.dart';
 import 'package:remath/src/features/learning/data/in_memory_progress_repository.dart';
 import 'package:remath/src/features/learning/domain/attempt_event.dart';
+import 'package:remath/src/features/learning/domain/learning_session.dart';
 
 void main() {
   group('backup coordinator', () {
@@ -61,7 +62,77 @@ void main() {
         throwsFormatException,
       );
     });
+
+    test('portable backup restores an active learning session', () async {
+      final source = InMemoryProgressRepository();
+      await source.saveSession(_session('portable-session'));
+      final exporter = BackupCoordinator(
+        cipher: cipher,
+        clock: () => DateTime.utc(2026, 9, 20, 12),
+        repository: source,
+      );
+      final encrypted = await exporter.export(password: password);
+      final target = InMemoryProgressRepository();
+      final importer = BackupCoordinator(
+        cipher: cipher,
+        clock: DateTime.now,
+        repository: target,
+      );
+
+      final pending = await importer.preview(encrypted, password: password);
+      final result = await importer.apply(pending);
+
+      expect(result.importedSession, isTrue);
+      final restored = await target.loadSession();
+      expect(restored?.id, 'portable-session');
+      expect(restored?.answerDraft, '12');
+      expect(restored?.currentQuestionIndex, 3);
+      expect(restored?.correctionOfEventId, 'event-1');
+      expect(restored?.focusSkillId, 'arithmetic.addition');
+      expect(restored?.phase, LearningSessionPhase.correction);
+      expect(restored?.revealedHintCount, 2);
+      expect(restored?.seed, 42);
+      expect(restored?.startedAt, DateTime.utc(2026, 9, 20, 10));
+    });
+
+    test('portable backup never replaces a local active session', () async {
+      final source = InMemoryProgressRepository();
+      await source.saveSession(_session('imported-session'));
+      final exporter = BackupCoordinator(
+        cipher: cipher,
+        clock: () => DateTime.utc(2026, 9, 20, 12),
+        repository: source,
+      );
+      final encrypted = await exporter.export(password: password);
+      final target = InMemoryProgressRepository();
+      await target.saveSession(_session('local-session'));
+      final importer = BackupCoordinator(
+        cipher: cipher,
+        clock: DateTime.now,
+        repository: target,
+      );
+
+      final pending = await importer.preview(encrypted, password: password);
+      final result = await importer.apply(pending);
+
+      expect(result.importedSession, isFalse);
+      expect((await target.loadSession())?.id, 'local-session');
+    });
   });
+}
+
+LearningSession _session(String id) {
+  return LearningSession(
+    answerDraft: '12',
+    correctionOfEventId: 'event-1',
+    currentQuestionIndex: 3,
+    focusSkillId: 'arithmetic.addition',
+    id: id,
+    phase: LearningSessionPhase.correction,
+    revealedHintCount: 2,
+    seed: 42,
+    startedAt: DateTime.utc(2026, 9, 20, 10),
+  );
 }
 
 AttemptEvent _attempt(String id) {
