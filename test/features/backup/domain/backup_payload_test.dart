@@ -120,5 +120,27 @@ void main() {
         throwsFormatException,
       );
     });
+
+    test('rejects a learn session without a focus skill', () {
+      final encoded = jsonEncode({
+        'formatVersion': 1,
+        'createdAt': '2026-09-21T18:00:00.000Z',
+        'attempts': const [],
+        'session': {
+          'answerDraft': '',
+          'correctionOfEventId': null,
+          'currentQuestionIndex': 0,
+          'focusSkillId': null,
+          'id': 'session-1',
+          'phase': 'learn',
+          'revealedHintCount': 0,
+          'seed': 42,
+          'startedAt': '2026-09-21T17:55:00.000Z',
+        },
+        'studyState': null,
+      });
+
+      expect(() => BackupPayload.decode(encoded), throwsFormatException);
+    });
   });
 }
