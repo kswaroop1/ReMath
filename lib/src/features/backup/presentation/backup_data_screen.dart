@@ -101,6 +101,8 @@ final class _BackupDataScreenState extends State<BackupDataScreen> {
             decoration: const InputDecoration(labelText: 'Confirm password'),
             obscureText: true,
           ),
+          const SizedBox(height: 8),
+          const Text('Keep this password safe. ReMath cannot recover it.'),
           const SizedBox(height: 16),
           FilledButton(
             onPressed: _busy ? null : _export,
