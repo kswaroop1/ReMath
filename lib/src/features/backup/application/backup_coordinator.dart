@@ -1,3 +1,4 @@
+import '../../learning/domain/learning_session.dart';
 import '../../learning/domain/progress_repository.dart';
 import '../../numbers/domain/study_plan.dart';
 import '../data/password_backup_cipher.dart';
@@ -5,6 +6,7 @@ import '../domain/backup_payload.dart';
 import '../domain/backup_preview.dart';
 
 typedef BackupClock = DateTime Function();
+typedef BackupSessionValidator = bool Function(LearningSession session);
 
 final class PendingBackupImport {
   const PendingBackupImport._(this._payload, {required this.preview});
@@ -18,13 +20,16 @@ final class BackupCoordinator {
     required BackupCipher cipher,
     required BackupClock clock,
     required ProgressRepository repository,
+    BackupSessionValidator? sessionValidator,
   }) : _cipher = cipher,
        _clock = clock,
-       _repository = repository;
+       _repository = repository,
+       _sessionValidator = sessionValidator;
 
   final BackupCipher _cipher;
   final BackupClock _clock;
   final ProgressRepository _repository;
+  final BackupSessionValidator? _sessionValidator;
 
   Future<String> export({required String password}) async {
     final payload = BackupPayload(
@@ -42,6 +47,10 @@ final class BackupCoordinator {
   }) async {
     final plaintext = await _cipher.decrypt(encrypted, password: password);
     final payload = BackupPayload.decode(plaintext);
+    final session = payload.session;
+    if (session != null && !(_sessionValidator?.call(session) ?? true)) {
+      throw const FormatException('Incompatible active learning session');
+    }
     final studyState = payload.studyState;
     if (studyState != null) {
       try {

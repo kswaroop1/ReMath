@@ -4,6 +4,7 @@ import 'package:remath/src/features/backup/application/backup_file_transfer.dart
 import 'package:remath/src/features/backup/data/password_backup_cipher.dart';
 import 'package:remath/src/features/home/presentation/home_screen.dart';
 import 'package:remath/src/features/learning/domain/content_pack.dart';
+import 'package:remath/src/features/learning/domain/learning_session_compatibility.dart';
 import 'package:remath/src/features/learning/domain/progress_repository.dart';
 
 class ReMathApp extends StatelessWidget {
@@ -28,6 +29,10 @@ class ReMathApp extends StatelessWidget {
               cipher: PasswordBackupCipher(),
               clock: DateTime.now,
               repository: repository,
+              sessionValidator: (session) => isLearningSessionCompatible(
+                session,
+                contentPack: contentPack,
+              ),
             ),
             files: files,
           );

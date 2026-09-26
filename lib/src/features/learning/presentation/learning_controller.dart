@@ -215,7 +215,7 @@ final class LearningController extends ChangeNotifier {
     _questionBeganAt = now;
     _lastCompletedOperation = null;
     _lastAssessment = null;
-    await _repository.saveSession(_session!);
+    await _persistSession();
     notifyListeners();
   }
 
@@ -232,7 +232,7 @@ final class LearningController extends ChangeNotifier {
     _questionBeganAt = now;
     _lastCompletedOperation = null;
     _lastAssessment = null;
-    await _repository.saveSession(_session!);
+    await _persistSession();
     notifyListeners();
   }
 
@@ -250,7 +250,7 @@ final class LearningController extends ChangeNotifier {
     _questionBeganAt = now;
     _lastCompletedOperation = null;
     _lastAssessment = null;
-    await _repository.saveSession(_session!);
+    await _persistSession();
     notifyListeners();
   }
 
@@ -272,7 +272,7 @@ final class LearningController extends ChangeNotifier {
     _questionBeganAt = now;
     _lastCompletedOperation = null;
     _lastAssessment = null;
-    await _repository.saveSession(_session!);
+    await _persistSession();
     notifyListeners();
     return true;
   }
@@ -302,7 +302,7 @@ final class LearningController extends ChangeNotifier {
     _session = session.copyWith(
       revealedHintCount: session.revealedHintCount + 1,
     );
-    await _repository.saveSession(_session!);
+    await _persistSession();
     _recalculateProgress();
     notifyListeners();
   }
@@ -318,7 +318,7 @@ final class LearningController extends ChangeNotifier {
       questionId: question?.id,
       questionSkillId: question?.skillId,
     );
-    unawaited(_repository.saveSession(_session!));
+    unawaited(_persistSession());
   }
 
   Future<void> submitAnswer() async {
@@ -374,7 +374,7 @@ final class LearningController extends ChangeNotifier {
       } else {
         _session = session.copyWith(answerDraft: '');
       }
-      await _repository.saveSession(_session!);
+      await _persistSession();
       _questionBeganAt = now;
       _isBusy = false;
       notifyListeners();
@@ -397,7 +397,7 @@ final class LearningController extends ChangeNotifier {
               : LearningSessionPhase.question,
         );
       }
-      await _repository.saveSession(_session!);
+      await _persistSession();
       _questionBeganAt = now;
       _isBusy = false;
       notifyListeners();
@@ -410,7 +410,7 @@ final class LearningController extends ChangeNotifier {
         focusSkillId: question.skillId,
         phase: LearningSessionPhase.correction,
       );
-      await _repository.saveSession(_session!);
+      await _persistSession();
       _questionBeganAt = now;
       _isBusy = false;
       notifyListeners();
@@ -430,7 +430,7 @@ final class LearningController extends ChangeNotifier {
         answerDraft: '',
         currentQuestionIndex: session.currentQuestionIndex + 1,
       );
-      await _repository.saveSession(_session!);
+      await _persistSession();
     }
     _questionBeganAt = now;
     _isBusy = false;
@@ -472,6 +472,21 @@ final class LearningController extends ChangeNotifier {
   void _recalculateProgress() {
     _mastery = MasterySummary.fromAttempts(_attempts);
     _fluency = _fluencyCalculator.calculate(_attempts);
+  }
+
+  Future<void> _persistSession() async {
+    final session = _session;
+    if (session == null) {
+      return;
+    }
+    final question = isLearning ? null : currentQuestion;
+    if (question != null) {
+      _session = session.copyWith(
+        questionId: question.id,
+        questionSkillId: question.skillId,
+      );
+    }
+    await _repository.saveSession(_session!);
   }
 
   static String _randomId() {
