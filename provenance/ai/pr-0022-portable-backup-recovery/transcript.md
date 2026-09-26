@@ -244,7 +244,23 @@ assertions use formatter-stable helpers; no behavioral contract was discarded
 to satisfy formatting. CI run 36264353536 then exposed one missing required
 fixture field and the canonical multiline test layout; all 334 other tests
 passed. The fixture and formatting were corrected without changing production
-behavior.
+behavior. CI run 36264737676 then verified the complete correction: 338 native
+tests, eight Chrome contracts and 98.52 percent line coverage.
+
+## Diagnostic-bound and SQLite-precision review corrections
+
+Independent review at head `28098ac` found that an identity-less legacy
+diagnostic could name an index beyond its fixed nine-question set, that SQLite
+recovery truncated sub-millisecond response durations and broke retry
+idempotency, and that the preceding green run had not yet been appended here.
+
+Focused red commit `fc58642` specifies rejection of the unsafe diagnostic and
+exact microsecond preservation across SQLite recovery and retry. Green commit
+`6a694f7` validates the diagnostic bound and advances progress schema nine with
+a backfilled `response_us` column while retaining the legacy millisecond column
+for migration compatibility. CI run 36271467222 is green: 340 native tests,
+eight Chrome contracts, 98.50 percent line coverage, formatting, static
+analysis, content validation, dependency-lock verification and secret scanning.
 
 ## Material review exchange
 
@@ -259,6 +275,8 @@ identity][r15], [TDD batching][r16], and [SQLite session recovery][r17].
 The final legacy-session review is linked in full: [removed Learn concept][r18],
 [unpinned legacy identity][r19], [payload assertions][r20], and [historical TDD
 claim][r21].
+The final precision review is linked in full: [diagnostic bound][r22],
+[SQLite microseconds][r23], and [final green provenance][r24].
 
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
@@ -281,3 +299,6 @@ claim][r21].
 [r19]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4112324240
 [r20]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4112324243
 [r21]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4112324250
+[r22]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4112610641
+[r23]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4112610645
+[r24]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4112610648
