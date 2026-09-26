@@ -10,10 +10,7 @@ void main() {
       () => _decodeWith('createdAt', '2026-09-20T09:45:00'),
       throwsFormatException,
     );
-    expect(
-      () => _decodeWith('attempts', 'not-a-list'),
-      throwsFormatException,
-    );
+    expect(() => _decodeWith('attempts', 'not-a-list'), throwsFormatException);
     expect(() => _decodeWith('studyState', 42), throwsFormatException);
   });
 
@@ -22,10 +19,7 @@ void main() {
     final invalidCorrectness = _validAttempt()..['isCorrect'] = 'yes';
 
     expect(() => _decodeWithAttempt(invalidKind), throwsFormatException);
-    expect(
-      () => _decodeWithAttempt(invalidCorrectness),
-      throwsFormatException,
-    );
+    expect(() => _decodeWithAttempt(invalidCorrectness), throwsFormatException);
   });
 }
 
