@@ -65,4 +65,21 @@ void main() {
     expect(restored.answerDraft, '23');
     expect(restored.currentQuestion?.id, questionId);
   });
+
+  test('persists exact question identity before the learner edits', () async {
+    final repository = InMemoryProgressRepository();
+    final controller = LearningController(
+      contentPack: foundationPackForTest(),
+      repository: repository,
+      clock: () => DateTime.utc(2026, 8, 27, 8),
+      idFactory: () => 'session',
+    );
+    await controller.initialise();
+    await controller.startChunk();
+
+    final persisted = await repository.loadSession();
+
+    expect(persisted?.questionId, controller.currentQuestion?.id);
+    expect(persisted?.questionSkillId, controller.currentQuestion?.skillId);
+  });
 }
