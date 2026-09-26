@@ -195,6 +195,13 @@ final class LearningController extends ChangeNotifier {
     _attempts = await _repository.loadAttempts();
     _latestDiagnosticSessionId = _latestDiagnosticId(_attempts);
     _recalculateProgress();
+    final restored = _session;
+    if (restored != null &&
+        !isLearning &&
+        restored.questionId == null &&
+        restored.questionSkillId == null) {
+      await _persistSession();
+    }
     _questionBeganAt = _clock().toUtc();
     notifyListeners();
   }

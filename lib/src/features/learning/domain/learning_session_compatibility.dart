@@ -8,6 +8,17 @@ bool isLearningSessionCompatible(
   required ContentPack contentPack,
   ArithmeticGenerator generator = const ArithmeticGenerator(),
 }) {
+  if (session.phase == LearningSessionPhase.learn) {
+    final focusSkillId = session.focusSkillId;
+    if (focusSkillId == null) {
+      return false;
+    }
+    try {
+      contentPack.conceptCardFor(focusSkillId);
+    } on StateError {
+      return false;
+    }
+  }
   final questionId = session.questionId;
   final skillId = session.questionSkillId;
   if (questionId == null && skillId == null) {
