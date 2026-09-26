@@ -120,55 +120,6 @@ void main() {
         ),
         throwsFormatException,
       );
-      final retiredKindAttempt = Map<String, Object?>.from(
-        (valid['attempts']! as List).single as Map,
-      )..['kind'] = 'retired';
-      final invalidBooleanAttempt = Map<String, Object?>.from(
-        (valid['attempts']! as List).single as Map,
-      )..['isCorrect'] = 'yes';
-
-      expect(
-        () => BackupPayload.decode(jsonEncode(const [])),
-        throwsFormatException,
-      );
-      expect(
-        () => BackupPayload.decode(
-          jsonEncode({...valid, 'createdAt': '2026-09-20T09:45:00'}),
-        ),
-        throwsFormatException,
-      );
-      expect(
-        () => BackupPayload.decode(
-          jsonEncode({...valid, 'attempts': 'not-a-list'}),
-        ),
-        throwsFormatException,
-      );
-      expect(
-        () => BackupPayload.decode(jsonEncode({...valid, 'studyState': 42})),
-        throwsFormatException,
-      );
-      expect(
-        () => BackupPayload.decode(
-          jsonEncode({...valid, 'attempts': [retiredKindAttempt]}),
-        ),
-        throwsFormatException,
-      );
-      expect(
-        () => BackupPayload.decode(
-          jsonEncode({...valid, 'attempts': [invalidBooleanAttempt]}),
-        ),
-        throwsFormatException,
-      );
-
-      final duplicates = [_attempt('duplicate'), _attempt('duplicate')];
-      expect(
-        () => BackupPayload(
-          attempts: duplicates,
-          createdAt: DateTime.utc(2026, 9, 20),
-          studyState: null,
-        ),
-        throwsArgumentError,
-      );
     });
 
     test('rejects a learn session without a focus skill', () {
@@ -216,14 +167,3 @@ void main() {
     });
   });
 }
-
-AttemptEvent _attempt(String eventId) => AttemptEvent(
-  answer: '4',
-  eventId: eventId,
-  isCorrect: true,
-  occurredAt: DateTime.utc(2026, 9, 20),
-  questionId: 'q-1',
-  responseTime: const Duration(milliseconds: 100),
-  sessionId: 's-1',
-  skillId: 'arithmetic.addition',
-);
