@@ -144,6 +144,30 @@ void main() {
       expect(() => BackupPayload.decode(encoded), throwsFormatException);
     });
 
+    test('rejects a session with more hints than the UI can reveal', () {
+      final encoded = jsonEncode({
+        'formatVersion': 1,
+        'createdAt': '2026-09-21T18:00:00.000Z',
+        'attempts': const [],
+        'session': {
+          'answerDraft': '',
+          'correctionOfEventId': null,
+          'currentQuestionIndex': 0,
+          'focusSkillId': null,
+          'id': 'session-1',
+          'phase': 'question',
+          'questionId': null,
+          'questionSkillId': null,
+          'revealedHintCount': 5,
+          'seed': 42,
+          'startedAt': '2026-09-21T17:55:00.000Z',
+        },
+        'studyState': null,
+      });
+
+      expect(() => BackupPayload.decode(encoded), throwsFormatException);
+    });
+
     test('preserves the exact generated question identity', () {
       final payload = BackupPayload(
         attempts: const [],
