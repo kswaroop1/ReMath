@@ -119,32 +119,35 @@ void main() {
       expect((await target.loadSession())?.id, 'local-session');
     });
 
-    test('preview rejects an incompatible generated question identity', () async {
-      final source = InMemoryProgressRepository();
-      await source.saveSession(
-        _session('incompatible').copyWith(
-          questionId: 'retired-pack.addition.v9.42.3',
-          questionSkillId: 'arithmetic.addition',
-        ),
-      );
-      final exporter = BackupCoordinator(
-        cipher: cipher,
-        clock: () => DateTime.utc(2026, 9, 20, 12),
-        repository: source,
-      );
-      final encrypted = await exporter.export(password: password);
-      final importer = BackupCoordinator(
-        cipher: cipher,
-        clock: DateTime.now,
-        repository: InMemoryProgressRepository(),
-        sessionValidator: (_) => false,
-      );
+    test(
+      'preview rejects an incompatible generated question identity',
+      () async {
+        final source = InMemoryProgressRepository();
+        await source.saveSession(
+          _session('incompatible').copyWith(
+            questionId: 'retired-pack.addition.v9.42.3',
+            questionSkillId: 'arithmetic.addition',
+          ),
+        );
+        final exporter = BackupCoordinator(
+          cipher: cipher,
+          clock: () => DateTime.utc(2026, 9, 20, 12),
+          repository: source,
+        );
+        final encrypted = await exporter.export(password: password);
+        final importer = BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+          sessionValidator: (_) => false,
+        );
 
-      await expectLater(
-        importer.preview(encrypted, password: password),
-        throwsFormatException,
-      );
-    });
+        await expectLater(
+          importer.preview(encrypted, password: password),
+          throwsFormatException,
+        );
+      },
+    );
   });
 }
 
