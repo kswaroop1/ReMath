@@ -254,13 +254,32 @@ diagnostic could name an index beyond its fixed nine-question set, that SQLite
 recovery truncated sub-millisecond response durations and broke retry
 idempotency, and that the preceding green run had not yet been appended here.
 
-Focused red commit `fc58642` specifies rejection of the unsafe diagnostic and
-exact microsecond preservation across SQLite recovery and retry. Green commit
-`6a694f7` validates the diagnostic bound and advances progress schema nine with
-a backfilled `response_us` column while retaining the legacy millisecond column
-for migration compatibility. CI run 36271467222 is green: 340 native tests,
+Combined red commit `fc58642` specifies rejection of the unsafe diagnostic and
+exact microsecond preservation across SQLite recovery and retry; combined green
+commit `6a694f7` implements both behaviors. This batching is a TDD-process
+deviation because the repository requires a separate red-green-refactor cycle
+for each behavior. It is retained and disclosed rather than represented as a
+compliant focused cycle. The implementation validates the diagnostic bound and
+advances progress schema nine with a backfilled `response_us` column while
+retaining the legacy millisecond column for migration compatibility. CI run
+36271467222 is green: 340 native tests,
 eight Chrome contracts, 98.50 percent line coverage, formatting, static
 analysis, content validation, dependency-lock verification and secret scanning.
+
+## Hint-bound and schema-nine evidence corrections
+
+Independent review at head `abc3132` required explicit disclosure of the
+combined cycle above, schema-nine rollback coverage, preview-time rejection of
+hint counts beyond the four-level UI contract, and the durable schema-nine
+architecture record. Hint validation has a distinct red/green history in
+`a3539e1` and `b6fce62`. Commit `0309138` characterizes the already-implemented
+schema-nine rollback path by forcing the backfill to abort and verifying that
+both schema version eight and the absence of `response_us` are restored; it is
+coverage added after production, not claimed as test-first. Commit `25b82fd`
+records the version-nine persistence and compatibility contract. The coverage
+change from 98.52 to 98.50 percent was the newly added migration branch; after
+its interruption test, CI run 36276714619 reports 342 native tests, eight Chrome
+contracts and 98.53 percent line coverage with every gate green.
 
 ## Material review exchange
 
@@ -277,6 +296,8 @@ The final legacy-session review is linked in full: [removed Learn concept][r18],
 claim][r21].
 The final precision review is linked in full: [diagnostic bound][r22],
 [SQLite microseconds][r23], and [final green provenance][r24].
+The last evidence review is linked in full: [batched TDD deviation][r25],
+[schema-nine rollback][r26], [hint bound][r27], and [schema-nine architecture][r28].
 
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
@@ -302,3 +323,7 @@ The final precision review is linked in full: [diagnostic bound][r22],
 [r22]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4112610641
 [r23]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4112610645
 [r24]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4112610648
+[r25]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4112815871
+[r26]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4112815877
+[r27]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4112815879
+[r28]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4112815883
