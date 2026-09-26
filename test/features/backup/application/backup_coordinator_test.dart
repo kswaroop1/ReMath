@@ -63,6 +63,27 @@ void main() {
       );
     });
 
+    test('cannot apply a preview containing immutable conflicts', () async {
+      final source = InMemoryProgressRepository();
+      await source.recordAttempt(_attempt('conflict'));
+      final encrypted = await BackupCoordinator(
+        cipher: cipher,
+        clock: () => DateTime.utc(2026, 9, 20, 12),
+        repository: source,
+      ).export(password: password);
+      final target = InMemoryProgressRepository();
+      await target.recordAttempt(_attempt('conflict', answer: 'different'));
+      final importer = BackupCoordinator(
+        cipher: cipher,
+        clock: DateTime.now,
+        repository: target,
+      );
+      final pending = await importer.preview(encrypted, password: password);
+
+      expect(pending.preview.canApply, isFalse);
+      await expectLater(importer.apply(pending), throwsStateError);
+    });
+
     test('portable backup restores an active learning session', () async {
       final source = InMemoryProgressRepository();
       await source.saveSession(_session('portable-session'));
@@ -165,9 +186,9 @@ LearningSession _session(String id) {
   );
 }
 
-AttemptEvent _attempt(String id) {
+AttemptEvent _attempt(String id, {String answer = '4'}) {
   return AttemptEvent(
-    answer: '4',
+    answer: answer,
     eventId: id,
     isCorrect: true,
     occurredAt: DateTime.utc(2026, 9, 20, 10),

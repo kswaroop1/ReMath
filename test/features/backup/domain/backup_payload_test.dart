@@ -120,6 +120,42 @@ void main() {
         ),
         throwsFormatException,
       );
+
+      for (final source in <Object?>[
+        const [],
+        {...valid, 'createdAt': '2026-09-20T09:45:00'},
+        {...valid, 'attempts': 'not-a-list'},
+        {...valid, 'studyState': 42},
+        {
+          ...valid,
+          'attempts': [
+            {...(valid['attempts']! as List).single as Map, 'kind': 'retired'},
+          ],
+        },
+        {
+          ...valid,
+          'attempts': [
+            {...(valid['attempts']! as List).single as Map, 'isCorrect': 'yes'},
+          ],
+        },
+      ]) {
+        expect(
+          () => BackupPayload.decode(jsonEncode(source)),
+          throwsFormatException,
+        );
+      }
+
+      expect(
+        () => BackupPayload(
+          attempts: [
+            _attempt('duplicate'),
+            _attempt('duplicate'),
+          ],
+          createdAt: DateTime.utc(2026, 9, 20),
+          studyState: null,
+        ),
+        throwsArgumentError,
+      );
     });
 
     test('rejects a learn session without a focus skill', () {
@@ -167,3 +203,14 @@ void main() {
     });
   });
 }
+
+AttemptEvent _attempt(String eventId) => AttemptEvent(
+  answer: '4',
+  eventId: eventId,
+  isCorrect: true,
+  occurredAt: DateTime.utc(2026, 9, 20),
+  questionId: 'q-1',
+  responseTime: const Duration(milliseconds: 100),
+  sessionId: 's-1',
+  skillId: 'arithmetic.addition',
+);

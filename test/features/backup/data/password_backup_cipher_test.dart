@@ -88,6 +88,29 @@ void main() {
         cipher.decrypt('not-json', password: password),
         throwsA(isA<BackupDecryptionException>()),
       );
+      await expectLater(
+        cipher.decrypt('{}', password: ''),
+        throwsA(
+          isA<BackupDecryptionException>().having(
+            (error) => error.toString(),
+            'message',
+            'The backup password or encrypted data is invalid.',
+          ),
+        ),
+      );
+    });
+
+    test('rejects invalid entropy-provider output before encryption', () async {
+      for (final bytes in <List<int>>[
+        List<int>.filled(15, 1),
+        <int>[...List<int>.filled(15, 1), 256],
+      ]) {
+        final cipher = PasswordBackupCipher(randomBytes: (_) => bytes);
+        await expectLater(
+          cipher.encrypt(plaintext: '{}', password: password),
+          throwsStateError,
+        );
+      }
     });
   });
 }

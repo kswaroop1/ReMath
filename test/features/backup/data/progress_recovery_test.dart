@@ -51,7 +51,13 @@ void main() {
             attempts: [_attempt('would-be-new'), conflict],
             studyState: 'imported-state',
           ),
-          throwsA(isA<ProgressConflictException>()),
+          throwsA(
+            isA<ProgressConflictException>().having(
+              (error) => error.toString(),
+              'message',
+              'Attempt event existing has conflicting content.',
+            ),
+          ),
         );
 
         expect(
@@ -59,6 +65,22 @@ void main() {
           ['existing'],
         );
         expect(await repository.loadStudyState(), 'local-state');
+      }
+    });
+
+    test('duplicate incoming IDs are rejected by every repository', () async {
+      for (final fixture in _fixtures()) {
+        final repository = fixture.repository;
+        addTearDown(fixture.close);
+
+        await expectLater(
+          repository.mergeProgress(
+            attempts: [_attempt('duplicate'), _attempt('duplicate')],
+            studyState: null,
+          ),
+          throwsArgumentError,
+        );
+        expect(await repository.loadAttempts(), isEmpty);
       }
     });
 
