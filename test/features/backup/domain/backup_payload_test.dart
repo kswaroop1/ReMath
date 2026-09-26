@@ -132,14 +132,8 @@ void main() {
         {...valid, 'createdAt': '2026-09-20T09:45:00'},
         {...valid, 'attempts': 'not-a-list'},
         {...valid, 'studyState': 42},
-        {
-          ...valid,
-          'attempts': [retiredKindAttempt],
-        },
-        {
-          ...valid,
-          'attempts': [invalidBooleanAttempt],
-        },
+        {...valid, 'attempts': [retiredKindAttempt]},
+        {...valid, 'attempts': [invalidBooleanAttempt]},
       ]) {
         expect(
           () => BackupPayload.decode(jsonEncode(source)),
@@ -149,10 +143,7 @@ void main() {
 
       expect(
         () => BackupPayload(
-          attempts: [
-            _attempt('duplicate'),
-            _attempt('duplicate'),
-          ],
+          attempts: [_attempt('duplicate'), _attempt('duplicate')],
           createdAt: DateTime.utc(2026, 9, 20),
           studyState: null,
         ),
