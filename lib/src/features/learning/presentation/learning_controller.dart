@@ -161,18 +161,22 @@ final class LearningController extends ChangeNotifier {
       return null;
     }
     final focusedOperation = ArithmeticOperationDefinition.fromSkillId(
-      session.focusSkillId ?? '',
+      session.questionSkillId ?? session.focusSkillId ?? '',
     );
     final operation =
         focusedOperation ??
         (isDiagnostic
             ? ArithmeticOperation.values[session.currentQuestionIndex ~/ 3]
             : _scheduler.choose(fluency: _fluency, now: _clock().toUtc()));
-    return _questionFor(
+    final question = _questionFor(
       seed: session.seed,
       index: session.currentQuestionIndex,
       operation: operation,
     );
+    if (session.questionId != null && session.questionId != question.id) {
+      return null;
+    }
+    return question;
   }
 
   Duration get remaining {
@@ -308,7 +312,12 @@ final class LearningController extends ChangeNotifier {
     if (session == null) {
       return;
     }
-    _session = session.copyWith(answerDraft: value);
+    final question = currentQuestion;
+    _session = session.copyWith(
+      answerDraft: value,
+      questionId: question?.id,
+      questionSkillId: question?.skillId,
+    );
     unawaited(_repository.saveSession(_session!));
   }
 

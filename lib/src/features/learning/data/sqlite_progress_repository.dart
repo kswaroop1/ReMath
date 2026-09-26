@@ -11,7 +11,7 @@ final class SqliteProgressRepository implements ProgressRepository {
   }
 
   final CommonDatabase _database;
-  static const _currentSchemaVersion = 7;
+  static const _currentSchemaVersion = 8;
 
   void _migrate() {
     _database.execute('PRAGMA foreign_keys = ON');
@@ -226,6 +226,21 @@ final class SqliteProgressRepository implements ProgressRepository {
         rethrow;
       }
     }
+    if (version < 8) {
+      _database.execute('BEGIN IMMEDIATE');
+      try {
+        _database
+          ..execute('ALTER TABLE active_session ADD COLUMN question_id TEXT')
+          ..execute(
+            'ALTER TABLE active_session ADD COLUMN question_skill_id TEXT',
+          )
+          ..execute('UPDATE schema_version SET version = 8')
+          ..execute('COMMIT');
+      } catch (_) {
+        _database.execute('ROLLBACK');
+        rethrow;
+      }
+    }
   }
 
   @override
@@ -261,6 +276,8 @@ final class SqliteProgressRepository implements ProgressRepository {
       focusSkillId: row['focus_skill_id'] as String?,
       id: row['session_id'] as String,
       phase: LearningSessionPhase.values.byName(row['phase'] as String),
+      questionId: row['question_id'] as String?,
+      questionSkillId: row['question_skill_id'] as String?,
       revealedHintCount: row['revealed_hint_count'] as int,
       seed: row['seed'] as int,
       startedAt: DateTime.parse(row['started_at'] as String).toUtc(),
@@ -365,8 +382,8 @@ final class SqliteProgressRepository implements ProgressRepository {
       INSERT INTO active_session (
         singleton, session_id, seed, started_at, current_question_index,
         answer_draft, phase, focus_skill_id, correction_of_event_id,
-        revealed_hint_count
-      ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        revealed_hint_count, question_id, question_skill_id
+      ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(singleton) DO UPDATE SET
         session_id = excluded.session_id,
         seed = excluded.seed,
@@ -376,7 +393,9 @@ final class SqliteProgressRepository implements ProgressRepository {
         phase = excluded.phase,
         focus_skill_id = excluded.focus_skill_id,
         correction_of_event_id = excluded.correction_of_event_id
-        , revealed_hint_count = excluded.revealed_hint_count
+        , revealed_hint_count = excluded.revealed_hint_count,
+        question_id = excluded.question_id,
+        question_skill_id = excluded.question_skill_id
       ''',
       [
         session.id,
@@ -388,6 +407,8 @@ final class SqliteProgressRepository implements ProgressRepository {
         session.focusSkillId,
         session.correctionOfEventId,
         session.revealedHintCount,
+        session.questionId,
+        session.questionSkillId,
       ],
     );
   }

@@ -48,8 +48,16 @@ final class LearningSession {
     focusSkillId: clearRemediation ? null : focusSkillId ?? this.focusSkillId,
     id: id,
     phase: phase ?? this.phase,
-    questionId: questionId ?? this.questionId,
-    questionSkillId: questionSkillId ?? this.questionSkillId,
+    questionId: questionId ??
+        (currentQuestionIndex != null &&
+                currentQuestionIndex != this.currentQuestionIndex
+            ? null
+            : this.questionId),
+    questionSkillId: questionSkillId ??
+        (currentQuestionIndex != null &&
+                currentQuestionIndex != this.currentQuestionIndex
+            ? null
+            : this.questionSkillId),
     revealedHintCount: revealedHintCount ?? this.revealedHintCount,
     seed: seed,
     startedAt: startedAt,

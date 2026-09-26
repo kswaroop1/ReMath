@@ -48,6 +48,11 @@ void main() {
     first.updateDraft('23');
     await Future<void>.delayed(Duration.zero);
     final questionId = first.currentQuestion?.id;
+    final questionSkillId = first.currentQuestion?.skillId;
+    final persisted = await repository.loadSession();
+
+    expect(persisted?.questionId, questionId);
+    expect(persisted?.questionSkillId, questionSkillId);
 
     final restored = LearningController(
       contentPack: foundationPackForTest(),
