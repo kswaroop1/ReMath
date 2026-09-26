@@ -129,13 +129,19 @@ void main() {
         {
           ...valid,
           'attempts': [
-            {...(valid['attempts']! as List).single as Map, 'kind': 'retired'},
+            {
+              ...(valid['attempts']! as List).single as Map,
+              'kind': 'retired',
+            },
           ],
         },
         {
           ...valid,
           'attempts': [
-            {...(valid['attempts']! as List).single as Map, 'isCorrect': 'yes'},
+            {
+              ...(valid['attempts']! as List).single as Map,
+              'isCorrect': 'yes',
+            },
           ],
         },
       ]) {
