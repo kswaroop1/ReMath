@@ -165,6 +165,28 @@ Apache 2.0 licensing, maintained cross-platform upstream, pure-Dart use behind
 `BackupCipher`, no network or telemetry surface, deterministic randomness only
 through tests, and a separate review requirement for future upgrades.
 
+Independent re-review at head `5574aac` found seven further issues. The
+accelerated correction stack kept focused red and green commits while publishing
+related corrections together rather than waiting for CI after every local
+commit. Runs 35640719926 and 35644110210 recorded and verified fail-closed
+validation of incoherent Learn sessions. Runs 35651856239 and 35653833728
+recorded and verified that inactive study rows are not advertised as resumable.
+The same stack separately disclosed active Home sessions in preview, added
+focused SQLite restoration, local-protection and rollback characterization, and
+corrected the review-exchange and TDD-batching record. Run 35656033821 verified
+that combined stack.
+
+Run 35663086168 recorded the final expected red boundary: an exported learning
+session did not retain the generated question ID and skill. The green change
+now carries both fields through the canonical payload, schema-eight SQLite
+persistence and controller restoration. The question ID pins pack, template,
+template version, seed and index; the skill pins the exact operation selected
+for a mixed Home session. Restoration fails closed if regenerated identity does
+not match. CI run 36234712494 exposed only Dart 3.13 formatting and idempotent
+migration-fixture corrections after 323 tests passed. Run 36234982471 verified
+the final result: 327 native tests, eight Chrome tests, 98.36 percent line
+coverage, formatting, static analysis, content validation and secret scanning.
+
 ## Material review exchange
 
 The exact first-review findings and repository responses remain available in

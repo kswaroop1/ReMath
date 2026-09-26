@@ -36,7 +36,9 @@ through an idempotent merge.
   applying it must not overwrite a local in-progress journey.
 - An imported learning session is restored only when no local active session
   exists. Its question position, draft, remediation phase, hint count and seed
-  are preserved in the same transaction as attempts and study state.
+  are preserved in the same transaction as attempts and study state. Its exact
+  generated question ID and skill are also retained, so a mixed Home session
+  cannot resume against a different operation or template version.
 
 ## User journey
 
