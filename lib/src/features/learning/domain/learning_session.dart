@@ -39,27 +39,25 @@ final class LearningSession {
     String? questionSkillId,
     int? revealedHintCount,
     bool clearRemediation = false,
-  }) => LearningSession(
-    answerDraft: answerDraft ?? this.answerDraft,
-    correctionOfEventId: clearRemediation
-        ? null
-        : correctionOfEventId ?? this.correctionOfEventId,
-    currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
-    focusSkillId: clearRemediation ? null : focusSkillId ?? this.focusSkillId,
-    id: id,
-    phase: phase ?? this.phase,
-    questionId: questionId ??
-        (currentQuestionIndex != null &&
-                currentQuestionIndex != this.currentQuestionIndex
-            ? null
-            : this.questionId),
-    questionSkillId: questionSkillId ??
-        (currentQuestionIndex != null &&
-                currentQuestionIndex != this.currentQuestionIndex
-            ? null
-            : this.questionSkillId),
-    revealedHintCount: revealedHintCount ?? this.revealedHintCount,
-    seed: seed,
-    startedAt: startedAt,
-  );
+  }) {
+    final questionChanged =
+        currentQuestionIndex != null &&
+        currentQuestionIndex != this.currentQuestionIndex;
+    return LearningSession(
+      answerDraft: answerDraft ?? this.answerDraft,
+      correctionOfEventId: clearRemediation
+          ? null
+          : correctionOfEventId ?? this.correctionOfEventId,
+      currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
+      focusSkillId: clearRemediation ? null : focusSkillId ?? this.focusSkillId,
+      id: id,
+      phase: phase ?? this.phase,
+      questionId: questionId ?? (questionChanged ? null : this.questionId),
+      questionSkillId:
+          questionSkillId ?? (questionChanged ? null : this.questionSkillId),
+      revealedHintCount: revealedHintCount ?? this.revealedHintCount,
+      seed: seed,
+      startedAt: startedAt,
+    );
+  }
 }

@@ -229,13 +229,22 @@ final class SqliteProgressRepository implements ProgressRepository {
     if (version < 8) {
       _database.execute('BEGIN IMMEDIATE');
       try {
-        _database
-          ..execute('ALTER TABLE active_session ADD COLUMN question_id TEXT')
-          ..execute(
+        final columns = _database
+            .select('PRAGMA table_info(active_session)')
+            .map((row) => row['name'] as String)
+            .toSet();
+        if (!columns.contains('question_id')) {
+          _database.execute(
+            'ALTER TABLE active_session ADD COLUMN question_id TEXT',
+          );
+        }
+        if (!columns.contains('question_skill_id')) {
+          _database.execute(
             'ALTER TABLE active_session ADD COLUMN question_skill_id TEXT',
-          )
-          ..execute('UPDATE schema_version SET version = 8')
-          ..execute('COMMIT');
+          );
+        }
+        _database.execute('UPDATE schema_version SET version = 8');
+        _database.execute('COMMIT');
       } catch (_) {
         _database.execute('ROLLBACK');
         rethrow;
