@@ -127,23 +127,43 @@ void main() {
         (valid['attempts']! as List).single as Map,
       )..['isCorrect'] = 'yes';
 
-      for (final source in <Object?>[
-        const [],
-        {...valid, 'createdAt': '2026-09-20T09:45:00'},
-        {...valid, 'attempts': 'not-a-list'},
-        {...valid, 'studyState': 42},
-        {...valid, 'attempts': [retiredKindAttempt]},
-        {...valid, 'attempts': [invalidBooleanAttempt]},
-      ]) {
-        expect(
-          () => BackupPayload.decode(jsonEncode(source)),
-          throwsFormatException,
-        );
-      }
+      expect(
+        () => BackupPayload.decode(jsonEncode(const [])),
+        throwsFormatException,
+      );
+      expect(
+        () => BackupPayload.decode(
+          jsonEncode({...valid, 'createdAt': '2026-09-20T09:45:00'}),
+        ),
+        throwsFormatException,
+      );
+      expect(
+        () => BackupPayload.decode(
+          jsonEncode({...valid, 'attempts': 'not-a-list'}),
+        ),
+        throwsFormatException,
+      );
+      expect(
+        () => BackupPayload.decode(jsonEncode({...valid, 'studyState': 42})),
+        throwsFormatException,
+      );
+      expect(
+        () => BackupPayload.decode(
+          jsonEncode({...valid, 'attempts': [retiredKindAttempt]}),
+        ),
+        throwsFormatException,
+      );
+      expect(
+        () => BackupPayload.decode(
+          jsonEncode({...valid, 'attempts': [invalidBooleanAttempt]}),
+        ),
+        throwsFormatException,
+      );
 
+      final duplicates = [_attempt('duplicate'), _attempt('duplicate')];
       expect(
         () => BackupPayload(
-          attempts: [_attempt('duplicate'), _attempt('duplicate')],
+          attempts: duplicates,
           createdAt: DateTime.utc(2026, 9, 20),
           studyState: null,
         ),
