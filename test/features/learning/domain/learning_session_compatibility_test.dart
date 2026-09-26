@@ -76,4 +76,19 @@ void main() {
       isFalse,
     );
   });
+
+  test('rejects an identity-less diagnostic beyond its fixed question set', () {
+    expect(
+      isLearningSessionCompatible(
+        LearningSession(
+          currentQuestionIndex: 9,
+          id: 'diagnostic-legacy',
+          seed: 42,
+          startedAt: DateTime.utc(2026, 9, 26),
+        ),
+        contentPack: pack,
+      ),
+      isFalse,
+    );
+  });
 }

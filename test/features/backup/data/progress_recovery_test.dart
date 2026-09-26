@@ -84,6 +84,35 @@ void main() {
       }
     });
 
+    test(
+      'SQLite recovery preserves microseconds and retries idempotently',
+      () async {
+        final database = sqlite3.openInMemory();
+        final repository = SqliteProgressRepository(database);
+        addTearDown(repository.close);
+        final precise = _attempt(
+          'precise',
+          responseTime: const Duration(microseconds: 500001),
+        );
+
+        final first = await repository.mergeProgress(
+          attempts: [precise],
+          studyState: null,
+        );
+        final retry = await repository.mergeProgress(
+          attempts: [precise],
+          studyState: null,
+        );
+
+        expect(first.insertedAttemptCount, 1);
+        expect(retry.duplicateAttemptCount, 1);
+        expect(
+          (await repository.loadAttempts()).single.responseTime,
+          precise.responseTime,
+        );
+      },
+    );
+
     test('new attempts never overwrite a local active study state', () async {
       for (final fixture in _fixtures()) {
         final repository = fixture.repository;
@@ -234,14 +263,18 @@ _fixtures() {
   ];
 }
 
-AttemptEvent _attempt(String id, {String answer = '4'}) {
+AttemptEvent _attempt(
+  String id, {
+  String answer = '4',
+  Duration responseTime = const Duration(milliseconds: 500),
+}) {
   return AttemptEvent(
     answer: answer,
     eventId: id,
     isCorrect: true,
     occurredAt: DateTime.utc(2026, 9, 20, 10),
     questionId: 'question-$id',
-    responseTime: const Duration(milliseconds: 500),
+    responseTime: responseTime,
     sessionId: 'session-1',
     skillId: 'arithmetic.addition',
   );
