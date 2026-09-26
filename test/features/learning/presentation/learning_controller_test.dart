@@ -84,26 +84,30 @@ void main() {
     expect(persisted?.questionSkillId, controller.currentQuestion?.skillId);
   });
 
-  test('pins exact identity when initializing a legacy active session', () async {
-    final repository = InMemoryProgressRepository();
-    await repository.saveSession(
-      LearningSession(
-        id: 'legacy-session',
-        seed: 42,
-        startedAt: DateTime.utc(2026, 8, 27, 8),
-      ),
-    );
-    final controller = LearningController(
-      contentPack: foundationPackForTest(),
-      repository: repository,
-      clock: () => DateTime.utc(2026, 8, 27, 8),
-    );
+  test(
+    'pins exact identity when initializing a legacy active session',
+    () async {
+      final repository = InMemoryProgressRepository();
+      await repository.saveSession(
+        LearningSession(
+          id: 'legacy-session',
+          currentQuestionIndex: 0,
+          seed: 42,
+          startedAt: DateTime.utc(2026, 8, 27, 8),
+        ),
+      );
+      final controller = LearningController(
+        contentPack: foundationPackForTest(),
+        repository: repository,
+        clock: () => DateTime.utc(2026, 8, 27, 8),
+      );
 
-    await controller.initialise();
+      await controller.initialise();
 
-    final persisted = await repository.loadSession();
-    expect(persisted?.questionId, controller.currentQuestion?.id);
-    expect(persisted?.questionSkillId, controller.currentQuestion?.skillId);
-    expect(persisted?.questionId, isNotNull);
-  });
+      final persisted = await repository.loadSession();
+      expect(persisted?.questionId, controller.currentQuestion?.id);
+      expect(persisted?.questionSkillId, controller.currentQuestion?.skillId);
+      expect(persisted?.questionId, isNotNull);
+    },
+  );
 }
