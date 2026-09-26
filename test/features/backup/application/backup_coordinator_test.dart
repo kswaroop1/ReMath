@@ -81,7 +81,7 @@ void main() {
       final pending = await importer.preview(encrypted, password: password);
 
       expect(pending.preview.canApply, isFalse);
-      await expectLater(importer.apply(pending), throwsStateError);
+      expect(() => importer.apply(pending), throwsStateError);
     });
 
     test('portable backup restores an active learning session', () async {
