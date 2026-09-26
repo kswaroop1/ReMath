@@ -191,11 +191,13 @@ coverage, formatting, static analysis, content validation and secret scanning.
 
 Independent review at head `dfb31ca` identified two related restored-session
 identity failures and asked for an exact explanation of the coverage change
-from PR21. The focused red commit required question identity to be persisted
-before the first edit and incompatible imported identities to be rejected
-before application. The green implementation pins identity on every persisted
-question transition and validates imported pack, template version, seed, index
-and operation against installed content. CI run 36245395349 verified 331 native
+from PR21. Commit `34e50fa` specified the coordinator rejection seam and the
+pre-edit identity requirement, but it did not specify the production content-
+pack compatibility policy. That policy and its direct unit coverage landed
+together in `730e78e`; this was a production-first deviation, not a complete
+test-first cycle. The implementation pins identity on every persisted question
+transition and validates imported pack, template version, seed, index and
+operation against installed content. CI run 36245395349 verified 331 native
 tests and the Chrome contracts after one formatter-only correction.
 
 Coverage was then treated as characterization rather than manufactured red
@@ -223,6 +225,24 @@ invoke host OS/plugin and nondeterministic entropy boundaries. The PR therefore
 improves the reviewed 98.36 percent result to 98.47 percent and documents the
 remaining delta instead of adding assertion-free line execution.
 
+## Legacy-session and payload-contract review corrections
+
+Independent review at head `a6a2e75` found that a legacy Learn session could
+name a removed concept, that an unpinned legacy session could be exported and
+restored against a different question, and that malformed-payload assertions
+had been removed during formatter cleanup. It also identified the inaccurate
+test-first claim for `34e50fa` and `730e78e` corrected above.
+
+The focused red commit `b17a0e2` requires removed Learn concepts to fail closed
+and legacy non-Learn sessions to acquire their exact generated-question
+identity during controller initialization. The green commit `e4672ba` validates
+the Learn focus against the installed content pack and persists identity for an
+otherwise unpinned restored question. Commit `aefc4e5` restores explicit tests
+for non-object payloads, timezone-free timestamps, non-list attempts,
+non-string study state, unknown event kinds and non-boolean correctness. These
+assertions use formatter-stable helpers; no behavioral contract was discarded
+to satisfy formatting.
+
 ## Material review exchange
 
 The exact first-review findings and repository responses remain available in
@@ -233,6 +253,9 @@ the pull-request threads: [stale preview][r1], [cryptography assessment][r2],
 is likewise preserved verbatim: [session invariants][r11], [inactive preview
 state][r12], [Home-session preview][r13], [review provenance][r14], [question
 identity][r15], [TDD batching][r16], and [SQLite session recovery][r17].
+The final legacy-session review is linked in full: [removed Learn concept][r18],
+[unpinned legacy identity][r19], [payload assertions][r20], and [historical TDD
+claim][r21].
 
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
@@ -251,3 +274,7 @@ identity][r15], [TDD batching][r16], and [SQLite session recovery][r17].
 [r15]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4064359867
 [r16]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4064359876
 [r17]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4064359882
+[r18]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4112324236
+[r19]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4112324240
+[r20]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4112324243
+[r21]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4112324250
