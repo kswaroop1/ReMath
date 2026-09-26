@@ -241,7 +241,10 @@ otherwise unpinned restored question. Commit `aefc4e5` restores explicit tests
 for non-object payloads, timezone-free timestamps, non-list attempts,
 non-string study state, unknown event kinds and non-boolean correctness. These
 assertions use formatter-stable helpers; no behavioral contract was discarded
-to satisfy formatting.
+to satisfy formatting. CI run 36264353536 then exposed one missing required
+fixture field and the canonical multiline test layout; all 334 other tests
+passed. The fixture and formatting were corrected without changing production
+behavior.
 
 ## Material review exchange
 
