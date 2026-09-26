@@ -117,6 +117,13 @@ question. The controller rejects a restored session when regeneration does not
 produce that recorded identity instead of attaching a saved draft to different
 content.
 
+SQLite schema version 9 adds `response_us` to immutable attempt events and
+backfills it from the retained `response_ms` value. New writes populate both
+columns: microseconds are the canonical precision, while milliseconds remain
+for backward migration compatibility. The migration is transactional, so a
+failed column addition or backfill leaves both schema version eight and its
+attempt history unchanged.
+
 `RemediationPolicy` is pure Dart and derives suggestions from the immutable
 event stream. Its first arithmetic rule requires repeated errors in one
 operation and excludes correction submissions. When no characteristic rule
