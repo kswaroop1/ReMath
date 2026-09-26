@@ -11,7 +11,7 @@ final class SqliteProgressRepository implements ProgressRepository {
   }
 
   final CommonDatabase _database;
-  static const _currentSchemaVersion = 8;
+  static const _currentSchemaVersion = 9;
 
   void _migrate() {
     _database.execute('PRAGMA foreign_keys = ON');
@@ -250,6 +250,30 @@ final class SqliteProgressRepository implements ProgressRepository {
         rethrow;
       }
     }
+    if (version < 9) {
+      _database.execute('BEGIN IMMEDIATE');
+      try {
+        final columns = _database
+            .select('PRAGMA table_info(attempt_events)')
+            .map((row) => row['name'] as String)
+            .toSet();
+        if (!columns.contains('response_us')) {
+          _database.execute(
+            'ALTER TABLE attempt_events ADD COLUMN response_us INTEGER '
+            'CHECK (response_us >= 0)',
+          );
+        }
+        _database.execute(
+          'UPDATE attempt_events SET response_us = response_ms * 1000 '
+          'WHERE response_us IS NULL',
+        );
+        _database.execute('UPDATE schema_version SET version = 9');
+        _database.execute('COMMIT');
+      } catch (_) {
+        _database.execute('ROLLBACK');
+        rethrow;
+      }
+    }
   }
 
   @override
@@ -357,9 +381,9 @@ final class SqliteProgressRepository implements ProgressRepository {
       '''
       INSERT OR IGNORE INTO attempt_events (
         event_id, session_id, question_id, answer, is_correct,
-        response_ms, occurred_at, skill_id, event_kind, related_event_id,
-        misconception_id, confidence, surprise
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        response_ms, response_us, occurred_at, skill_id, event_kind,
+        related_event_id, misconception_id, confidence, surprise
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ''',
       [
         event.eventId,
@@ -368,6 +392,7 @@ final class SqliteProgressRepository implements ProgressRepository {
         event.answer,
         event.isCorrect ? 1 : 0,
         event.responseTime.inMilliseconds,
+        event.responseTime.inMicroseconds,
         event.occurredAt.toUtc().toIso8601String(),
         event.skillId,
         event.kind.name,
@@ -466,7 +491,7 @@ final class SqliteProgressRepository implements ProgressRepository {
     misconceptionId: row['misconception_id'] as String?,
     occurredAt: DateTime.parse(row['occurred_at'] as String).toUtc(),
     questionId: row['question_id'] as String,
-    responseTime: Duration(milliseconds: row['response_ms'] as int),
+    responseTime: Duration(microseconds: row['response_us'] as int),
     relatedEventId: row['related_event_id'] as String?,
     sessionId: row['session_id'] as String,
     skillId: row['skill_id'] as String,

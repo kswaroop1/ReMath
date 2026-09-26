@@ -22,6 +22,10 @@ bool isLearningSessionCompatible(
   final questionId = session.questionId;
   final skillId = session.questionSkillId;
   if (questionId == null && skillId == null) {
+    if (session.id.startsWith('diagnostic-') &&
+        session.currentQuestionIndex >= ArithmeticOperation.values.length * 3) {
+      return false;
+    }
     return true;
   }
   if (questionId == null || skillId == null) {
