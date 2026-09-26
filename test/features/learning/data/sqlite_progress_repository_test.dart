@@ -334,6 +334,54 @@ void main() {
     );
     database.close();
   });
+
+  test(
+    'a failed microsecond migration restores schema version eight',
+    () async {
+      final migrationDatabase = sqlite3.openInMemory();
+      addTearDown(migrationDatabase.close);
+      final seeded = SqliteProgressRepository(migrationDatabase);
+      await seeded.recordAttempt(
+        AttemptEvent(
+          answer: '4',
+          eventId: 'legacy-precision',
+          isCorrect: true,
+          occurredAt: DateTime.utc(2026, 9, 26),
+          questionId: 'question-1',
+          responseTime: const Duration(milliseconds: 500),
+          sessionId: 'session-1',
+          skillId: 'arithmetic.addition',
+        ),
+      );
+      migrationDatabase
+        ..execute('UPDATE schema_version SET version = 8')
+        ..execute('ALTER TABLE attempt_events DROP COLUMN response_us')
+        ..execute('''
+        CREATE TRIGGER interrupt_precision_migration
+        BEFORE UPDATE ON attempt_events
+        BEGIN
+          SELECT RAISE(ABORT, 'simulated precision migration failure');
+        END
+      ''');
+
+      expect(
+        () => SqliteProgressRepository(migrationDatabase),
+        throwsA(isA<SqliteException>()),
+      );
+      expect(
+        migrationDatabase
+            .select('SELECT version FROM schema_version')
+            .single['version'],
+        8,
+      );
+      expect(
+        migrationDatabase
+            .select('PRAGMA table_info(attempt_events)')
+            .map((row) => row['name']),
+        isNot(contains('response_us')),
+      );
+    },
+  );
 }
 
 Database _schemaFourDatabase() => sqlite3.openInMemory()
