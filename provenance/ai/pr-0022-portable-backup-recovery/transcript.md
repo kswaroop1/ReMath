@@ -187,6 +187,42 @@ migration-fixture corrections after 323 tests passed. Run 36234982471 verified
 the final result: 327 native tests, eight Chrome tests, 98.36 percent line
 coverage, formatting, static analysis, content validation and secret scanning.
 
+## Final review corrections and coverage accounting
+
+Independent review at head `dfb31ca` identified two related restored-session
+identity failures and asked for an exact explanation of the coverage change
+from PR21. The focused red commit required question identity to be persisted
+before the first edit and incompatible imported identities to be rejected
+before application. The green implementation pins identity on every persisted
+question transition and validates imported pack, template version, seed, index
+and operation against installed content. CI run 36245395349 verified 331 native
+tests and the Chrome contracts after one formatter-only correction.
+
+Coverage was then treated as characterization rather than manufactured red
+behavior. Tests were added for duplicate incoming IDs in both repositories,
+immutable-conflict reporting, refusal to apply a conflicting preview,
+decryption-error presentation, and malformed injected entropy. CI runs
+36248148245, 36248363204, 36250762320, 36250934137 and 36255743946 exposed one
+test-harness error and canonical Dart formatting differences while all behavior
+tests passed. The low-value combinatorial payload matrix was removed rather
+than retaining formatter churn; the existing payload suite still covers
+canonical round trip, version rejection, duplicate and invalid events,
+incoherent sessions and exact identity. CI run 36255837351 is the final green
+result: 334 native tests, eight Chrome tests and 98.47 percent line coverage.
+
+PR21's 98.99 percent baseline already left isolated number curriculum, study
+plan, study controller/screen and schema-seven rollback lines uncovered. PR22
+does not claim those pre-existing paths as a backup regression. The remaining
+PR22-only uncovered lines are deliberately bounded: the real OS file-picker
+gateway, production secure-random generator, production composition callback,
+defensive missing-template catch, schema-eight migration rollback, and
+redundant malformed-payload sub-branches. Their policies are exercised through
+injected file, entropy, coordinator, compatibility, repository-transaction and
+payload seams. Direct execution would either duplicate those contracts or
+invoke host OS/plugin and nondeterministic entropy boundaries. The PR therefore
+improves the reviewed 98.36 percent result to 98.47 percent and documents the
+remaining delta instead of adding assertion-free line execution.
+
 ## Material review exchange
 
 The exact first-review findings and repository responses remain available in
