@@ -120,6 +120,12 @@ void main() {
         ),
         throwsFormatException,
       );
+      final retiredKindAttempt = Map<String, Object?>.from(
+        (valid['attempts']! as List).single as Map,
+      )..['kind'] = 'retired';
+      final invalidBooleanAttempt = Map<String, Object?>.from(
+        (valid['attempts']! as List).single as Map,
+      )..['isCorrect'] = 'yes';
 
       for (final source in <Object?>[
         const [],
@@ -128,21 +134,11 @@ void main() {
         {...valid, 'studyState': 42},
         {
           ...valid,
-          'attempts': [
-            {
-              ...(valid['attempts']! as List).single as Map,
-              'kind': 'retired',
-            },
-          ],
+          'attempts': [retiredKindAttempt],
         },
         {
           ...valid,
-          'attempts': [
-            {
-              ...(valid['attempts']! as List).single as Map,
-              'isCorrect': 'yes',
-            },
-          ],
+          'attempts': [invalidBooleanAttempt],
         },
       ]) {
         expect(
