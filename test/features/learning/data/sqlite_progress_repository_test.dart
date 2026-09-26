@@ -25,6 +25,8 @@ void main() {
         focusSkillId: 'arithmetic.subtraction',
         id: 'session-1',
         phase: LearningSessionPhase.correction,
+        questionId: 'core.subtraction.v2.91.4',
+        questionSkillId: 'arithmetic.subtraction',
         seed: 91,
         startedAt: DateTime.utc(2026, 8, 27, 8),
       );
@@ -37,6 +39,8 @@ void main() {
       expect(restored?.currentQuestionIndex, 4);
       expect(restored?.answerDraft, '17');
       expect(restored?.phase, LearningSessionPhase.correction);
+      expect(restored?.questionId, 'core.subtraction.v2.91.4');
+      expect(restored?.questionSkillId, 'arithmetic.subtraction');
       expect(restored?.focusSkillId, 'arithmetic.subtraction');
       expect(restored?.correctionOfEventId, 'wrong-attempt');
       expect(restored?.startedAt, session.startedAt);
@@ -206,7 +210,7 @@ void main() {
     expect(attempts.single.misconceptionId, isNull);
     expect(
       database.select('SELECT version FROM schema_version').single['version'],
-      7,
+      8,
     );
     await migrated.close();
   });
@@ -302,7 +306,7 @@ void main() {
       expect(session?.focusSkillId, 'arithmetic.addition');
       expect(
         database.select('SELECT version FROM schema_version').single['version'],
-        7,
+        8,
       );
       await migrated.close();
     },

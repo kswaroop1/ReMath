@@ -10,6 +10,8 @@ final class LearningSession {
     this.correctionOfEventId,
     this.focusSkillId,
     this.phase = LearningSessionPhase.question,
+    this.questionId,
+    this.questionSkillId,
     this.revealedHintCount = 0,
   });
 
@@ -21,6 +23,8 @@ final class LearningSession {
   final String? focusSkillId;
   final String id;
   final LearningSessionPhase phase;
+  final String? questionId;
+  final String? questionSkillId;
   final int revealedHintCount;
   final int seed;
   final DateTime startedAt;
@@ -31,19 +35,29 @@ final class LearningSession {
     String? correctionOfEventId,
     String? focusSkillId,
     LearningSessionPhase? phase,
+    String? questionId,
+    String? questionSkillId,
     int? revealedHintCount,
     bool clearRemediation = false,
-  }) => LearningSession(
-    answerDraft: answerDraft ?? this.answerDraft,
-    correctionOfEventId: clearRemediation
-        ? null
-        : correctionOfEventId ?? this.correctionOfEventId,
-    currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
-    focusSkillId: clearRemediation ? null : focusSkillId ?? this.focusSkillId,
-    id: id,
-    phase: phase ?? this.phase,
-    revealedHintCount: revealedHintCount ?? this.revealedHintCount,
-    seed: seed,
-    startedAt: startedAt,
-  );
+  }) {
+    final questionChanged =
+        currentQuestionIndex != null &&
+        currentQuestionIndex != this.currentQuestionIndex;
+    return LearningSession(
+      answerDraft: answerDraft ?? this.answerDraft,
+      correctionOfEventId: clearRemediation
+          ? null
+          : correctionOfEventId ?? this.correctionOfEventId,
+      currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
+      focusSkillId: clearRemediation ? null : focusSkillId ?? this.focusSkillId,
+      id: id,
+      phase: phase ?? this.phase,
+      questionId: questionId ?? (questionChanged ? null : this.questionId),
+      questionSkillId:
+          questionSkillId ?? (questionChanged ? null : this.questionSkillId),
+      revealedHintCount: revealedHintCount ?? this.revealedHintCount,
+      seed: seed,
+      startedAt: startedAt,
+    );
+  }
 }

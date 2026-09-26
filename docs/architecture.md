@@ -110,6 +110,13 @@ adds those fields and the corresponding event kind, relationship, and
 misconception columns. Version-one history migrates with `answer` as its safe
 default, and each migration is transactional.
 
+SQLite schema version 8 adds the generated question ID and question skill to
+the active-session record. Together they preserve the exact pack, template,
+template version, seed, index and operation selected for an interrupted Home
+question. The controller rejects a restored session when regeneration does not
+produce that recorded identity instead of attaching a saved draft to different
+content.
+
 `RemediationPolicy` is pure Dart and derives suggestions from the immutable
 event stream. Its first arithmetic rule requires repeated errors in one
 operation and excludes correction submissions. When no characteristic rule

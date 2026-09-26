@@ -142,3 +142,15 @@ sync, and content-pack work. No release or `VERSION` change is included.
 
 EN-011 remains incomplete until release jobs build unchanged committed projects
 and their generation steps are removed under the existing permission boundary.
+
+## PR #22 — Portable backup and recovery
+
+Deliver a local-first recovery path before cloud sync. Implement a versioned,
+password-encrypted export with authenticated integrity metadata, a read-only
+import preview, and an idempotent event merge that never replaces the complete
+database. Preserve active study state only when it is safe to apply. See the
+exact [scope and acceptance criteria](slices/portable-backup-recovery.md).
+
+Cloud providers, OAuth, automatic background sync, content-pack transfer, and a
+release remain outside PR22. PR23 follows with the content-pack lifecycle; PR24
+then addresses the broader operational-security foundation.

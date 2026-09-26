@@ -1,3 +1,4 @@
+import '../../numbers/domain/study_plan.dart';
 import '../domain/attempt_event.dart';
 import '../domain/learning_session.dart';
 import '../domain/progress_repository.dart';
@@ -44,6 +45,42 @@ final class InMemoryProgressRepository implements ProgressRepository {
   Future<LearningSession?> loadSession() async => _session;
 
   @override
+  Future<ProgressMergeResult> mergeProgress({
+    required List<AttemptEvent> attempts,
+    required String? studyState,
+    LearningSession? session,
+  }) async {
+    final incomingIds = <String>{};
+    var duplicateAttemptCount = 0;
+    for (final attempt in attempts) {
+      attempt.validateCalibrationEvidence();
+      if (!incomingIds.add(attempt.eventId)) {
+        throw ArgumentError.value(attempts, 'attempts', 'IDs must be unique');
+      }
+      final existing = _attempts[attempt.eventId];
+      if (existing == null) continue;
+      if (!existing.hasSameImmutableContentAs(attempt)) {
+        throw ProgressConflictException(attempt.eventId);
+      }
+      duplicateAttemptCount++;
+    }
+    for (final attempt in attempts) {
+      _attempts.putIfAbsent(attempt.eventId, () => attempt);
+    }
+    final importStudyState =
+        studyState != null && !_hasActiveStudyState(_studyState);
+    if (importStudyState) _studyState = studyState;
+    final importSession = session != null && _session == null;
+    if (importSession) _session = session;
+    return ProgressMergeResult(
+      duplicateAttemptCount: duplicateAttemptCount,
+      importedStudyState: importStudyState,
+      importedSession: importSession,
+      insertedAttemptCount: attempts.length - duplicateAttemptCount,
+    );
+  }
+
+  @override
   Future<bool> recordAttempt(AttemptEvent event) async {
     event.validateCalibrationEvidence();
     if (_attempts.containsKey(event.eventId)) {
@@ -56,5 +93,14 @@ final class InMemoryProgressRepository implements ProgressRepository {
   @override
   Future<void> saveSession(LearningSession session) async {
     _session = session;
+  }
+}
+
+bool _hasActiveStudyState(String? source) {
+  if (source == null) return false;
+  try {
+    return StudyState.decode(source).plan != null;
+  } on Object {
+    return true;
   }
 }
