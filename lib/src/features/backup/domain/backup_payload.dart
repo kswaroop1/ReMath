@@ -98,9 +98,11 @@ LearningSession _decodeSession(Map<String, Object?> value) {
       'currentQuestionIndex must be a non-negative integer',
     );
   }
-  if (revealedHintCount is! int || revealedHintCount < 0) {
+  if (revealedHintCount is! int ||
+      revealedHintCount < 0 ||
+      revealedHintCount > 4) {
     throw const FormatException(
-      'revealedHintCount must be a non-negative integer',
+      'revealedHintCount must be an integer between zero and four',
     );
   }
   if (seed is! int) throw const FormatException('seed must be an integer');
