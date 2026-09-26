@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/data/in_memory_progress_repository.dart';
 import 'package:remath/src/features/learning/domain/fluency.dart';
+import 'package:remath/src/features/learning/domain/learning_session.dart';
 import 'package:remath/src/features/learning/presentation/learning_controller.dart';
 
 import '../../../support/foundation_pack.dart';
@@ -81,5 +82,28 @@ void main() {
 
     expect(persisted?.questionId, controller.currentQuestion?.id);
     expect(persisted?.questionSkillId, controller.currentQuestion?.skillId);
+  });
+
+  test('pins exact identity when initializing a legacy active session', () async {
+    final repository = InMemoryProgressRepository();
+    await repository.saveSession(
+      LearningSession(
+        id: 'legacy-session',
+        seed: 42,
+        startedAt: DateTime.utc(2026, 8, 27, 8),
+      ),
+    );
+    final controller = LearningController(
+      contentPack: foundationPackForTest(),
+      repository: repository,
+      clock: () => DateTime.utc(2026, 8, 27, 8),
+    );
+
+    await controller.initialise();
+
+    final persisted = await repository.loadSession();
+    expect(persisted?.questionId, controller.currentQuestion?.id);
+    expect(persisted?.questionSkillId, controller.currentQuestion?.skillId);
+    expect(persisted?.questionId, isNotNull);
   });
 }

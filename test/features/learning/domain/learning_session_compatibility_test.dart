@@ -63,4 +63,17 @@ void main() {
       isFalse,
     );
   });
+
+  test('rejects a Learn focus missing from the installed content pack', () {
+    expect(
+      isLearningSessionCompatible(
+        base.copyWith(
+          focusSkillId: 'arithmetic.retired',
+          phase: LearningSessionPhase.learn,
+        ),
+        contentPack: pack,
+      ),
+      isFalse,
+    );
+  });
 }
