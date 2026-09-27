@@ -31,6 +31,21 @@ bool isLearningSessionCompatible(
   if (requiresFocus && focusSkillId == null) {
     return false;
   }
+  if (focusSkillId != null) {
+    final focusOperation = ArithmeticOperationDefinition.fromSkillId(
+      focusSkillId,
+    );
+    if (focusOperation == null) {
+      return false;
+    }
+    try {
+      if (contentPack.templateFor(focusOperation).skillId != focusSkillId) {
+        return false;
+      }
+    } on StateError {
+      return false;
+    }
+  }
   if (session.id.startsWith('diagnostic-') &&
       focusSkillId != null &&
       focusSkillId !=
