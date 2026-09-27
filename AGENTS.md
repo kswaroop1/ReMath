@@ -82,6 +82,27 @@ refactoring verification. Never change a test merely because correct production
 code cannot satisfy it; resolve whether the requirement, test, or implementation
 is wrong and document the decision.
 
+### Efficient red/green publication
+
+- Preserve each behaviour's test-first red commit and corresponding green
+  implementation commit locally; TDD provability does not require pushing each
+  intermediate commit or starting CI after every review finding.
+- When several review findings are known, address the complete bounded set in
+  one working pass. Keep separate red/green commits where behaviour differs,
+  then run formatting, static analysis, and the complete relevant suite against
+  the final local stack before publishing it.
+- Push the reviewed local commit stack together and use one full CI run as the
+  authoritative remote verification. Do not use GitHub CI as a serial formatter,
+  compiler, or one-finding-at-a-time feedback loop when the same check can run
+  locally.
+- If a required tool or target cannot run locally, use the smallest necessary
+  CI execution to obtain that unavailable evidence. Diagnose all failures from
+  that run together, correct them locally, and publish one replacement stack;
+  avoid speculative single-fix pushes.
+- A subsequent records/provenance-only commit may use the repository's bounded
+  records-only path after the behavioural head is fully green. Record both the
+  local red/green evidence and final authoritative CI run chronologically.
+
 
 ## Code Review Rules
 
