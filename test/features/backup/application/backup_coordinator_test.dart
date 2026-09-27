@@ -118,7 +118,7 @@ void main() {
     test('portable backup restores an active learning session', () async {
       final source = InMemoryProgressRepository();
       await source.recordAttempt(
-        _attempt('event-1', sessionId: 'imported-session'),
+        _attempt('event-1', sessionId: 'portable-session'),
       );
       await source.saveSession(_session('portable-session'));
       final exporter = BackupCoordinator(
@@ -152,7 +152,9 @@ void main() {
 
     test('portable backup never replaces a local active session', () async {
       final source = InMemoryProgressRepository();
-      await source.recordAttempt(_attempt('event-1'));
+      await source.recordAttempt(
+        _attempt('event-1', sessionId: 'imported-session'),
+      );
       await source.saveSession(_session('imported-session'));
       final exporter = BackupCoordinator(
         cipher: cipher,
@@ -273,33 +275,36 @@ void main() {
       }
     });
 
-    test('preview rejects remediation linked to an unrelated attempt', () async {
-      final payload = BackupPayload(
-        attempts: [
-          _attempt(
-            'event-1',
-            sessionId: 'different-session',
-            skillId: 'arithmetic.multiplication',
-          ),
-        ],
-        createdAt: DateTime.utc(2026, 9, 20, 12),
-        session: _session('portable-session'),
-        studyState: null,
-      );
-      final encrypted = await cipher.encrypt(
-        plaintext: payload.encode(),
-        password: password,
-      );
+    test(
+      'preview rejects remediation linked to an unrelated attempt',
+      () async {
+        final payload = BackupPayload(
+          attempts: [
+            _attempt(
+              'event-1',
+              sessionId: 'different-session',
+              skillId: 'arithmetic.multiplication',
+            ),
+          ],
+          createdAt: DateTime.utc(2026, 9, 20, 12),
+          session: _session('portable-session'),
+          studyState: null,
+        );
+        final encrypted = await cipher.encrypt(
+          plaintext: payload.encode(),
+          password: password,
+        );
 
-      await expectLater(
-        BackupCoordinator(
-          cipher: cipher,
-          clock: DateTime.now,
-          repository: InMemoryProgressRepository(),
-        ).preview(encrypted, password: password),
-        throwsFormatException,
-      );
-    });
+        await expectLater(
+          BackupCoordinator(
+            cipher: cipher,
+            clock: DateTime.now,
+            repository: InMemoryProgressRepository(),
+          ).preview(encrypted, password: password),
+          throwsFormatException,
+        );
+      },
+    );
 
     test('preview rejects remediation in a diagnostic study', () async {
       final payload = BackupPayload(
