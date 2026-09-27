@@ -31,6 +31,13 @@ bool isLearningSessionCompatible(
   if (questionId == null || skillId == null) {
     return false;
   }
+  if (session.id.startsWith('diagnostic-') &&
+      skillId !=
+          ArithmeticOperation
+              .values[session.currentQuestionIndex ~/ 3]
+              .skillId) {
+    return false;
+  }
   final focusSkillId = session.focusSkillId;
   final requiresFocus = session.phase == LearningSessionPhase.correction ||
       session.phase == LearningSessionPhase.retest ||
