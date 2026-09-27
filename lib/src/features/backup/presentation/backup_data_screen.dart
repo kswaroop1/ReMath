@@ -4,8 +4,9 @@ import '../application/backup_coordinator.dart';
 import '../application/backup_file_transfer.dart';
 
 final class BackupDataScreen extends StatefulWidget {
-  const BackupDataScreen({required this.transfer, super.key});
+  const BackupDataScreen({this.onApplied, required this.transfer, super.key});
 
+  final VoidCallback? onApplied;
   final BackupFileTransfer transfer;
 
   @override
@@ -61,6 +62,7 @@ final class _BackupDataScreenState extends State<BackupDataScreen> {
     await _run(() async {
       final result = await widget.transfer.apply(pending);
       if (!mounted) return;
+      widget.onApplied?.call();
       final count = result.insertedAttemptCount;
       setState(
         () => _message = '$count attempt${count == 1 ? '' : 's'} restored.',

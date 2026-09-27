@@ -90,12 +90,16 @@ class _HomeScreenState extends State<HomeScreen> {
         if (widget.backupTransfer case final transfer?)
           TextButton(
             onPressed: () async {
+              var applied = false;
               await Navigator.of(context).push<void>(
                 MaterialPageRoute(
-                  builder: (_) => BackupDataScreen(transfer: transfer),
+                  builder: (_) => BackupDataScreen(
+                    onApplied: () => applied = true,
+                    transfer: transfer,
+                  ),
                 ),
               );
-              if (mounted) await _controller.initialise();
+              if (mounted && applied) await _controller.initialise();
             },
             child: const Text('Backup and recovery'),
           ),
