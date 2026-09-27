@@ -268,4 +268,17 @@ void main() {
       );
     }
   });
+
+  test('requires review phase to use a review session identity', () {
+    expect(
+      isLearningSessionCompatible(
+        base.copyWith(
+          focusSkillId: 'arithmetic.addition',
+          phase: LearningSessionPhase.review,
+        ),
+        contentPack: pack,
+      ),
+      isFalse,
+    );
+  });
 }
