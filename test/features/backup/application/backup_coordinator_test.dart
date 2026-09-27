@@ -236,6 +236,38 @@ void main() {
         }
       },
     );
+
+    test('preview rejects orphaned active-study remediation', () async {
+      for (final relatedEventId in <String?>[null, 'missing-event']) {
+        final payload = BackupPayload(
+          attempts: const [],
+          createdAt: DateTime.utc(2026, 9, 20, 12),
+          studyState: StudyState(
+            phase: StudyPhase.correction,
+            plan: StudyPlanner().plan(
+              'number-fluency',
+              const [],
+              DateTime.utc(2026, 9, 20),
+            ),
+            relatedEventId: relatedEventId,
+            sessionId: 'orphaned-study',
+          ).encode(),
+        );
+        final encrypted = await cipher.encrypt(
+          plaintext: payload.encode(),
+          password: password,
+        );
+
+        await expectLater(
+          BackupCoordinator(
+            cipher: cipher,
+            clock: DateTime.now,
+            repository: InMemoryProgressRepository(),
+          ).preview(encrypted, password: password),
+          throwsFormatException,
+        );
+      }
+    });
   });
 }
 
