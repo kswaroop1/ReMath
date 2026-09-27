@@ -305,9 +305,33 @@ void main() {
       },
     );
 
+    test('preview rejects remediation linked to a successful attempt', () async {
+      final payload = BackupPayload(
+        attempts: [_attempt('event-1')],
+        createdAt: DateTime.utc(2026, 9, 20, 12),
+        session: _session('session-1'),
+        studyState: null,
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: payload.encode(),
+        password: password,
+      );
+
+      await expectLater(
+        BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+        ).preview(encrypted, password: password),
+        throwsFormatException,
+      );
+    });
+
     test('preview accepts consistently linked study remediation', () async {
       final payload = BackupPayload(
-        attempts: [_attempt('event-1', sessionId: 'study-session')],
+        attempts: [
+          _attempt('event-1', isCorrect: false, sessionId: 'study-session'),
+        ],
         createdAt: DateTime.utc(2026, 9, 20, 12),
         studyState: StudyState(
           phase: StudyPhase.correction,
@@ -359,6 +383,64 @@ void main() {
         throwsFormatException,
       );
     });
+
+    test('preview rejects hinted diagnostic study state', () async {
+      final payload = BackupPayload(
+        attempts: const [],
+        createdAt: DateTime.utc(2026, 9, 20, 12),
+        studyState: StudyState(
+          hintCount: 1,
+          plan: StudyPlanner().diagnostic('number-fluency'),
+          sessionId: 'diagnostic-study',
+        ).encode(),
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: payload.encode(),
+        password: password,
+      );
+
+      await expectLater(
+        BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+        ).preview(encrypted, password: password),
+        throwsFormatException,
+      );
+    });
+
+    test('preview rejects remediation on a non-question study step', () async {
+      final payload = BackupPayload(
+        attempts: [
+          _attempt('event-1', isCorrect: false, sessionId: 'study-session'),
+        ],
+        createdAt: DateTime.utc(2026, 9, 20, 12),
+        studyState: StudyState(
+          phase: StudyPhase.correction,
+          plan: StudyPlan(
+            steps: const [
+              StudyStep(StudyStepKind.learn, 'arithmetic.addition', 0),
+            ],
+            reason: 'Focused lesson',
+          ),
+          relatedEventId: 'event-1',
+          sessionId: 'study-session',
+        ).encode(),
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: payload.encode(),
+        password: password,
+      );
+
+      await expectLater(
+        BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+        ).preview(encrypted, password: password),
+        throwsFormatException,
+      );
+    });
   });
 }
 
@@ -379,13 +461,14 @@ LearningSession _session(String id) {
 AttemptEvent _attempt(
   String id, {
   String answer = '4',
+  bool isCorrect = true,
   String sessionId = 'session-1',
   String skillId = 'arithmetic.addition',
 }) {
   return AttemptEvent(
     answer: answer,
     eventId: id,
-    isCorrect: true,
+    isCorrect: isCorrect,
     occurredAt: DateTime.utc(2026, 9, 20, 10),
     questionId: 'question-$id',
     responseTime: const Duration(milliseconds: 500),

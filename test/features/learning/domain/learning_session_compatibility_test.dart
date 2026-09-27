@@ -281,4 +281,17 @@ void main() {
       isFalse,
     );
   });
+
+  test('rejects review identity in an ordinary question phase', () {
+    expect(
+      isLearningSessionCompatible(
+        base.copyWith(
+          focusSkillId: 'arithmetic.addition',
+          id: 'review-restored',
+        ),
+        contentPack: pack,
+      ),
+      isFalse,
+    );
+  });
 }
