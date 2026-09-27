@@ -385,6 +385,18 @@ together with formatting, static analysis, content validation, dependency-lock
 verification and secret scanning. This run is the execution evidence for both
 ordered test/implementation pairs described above.
 
+Final-head CI run 36298024083 verifies reconciled head `ca4ae65` with 353
+native tests, eight Chrome contracts and 98.54 percent line coverage. Review of
+that head found three further behavioral edges: identity-less diagnostics could
+carry focus inconsistent with their fixed operation block; completed Home
+sessions could be resurrected by reapplying an older backup; and successful
+recovery refresh reset timing for an unchanged local active question. Focused
+tests and implementations are ordered separately for each behavior and are
+published together for CI, without claiming unavailable local execution. The
+fourth finding was the now-recorded final-head run. Exact review text is linked
+as [final-head provenance][r44], [legacy diagnostic focus][r45], [stale Home
+session][r46], and [active timing][r47].
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
@@ -428,3 +440,7 @@ ordered test/implementation pairs described above.
 [r41]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114074355
 [r42]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114074357
 [r43]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114074358
+[r44]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114269618
+[r45]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114269620
+[r46]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114269621
+[r47]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114269623
