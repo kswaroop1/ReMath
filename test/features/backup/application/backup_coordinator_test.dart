@@ -331,7 +331,7 @@ void main() {
         repository: InMemoryProgressRepository(),
       ).preview(encrypted, password: password);
 
-      expect(pending.preview.hasActiveStudy, isTrue);
+      expect(pending.preview.hasStudyState, isTrue);
     });
 
     test('preview rejects remediation in a diagnostic study', () async {
