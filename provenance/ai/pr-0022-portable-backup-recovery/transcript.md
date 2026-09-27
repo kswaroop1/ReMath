@@ -420,6 +420,16 @@ per-commit execution evidence. Exact review text is linked as [latest provenance
 gap][r48], [unsupported legacy focus][r49], [orphaned remediation][r50],
 [envelope contract][r51], and [incompatible local session][r52].
 
+CI run 36312515317 recorded the combined correction stack's expected integration
+issues: the three new tests required Dart 3.13 formatting and the orphaned-
+remediation fixture omitted the payload's required `studyState` field. Run
+36312750355 then passed formatting, analysis, content validation, Chrome and the
+new behavioral contracts, but exposed one older active-session fixture that
+also referenced an absent originating attempt. After supplying that valid
+immutable attempt, final-head CI run 36312948262 passed all gates with 359 native
+tests, eight Chrome contracts and 98.50 percent line coverage. These
+CI-discovered fixture/format corrections change no production behavior.
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
