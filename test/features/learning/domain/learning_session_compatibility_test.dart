@@ -97,6 +97,26 @@ void main() {
     }
   });
 
+  test('rejects any focused session whose pinned skill disagrees', () {
+    for (final phase in [
+      LearningSessionPhase.question,
+      LearningSessionPhase.review,
+    ]) {
+      expect(
+        isLearningSessionCompatible(
+          base.copyWith(
+            focusSkillId: 'arithmetic.subtraction',
+            phase: phase,
+            questionId: question.id,
+            questionSkillId: question.skillId,
+          ),
+          contentPack: pack,
+        ),
+        isFalse,
+      );
+    }
+  });
+
   test('rejects an identity-less diagnostic beyond its fixed question set', () {
     expect(
       isLearningSessionCompatible(
