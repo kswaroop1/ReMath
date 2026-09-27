@@ -137,6 +137,22 @@ void main() {
     }
   });
 
+  test('requires focus before accepting a legacy identity-less session', () {
+    for (final phase in [
+      LearningSessionPhase.correction,
+      LearningSessionPhase.retest,
+      LearningSessionPhase.review,
+    ]) {
+      expect(
+        isLearningSessionCompatible(
+          base.copyWith(phase: phase),
+          contentPack: pack,
+        ),
+        isFalse,
+      );
+    }
+  });
+
   test('rejects an identity-less diagnostic beyond its fixed question set', () {
     expect(
       isLearningSessionCompatible(
