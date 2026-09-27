@@ -50,8 +50,8 @@ final class BackupCoordinator {
     final payload = BackupPayload.decode(plaintext);
     final localAttempts = await _repository.loadAttempts();
     final availableAttempts = {
-      for (final attempt in payload.attempts) attempt.eventId: attempt,
       for (final attempt in localAttempts) attempt.eventId: attempt,
+      for (final attempt in payload.attempts) attempt.eventId: attempt,
     };
     final session = payload.session;
     if (session != null && !(_sessionValidator?.call(session) ?? true)) {
@@ -64,7 +64,7 @@ final class BackupCoordinator {
       final related = availableAttempts[relatedEventId];
       if (related == null ||
           related.isCorrect ||
-          related.kind != AttemptKind.answer ||
+          !_isRemediationOrigin(related.kind) ||
           related.sessionId != session.id ||
           related.skillId != session.focusSkillId) {
         throw const FormatException(
@@ -86,13 +86,19 @@ final class BackupCoordinator {
             );
           }
         }
+        if (decoded.phase == StudyPhase.question &&
+            decoded.relatedEventId != null) {
+          throw const FormatException(
+            'Question-phase study cannot reference remediation history',
+          );
+        }
         if (decoded.phase != StudyPhase.question &&
             decoded.relatedEventId != null) {
           final related = availableAttempts[decoded.relatedEventId];
           final step = decoded.step;
           if (related == null ||
               related.isCorrect ||
-              related.kind != AttemptKind.answer ||
+              !_isRemediationOrigin(related.kind) ||
               step == null ||
               (step.kind != StudyStepKind.retrieval &&
                   step.kind != StudyStepKind.practice) ||
@@ -129,3 +135,8 @@ final class BackupCoordinator {
     );
   }
 }
+
+bool _isRemediationOrigin(AttemptKind kind) =>
+    kind == AttemptKind.answer ||
+    kind == AttemptKind.correction ||
+    kind == AttemptKind.retest;
