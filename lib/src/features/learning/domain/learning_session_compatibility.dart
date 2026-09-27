@@ -31,6 +31,14 @@ bool isLearningSessionCompatible(
   if (requiresFocus && focusSkillId == null) {
     return false;
   }
+  if (session.id.startsWith('diagnostic-') &&
+      focusSkillId != null &&
+      focusSkillId !=
+          ArithmeticOperation
+              .values[session.currentQuestionIndex ~/ 3]
+              .skillId) {
+    return false;
+  }
   final questionId = session.questionId;
   final skillId = session.questionSkillId;
   if (questionId == null && skillId == null) {
