@@ -38,8 +38,14 @@ final class InMemoryProgressRepository implements ProgressRepository {
   }
 
   @override
-  Future<List<AttemptEvent>> loadAttempts() async =>
-      List.unmodifiable(_attempts.values);
+  Future<List<AttemptEvent>> loadAttempts() async {
+    final attempts = _attempts.values.toList()
+      ..sort((left, right) {
+        final byTime = left.occurredAt.compareTo(right.occurredAt);
+        return byTime != 0 ? byTime : left.eventId.compareTo(right.eventId);
+      });
+    return List.unmodifiable(attempts);
+  }
 
   @override
   Future<LearningSession?> loadSession() async => _session;
