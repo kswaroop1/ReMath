@@ -516,6 +516,14 @@ successful origin plus the formatter's compact layout for the two corrected
 fixture calls. Commit `41173b1` corrects that final test-only integration issue;
 production behavior is unchanged.
 
+CI runs 36345313245 and 36348677592 confirmed all 371 native tests passed
+while exposing only the canonical Dart 3.13 layout for three equivalent
+fixture calls. Commit `2342e69` applies that mechanical layout consistently.
+Final implementation-head CI run 36349567209 is fully green: formatting,
+static analysis, content validation, dependency-lock verification, eight Chrome
+contracts, 371 native tests, 98.52 percent line coverage and secret scanning all
+pass.
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
