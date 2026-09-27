@@ -430,6 +430,23 @@ immutable attempt, final-head CI run 36312948262 passed all gates with 359 nativ
 tests, eight Chrome contracts and 98.50 percent line coverage. These
 CI-discovered fixture/format corrections change no production behavior.
 
+Independent review of `ceed1b7` identified five related close-out items:
+restored diagnostics must remain in their ordinary question phase; active-study
+correction/retest snapshots need the same originating-attempt validation as Home
+sessions; in-memory recovery must expose the same chronological attempt order as
+SQLite; the durable duplicate contract is semantic typed-field equality rather
+than byte equality; and the 98.54-to-98.50 percent coverage movement required an
+explicit investigation. The decrease followed the three preceding production
+guards (legacy-focus/template validation, remediation-link validation and local
+session retirement), whose new conditional paths increased the production-line
+denominator. This correction adds focused business tests for the remaining
+diagnostic, study-link and ordering branches rather than accepting the decrease
+without investigation. Separate ordered local test and implementation commits
+are retained for all three behavioral changes; local Flutter execution remains
+unavailable, so combined CI is the execution evidence. Exact review text is
+linked as [coverage investigation][r53], [diagnostic phase][r54], [study
+remediation link][r55], [semantic duplicates][r56], and [attempt ordering][r57].
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
@@ -482,3 +499,8 @@ CI-discovered fixture/format corrections change no production behavior.
 [r50]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114874242
 [r51]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114874245
 [r52]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114874247
+[r53]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4115051703
+[r54]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4115051708
+[r55]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4115051710
+[r56]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4115051715
+[r57]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4115051718

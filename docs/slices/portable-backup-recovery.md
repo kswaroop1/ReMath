@@ -29,9 +29,10 @@ through an idempotent merge.
   time, format version, attempt count, new/duplicate/conflicting event counts,
   skill/time range, and whether an active snapshot is present. Preview writes
   nothing.
-- Apply merges new immutable events by event ID. Byte-for-byte equivalent events
-  are duplicates; the same ID with different immutable content blocks the entire
-  import. Retrying an applied backup adds nothing.
+- Apply merges new immutable events by event ID. Events whose decoded typed
+  immutable fields are semantically equal are duplicates, even when equivalent
+  encodings differ; the same ID with different immutable content blocks the
+  entire import. Retrying an applied backup adds nothing.
 - Apply is transactional for SQLite. A validation or write failure leaves local
   attempts and active state unchanged.
 - An imported active snapshot is offered only when local active state is empty;
