@@ -100,6 +100,23 @@ void main() {
       );
     });
 
+    test('rejects additional unauthenticated envelope fields', () async {
+      final cipher = PasswordBackupCipher(
+        randomBytes: (length) => length == 16 ? salt : nonce,
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: '{}',
+        password: password,
+      );
+      final envelope = (jsonDecode(encrypted) as Map).cast<String, Object?>()
+        ..['createdAt'] = '2026-09-27T00:00:00Z';
+
+      await expectLater(
+        cipher.decrypt(jsonEncode(envelope), password: password),
+        throwsA(isA<BackupDecryptionException>()),
+      );
+    });
+
     test('rejects invalid entropy-provider output before encryption', () async {
       for (final bytes in <List<int>>[
         List<int>.filled(15, 1),
