@@ -174,4 +174,27 @@ void main() {
       isFalse,
     );
   });
+
+  test('rejects a diagnostic pinned to the wrong operation', () {
+    final wrongOperation = const ArithmeticGenerator().generate(
+      seed: 42,
+      index: 3,
+      packId: pack.id,
+      template: pack.templates.first,
+    );
+    expect(
+      isLearningSessionCompatible(
+        LearningSession(
+          currentQuestionIndex: 3,
+          id: 'diagnostic-wrong-operation',
+          questionId: wrongOperation.id,
+          questionSkillId: wrongOperation.skillId,
+          seed: 42,
+          startedAt: DateTime.utc(2026, 9, 26),
+        ),
+        contentPack: pack,
+      ),
+      isFalse,
+    );
+  });
 }
