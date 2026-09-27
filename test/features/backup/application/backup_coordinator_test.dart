@@ -278,33 +278,61 @@ void main() {
     test(
       'preview rejects remediation linked to an unrelated attempt',
       () async {
-        final payload = BackupPayload(
-          attempts: [
-            _attempt(
-              'event-1',
-              sessionId: 'different-session',
-              skillId: 'arithmetic.multiplication',
-            ),
-          ],
-          createdAt: DateTime.utc(2026, 9, 20, 12),
-          session: _session('portable-session'),
-          studyState: null,
-        );
-        final encrypted = await cipher.encrypt(
-          plaintext: payload.encode(),
-          password: password,
-        );
+        for (final attempt in [
+          _attempt('event-1', sessionId: 'different-session'),
+          _attempt('event-1', skillId: 'arithmetic.multiplication'),
+        ]) {
+          final payload = BackupPayload(
+            attempts: [attempt],
+            createdAt: DateTime.utc(2026, 9, 20, 12),
+            session: _session('session-1'),
+            studyState: null,
+          );
+          final encrypted = await cipher.encrypt(
+            plaintext: payload.encode(),
+            password: password,
+          );
 
-        await expectLater(
-          BackupCoordinator(
-            cipher: cipher,
-            clock: DateTime.now,
-            repository: InMemoryProgressRepository(),
-          ).preview(encrypted, password: password),
-          throwsFormatException,
-        );
+          await expectLater(
+            BackupCoordinator(
+              cipher: cipher,
+              clock: DateTime.now,
+              repository: InMemoryProgressRepository(),
+            ).preview(encrypted, password: password),
+            throwsFormatException,
+          );
+        }
       },
     );
+
+    test('preview accepts consistently linked study remediation', () async {
+      final payload = BackupPayload(
+        attempts: [_attempt('event-1', sessionId: 'study-session')],
+        createdAt: DateTime.utc(2026, 9, 20, 12),
+        studyState: StudyState(
+          phase: StudyPhase.correction,
+          plan: StudyPlanner().plan(
+            'number-fluency',
+            const [],
+            DateTime.utc(2026, 9, 20),
+          ),
+          relatedEventId: 'event-1',
+          sessionId: 'study-session',
+        ).encode(),
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: payload.encode(),
+        password: password,
+      );
+
+      final pending = await BackupCoordinator(
+        cipher: cipher,
+        clock: DateTime.now,
+        repository: InMemoryProgressRepository(),
+      ).preview(encrypted, password: password);
+
+      expect(pending.preview.hasActiveStudy, isTrue);
+    });
 
     test('preview rejects remediation in a diagnostic study', () async {
       final payload = BackupPayload(
