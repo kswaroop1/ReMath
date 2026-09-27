@@ -157,23 +157,26 @@ void main() {
       },
     );
 
-    test('an inactive imported study row does not replace local choice', () async {
-      final local = const StudyState(goalId: 'number-fluency').encode();
-      final incoming = const StudyState(goalId: 'algebra').encode();
-      for (final fixture in _fixtures()) {
-        final repository = fixture.repository;
-        addTearDown(fixture.close);
-        await repository.saveStudyState(local);
+    test(
+      'an inactive imported study row does not replace local choice',
+      () async {
+        final local = const StudyState(goalId: 'number-fluency').encode();
+        final incoming = const StudyState(goalId: 'algebra').encode();
+        for (final fixture in _fixtures()) {
+          final repository = fixture.repository;
+          addTearDown(fixture.close);
+          await repository.saveStudyState(local);
 
-        final result = await repository.mergeProgress(
-          attempts: const [],
-          studyState: incoming,
-        );
+          final result = await repository.mergeProgress(
+            attempts: const [],
+            studyState: incoming,
+          );
 
-        expect(result.importedStudyState, isFalse);
-        expect(await repository.loadStudyState(), local);
-      }
-    });
+          expect(result.importedStudyState, isFalse);
+          expect(await repository.loadStudyState(), local);
+        }
+      },
+    );
 
     test(
       'a SQLite write interruption rolls back attempts and study state',

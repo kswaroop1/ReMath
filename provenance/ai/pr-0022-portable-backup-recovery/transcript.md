@@ -310,6 +310,11 @@ replace the user's local inactive goal choice. The exact review findings are
 preserved as [final CI record][r29], [remediation focus][r30], [Home elapsed
 time][r31], and [inactive imported study][r32].
 
+CI run 36283613274 executed the complete correction stack. All 344 native tests
+passed, including the three focused corrections; the only failure was Dart
+3.13's canonical multiline layout for the inactive-import test. The subsequent
+correction changes formatting and records only, not production behavior.
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
