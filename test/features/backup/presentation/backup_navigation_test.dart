@@ -28,7 +28,7 @@ void main() {
     expect(find.text('Preview backup'), findsOneWidget);
   });
 
-  testWidgets('home refreshes cached progress after returning from recovery', (
+  testWidgets('home preserves cached session after leaving without recovery', (
     tester,
   ) async {
     final repository = InMemoryProgressRepository();
@@ -59,7 +59,7 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
 
-    expect(find.text('1 attempts • 100% accuracy'), findsOneWidget);
+    expect(find.text('0 attempts • 0% accuracy'), findsOneWidget);
   });
 }
 

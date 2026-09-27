@@ -64,9 +64,11 @@ void main() {
       final encrypted = await sourceCoordinator.export(password: 'password');
       final files = _MemoryBackupFiles()..contentsToOpen = encrypted;
       final target = InMemoryProgressRepository();
+      var applied = false;
       await tester.pumpWidget(
         MaterialApp(
           home: BackupDataScreen(
+            onApplied: () => applied = true,
             transfer: _transfer(files: files, repository: target),
           ),
         ),
@@ -95,6 +97,7 @@ void main() {
 
       expect((await target.loadAttempts()).single.eventId, 'event-1');
       expect(find.text('1 attempt restored.'), findsOneWidget);
+      expect(applied, isTrue);
     });
 
     testWidgets('a failed second preview clears the prior applicable backup', (
