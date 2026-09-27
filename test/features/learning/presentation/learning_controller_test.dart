@@ -136,4 +136,29 @@ void main() {
       expect(persisted?.questionId, isNotNull);
     },
   );
+
+  test('retires a persisted session whose pinned question is unavailable', () async {
+    final repository = InMemoryProgressRepository();
+    await repository.saveSession(
+      LearningSession(
+        currentQuestionIndex: 0,
+        id: 'retired-template-session',
+        questionId: 'retired-pack.addition.v9.42.0',
+        questionSkillId: 'arithmetic.addition',
+        seed: 42,
+        startedAt: DateTime.utc(2026, 8, 27, 8),
+      ),
+    );
+    final controller = LearningController(
+      contentPack: foundationPackForTest(),
+      repository: repository,
+      clock: () => DateTime.utc(2026, 8, 27, 8),
+    );
+
+    await controller.initialise();
+
+    expect(controller.hasActiveSession, isFalse);
+    expect(controller.currentQuestion, isNull);
+    expect(await repository.loadSession(), isNull);
+  });
 }
