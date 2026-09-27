@@ -16,14 +16,22 @@ void main() {
           final repository = fixture.repository;
           addTearDown(fixture.close);
           final attempts = [_attempt('first'), _attempt('second')];
+          final activeStudyState = StudyState(
+            plan: StudyPlanner().plan(
+              'number-fluency',
+              const [],
+              DateTime.utc(2026, 9, 20),
+            ),
+            sessionId: 'recovered-study',
+          ).encode();
 
           final first = await repository.mergeProgress(
             attempts: attempts,
-            studyState: '{"phase":"question"}',
+            studyState: activeStudyState,
           );
           final retry = await repository.mergeProgress(
             attempts: attempts,
-            studyState: '{"phase":"question"}',
+            studyState: activeStudyState,
           );
 
           expect(first.insertedAttemptCount, 2);
@@ -33,7 +41,7 @@ void main() {
           expect(retry.duplicateAttemptCount, 2);
           expect(retry.importedStudyState, isFalse);
           expect(await repository.loadAttempts(), hasLength(2));
-          expect(await repository.loadStudyState(), '{"phase":"question"}');
+          expect(await repository.loadStudyState(), activeStudyState);
         }
       },
     );
@@ -178,33 +186,36 @@ void main() {
       },
     );
 
-    test('an advanced event stream blocks stale active study recovery', () async {
-      final incoming = StudyState(
-        plan: StudyPlanner().plan(
-          'number-fluency',
-          const [],
-          DateTime.utc(2026, 9, 20),
-        ),
-        sessionId: 'recovered-study',
-      ).encode();
-      for (final fixture in _fixtures()) {
-        final repository = fixture.repository;
-        addTearDown(fixture.close);
-        await repository.saveStudyState(const StudyState().encode());
-        await repository.recordAttempt(_attempt('recovered-study.0'));
+    test(
+      'an advanced event stream blocks stale active study recovery',
+      () async {
+        final incoming = StudyState(
+          plan: StudyPlanner().plan(
+            'number-fluency',
+            const [],
+            DateTime.utc(2026, 9, 20),
+          ),
+          sessionId: 'recovered-study',
+        ).encode();
+        for (final fixture in _fixtures()) {
+          final repository = fixture.repository;
+          addTearDown(fixture.close);
+          await repository.saveStudyState(const StudyState().encode());
+          await repository.recordAttempt(_attempt('recovered-study.0'));
 
-        final result = await repository.mergeProgress(
-          attempts: const [],
-          studyState: incoming,
-        );
+          final result = await repository.mergeProgress(
+            attempts: const [],
+            studyState: incoming,
+          );
 
-        expect(result.importedStudyState, isFalse);
-        expect(
-          await repository.loadStudyState(),
-          const StudyState().encode(),
-        );
-      }
-    });
+          expect(result.importedStudyState, isFalse);
+          expect(
+            await repository.loadStudyState(),
+            const StudyState().encode(),
+          );
+        }
+      },
+    );
 
     test(
       'a SQLite write interruption rolls back attempts and study state',

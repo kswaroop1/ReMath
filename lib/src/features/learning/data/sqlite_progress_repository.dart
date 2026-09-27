@@ -356,12 +356,13 @@ final class SqliteProgressRepository implements ProgressRepository {
           studyState != null &&
           _canImportStudyState(
             studyState,
-            (eventId) => _database
-                .select(
-                  'SELECT 1 FROM attempt_events WHERE event_id = ? LIMIT 1',
-                  [eventId],
-                )
-                .isNotEmpty,
+            (eventId) =>
+                _database
+                    .select(
+                      'SELECT 1 FROM attempt_events WHERE event_id = ? LIMIT 1',
+                      [eventId],
+                    )
+                    .isNotEmpty,
           ) &&
           !_hasActiveStudyState(localStudyState);
       if (importStudyState) _writeStudyState(studyState);

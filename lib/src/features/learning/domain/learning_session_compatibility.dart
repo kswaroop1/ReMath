@@ -39,7 +39,8 @@ bool isLearningSessionCompatible(
     return false;
   }
   final focusSkillId = session.focusSkillId;
-  final requiresFocus = session.phase == LearningSessionPhase.correction ||
+  final requiresFocus =
+      session.phase == LearningSessionPhase.correction ||
       session.phase == LearningSessionPhase.retest ||
       session.phase == LearningSessionPhase.review;
   if ((requiresFocus && focusSkillId == null) ||
