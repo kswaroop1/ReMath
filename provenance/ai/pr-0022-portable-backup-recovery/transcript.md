@@ -319,6 +319,27 @@ CI run 36283768966 is the clean full-suite result: formatting, static analysis,
 content validation, dependency-lock verification, secret scanning, eight Chrome
 contracts, 344 native tests and the 98.51 percent line-coverage gate all pass.
 
+## Final focused-session and evidence corrections
+
+Independent review at head `7ad238e` found two remaining compatibility gaps:
+focused question/review sessions could disagree with their pinned skill, and a
+pinned diagnostic could exceed its fixed nine-question set. Separate local test
+and implementation commits were retained for each correction. As with the
+preceding three local pairs, Flutter could not run in the local environment and
+the stack was pushed together for permitted CI execution. There is therefore no
+honest per-commit red or green execution evidence for these five cycles; the
+commit ordering records intent and separation, while the combined CI runs are
+the only execution evidence. This is an explicit TDD-process deviation.
+
+The coverage movement from 98.53 percent at run 36276714619 to 98.51 percent at
+run 36283768966 came from the new Home recovery callback/conditional refresh
+composition path. The screen-level callback and cancellation path were covered,
+but the successful apply-through-Home path was not. A focused characterization
+test now performs preview, apply, back navigation and verifies refreshed Home
+progress. This is coverage added after production, not claimed as test-first.
+The exact findings are preserved as [missing cycle executions][r33], [coverage
+accounting][r34], [all focused sessions][r35], and [pinned diagnostic bound][r36].
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
@@ -351,3 +372,7 @@ contracts, 344 native tests and the 98.51 percent line-coverage gate all pass.
 [r30]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113202324
 [r31]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113202326
 [r32]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113202333
+[r33]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113615455
+[r34]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113615464
+[r35]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113615473
+[r36]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113615476
