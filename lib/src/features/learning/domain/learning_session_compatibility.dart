@@ -23,6 +23,14 @@ bool isLearningSessionCompatible(
       session.currentQuestionIndex >= ArithmeticOperation.values.length * 3) {
     return false;
   }
+  final focusSkillId = session.focusSkillId;
+  final requiresFocus =
+      session.phase == LearningSessionPhase.correction ||
+      session.phase == LearningSessionPhase.retest ||
+      session.phase == LearningSessionPhase.review;
+  if (requiresFocus && focusSkillId == null) {
+    return false;
+  }
   final questionId = session.questionId;
   final skillId = session.questionSkillId;
   if (questionId == null && skillId == null) {
@@ -38,13 +46,7 @@ bool isLearningSessionCompatible(
               .skillId) {
     return false;
   }
-  final focusSkillId = session.focusSkillId;
-  final requiresFocus =
-      session.phase == LearningSessionPhase.correction ||
-      session.phase == LearningSessionPhase.retest ||
-      session.phase == LearningSessionPhase.review;
-  if ((requiresFocus && focusSkillId == null) ||
-      (focusSkillId != null && focusSkillId != skillId)) {
+  if (focusSkillId != null && focusSkillId != skillId) {
     return false;
   }
   final operation = ArithmeticOperationDefinition.fromSkillId(skillId);
