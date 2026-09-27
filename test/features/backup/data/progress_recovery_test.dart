@@ -178,6 +178,34 @@ void main() {
       },
     );
 
+    test('an advanced event stream blocks stale active study recovery', () async {
+      final incoming = StudyState(
+        plan: StudyPlanner().plan(
+          'number-fluency',
+          const [],
+          DateTime.utc(2026, 9, 20),
+        ),
+        sessionId: 'recovered-study',
+      ).encode();
+      for (final fixture in _fixtures()) {
+        final repository = fixture.repository;
+        addTearDown(fixture.close);
+        await repository.saveStudyState(const StudyState().encode());
+        await repository.recordAttempt(_attempt('recovered-study.0'));
+
+        final result = await repository.mergeProgress(
+          attempts: const [],
+          studyState: incoming,
+        );
+
+        expect(result.importedStudyState, isFalse);
+        expect(
+          await repository.loadStudyState(),
+          const StudyState().encode(),
+        );
+      }
+    });
+
     test(
       'a SQLite write interruption rolls back attempts and study state',
       () async {
