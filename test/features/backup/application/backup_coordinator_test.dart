@@ -330,6 +330,36 @@ void main() {
       },
     );
 
+    test('preview accepts failed Home remediation attempts as origins', () async {
+      for (final kind in [AttemptKind.correction, AttemptKind.retest]) {
+        final payload = BackupPayload(
+          attempts: [
+            _attempt(
+              'event-1',
+              isCorrect: false,
+              kind: kind,
+              sessionId: 'session-1',
+            ),
+          ],
+          createdAt: DateTime.utc(2026, 9, 20, 12),
+          session: _session('session-1'),
+          studyState: null,
+        );
+        final encrypted = await cipher.encrypt(
+          plaintext: payload.encode(),
+          password: password,
+        );
+
+        final pending = await BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+        ).preview(encrypted, password: password);
+
+        expect(pending.preview.hasLearningSession, isTrue);
+      }
+    });
+
     test('preview accepts consistently linked study remediation', () async {
       final payload = BackupPayload(
         attempts: [
@@ -359,6 +389,103 @@ void main() {
       ).preview(encrypted, password: password);
 
       expect(pending.preview.hasStudyState, isTrue);
+    });
+
+    test('preview accepts failed study remediation attempts as origins', () async {
+      for (final kind in [AttemptKind.correction, AttemptKind.retest]) {
+        final payload = BackupPayload(
+          attempts: [
+            _attempt(
+              'event-1',
+              isCorrect: false,
+              kind: kind,
+              sessionId: 'study-session',
+            ),
+          ],
+          createdAt: DateTime.utc(2026, 9, 20, 12),
+          studyState: StudyState(
+            phase: StudyPhase.correction,
+            plan: StudyPlan(
+              steps: const [
+                StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
+              ],
+              reason: 'Focused practice',
+            ),
+            relatedEventId: 'event-1',
+            sessionId: 'study-session',
+          ).encode(),
+        );
+        final encrypted = await cipher.encrypt(
+          plaintext: payload.encode(),
+          password: password,
+        );
+
+        final pending = await BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+        ).preview(encrypted, password: password);
+
+        expect(pending.preview.hasStudyState, isTrue);
+      }
+    });
+
+    test('preview rejects related events in question-phase study state', () async {
+      final payload = BackupPayload(
+        attempts: const [],
+        createdAt: DateTime.utc(2026, 9, 20, 12),
+        studyState: StudyState(
+          plan: StudyPlanner().plan(
+            'number-fluency',
+            const [],
+            DateTime.utc(2026, 9, 20),
+          ),
+          relatedEventId: 'dangling-event',
+          sessionId: 'study-session',
+        ).encode(),
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: payload.encode(),
+        password: password,
+      );
+
+      await expectLater(
+        BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+        ).preview(encrypted, password: password),
+        throwsFormatException,
+      );
+    });
+
+    test('preview reports local conflicts before blocking apply', () async {
+      final incoming = _attempt(
+        'event-1',
+        isCorrect: false,
+        sessionId: 'session-1',
+      );
+      final payload = BackupPayload(
+        attempts: [incoming],
+        createdAt: DateTime.utc(2026, 9, 20, 12),
+        session: _session('session-1'),
+        studyState: null,
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: payload.encode(),
+        password: password,
+      );
+      final local = InMemoryProgressRepository();
+      await local.recordAttempt(_attempt('event-1'));
+
+      final pending = await BackupCoordinator(
+        cipher: cipher,
+        clock: DateTime.now,
+        repository: local,
+      ).preview(encrypted, password: password);
+
+      expect(pending.preview.conflictingAttemptCount, 1);
+      expect(pending.preview.canApply, isFalse);
     });
 
     test('preview rejects remediation in a diagnostic study', () async {
@@ -465,6 +592,7 @@ AttemptEvent _attempt(
   String id, {
   String answer = '4',
   bool isCorrect = true,
+  AttemptKind kind = AttemptKind.answer,
   String sessionId = 'session-1',
   String skillId = 'arithmetic.addition',
 }) {
@@ -472,6 +600,7 @@ AttemptEvent _attempt(
     answer: answer,
     eventId: id,
     isCorrect: isCorrect,
+    kind: kind,
     occurredAt: DateTime.utc(2026, 9, 20, 10),
     questionId: 'question-$id',
     responseTime: const Duration(milliseconds: 500),
