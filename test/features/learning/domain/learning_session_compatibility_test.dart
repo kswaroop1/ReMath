@@ -161,10 +161,7 @@ void main() {
     ]) {
       expect(
         isLearningSessionCompatible(
-          base.copyWith(
-            focusSkillId: 'arithmetic.retired',
-            phase: phase,
-          ),
+          base.copyWith(focusSkillId: 'arithmetic.retired', phase: phase),
           contentPack: pack,
         ),
         isFalse,

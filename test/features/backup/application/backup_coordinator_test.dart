@@ -200,37 +200,41 @@ void main() {
       },
     );
 
-    test('preview rejects remediation without an originating attempt', () async {
-      for (final correctionOfEventId in <String?>[null, 'missing-event']) {
-        final payload = BackupPayload(
-          attempts: const [],
-          createdAt: DateTime.utc(2026, 9, 20, 12),
-          session: LearningSession(
-            correctionOfEventId: correctionOfEventId,
-            currentQuestionIndex: 3,
-            focusSkillId: 'arithmetic.addition',
-            id: 'orphaned-remediation',
-            phase: LearningSessionPhase.correction,
-            seed: 42,
-            startedAt: DateTime.utc(2026, 9, 20, 10),
-          ),
-        );
-        final encrypted = await cipher.encrypt(
-          plaintext: payload.encode(),
-          password: password,
-        );
-        final coordinator = BackupCoordinator(
-          cipher: cipher,
-          clock: DateTime.now,
-          repository: InMemoryProgressRepository(),
-        );
+    test(
+      'preview rejects remediation without an originating attempt',
+      () async {
+        for (final correctionOfEventId in <String?>[null, 'missing-event']) {
+          final payload = BackupPayload(
+            attempts: const [],
+            createdAt: DateTime.utc(2026, 9, 20, 12),
+            session: LearningSession(
+              correctionOfEventId: correctionOfEventId,
+              currentQuestionIndex: 3,
+              focusSkillId: 'arithmetic.addition',
+              id: 'orphaned-remediation',
+              phase: LearningSessionPhase.correction,
+              seed: 42,
+              startedAt: DateTime.utc(2026, 9, 20, 10),
+            ),
+            studyState: null,
+          );
+          final encrypted = await cipher.encrypt(
+            plaintext: payload.encode(),
+            password: password,
+          );
+          final coordinator = BackupCoordinator(
+            cipher: cipher,
+            clock: DateTime.now,
+            repository: InMemoryProgressRepository(),
+          );
 
-        await expectLater(
-          coordinator.preview(encrypted, password: password),
-          throwsFormatException,
-        );
-      }
-    });
+          await expectLater(
+            coordinator.preview(encrypted, password: password),
+            throwsFormatException,
+          );
+        }
+      },
+    );
   });
 }
 
