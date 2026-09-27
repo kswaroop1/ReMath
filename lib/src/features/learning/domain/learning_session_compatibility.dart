@@ -31,8 +31,12 @@ bool isLearningSessionCompatible(
   if (questionId == null || skillId == null) {
     return false;
   }
-  if (session.focusSkillId case final focusSkillId?
-      when focusSkillId != skillId) {
+  final focusSkillId = session.focusSkillId;
+  final requiresFocus = session.phase == LearningSessionPhase.correction ||
+      session.phase == LearningSessionPhase.retest ||
+      session.phase == LearningSessionPhase.review;
+  if ((requiresFocus && focusSkillId == null) ||
+      (focusSkillId != null && focusSkillId != skillId)) {
     return false;
   }
   final operation = ArithmeticOperationDefinition.fromSkillId(skillId);
