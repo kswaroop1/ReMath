@@ -213,4 +213,20 @@ void main() {
       isFalse,
     );
   });
+
+  test('rejects legacy diagnostic focus for the wrong index operation', () {
+    expect(
+      isLearningSessionCompatible(
+        LearningSession(
+          currentQuestionIndex: 3,
+          focusSkillId: 'arithmetic.addition',
+          id: 'diagnostic-legacy-focus',
+          seed: 42,
+          startedAt: DateTime.utc(2026, 9, 26),
+        ),
+        contentPack: pack,
+      ),
+      isFalse,
+    );
+  });
 }
