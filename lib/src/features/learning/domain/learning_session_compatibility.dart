@@ -31,6 +31,11 @@ bool isLearningSessionCompatible(
   if (questionId == null || skillId == null) {
     return false;
   }
+  if ((session.phase == LearningSessionPhase.correction ||
+          session.phase == LearningSessionPhase.retest) &&
+      session.focusSkillId != skillId) {
+    return false;
+  }
   final operation = ArithmeticOperationDefinition.fromSkillId(skillId);
   if (operation == null) {
     return false;
