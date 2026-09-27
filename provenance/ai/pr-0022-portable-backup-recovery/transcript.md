@@ -367,6 +367,18 @@ inline expression with a named event lookup. CI run 36293636129 is fully green:
 351 native tests, eight Chrome contracts, 98.54 percent line coverage, and all
 formatting, analysis, content, dependency-lock and secret-scanning gates pass.
 
+Final-head CI run 36293824189 verifies documentation head `ee5e22c` with the
+same 351 native tests, eight Chrome contracts and 98.54 percent line coverage;
+all gates pass. Independent review of that head found that the compatibility
+guard still accepted identity-less focused sessions before checking focus, and
+that a successful review retest cleared the focus required by the guard. The
+focused tests and implementations are preserved as separate ordered local
+commits, then published together because local Flutter execution remains
+unavailable; their ordering is not claimed as per-commit execution evidence.
+The third finding was this missing final-head run itself. The exact findings are
+[final-head provenance][r41], [review focus retention][r42], and [legacy focused
+sessions][r43].
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
@@ -407,3 +419,6 @@ formatting, analysis, content, dependency-lock and secret-scanning gates pass.
 [r38]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113711101
 [r39]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113711102
 [r40]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113711103
+[r41]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114074355
+[r42]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114074357
+[r43]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114074358
