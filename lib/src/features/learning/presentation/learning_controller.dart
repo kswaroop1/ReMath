@@ -13,6 +13,7 @@ import '../domain/curriculum_graph.dart';
 import '../domain/diagnostic_placement.dart';
 import '../domain/fluency.dart';
 import '../domain/learning_session.dart';
+import '../domain/learning_session_compatibility.dart';
 import '../domain/mastery_summary.dart';
 import '../domain/progress_dashboard.dart';
 import '../domain/progress_repository.dart';
@@ -195,7 +196,17 @@ final class LearningController extends ChangeNotifier {
     _attempts = await _repository.loadAttempts();
     _latestDiagnosticSessionId = _latestDiagnosticId(_attempts);
     _recalculateProgress();
-    final restored = _session;
+    var restored = _session;
+    if (restored != null &&
+        !isLearningSessionCompatible(
+          restored,
+          contentPack: _contentPack,
+          generator: _generator,
+        )) {
+      await _repository.completeSession(restored.id);
+      _session = null;
+      restored = null;
+    }
     if (restored != null &&
         !isLearning &&
         restored.questionId == null &&
