@@ -68,6 +68,19 @@ final class PasswordBackupCipher implements BackupCipher {
         throw const FormatException();
       }
       final envelope = decoded.cast<String, Object?>();
+      const expectedKeys = {
+        'formatVersion',
+        'keyDerivation',
+        'cipher',
+        'salt',
+        'nonce',
+        'ciphertext',
+        'authenticationTag',
+      };
+      if (envelope.length != expectedKeys.length ||
+          !envelope.keys.every(expectedKeys.contains)) {
+        throw const FormatException();
+      }
       if (envelope['formatVersion'] != _formatVersion ||
           envelope['keyDerivation'] != _keyDerivation ||
           envelope['cipher'] != _cipherName) {
