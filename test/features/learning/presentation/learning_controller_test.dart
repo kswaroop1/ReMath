@@ -35,6 +35,32 @@ void main() {
     );
   });
 
+  test('refreshing unchanged recovery state preserves answer timing', () async {
+    final repository = InMemoryProgressRepository();
+    var now = DateTime.utc(2026, 8, 27, 8);
+    var nextId = 0;
+    final controller = LearningController(
+      contentPack: foundationPackForTest(),
+      repository: repository,
+      clock: () => now,
+      idFactory: () => 'id-${nextId++}',
+    );
+    await controller.initialise();
+    await controller.startChunk();
+    final question = controller.currentQuestion!;
+    now = now.add(const Duration(seconds: 3));
+
+    await controller.refreshPersistedState();
+    controller.updateDraft(question.answer.toString());
+    now = now.add(const Duration(seconds: 2));
+    await controller.submitAnswer();
+
+    expect(
+      (await repository.loadAttempts()).single.responseTime,
+      const Duration(seconds: 5),
+    );
+  });
+
   test('restores question and draft after controller recreation', () async {
     final repository = InMemoryProgressRepository();
     final now = DateTime.utc(2026, 8, 27, 8);
