@@ -69,7 +69,7 @@ final class InMemoryProgressRepository implements ProgressRepository {
     }
     final importStudyState =
         studyState != null &&
-        _hasActiveStudyState(studyState) &&
+        _canImportStudyState(studyState, _attempts.containsKey) &&
         !_hasActiveStudyState(_studyState);
     if (importStudyState) _studyState = studyState;
     final importSession = session != null && _session == null;
@@ -104,5 +104,18 @@ bool _hasActiveStudyState(String? source) {
     return StudyState.decode(source).plan != null;
   } on Object {
     return true;
+  }
+}
+
+bool _canImportStudyState(
+  String source,
+  bool Function(String eventId) containsEvent,
+) {
+  try {
+    final state = StudyState.decode(source);
+    return state.plan != null &&
+        !containsEvent('${state.sessionId}.${state.serial}');
+  } on Object {
+    return false;
   }
 }

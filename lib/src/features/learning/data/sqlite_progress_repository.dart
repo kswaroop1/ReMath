@@ -354,7 +354,15 @@ final class SqliteProgressRepository implements ProgressRepository {
       final localStudyState = await loadStudyState();
       final importStudyState =
           studyState != null &&
-          _hasActiveStudyState(studyState) &&
+          _canImportStudyState(
+            studyState,
+            (eventId) => _database
+                .select(
+                  'SELECT 1 FROM attempt_events WHERE event_id = ? LIMIT 1',
+                  [eventId],
+                )
+                .isNotEmpty,
+          ) &&
           !_hasActiveStudyState(localStudyState);
       if (importStudyState) _writeStudyState(studyState);
       final importSession = session != null && await loadSession() == null;
@@ -512,5 +520,18 @@ bool _hasActiveStudyState(String? source) {
     return StudyState.decode(source).plan != null;
   } on Object {
     return true;
+  }
+}
+
+bool _canImportStudyState(
+  String source,
+  bool Function(String eventId) containsEvent,
+) {
+  try {
+    final state = StudyState.decode(source);
+    return state.plan != null &&
+        !containsEvent('${state.sessionId}.${state.serial}');
+  } on Object {
+    return false;
   }
 }
