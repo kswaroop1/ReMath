@@ -38,14 +38,8 @@ final class InMemoryProgressRepository implements ProgressRepository {
   }
 
   @override
-  Future<List<AttemptEvent>> loadAttempts() async {
-    final attempts = _attempts.values.toList()
-      ..sort((left, right) {
-        final byTime = left.occurredAt.compareTo(right.occurredAt);
-        return byTime != 0 ? byTime : left.eventId.compareTo(right.eventId);
-      });
-    return List.unmodifiable(attempts);
-  }
+  Future<List<AttemptEvent>> loadAttempts() async =>
+      List.unmodifiable(_attempts.values);
 
   @override
   Future<LearningSession?> loadSession() async => _session;
@@ -80,6 +74,16 @@ final class InMemoryProgressRepository implements ProgressRepository {
     for (final attempt in attempts) {
       _attempts.putIfAbsent(attempt.eventId, () => attempt);
     }
+    final orderedAttempts = _attempts.values.toList()
+      ..sort((left, right) {
+        final byTime = left.occurredAt.compareTo(right.occurredAt);
+        return byTime != 0 ? byTime : left.eventId.compareTo(right.eventId);
+      });
+    _attempts
+      ..clear()
+      ..addEntries(
+        orderedAttempts.map((attempt) => MapEntry(attempt.eventId, attempt)),
+      );
     final importStudyState =
         studyState != null &&
         _canImportStudyState(studyState, _attempts.containsKey) &&
