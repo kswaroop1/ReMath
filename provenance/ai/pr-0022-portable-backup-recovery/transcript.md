@@ -495,8 +495,8 @@ this final-head run from provenance: remediation origins must be failed answer
 attempts, study remediation must target an answerable retrieval or practice
 step, diagnostic study snapshots must be unassisted, and `review-` identities
 must remain in review/remediation phases. In accordance with the repository's
-batched-publication rule, commit `157f70e` states all four contracts together
-before commit `0054a28` implements the guards; both local commits are published
+batched-publication rule, commit `aa1ea93` states all four contracts together
+before commit `f228f53` implements the guards; both local commits are published
 as one stack for authoritative CI. Exact review text is linked as [verified-head
 provenance][r63], [failed remediation origin][r64], [answerable study
 remediation][r65], [unassisted diagnostic][r66], and [review identity
@@ -507,13 +507,13 @@ behavioral examples passed, then the run exposed three mechanical integration
 issues: two older valid-remediation fixtures still used successful origins, the
 new review-identity test attempted to change immutable session identity through
 `copyWith`, and one test declaration differed from canonical Dart 3.13
-formatting. Commit `866a812` corrects all three together without changing the
+formatting. Commit `b63e418` corrects all three together without changing the
 production guards.
 
 CI run 36341824171 passed 370 tests and every new behavior contract, then
 identified one remaining valid-remediation fixture that still created a
 successful origin plus the formatter's compact layout for the two corrected
-fixture calls. Commit `41173b1` corrects that final test-only integration issue;
+fixture calls. Commit `c20cb35` corrects that final test-only integration issue;
 production behavior is unchanged.
 
 CI runs 36345313245 and 36348677592 confirmed all 371 native tests passed
@@ -523,6 +523,17 @@ Final implementation-head CI run 36349567209 is fully green: formatting,
 static analysis, content validation, dependency-lock verification, eight Chrome
 contracts, 371 native tests, 98.52 percent line coverage and secret scanning all
 pass.
+
+Independent re-review of verified head `9cb22e0` identified five final recovery
+boundaries: failed correction and retest events are valid remediation origins;
+question-phase study snapshots must not retain a remediation relationship;
+payload coherence must be validated against the incoming event even when a
+local event with the same ID conflicts; and the restored-stack commit IDs above
+needed reconciliation. Commit \`4164c2f\` states the four behavior contracts
+before commit \`f303cae\` implements them. Exact review text is linked as [Home
+remediation origins][r68], [study remediation origins][r69], [question-phase
+relationships][r70], [restored commit identities][r71], and [conflict
+preview][r72].
 
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
@@ -591,3 +602,8 @@ pass.
 [r65]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4116107223
 [r66]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4116107228
 [r67]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4116107231
+[r68]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4117429406
+[r69]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4117429408
+[r70]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4117429415
+[r71]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4117429417
+[r72]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4117429420
