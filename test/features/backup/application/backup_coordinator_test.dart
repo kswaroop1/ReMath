@@ -148,6 +148,7 @@ void main() {
 
     test('portable backup never replaces a local active session', () async {
       final source = InMemoryProgressRepository();
+      await source.recordAttempt(_attempt('event-1'));
       await source.saveSession(_session('imported-session'));
       final exporter = BackupCoordinator(
         cipher: cipher,
