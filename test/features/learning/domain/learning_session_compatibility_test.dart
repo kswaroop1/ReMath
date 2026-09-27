@@ -245,4 +245,27 @@ void main() {
       isFalse,
     );
   });
+
+  test('rejects remediation phases in a diagnostic session', () {
+    for (final phase in [
+      LearningSessionPhase.correction,
+      LearningSessionPhase.retest,
+    ]) {
+      expect(
+        isLearningSessionCompatible(
+          LearningSession(
+            correctionOfEventId: 'attempt',
+            currentQuestionIndex: 3,
+            focusSkillId: 'arithmetic.subtraction',
+            id: 'diagnostic-remediation',
+            phase: phase,
+            seed: 42,
+            startedAt: DateTime.utc(2026, 9, 26),
+          ),
+          contentPack: pack,
+        ),
+        isFalse,
+      );
+    }
+  });
 }
