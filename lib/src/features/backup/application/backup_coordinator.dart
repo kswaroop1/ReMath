@@ -54,7 +54,10 @@ final class BackupCoordinator {
     final studyState = payload.studyState;
     if (studyState != null) {
       try {
-        StudyState.decode(studyState);
+        final decoded = StudyState.decode(studyState);
+        if (decoded.plan != null && decoded.sessionId.isEmpty) {
+          throw const FormatException('Active study requires a session ID');
+        }
       } catch (_) {
         throw const FormatException('Invalid active study snapshot');
       }
