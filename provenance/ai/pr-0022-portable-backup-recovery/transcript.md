@@ -502,6 +502,14 @@ provenance][r63], [failed remediation origin][r64], [answerable study
 remediation][r65], [unassisted diagnostic][r66], and [review identity
 inverse][r67].
 
+CI run 36335344015 exercised the complete batched implementation. All new
+behavioral examples passed, then the run exposed three mechanical integration
+issues: two older valid-remediation fixtures still used successful origins, the
+new review-identity test attempted to change immutable session identity through
+`copyWith`, and one test declaration differed from canonical Dart 3.13
+formatting. Commit `866a812` corrects all three together without changing the
+production guards.
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
