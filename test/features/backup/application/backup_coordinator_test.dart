@@ -268,6 +268,60 @@ void main() {
         );
       }
     });
+
+    test('preview rejects remediation linked to an unrelated attempt', () async {
+      final payload = BackupPayload(
+        attempts: [
+          _attempt(
+            'event-1',
+            sessionId: 'different-session',
+            skillId: 'arithmetic.multiplication',
+          ),
+        ],
+        createdAt: DateTime.utc(2026, 9, 20, 12),
+        session: _session('portable-session'),
+        studyState: null,
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: payload.encode(),
+        password: password,
+      );
+
+      await expectLater(
+        BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+        ).preview(encrypted, password: password),
+        throwsFormatException,
+      );
+    });
+
+    test('preview rejects remediation in a diagnostic study', () async {
+      final payload = BackupPayload(
+        attempts: [_attempt('event-1', sessionId: 'diagnostic-study')],
+        createdAt: DateTime.utc(2026, 9, 20, 12),
+        studyState: StudyState(
+          phase: StudyPhase.correction,
+          plan: StudyPlanner().diagnostic('number-fluency'),
+          relatedEventId: 'event-1',
+          sessionId: 'diagnostic-study',
+        ).encode(),
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: payload.encode(),
+        password: password,
+      );
+
+      await expectLater(
+        BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+        ).preview(encrypted, password: password),
+        throwsFormatException,
+      );
+    });
   });
 }
 
@@ -285,7 +339,12 @@ LearningSession _session(String id) {
   );
 }
 
-AttemptEvent _attempt(String id, {String answer = '4'}) {
+AttemptEvent _attempt(
+  String id, {
+  String answer = '4',
+  String sessionId = 'session-1',
+  String skillId = 'arithmetic.addition',
+}) {
   return AttemptEvent(
     answer: answer,
     eventId: id,
@@ -293,7 +352,7 @@ AttemptEvent _attempt(String id, {String answer = '4'}) {
     occurredAt: DateTime.utc(2026, 9, 20, 10),
     questionId: 'question-$id',
     responseTime: const Duration(milliseconds: 500),
-    sessionId: 'session-1',
-    skillId: 'arithmetic.addition',
+    sessionId: sessionId,
+    skillId: skillId,
   );
 }
