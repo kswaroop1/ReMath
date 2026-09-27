@@ -332,6 +332,13 @@ final class SqliteProgressRepository implements ProgressRepository {
     }
     _database.execute('BEGIN IMMEDIATE');
     try {
+      final sessionStreamAdvanced =
+          session != null &&
+          (await loadAttempts()).any(
+            (attempt) =>
+                attempt.sessionId == session.id &&
+                !incomingIds.contains(attempt.eventId),
+          );
       var duplicateAttemptCount = 0;
       final newAttempts = <AttemptEvent>[];
       for (final attempt in attempts) {
@@ -357,7 +364,10 @@ final class SqliteProgressRepository implements ProgressRepository {
           _canImportStudyState(studyState, _containsAttemptEvent) &&
           !_hasActiveStudyState(localStudyState);
       if (importStudyState) _writeStudyState(studyState);
-      final importSession = session != null && await loadSession() == null;
+      final importSession =
+          session != null &&
+          await loadSession() == null &&
+          !sessionStreamAdvanced;
       if (importSession) _writeSession(session);
       _database.execute('COMMIT');
       return ProgressMergeResult(

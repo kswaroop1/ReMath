@@ -64,6 +64,13 @@ final class InMemoryProgressRepository implements ProgressRepository {
       }
       duplicateAttemptCount++;
     }
+    final sessionStreamAdvanced =
+        session != null &&
+        _attempts.values.any(
+          (attempt) =>
+              attempt.sessionId == session.id &&
+              !incomingIds.contains(attempt.eventId),
+        );
     for (final attempt in attempts) {
       _attempts.putIfAbsent(attempt.eventId, () => attempt);
     }
@@ -72,7 +79,8 @@ final class InMemoryProgressRepository implements ProgressRepository {
         _canImportStudyState(studyState, _attempts.containsKey) &&
         !_hasActiveStudyState(_studyState);
     if (importStudyState) _studyState = studyState;
-    final importSession = session != null && _session == null;
+    final importSession =
+        session != null && _session == null && !sessionStreamAdvanced;
     if (importSession) _session = session;
     return ProgressMergeResult(
       duplicateAttemptCount: duplicateAttemptCount,
