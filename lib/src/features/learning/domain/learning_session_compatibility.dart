@@ -33,6 +33,10 @@ bool isLearningSessionCompatible(
   if (requiresFocus && focusSkillId == null) {
     return false;
   }
+  if (session.phase == LearningSessionPhase.review &&
+      !session.id.startsWith('review-')) {
+    return false;
+  }
   if (focusSkillId != null) {
     final focusOperation = ArithmeticOperationDefinition.fromSkillId(
       focusSkillId,
