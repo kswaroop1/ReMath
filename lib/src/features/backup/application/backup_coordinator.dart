@@ -47,9 +47,25 @@ final class BackupCoordinator {
   }) async {
     final plaintext = await _cipher.decrypt(encrypted, password: password);
     final payload = BackupPayload.decode(plaintext);
+    final localAttempts = await _repository.loadAttempts();
     final session = payload.session;
     if (session != null && !(_sessionValidator?.call(session) ?? true)) {
       throw const FormatException('Incompatible active learning session');
+    }
+    if (session != null &&
+        (session.phase == LearningSessionPhase.correction ||
+            session.phase == LearningSessionPhase.retest)) {
+      final relatedEventId = session.correctionOfEventId;
+      final availableAttemptIds = {
+        for (final attempt in payload.attempts) attempt.eventId,
+        for (final attempt in localAttempts) attempt.eventId,
+      };
+      if (relatedEventId == null ||
+          !availableAttemptIds.contains(relatedEventId)) {
+        throw const FormatException(
+          'Remediation session requires an originating attempt',
+        );
+      }
     }
     final studyState = payload.studyState;
     if (studyState != null) {
@@ -64,7 +80,7 @@ final class BackupCoordinator {
     }
     final preview = BackupPreview.create(
       payload: payload,
-      localAttempts: await _repository.loadAttempts(),
+      localAttempts: localAttempts,
     );
     return PendingBackupImport._(payload, preview: preview);
   }

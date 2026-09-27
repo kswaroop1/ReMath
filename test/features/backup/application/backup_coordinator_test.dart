@@ -115,6 +115,7 @@ void main() {
 
     test('portable backup restores an active learning session', () async {
       final source = InMemoryProgressRepository();
+      await source.recordAttempt(_attempt('event-1'));
       await source.saveSession(_session('portable-session'));
       final exporter = BackupCoordinator(
         cipher: cipher,
