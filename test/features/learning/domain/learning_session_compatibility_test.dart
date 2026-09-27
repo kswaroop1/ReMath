@@ -117,6 +117,26 @@ void main() {
     }
   });
 
+  test('requires focus for remediation and review sessions', () {
+    for (final phase in [
+      LearningSessionPhase.correction,
+      LearningSessionPhase.retest,
+      LearningSessionPhase.review,
+    ]) {
+      expect(
+        isLearningSessionCompatible(
+          base.copyWith(
+            phase: phase,
+            questionId: question.id,
+            questionSkillId: question.skillId,
+          ),
+          contentPack: pack,
+        ),
+        isFalse,
+      );
+    }
+  });
+
   test('rejects an identity-less diagnostic beyond its fixed question set', () {
     expect(
       isLearningSessionCompatible(
