@@ -131,4 +131,27 @@ void main() {
       isFalse,
     );
   });
+
+  test('rejects a pinned diagnostic beyond its fixed question set', () {
+    final outOfRangeQuestion = const ArithmeticGenerator().generate(
+      seed: 42,
+      index: 9,
+      packId: pack.id,
+      template: pack.templates.first,
+    );
+    expect(
+      isLearningSessionCompatible(
+        LearningSession(
+          currentQuestionIndex: 9,
+          id: 'diagnostic-pinned',
+          questionId: outOfRangeQuestion.id,
+          questionSkillId: outOfRangeQuestion.skillId,
+          seed: 42,
+          startedAt: DateTime.utc(2026, 9, 26),
+        ),
+        contentPack: pack,
+      ),
+      isFalse,
+    );
+  });
 }
