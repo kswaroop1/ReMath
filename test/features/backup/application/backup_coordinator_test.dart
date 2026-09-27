@@ -16,7 +16,9 @@ void main() {
 
     test('exports, previews without writes, then applies explicitly', () async {
       final source = InMemoryProgressRepository();
-      await source.recordAttempt(_attempt('event-1'));
+      await source.recordAttempt(
+        _attempt('event-1', sessionId: 'portable-session'),
+      );
       final exporter = BackupCoordinator(
         cipher: cipher,
         clock: () => DateTime.utc(2026, 9, 20, 12),
@@ -115,7 +117,9 @@ void main() {
 
     test('portable backup restores an active learning session', () async {
       final source = InMemoryProgressRepository();
-      await source.recordAttempt(_attempt('event-1'));
+      await source.recordAttempt(
+        _attempt('event-1', sessionId: 'imported-session'),
+      );
       await source.saveSession(_session('portable-session'));
       final exporter = BackupCoordinator(
         cipher: cipher,

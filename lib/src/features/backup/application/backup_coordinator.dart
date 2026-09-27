@@ -48,9 +48,9 @@ final class BackupCoordinator {
     final plaintext = await _cipher.decrypt(encrypted, password: password);
     final payload = BackupPayload.decode(plaintext);
     final localAttempts = await _repository.loadAttempts();
-    final availableAttemptIds = {
-      for (final attempt in payload.attempts) attempt.eventId,
-      for (final attempt in localAttempts) attempt.eventId,
+    final availableAttempts = {
+      for (final attempt in payload.attempts) attempt.eventId: attempt,
+      for (final attempt in localAttempts) attempt.eventId: attempt,
     };
     final session = payload.session;
     if (session != null && !(_sessionValidator?.call(session) ?? true)) {
@@ -60,8 +60,10 @@ final class BackupCoordinator {
         (session.phase == LearningSessionPhase.correction ||
             session.phase == LearningSessionPhase.retest)) {
       final relatedEventId = session.correctionOfEventId;
-      if (relatedEventId == null ||
-          !availableAttemptIds.contains(relatedEventId)) {
+      final related = availableAttempts[relatedEventId];
+      if (related == null ||
+          related.sessionId != session.id ||
+          related.skillId != session.focusSkillId) {
         throw const FormatException(
           'Remediation session requires an originating attempt',
         );
@@ -74,9 +76,24 @@ final class BackupCoordinator {
         if (decoded.plan != null && decoded.sessionId.isEmpty) {
           throw const FormatException('Active study requires a session ID');
         }
+        if (decoded.plan?.isDiagnostic ?? false) {
+          if (decoded.phase != StudyPhase.question) {
+            throw const FormatException(
+              'Diagnostic study must remain in question phase',
+            );
+          }
+        }
         if (decoded.phase != StudyPhase.question &&
-            (decoded.relatedEventId == null ||
-                !availableAttemptIds.contains(decoded.relatedEventId))) {
+            decoded.relatedEventId != null) {
+          final related = availableAttempts[decoded.relatedEventId];
+          if (related == null ||
+              related.sessionId != decoded.sessionId ||
+              related.skillId != decoded.step?.skillId) {
+            throw const FormatException(
+              'Study remediation requires an originating attempt',
+            );
+          }
+        } else if (decoded.phase != StudyPhase.question) {
           throw const FormatException(
             'Study remediation requires an originating attempt',
           );
