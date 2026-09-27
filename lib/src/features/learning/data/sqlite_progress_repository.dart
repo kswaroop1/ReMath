@@ -353,7 +353,9 @@ final class SqliteProgressRepository implements ProgressRepository {
       }
       final localStudyState = await loadStudyState();
       final importStudyState =
-          studyState != null && !_hasActiveStudyState(localStudyState);
+          studyState != null &&
+          _hasActiveStudyState(studyState) &&
+          !_hasActiveStudyState(localStudyState);
       if (importStudyState) _writeStudyState(studyState);
       final importSession = session != null && await loadSession() == null;
       if (importSession) _writeSession(session);

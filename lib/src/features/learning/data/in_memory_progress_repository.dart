@@ -68,7 +68,9 @@ final class InMemoryProgressRepository implements ProgressRepository {
       _attempts.putIfAbsent(attempt.eventId, () => attempt);
     }
     final importStudyState =
-        studyState != null && !_hasActiveStudyState(_studyState);
+        studyState != null &&
+        _hasActiveStudyState(studyState) &&
+        !_hasActiveStudyState(_studyState);
     if (importStudyState) _studyState = studyState;
     final importSession = session != null && _session == null;
     if (importSession) _session = session;
