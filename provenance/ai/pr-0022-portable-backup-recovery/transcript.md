@@ -471,6 +471,23 @@ Exact review text is linked as [records-head provenance][r58], [remediation
 identity][r59], [study diagnostic phase][r60], [review identity][r61], and
 [envelope keys][r62].
 
+CI run 36327717785 exposed only mechanical fixture and formatting integration
+issues in the completed correction stack. Commit `e199971` corrected those
+together; CI run 36327925937 was fully green with 366 native tests, eight Chrome
+contracts and 98.46 percent line coverage. Focused characterization tests then
+covered the independent remediation session/skill mismatch branches and the
+valid linked-study path without changing production behaviour. Run 36328201531
+found that one new assertion used the internal name `hasActiveStudy` instead of
+the published preview contract `hasStudyState`; all other tests passed. Commit
+`01be958` corrects that test-only compile error. Commit `8af8d77` also makes the
+agreed efficient publication workflow durable in `AGENTS.md`: preserve local
+red/green commits, batch known review corrections, publish the completed stack
+once, and reserve CI for unavailable local capabilities and final verification.
+Final CI run 36331689402 is fully green with 367 native tests, eight Chrome
+contracts and 98.51 percent line coverage. Formatting, static analysis, content
+validation, dependency-lock verification, coverage enforcement and secret
+scanning all pass.
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
