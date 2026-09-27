@@ -5,6 +5,7 @@ import 'package:remath/src/features/backup/domain/backup_payload.dart';
 import 'package:remath/src/features/learning/data/in_memory_progress_repository.dart';
 import 'package:remath/src/features/learning/domain/attempt_event.dart';
 import 'package:remath/src/features/learning/domain/learning_session.dart';
+import 'package:remath/src/features/numbers/domain/study_plan.dart';
 
 void main() {
   group('backup coordinator', () {
@@ -46,6 +47,34 @@ void main() {
         attempts: const [],
         createdAt: DateTime.utc(2026, 9, 20, 12),
         studyState: '{"formatVersion":999}',
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: payload.encode(),
+        password: password,
+      );
+      final coordinator = BackupCoordinator(
+        cipher: cipher,
+        clock: DateTime.now,
+        repository: InMemoryProgressRepository(),
+      );
+
+      await expectLater(
+        coordinator.preview(encrypted, password: password),
+        throwsFormatException,
+      );
+    });
+
+    test('preview rejects active study without a session identity', () async {
+      final payload = BackupPayload(
+        attempts: const [],
+        createdAt: DateTime.utc(2026, 9, 20, 12),
+        studyState: StudyState(
+          plan: StudyPlanner().plan(
+            'number-fluency',
+            const [],
+            DateTime.utc(2026, 9, 20),
+          ),
+        ).encode(),
       );
       final encrypted = await cipher.encrypt(
         plaintext: payload.encode(),
