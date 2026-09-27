@@ -17,7 +17,11 @@ void main() {
     test('exports, previews without writes, then applies explicitly', () async {
       final source = InMemoryProgressRepository();
       await source.recordAttempt(
-        _attempt('event-1', isCorrect: false, sessionId: 'portable-session'),
+        _attempt(
+          'event-1',
+          isCorrect: false,
+          sessionId: 'portable-session',
+        ),
       );
       final exporter = BackupCoordinator(
         cipher: cipher,
@@ -157,7 +161,11 @@ void main() {
     test('portable backup never replaces a local active session', () async {
       final source = InMemoryProgressRepository();
       await source.recordAttempt(
-        _attempt('event-1', isCorrect: false, sessionId: 'imported-session'),
+        _attempt(
+          'event-1',
+          isCorrect: false,
+          sessionId: 'imported-session',
+        ),
       );
       await source.saveSession(_session('imported-session'));
       final exporter = BackupCoordinator(
