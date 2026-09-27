@@ -447,6 +447,18 @@ unavailable, so combined CI is the execution evidence. Exact review text is
 linked as [coverage investigation][r53], [diagnostic phase][r54], [study
 remediation link][r55], [semantic duplicates][r56], and [attempt ordering][r57].
 
+CI run 36315377511 passed formatting, analysis, content validation, eight Chrome
+contracts and all new focused tests, then exposed one existing algebra journey
+whose equal-time insertion order changed because the initial ordering fix sorted
+every in-memory read. Commit `265a0aa` narrows sorting to recovery merges, so
+ordinary recording retains insertion order while imported older attempts are
+placed chronologically. Final CI run 36315594634 is fully green with 362 native
+tests, eight Chrome contracts and 98.51 percent line coverage. The focused tests
+recover part of the investigated 0.04-point decrease; the remaining 0.03 points
+are the explicit fail-closed branches added by the earlier compatibility and
+retirement guards, while all reachable business outcomes and invalid-input
+contracts are exercised. No assertion or coverage threshold was weakened.
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
