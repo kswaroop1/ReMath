@@ -459,6 +459,18 @@ are the explicit fail-closed branches added by the earlier compatibility and
 retirement guards, while all reachable business outcomes and invalid-input
 contracts are exercised. No assertion or coverage threshold was weakened.
 
+Records-head CI run 36317958110 verifies submitted head `31015fe` with all gates
+green. Independent review of that head found four additional fail-closed
+boundaries: Home remediation links must match session and skill, diagnostic
+study snapshots must remain in question phase, review-phase Home sessions must
+use the `review-` identity contract, and encrypted envelopes must reject every
+field outside the exact authenticated schema. The fifth finding was the missing
+records-head run above. Focused tests precede the corresponding implementations;
+the two coordinator rules share one closely related test/implementation cycle.
+Exact review text is linked as [records-head provenance][r58], [remediation
+identity][r59], [study diagnostic phase][r60], [review identity][r61], and
+[envelope keys][r62].
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
@@ -516,3 +528,8 @@ contracts are exercised. No assertion or coverage threshold was weakened.
 [r55]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4115051710
 [r56]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4115051715
 [r57]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4115051718
+[r58]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4115315025
+[r59]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4115315029
+[r60]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4115315033
+[r61]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4115315039
+[r62]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4115315042
