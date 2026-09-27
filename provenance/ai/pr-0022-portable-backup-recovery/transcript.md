@@ -344,6 +344,18 @@ CI run 36285767915 verifies the combined correction: 347 native tests, eight
 Chrome contracts and restored 98.53 percent line coverage, with formatting,
 analysis, content, dependency-lock and secret-scanning gates all green.
 
+Independent review of verified head `920db47` found four remaining restoration
+invariants: remediation/review phases require a focus even when identity is
+pinned; diagnostics require the operation assigned to their three-question
+index block; active study requires a non-empty session ID; and an already
+advanced local event stream must suppress an older active-study snapshot.
+Each behavior has a separate ordered local test and implementation commit, but
+the local environment still cannot execute Flutter. As disclosed above, the
+stack is published together for CI and commit order is not claimed as red/green
+execution evidence. The exact findings are [required focused-session focus][r37],
+[diagnostic operation][r38], [active-study identity][r39], and [stale study
+snapshot][r40].
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
@@ -380,3 +392,7 @@ analysis, content, dependency-lock and secret-scanning gates all green.
 [r34]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113615464
 [r35]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113615473
 [r36]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113615476
+[r37]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113711096
+[r38]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113711101
+[r39]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113711102
+[r40]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113711103
