@@ -510,6 +510,12 @@ new review-identity test attempted to change immutable session identity through
 formatting. Commit `866a812` corrects all three together without changing the
 production guards.
 
+CI run 36341824171 passed 370 tests and every new behavior contract, then
+identified one remaining valid-remediation fixture that still created a
+successful origin plus the formatter's compact layout for the two corrected
+fixture calls. Commit `41173b1` corrects that final test-only integration issue;
+production behavior is unchanged.
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
