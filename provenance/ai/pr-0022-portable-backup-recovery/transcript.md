@@ -397,6 +397,29 @@ fourth finding was the now-recorded final-head run. Exact review text is linked
 as [final-head provenance][r44], [legacy diagnostic focus][r45], [stale Home
 session][r46], and [active timing][r47].
 
+The next correction stack added separate ordered tests and implementations for
+legacy diagnostic focus consistency, stale Home-session suppression and timing
+preservation across an unchanged recovery refresh. CI run 36304028431 passed all
+356 native tests but found one Dart-formatting difference; formatter-only commit
+`e7cc11c` corrected it. Final-head CI run 36304198865 then passed 356 native
+tests, eight Chrome contracts and 98.54 percent line coverage, together with
+formatting, static analysis, content validation, dependency-lock verification
+and secret scanning.
+
+Independent review of `e7cc11c` found five further gaps. Every supplied legacy
+focus must resolve through the installed question contract; imported correction
+and retest sessions must link to an originating attempt available locally or in
+the payload; incompatible locally persisted pinned sessions must be retired
+before Home renders; the durable-format documentation must state that creation
+time and counts remain encrypted; and the correction/CI evidence above had not
+yet been appended. The three behavioral changes have separate ordered local
+test and implementation commits, while the envelope and provenance changes are
+documentation-only. Flutter remains unavailable locally, so these commits are
+published together for permitted CI and their ordering is not claimed as
+per-commit execution evidence. Exact review text is linked as [latest provenance
+gap][r48], [unsupported legacy focus][r49], [orphaned remediation][r50],
+[envelope contract][r51], and [incompatible local session][r52].
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
@@ -444,3 +467,8 @@ session][r46], and [active timing][r47].
 [r45]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114269620
 [r46]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114269621
 [r47]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114269623
+[r48]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114874236
+[r49]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114874239
+[r50]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114874242
+[r51]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114874245
+[r52]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4114874247

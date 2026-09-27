@@ -15,9 +15,11 @@ through an idempotent merge.
 - Encrypt before the bytes leave the application boundary. Use a random salt
   and nonce, a password-derived key, and authenticated encryption so an incorrect
   password or any modified metadata/ciphertext fails closed.
-- Include only non-secret preview metadata outside encryption: format/version,
-  creation time, algorithm identifiers, salt, nonce, ciphertext and counts that
-  are authenticated as associated data. Never store the password or derived key.
+- Keep only the envelope format/version, algorithm identifiers, salt, nonce and
+  ciphertext outside encryption; authenticate that envelope metadata as
+  associated data. Creation time, attempt counts and all other preview fields
+  remain inside the encrypted payload and are available only after successful
+  decryption. Never store the password or derived key.
 - Reject unsupported versions, algorithms, malformed encodings, invalid event
   values, duplicate IDs with conflicting content, and unsafe snapshot data.
 
