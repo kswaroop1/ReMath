@@ -395,11 +395,13 @@ final class LearningController extends ChangeNotifier {
           phase: LearningSessionPhase.correction,
         );
       } else {
+        final returningToReview = session.id.startsWith(_reviewPrefix);
         _session = session.copyWith(
           answerDraft: '',
-          clearRemediation: true,
+          clearCorrection: returningToReview,
+          clearRemediation: !returningToReview,
           currentQuestionIndex: question.index + 1,
-          phase: session.id.startsWith(_reviewPrefix)
+          phase: returningToReview
               ? LearningSessionPhase.review
               : LearningSessionPhase.question,
         );

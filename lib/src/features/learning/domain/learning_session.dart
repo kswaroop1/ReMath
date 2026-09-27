@@ -38,6 +38,7 @@ final class LearningSession {
     String? questionId,
     String? questionSkillId,
     int? revealedHintCount,
+    bool clearCorrection = false,
     bool clearRemediation = false,
   }) {
     final questionChanged =
@@ -45,7 +46,7 @@ final class LearningSession {
         currentQuestionIndex != this.currentQuestionIndex;
     return LearningSession(
       answerDraft: answerDraft ?? this.answerDraft,
-      correctionOfEventId: clearRemediation
+      correctionOfEventId: clearCorrection || clearRemediation
           ? null
           : correctionOfEventId ?? this.correctionOfEventId,
       currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
