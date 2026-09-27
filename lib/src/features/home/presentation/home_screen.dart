@@ -99,7 +99,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               );
-              if (mounted && applied) await _controller.initialise();
+              if (mounted && applied) {
+                await _controller.refreshPersistedState();
+              }
             },
             child: const Text('Backup and recovery'),
           ),

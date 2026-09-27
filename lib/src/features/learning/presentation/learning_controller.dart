@@ -206,6 +206,17 @@ final class LearningController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> refreshPersistedState() async {
+    final previousSessionId = _session?.id;
+    final previousQuestionId = currentQuestion?.id;
+    final previousQuestionBeganAt = _questionBeganAt;
+    await initialise();
+    if (_session?.id == previousSessionId &&
+        currentQuestion?.id == previousQuestionId) {
+      _questionBeganAt = previousQuestionBeganAt;
+    }
+  }
+
   Future<void> startChunk() async {
     await _startChunk();
   }
