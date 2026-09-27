@@ -488,6 +488,20 @@ contracts and 98.51 percent line coverage. Formatting, static analysis, content
 validation, dependency-lock verification, coverage enforcement and secret
 scanning all pass.
 
+Verified-head CI run 36333470103 is fully green with the same 367 native tests,
+eight Chrome contracts and 98.51 percent line coverage. Independent review of
+that head identified four related restored-state invariants plus the omission of
+this final-head run from provenance: remediation origins must be failed answer
+attempts, study remediation must target an answerable retrieval or practice
+step, diagnostic study snapshots must be unassisted, and `review-` identities
+must remain in review/remediation phases. In accordance with the repository's
+batched-publication rule, commit `157f70e` states all four contracts together
+before commit `0054a28` implements the guards; both local commits are published
+as one stack for authoritative CI. Exact review text is linked as [verified-head
+provenance][r63], [failed remediation origin][r64], [answerable study
+remediation][r65], [unassisted diagnostic][r66], and [review identity
+inverse][r67].
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
@@ -550,3 +564,8 @@ scanning all pass.
 [r60]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4115315033
 [r61]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4115315039
 [r62]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4115315042
+[r63]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4116107216
+[r64]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4116107219
+[r65]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4116107223
+[r66]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4116107228
+[r67]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4116107231
