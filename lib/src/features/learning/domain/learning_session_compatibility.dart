@@ -37,6 +37,12 @@ bool isLearningSessionCompatible(
       !session.id.startsWith('review-')) {
     return false;
   }
+  if (session.id.startsWith('review-') &&
+      session.phase != LearningSessionPhase.review &&
+      session.phase != LearningSessionPhase.correction &&
+      session.phase != LearningSessionPhase.retest) {
+    return false;
+  }
   if (focusSkillId != null) {
     final focusOperation = ArithmeticOperationDefinition.fromSkillId(
       focusSkillId,

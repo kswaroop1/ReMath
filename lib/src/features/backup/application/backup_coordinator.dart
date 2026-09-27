@@ -1,3 +1,4 @@
+import '../../learning/domain/attempt_event.dart';
 import '../../learning/domain/learning_session.dart';
 import '../../learning/domain/progress_repository.dart';
 import '../../numbers/domain/study_plan.dart';
@@ -62,6 +63,8 @@ final class BackupCoordinator {
       final relatedEventId = session.correctionOfEventId;
       final related = availableAttempts[relatedEventId];
       if (related == null ||
+          related.isCorrect ||
+          related.kind != AttemptKind.answer ||
           related.sessionId != session.id ||
           related.skillId != session.focusSkillId) {
         throw const FormatException(
@@ -77,18 +80,24 @@ final class BackupCoordinator {
           throw const FormatException('Active study requires a session ID');
         }
         if (decoded.plan?.isDiagnostic ?? false) {
-          if (decoded.phase != StudyPhase.question) {
+          if (decoded.phase != StudyPhase.question || decoded.hintCount != 0) {
             throw const FormatException(
-              'Diagnostic study must remain in question phase',
+              'Diagnostic study must remain unassisted in question phase',
             );
           }
         }
         if (decoded.phase != StudyPhase.question &&
             decoded.relatedEventId != null) {
           final related = availableAttempts[decoded.relatedEventId];
+          final step = decoded.step;
           if (related == null ||
+              related.isCorrect ||
+              related.kind != AttemptKind.answer ||
+              step == null ||
+              (step.kind != StudyStepKind.retrieval &&
+                  step.kind != StudyStepKind.practice) ||
               related.sessionId != decoded.sessionId ||
-              related.skillId != decoded.step?.skillId) {
+              related.skillId != step.skillId) {
             throw const FormatException(
               'Study remediation requires an originating attempt',
             );
