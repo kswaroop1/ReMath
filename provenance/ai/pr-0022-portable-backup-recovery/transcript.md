@@ -299,6 +299,17 @@ The final precision review is linked in full: [diagnostic bound][r22],
 The last evidence review is linked in full: [batched TDD deviation][r25],
 [schema-nine rollback][r26], [hint bound][r27], and [schema-nine architecture][r28].
 
+CI run 36276949704 verified the evidence-only head `dafde6f` with every gate
+green. Independent review of that head then identified three further behavioral
+boundaries and the missing final run in metadata. The corrections retain a
+separate local red/green commit pair for each behavior before publishing the
+complete stack: remediation sessions must keep their focus skill consistent
+with their pinned question identity; merely visiting backup/recovery must not
+reset the active Home question timer; and inactive imported study rows must not
+replace the user's local inactive goal choice. The exact review findings are
+preserved as [final CI record][r29], [remediation focus][r30], [Home elapsed
+time][r31], and [inactive imported study][r32].
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
@@ -327,3 +338,7 @@ The last evidence review is linked in full: [batched TDD deviation][r25],
 [r26]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4112815877
 [r27]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4112815879
 [r28]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4112815883
+[r29]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113202319
+[r30]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113202324
+[r31]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113202326
+[r32]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4113202333
