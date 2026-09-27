@@ -356,6 +356,17 @@ execution evidence. The exact findings are [required focused-session focus][r37]
 [diagnostic operation][r38], [active-study identity][r39], and [stale study
 snapshot][r40].
 
+CI run 36293085891 recorded the combined stack's first integration result:
+the four focused invariants passed, but the suite exposed one legacy repository
+fixture that supplied malformed placeholder study state, while Dart 3.13 also
+reformatted three touched files. Commit `35f55ce` replaces that placeholder
+with a real active `StudyState` and applies the corresponding formatting; its
+run 36293321888 passed all 351 native tests but retained one callback-layout
+formatting difference. Commits `b8d0741` and `7a8f585` replace the unstable
+inline expression with a named event lookup. CI run 36293636129 is fully green:
+351 native tests, eight Chrome contracts, 98.54 percent line coverage, and all
+formatting, analysis, content, dependency-lock and secret-scanning gates pass.
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
