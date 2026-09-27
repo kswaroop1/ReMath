@@ -217,22 +217,25 @@ void main() {
       },
     );
 
-    test('an advanced event stream blocks stale Home-session recovery', () async {
-      for (final fixture in _fixtures()) {
-        final repository = fixture.repository;
-        addTearDown(fixture.close);
-        await repository.recordAttempt(_attempt('local-session-progress'));
+    test(
+      'an advanced event stream blocks stale Home-session recovery',
+      () async {
+        for (final fixture in _fixtures()) {
+          final repository = fixture.repository;
+          addTearDown(fixture.close);
+          await repository.recordAttempt(_attempt('local-session-progress'));
 
-        final result = await repository.mergeProgress(
-          attempts: const [],
-          studyState: null,
-          session: _session('session-1'),
-        );
+          final result = await repository.mergeProgress(
+            attempts: const [],
+            studyState: null,
+            session: _session('session-1'),
+          );
 
-        expect(result.importedSession, isFalse);
-        expect(await repository.loadSession(), isNull);
-      }
-    });
+          expect(result.importedSession, isFalse);
+          expect(await repository.loadSession(), isNull);
+        }
+      },
+    );
 
     test(
       'a SQLite write interruption rolls back attempts and study state',
