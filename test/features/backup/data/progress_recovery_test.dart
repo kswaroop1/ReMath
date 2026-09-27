@@ -92,6 +92,28 @@ void main() {
       }
     });
 
+    test('recovery preserves chronological attempt order', () async {
+      for (final fixture in _fixtures()) {
+        final repository = fixture.repository;
+        addTearDown(fixture.close);
+        await repository.recordAttempt(
+          _attempt('newer', occurredAt: DateTime.utc(2026, 9, 20, 11)),
+        );
+
+        await repository.mergeProgress(
+          attempts: [
+            _attempt('older', occurredAt: DateTime.utc(2026, 9, 20, 9)),
+          ],
+          studyState: null,
+        );
+
+        expect(
+          (await repository.loadAttempts()).map((event) => event.eventId),
+          ['older', 'newer'],
+        );
+      }
+    });
+
     test(
       'SQLite recovery preserves microseconds and retries idempotently',
       () async {
@@ -346,13 +368,14 @@ _fixtures() {
 AttemptEvent _attempt(
   String id, {
   String answer = '4',
+  DateTime? occurredAt,
   Duration responseTime = const Duration(milliseconds: 500),
 }) {
   return AttemptEvent(
     answer: answer,
     eventId: id,
     isCorrect: true,
-    occurredAt: DateTime.utc(2026, 9, 20, 10),
+    occurredAt: occurredAt ?? DateTime.utc(2026, 9, 20, 10),
     questionId: 'question-$id',
     responseTime: responseTime,
     sessionId: 'session-1',
