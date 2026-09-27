@@ -19,9 +19,11 @@ bool isLearningSessionCompatible(
       return false;
     }
   }
-  if (session.id.startsWith('diagnostic-') &&
-      session.currentQuestionIndex >= ArithmeticOperation.values.length * 3) {
-    return false;
+  if (session.id.startsWith('diagnostic-')) {
+    if (session.phase != LearningSessionPhase.question ||
+        session.currentQuestionIndex >= ArithmeticOperation.values.length * 3) {
+      return false;
+    }
   }
   final focusSkillId = session.focusSkillId;
   final requiresFocus =
