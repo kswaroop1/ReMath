@@ -354,17 +354,7 @@ final class SqliteProgressRepository implements ProgressRepository {
       final localStudyState = await loadStudyState();
       final importStudyState =
           studyState != null &&
-          _canImportStudyState(
-            studyState,
-            (eventId) {
-              return _database
-                  .select(
-                  'SELECT 1 FROM attempt_events WHERE event_id = ? LIMIT 1',
-                  [eventId],
-                  )
-                  .isNotEmpty;
-            },
-          ) &&
+          _canImportStudyState(studyState, _containsAttemptEvent) &&
           !_hasActiveStudyState(localStudyState);
       if (importStudyState) _writeStudyState(studyState);
       final importSession = session != null && await loadSession() == null;
@@ -380,6 +370,14 @@ final class SqliteProgressRepository implements ProgressRepository {
       _database.execute('ROLLBACK');
       rethrow;
     }
+  }
+
+  bool _containsAttemptEvent(String eventId) {
+    final rows = _database.select(
+      'SELECT 1 FROM attempt_events WHERE event_id = ? LIMIT 1',
+      [eventId],
+    );
+    return rows.isNotEmpty;
   }
 
   @override
