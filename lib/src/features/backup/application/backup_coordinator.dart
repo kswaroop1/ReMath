@@ -48,6 +48,10 @@ final class BackupCoordinator {
     final plaintext = await _cipher.decrypt(encrypted, password: password);
     final payload = BackupPayload.decode(plaintext);
     final localAttempts = await _repository.loadAttempts();
+    final availableAttemptIds = {
+      for (final attempt in payload.attempts) attempt.eventId,
+      for (final attempt in localAttempts) attempt.eventId,
+    };
     final session = payload.session;
     if (session != null && !(_sessionValidator?.call(session) ?? true)) {
       throw const FormatException('Incompatible active learning session');
@@ -56,10 +60,6 @@ final class BackupCoordinator {
         (session.phase == LearningSessionPhase.correction ||
             session.phase == LearningSessionPhase.retest)) {
       final relatedEventId = session.correctionOfEventId;
-      final availableAttemptIds = {
-        for (final attempt in payload.attempts) attempt.eventId,
-        for (final attempt in localAttempts) attempt.eventId,
-      };
       if (relatedEventId == null ||
           !availableAttemptIds.contains(relatedEventId)) {
         throw const FormatException(
@@ -73,6 +73,13 @@ final class BackupCoordinator {
         final decoded = StudyState.decode(studyState);
         if (decoded.plan != null && decoded.sessionId.isEmpty) {
           throw const FormatException('Active study requires a session ID');
+        }
+        if (decoded.phase != StudyPhase.question &&
+            (decoded.relatedEventId == null ||
+                !availableAttemptIds.contains(decoded.relatedEventId))) {
+          throw const FormatException(
+            'Study remediation requires an originating attempt',
+          );
         }
       } catch (_) {
         throw const FormatException('Invalid active study snapshot');
