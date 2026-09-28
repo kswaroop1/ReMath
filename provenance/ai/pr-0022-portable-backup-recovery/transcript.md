@@ -549,7 +549,26 @@ not merely the same session and skill. Commit `780c8bd` states that
 contract before commit `08adcca` enforces it. Exact review text is
 linked as [pinned correction origin][r73].
 
-CI run 36375438515 passed all 376 native behavior tests but exposed only\nthe canonical Dart 3.13 layout for the new pinned-question fixture. Commit\n`d7282be` applies that mechanical formatting. Final implementation-head CI run\n36381715167 is fully green: formatting, static analysis, content validation,\ndependency-lock verification, eight Chrome contracts, 376 native tests, 98.52\npercent line coverage and secret scanning all pass.\n\n[r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
+CI run 36375438515 passed all 376 native behavior tests but exposed only
+the canonical Dart 3.13 layout for the new pinned-question fixture. Commit
+`d7282be` applies that mechanical formatting. Final implementation-head CI run
+36381715167 is fully green: formatting, static analysis, content validation,
+dependency-lock verification, eight Chrome contracts, 376 native tests, 98.52
+percent line coverage and secret scanning all pass.
+
+Records-head CI run 36384149132 verifies submitted head `878ccd5` with all
+gates green. Independent review found three remaining consistency boundaries:
+legacy Home corrections must compare their origin against the deterministically
+resolved current question; study corrections must bind to their generated
+current question while retests retain their intentional next-question behavior;
+and export must not combine attempts and active state observed on opposite sides
+of a concurrent commit. Commit `ff7131a` states all three contracts before
+commit `bff3a12` implements resolved identity checks and a bounded stable-
+snapshot retry. Exact findings are [records-head provenance][r74], [legacy
+correction identity][r75], [study correction identity][r76], and [consistent
+export snapshot][r77].
+
+[r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
 [r4]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815405
@@ -622,3 +641,7 @@ CI run 36375438515 passed all 376 native behavior tests but exposed only\nthe ca
 [r71]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4117429417
 [r72]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4117429420
 [r73]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4118305418
+[r74]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4119606371
+[r75]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4119606376
+[r76]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4119606383
+[r77]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4119606392
