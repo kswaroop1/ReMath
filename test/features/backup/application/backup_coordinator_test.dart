@@ -330,6 +330,37 @@ void main() {
       },
     );
 
+    test('preview rejects correction linked to another question', () async {
+      final payload = BackupPayload(
+        attempts: [
+          _attempt(
+            'event-1',
+            isCorrect: false,
+            questionId: 'question-earlier',
+          ),
+        ],
+        createdAt: DateTime.utc(2026, 9, 20, 12),
+        session: _session('session-1').copyWith(
+          questionId: 'question-current',
+          questionSkillId: 'arithmetic.addition',
+        ),
+        studyState: null,
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: payload.encode(),
+        password: password,
+      );
+
+      await expectLater(
+        BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+        ).preview(encrypted, password: password),
+        throwsFormatException,
+      );
+    });
+
     test(
       'preview accepts failed Home remediation attempts as origins',
       () async {
@@ -602,6 +633,7 @@ AttemptEvent _attempt(
   String answer = '4',
   bool isCorrect = true,
   AttemptKind kind = AttemptKind.answer,
+  String? questionId,
   String sessionId = 'session-1',
   String skillId = 'arithmetic.addition',
 }) {
@@ -611,7 +643,7 @@ AttemptEvent _attempt(
     isCorrect: isCorrect,
     kind: kind,
     occurredAt: DateTime.utc(2026, 9, 20, 10),
-    questionId: 'question-$id',
+    questionId: questionId ?? 'question-$id',
     responseTime: const Duration(milliseconds: 500),
     sessionId: sessionId,
     skillId: skillId,
