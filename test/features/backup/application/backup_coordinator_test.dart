@@ -330,35 +330,38 @@ void main() {
       },
     );
 
-    test('preview accepts failed Home remediation attempts as origins', () async {
-      for (final kind in [AttemptKind.correction, AttemptKind.retest]) {
-        final payload = BackupPayload(
-          attempts: [
-            _attempt(
-              'event-1',
-              isCorrect: false,
-              kind: kind,
-              sessionId: 'session-1',
-            ),
-          ],
-          createdAt: DateTime.utc(2026, 9, 20, 12),
-          session: _session('session-1'),
-          studyState: null,
-        );
-        final encrypted = await cipher.encrypt(
-          plaintext: payload.encode(),
-          password: password,
-        );
+    test(
+      'preview accepts failed Home remediation attempts as origins',
+      () async {
+        for (final kind in [AttemptKind.correction, AttemptKind.retest]) {
+          final payload = BackupPayload(
+            attempts: [
+              _attempt(
+                'event-1',
+                isCorrect: false,
+                kind: kind,
+                sessionId: 'session-1',
+              ),
+            ],
+            createdAt: DateTime.utc(2026, 9, 20, 12),
+            session: _session('session-1'),
+            studyState: null,
+          );
+          final encrypted = await cipher.encrypt(
+            plaintext: payload.encode(),
+            password: password,
+          );
 
-        final pending = await BackupCoordinator(
-          cipher: cipher,
-          clock: DateTime.now,
-          repository: InMemoryProgressRepository(),
-        ).preview(encrypted, password: password);
+          final pending = await BackupCoordinator(
+            cipher: cipher,
+            clock: DateTime.now,
+            repository: InMemoryProgressRepository(),
+          ).preview(encrypted, password: password);
 
-        expect(pending.preview.hasLearningSession, isTrue);
-      }
-    });
+          expect(pending.preview.hasLearningSession, isTrue);
+        }
+      },
+    );
 
     test('preview accepts consistently linked study remediation', () async {
       final payload = BackupPayload(
@@ -391,27 +394,61 @@ void main() {
       expect(pending.preview.hasStudyState, isTrue);
     });
 
-    test('preview accepts failed study remediation attempts as origins', () async {
-      for (final kind in [AttemptKind.correction, AttemptKind.retest]) {
-        final payload = BackupPayload(
-          attempts: [
-            _attempt(
-              'event-1',
-              isCorrect: false,
-              kind: kind,
+    test(
+      'preview accepts failed study remediation attempts as origins',
+      () async {
+        for (final kind in [AttemptKind.correction, AttemptKind.retest]) {
+          final payload = BackupPayload(
+            attempts: [
+              _attempt(
+                'event-1',
+                isCorrect: false,
+                kind: kind,
+                sessionId: 'study-session',
+              ),
+            ],
+            createdAt: DateTime.utc(2026, 9, 20, 12),
+            studyState: StudyState(
+              phase: StudyPhase.correction,
+              plan: StudyPlan(
+                steps: const [
+                  StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
+                ],
+                reason: 'Focused practice',
+              ),
+              relatedEventId: 'event-1',
               sessionId: 'study-session',
-            ),
-          ],
+            ).encode(),
+          );
+          final encrypted = await cipher.encrypt(
+            plaintext: payload.encode(),
+            password: password,
+          );
+
+          final pending = await BackupCoordinator(
+            cipher: cipher,
+            clock: DateTime.now,
+            repository: InMemoryProgressRepository(),
+          ).preview(encrypted, password: password);
+
+          expect(pending.preview.hasStudyState, isTrue);
+        }
+      },
+    );
+
+    test(
+      'preview rejects related events in question-phase study state',
+      () async {
+        final payload = BackupPayload(
+          attempts: const [],
           createdAt: DateTime.utc(2026, 9, 20, 12),
           studyState: StudyState(
-            phase: StudyPhase.correction,
-            plan: StudyPlan(
-              steps: const [
-                StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
-              ],
-              reason: 'Focused practice',
+            plan: StudyPlanner().plan(
+              'number-fluency',
+              const [],
+              DateTime.utc(2026, 9, 20),
             ),
-            relatedEventId: 'event-1',
+            relatedEventId: 'dangling-event',
             sessionId: 'study-session',
           ).encode(),
         );
@@ -420,44 +457,16 @@ void main() {
           password: password,
         );
 
-        final pending = await BackupCoordinator(
-          cipher: cipher,
-          clock: DateTime.now,
-          repository: InMemoryProgressRepository(),
-        ).preview(encrypted, password: password);
-
-        expect(pending.preview.hasStudyState, isTrue);
-      }
-    });
-
-    test('preview rejects related events in question-phase study state', () async {
-      final payload = BackupPayload(
-        attempts: const [],
-        createdAt: DateTime.utc(2026, 9, 20, 12),
-        studyState: StudyState(
-          plan: StudyPlanner().plan(
-            'number-fluency',
-            const [],
-            DateTime.utc(2026, 9, 20),
-          ),
-          relatedEventId: 'dangling-event',
-          sessionId: 'study-session',
-        ).encode(),
-      );
-      final encrypted = await cipher.encrypt(
-        plaintext: payload.encode(),
-        password: password,
-      );
-
-      await expectLater(
-        BackupCoordinator(
-          cipher: cipher,
-          clock: DateTime.now,
-          repository: InMemoryProgressRepository(),
-        ).preview(encrypted, password: password),
-        throwsFormatException,
-      );
-    });
+        await expectLater(
+          BackupCoordinator(
+            cipher: cipher,
+            clock: DateTime.now,
+            repository: InMemoryProgressRepository(),
+          ).preview(encrypted, password: password),
+          throwsFormatException,
+        );
+      },
+    );
 
     test('preview reports local conflicts before blocking apply', () async {
       final incoming = _attempt(
