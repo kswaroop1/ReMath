@@ -182,7 +182,8 @@ String _studyQuestionId(StudyState state) {
   var identity = question.id;
   if (step.templateVersion == 1 &&
       StudyCurriculum.currentTemplateVersion(question.skillId) == 2) {
-    identity = '$identity.origin-${state.generator == 'legacy-browser' ? 'browser' : 'portable'}';
+    identity =
+        '$identity.origin-${state.generator == 'legacy-browser' ? 'browser' : 'portable'}';
   }
   return step.multipleChoice ? '$identity.mcq' : identity;
 }

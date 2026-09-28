@@ -46,21 +46,24 @@ void main() {
       expect((await target.loadAttempts()).single.eventId, 'event-1');
     });
 
-    test('export retries until attempts and active state are coherent', () async {
-      final repository = _ChangingExportRepository();
-      final encrypted = await BackupCoordinator(
-        cipher: cipher,
-        clock: () => DateTime.utc(2026, 9, 20, 12),
-        repository: repository,
-      ).export(password: password);
+    test(
+      'export retries until attempts and active state are coherent',
+      () async {
+        final repository = _ChangingExportRepository();
+        final encrypted = await BackupCoordinator(
+          cipher: cipher,
+          clock: () => DateTime.utc(2026, 9, 20, 12),
+          repository: repository,
+        ).export(password: password);
 
-      final payload = BackupPayload.decode(
-        await cipher.decrypt(encrypted, password: password),
-      );
+        final payload = BackupPayload.decode(
+          await cipher.decrypt(encrypted, password: password),
+        );
 
-      expect(payload.attempts.single.eventId, 'event-1');
-      expect(payload.session?.correctionOfEventId, 'event-1');
-    });
+        expect(payload.attempts.single.eventId, 'event-1');
+        expect(payload.session?.correctionOfEventId, 'event-1');
+      },
+    );
 
     test('preview rejects an unsafe active-study snapshot', () async {
       final payload = BackupPayload(
@@ -375,40 +378,47 @@ void main() {
       );
     });
 
-    test('preview resolves legacy correction identity before validation', () async {
-      final payload = BackupPayload(
-        attempts: [
-          _attempt('event-1', isCorrect: false, questionId: 'question-earlier'),
-        ],
-        createdAt: DateTime.utc(2026, 9, 20, 12),
-        session: LearningSession(
-          answerDraft: '12',
-          correctionOfEventId: 'event-1',
-          currentQuestionIndex: 3,
-          focusSkillId: 'arithmetic.addition',
-          id: 'session-1',
-          phase: LearningSessionPhase.correction,
-          revealedHintCount: 2,
-          seed: 42,
-          startedAt: DateTime.utc(2026, 9, 20, 10),
-        ),
-        studyState: null,
-      );
-      final encrypted = await cipher.encrypt(
-        plaintext: payload.encode(),
-        password: password,
-      );
+    test(
+      'preview resolves legacy correction identity before validation',
+      () async {
+        final payload = BackupPayload(
+          attempts: [
+            _attempt(
+              'event-1',
+              isCorrect: false,
+              questionId: 'question-earlier',
+            ),
+          ],
+          createdAt: DateTime.utc(2026, 9, 20, 12),
+          session: LearningSession(
+            answerDraft: '12',
+            correctionOfEventId: 'event-1',
+            currentQuestionIndex: 3,
+            focusSkillId: 'arithmetic.addition',
+            id: 'session-1',
+            phase: LearningSessionPhase.correction,
+            revealedHintCount: 2,
+            seed: 42,
+            startedAt: DateTime.utc(2026, 9, 20, 10),
+          ),
+          studyState: null,
+        );
+        final encrypted = await cipher.encrypt(
+          plaintext: payload.encode(),
+          password: password,
+        );
 
-      await expectLater(
-        BackupCoordinator(
-          cipher: cipher,
-          clock: DateTime.now,
-          repository: InMemoryProgressRepository(),
-          sessionQuestionIdResolver: (_) => 'question-current',
-        ).preview(encrypted, password: password),
-        throwsFormatException,
-      );
-    });
+        await expectLater(
+          BackupCoordinator(
+            cipher: cipher,
+            clock: DateTime.now,
+            repository: InMemoryProgressRepository(),
+            sessionQuestionIdResolver: (_) => 'question-current',
+          ).preview(encrypted, password: password),
+          throwsFormatException,
+        );
+      },
+    );
 
     test(
       'preview accepts failed Home remediation attempts as origins',
@@ -480,43 +490,46 @@ void main() {
       expect(pending.preview.hasStudyState, isTrue);
     });
 
-    test('preview rejects study correction linked to another question', () async {
-      final payload = BackupPayload(
-        attempts: [
-          _attempt(
-            'event-1',
-            isCorrect: false,
-            questionId: 'question-earlier',
+    test(
+      'preview rejects study correction linked to another question',
+      () async {
+        final payload = BackupPayload(
+          attempts: [
+            _attempt(
+              'event-1',
+              isCorrect: false,
+              questionId: 'question-earlier',
+              sessionId: 'study-session',
+            ),
+          ],
+          createdAt: DateTime.utc(2026, 9, 20, 12),
+          studyState: StudyState(
+            phase: StudyPhase.correction,
+            plan: StudyPlan(
+              steps: const [
+                StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
+              ],
+              reason: 'Focused practice',
+            ),
+            relatedEventId: 'event-1',
             sessionId: 'study-session',
-          ),
-        ],
-        createdAt: DateTime.utc(2026, 9, 20, 12),
-        studyState: StudyState(
-          phase: StudyPhase.correction,
-          plan: StudyPlan(
-            steps: const [
-              StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
-            ],
-            reason: 'Focused practice',
-          ),
-          relatedEventId: 'event-1',
-          sessionId: 'study-session',
-        ).encode(),
-      );
-      final encrypted = await cipher.encrypt(
-        plaintext: payload.encode(),
-        password: password,
-      );
+          ).encode(),
+        );
+        final encrypted = await cipher.encrypt(
+          plaintext: payload.encode(),
+          password: password,
+        );
 
-      await expectLater(
-        BackupCoordinator(
-          cipher: cipher,
-          clock: DateTime.now,
-          repository: InMemoryProgressRepository(),
-        ).preview(encrypted, password: password),
-        throwsFormatException,
-      );
-    });
+        await expectLater(
+          BackupCoordinator(
+            cipher: cipher,
+            clock: DateTime.now,
+            repository: InMemoryProgressRepository(),
+          ).preview(encrypted, password: password),
+          throwsFormatException,
+        );
+      },
+    );
 
     test(
       'preview accepts failed study remediation attempts as origins',
@@ -812,7 +825,8 @@ String _questionIdForState(StudyState state) {
   var identity = question.id;
   if (step.templateVersion == 1 &&
       StudyCurriculum.currentTemplateVersion(question.skillId) == 2) {
-    identity = '$identity.origin-${state.generator == 'legacy-browser' ? 'browser' : 'portable'}';
+    identity =
+        '$identity.origin-${state.generator == 'legacy-browser' ? 'browser' : 'portable'}';
   }
   return step.multipleChoice ? '$identity.mcq' : identity;
 }
