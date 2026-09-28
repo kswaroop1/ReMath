@@ -549,7 +549,7 @@ not merely the same session and skill. Commit `780c8bd` states that
 contract before commit `08adcca` enforces it. Exact review text is
 linked as [pinned correction origin][r73].
 
-[r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
+CI run 36375438515 passed all 376 native behavior tests but exposed only\nthe canonical Dart 3.13 layout for the new pinned-question fixture. Commit\n`d7282be` applies that mechanical formatting. Final implementation-head CI run\n36381715167 is fully green: formatting, static analysis, content validation,\ndependency-lock verification, eight Chrome contracts, 376 native tests, 98.52\npercent line coverage and secret scanning all pass.\n\n[r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
 [r4]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815405
