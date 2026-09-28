@@ -5,6 +5,7 @@ import 'package:remath/src/features/backup/domain/backup_payload.dart';
 import 'package:remath/src/features/learning/data/in_memory_progress_repository.dart';
 import 'package:remath/src/features/learning/domain/attempt_event.dart';
 import 'package:remath/src/features/learning/domain/learning_session.dart';
+import 'package:remath/src/features/learning/domain/progress_repository.dart';
 import 'package:remath/src/features/numbers/domain/study_plan.dart';
 
 void main() {
@@ -42,6 +43,22 @@ void main() {
 
       expect(result.insertedAttemptCount, 1);
       expect((await target.loadAttempts()).single.eventId, 'event-1');
+    });
+
+    test('export retries until attempts and active state are coherent', () async {
+      final repository = _ChangingExportRepository();
+      final encrypted = await BackupCoordinator(
+        cipher: cipher,
+        clock: () => DateTime.utc(2026, 9, 20, 12),
+        repository: repository,
+      ).export(password: password);
+
+      final payload = BackupPayload.decode(
+        await cipher.decrypt(encrypted, password: password),
+      );
+
+      expect(payload.attempts.single.eventId, 'event-1');
+      expect(payload.session?.correctionOfEventId, 'event-1');
     });
 
     test('preview rejects an unsafe active-study snapshot', () async {
@@ -357,6 +374,34 @@ void main() {
       );
     });
 
+    test('preview resolves legacy correction identity before validation', () async {
+      final payload = BackupPayload(
+        attempts: [
+          _attempt('event-1', isCorrect: false, questionId: 'question-earlier'),
+        ],
+        createdAt: DateTime.utc(2026, 9, 20, 12),
+        session: _session('session-1').copyWith(
+          questionId: null,
+          questionSkillId: null,
+        ),
+        studyState: null,
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: payload.encode(),
+        password: password,
+      );
+
+      await expectLater(
+        BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+          sessionQuestionIdResolver: (_) => 'question-current',
+        ).preview(encrypted, password: password),
+        throwsFormatException,
+      );
+    });
+
     test(
       'preview accepts failed Home remediation attempts as origins',
       () async {
@@ -419,6 +464,44 @@ void main() {
       ).preview(encrypted, password: password);
 
       expect(pending.preview.hasStudyState, isTrue);
+    });
+
+    test('preview rejects study correction linked to another question', () async {
+      final payload = BackupPayload(
+        attempts: [
+          _attempt(
+            'event-1',
+            isCorrect: false,
+            questionId: 'question-earlier',
+            sessionId: 'study-session',
+          ),
+        ],
+        createdAt: DateTime.utc(2026, 9, 20, 12),
+        studyState: StudyState(
+          phase: StudyPhase.correction,
+          plan: StudyPlan(
+            steps: const [
+              StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
+            ],
+            reason: 'Focused practice',
+          ),
+          relatedEventId: 'event-1',
+          sessionId: 'study-session',
+        ).encode(),
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: payload.encode(),
+        password: password,
+      );
+
+      await expectLater(
+        BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+        ).preview(encrypted, password: password),
+        throwsFormatException,
+      );
     });
 
     test(
@@ -644,4 +727,54 @@ AttemptEvent _attempt(
     sessionId: sessionId,
     skillId: skillId,
   );
+}
+
+final class _ChangingExportRepository implements ProgressRepository {
+  final _delegate = InMemoryProgressRepository();
+  var _attemptReads = 0;
+
+  @override
+  Future<List<AttemptEvent>> loadAttempts() async {
+    _attemptReads++;
+    if (_attemptReads == 2) {
+      await _delegate.recordAttempt(
+        _attempt('event-1', isCorrect: false, sessionId: 'session-1'),
+      );
+      await _delegate.saveSession(_session('session-1'));
+    }
+    return _delegate.loadAttempts();
+  }
+
+  @override
+  Future<LearningSession?> loadSession() => _delegate.loadSession();
+
+  @override
+  Future<String?> loadStudyState() => _delegate.loadStudyState();
+
+  @override
+  Future<bool> commitStudyAttempt(AttemptEvent event, String state) =>
+      _delegate.commitStudyAttempt(event, state);
+  @override
+  Future<void> saveStudyState(String state) => _delegate.saveStudyState(state);
+  @override
+  Future<void> close() => _delegate.close();
+  @override
+  Future<void> completeSession(String sessionId) =>
+      _delegate.completeSession(sessionId);
+  @override
+  Future<ProgressMergeResult> mergeProgress({
+    required List<AttemptEvent> attempts,
+    required String? studyState,
+    LearningSession? session,
+  }) => _delegate.mergeProgress(
+    attempts: attempts,
+    session: session,
+    studyState: studyState,
+  );
+  @override
+  Future<bool> recordAttempt(AttemptEvent event) =>
+      _delegate.recordAttempt(event);
+  @override
+  Future<void> saveSession(LearningSession session) =>
+      _delegate.saveSession(session);
 }
