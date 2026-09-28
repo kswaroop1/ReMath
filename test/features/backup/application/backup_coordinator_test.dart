@@ -333,11 +333,7 @@ void main() {
     test('preview rejects correction linked to another question', () async {
       final payload = BackupPayload(
         attempts: [
-          _attempt(
-            'event-1',
-            isCorrect: false,
-            questionId: 'question-earlier',
-          ),
+          _attempt('event-1', isCorrect: false, questionId: 'question-earlier'),
         ],
         createdAt: DateTime.utc(2026, 9, 20, 12),
         session: _session('session-1').copyWith(
