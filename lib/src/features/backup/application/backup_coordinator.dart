@@ -66,7 +66,10 @@ final class BackupCoordinator {
           related.isCorrect ||
           !_isRemediationOrigin(related.kind) ||
           related.sessionId != session.id ||
-          related.skillId != session.focusSkillId) {
+          related.skillId != session.focusSkillId ||
+          (session.phase == LearningSessionPhase.correction &&
+              session.questionId != null &&
+              related.questionId != session.questionId)) {
         throw const FormatException(
           'Remediation session requires an originating attempt',
         );
