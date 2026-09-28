@@ -6,6 +6,7 @@ import 'package:remath/src/features/learning/data/in_memory_progress_repository.
 import 'package:remath/src/features/learning/domain/attempt_event.dart';
 import 'package:remath/src/features/learning/domain/learning_session.dart';
 import 'package:remath/src/features/learning/domain/progress_repository.dart';
+import 'package:remath/src/features/numbers/domain/study_curriculum.dart';
 import 'package:remath/src/features/numbers/domain/study_plan.dart';
 
 void main() {
@@ -380,9 +381,16 @@ void main() {
           _attempt('event-1', isCorrect: false, questionId: 'question-earlier'),
         ],
         createdAt: DateTime.utc(2026, 9, 20, 12),
-        session: _session('session-1').copyWith(
-          questionId: null,
-          questionSkillId: null,
+        session: LearningSession(
+          answerDraft: '12',
+          correctionOfEventId: 'event-1',
+          currentQuestionIndex: 3,
+          focusSkillId: 'arithmetic.addition',
+          id: 'session-1',
+          phase: LearningSessionPhase.correction,
+          revealedHintCount: 2,
+          seed: 42,
+          startedAt: DateTime.utc(2026, 9, 20, 10),
         ),
         studyState: null,
       );
@@ -436,21 +444,27 @@ void main() {
     );
 
     test('preview accepts consistently linked study remediation', () async {
+      final state = StudyState(
+        phase: StudyPhase.correction,
+        plan: StudyPlanner().plan(
+          'number-fluency',
+          const [],
+          DateTime.utc(2026, 9, 20),
+        ),
+        relatedEventId: 'event-1',
+        sessionId: 'study-session',
+      );
       final payload = BackupPayload(
         attempts: [
-          _attempt('event-1', isCorrect: false, sessionId: 'study-session'),
+          _attempt(
+            'event-1',
+            isCorrect: false,
+            questionId: _questionIdForState(state),
+            sessionId: 'study-session',
+          ),
         ],
         createdAt: DateTime.utc(2026, 9, 20, 12),
-        studyState: StudyState(
-          phase: StudyPhase.correction,
-          plan: StudyPlanner().plan(
-            'number-fluency',
-            const [],
-            DateTime.utc(2026, 9, 20),
-          ),
-          relatedEventId: 'event-1',
-          sessionId: 'study-session',
-        ).encode(),
+        studyState: state.encode(),
       );
       final encrypted = await cipher.encrypt(
         plaintext: payload.encode(),
@@ -508,27 +522,29 @@ void main() {
       'preview accepts failed study remediation attempts as origins',
       () async {
         for (final kind in [AttemptKind.correction, AttemptKind.retest]) {
+          final state = StudyState(
+            phase: StudyPhase.correction,
+            plan: StudyPlan(
+              steps: const [
+                StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
+              ],
+              reason: 'Focused practice',
+            ),
+            relatedEventId: 'event-1',
+            sessionId: 'study-session',
+          );
           final payload = BackupPayload(
             attempts: [
               _attempt(
                 'event-1',
                 isCorrect: false,
                 kind: kind,
+                questionId: _questionIdForState(state),
                 sessionId: 'study-session',
               ),
             ],
             createdAt: DateTime.utc(2026, 9, 20, 12),
-            studyState: StudyState(
-              phase: StudyPhase.correction,
-              plan: StudyPlan(
-                steps: const [
-                  StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
-                ],
-                reason: 'Focused practice',
-              ),
-              relatedEventId: 'event-1',
-              sessionId: 'study-session',
-            ).encode(),
+            studyState: state.encode(),
           );
           final encrypted = await cipher.encrypt(
             plaintext: payload.encode(),
@@ -701,6 +717,8 @@ LearningSession _session(String id) {
     focusSkillId: 'arithmetic.addition',
     id: id,
     phase: LearningSessionPhase.correction,
+    questionId: 'question-event-1',
+    questionSkillId: 'arithmetic.addition',
     revealedHintCount: 2,
     seed: 42,
     startedAt: DateTime.utc(2026, 9, 20, 10),
@@ -777,4 +795,24 @@ final class _ChangingExportRepository implements ProgressRepository {
   @override
   Future<void> saveSession(LearningSession session) =>
       _delegate.saveSession(session);
+}
+
+String _questionIdForState(StudyState state) {
+  final step = state.step!;
+  final question = StudyCurriculum().question(
+    step.skillId,
+    step.level,
+    state.seed,
+    state.questionIndex,
+    templateVersion: step.templateVersion,
+    legacyBrowser: state.generator == 'legacy-browser',
+    markingVersion: step.markingVersion,
+    scoringVersion: step.scoringVersion,
+  );
+  var identity = question.id;
+  if (step.templateVersion == 1 &&
+      StudyCurriculum.currentTemplateVersion(question.skillId) == 2) {
+    identity = '$identity.origin-${state.generator == 'legacy-browser' ? 'browser' : 'portable'}';
+  }
+  return step.multipleChoice ? '$identity.mcq' : identity;
 }

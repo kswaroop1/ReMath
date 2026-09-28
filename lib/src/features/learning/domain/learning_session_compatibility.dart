@@ -100,3 +100,31 @@ bool isLearningSessionCompatible(
     return false;
   }
 }
+
+String? learningSessionQuestionId(
+  LearningSession session, {
+  required ContentPack contentPack,
+  ArithmeticGenerator generator = const ArithmeticGenerator(),
+}) {
+  final operation = ArithmeticOperationDefinition.fromSkillId(
+    session.questionSkillId ?? session.focusSkillId ?? '',
+  );
+  final resolvedOperation =
+      operation ??
+      (session.id.startsWith('diagnostic-')
+          ? ArithmeticOperation.values[session.currentQuestionIndex ~/ 3]
+          : null);
+  if (resolvedOperation == null) return null;
+  try {
+    return generator
+        .generate(
+          seed: session.seed,
+          index: session.currentQuestionIndex,
+          packId: contentPack.id,
+          template: contentPack.templateFor(resolvedOperation),
+        )
+        .id;
+  } on StateError {
+    return null;
+  }
+}

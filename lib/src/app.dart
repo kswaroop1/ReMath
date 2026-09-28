@@ -33,6 +33,8 @@ class ReMathApp extends StatelessWidget {
                 session,
                 contentPack: contentPack,
               ),
+              sessionQuestionIdResolver: (session) =>
+                  learningSessionQuestionId(session, contentPack: contentPack),
             ),
             files: files,
           );

@@ -1,6 +1,7 @@
 import '../../learning/domain/attempt_event.dart';
 import '../../learning/domain/learning_session.dart';
 import '../../learning/domain/progress_repository.dart';
+import '../../numbers/domain/study_curriculum.dart';
 import '../../numbers/domain/study_plan.dart';
 import '../data/password_backup_cipher.dart';
 import '../domain/backup_payload.dart';
@@ -8,6 +9,9 @@ import '../domain/backup_preview.dart';
 
 typedef BackupClock = DateTime Function();
 typedef BackupSessionValidator = bool Function(LearningSession session);
+typedef BackupSessionQuestionIdResolver = String? Function(
+  LearningSession session,
+);
 
 final class PendingBackupImport {
   const PendingBackupImport._(this._payload, {required this.preview});
@@ -22,24 +26,36 @@ final class BackupCoordinator {
     required BackupClock clock,
     required ProgressRepository repository,
     BackupSessionValidator? sessionValidator,
+    BackupSessionQuestionIdResolver? sessionQuestionIdResolver,
   }) : _cipher = cipher,
        _clock = clock,
        _repository = repository,
-       _sessionValidator = sessionValidator;
+       _sessionValidator = sessionValidator,
+       _sessionQuestionIdResolver = sessionQuestionIdResolver;
 
   final BackupCipher _cipher;
   final BackupClock _clock;
   final ProgressRepository _repository;
   final BackupSessionValidator? _sessionValidator;
+  final BackupSessionQuestionIdResolver? _sessionQuestionIdResolver;
 
   Future<String> export({required String password}) async {
-    final payload = BackupPayload(
-      attempts: await _repository.loadAttempts(),
-      createdAt: _clock().toUtc(),
-      session: await _repository.loadSession(),
-      studyState: await _repository.loadStudyState(),
-    );
-    return _cipher.encrypt(plaintext: payload.encode(), password: password);
+    for (var attempt = 0; attempt < 3; attempt++) {
+      final before = await _repository.loadAttempts();
+      final session = await _repository.loadSession();
+      final studyState = await _repository.loadStudyState();
+      final after = await _repository.loadAttempts();
+      if (_sameAttempts(before, after)) {
+        final payload = BackupPayload(
+          attempts: after,
+          createdAt: _clock().toUtc(),
+          session: session,
+          studyState: studyState,
+        );
+        return _cipher.encrypt(plaintext: payload.encode(), password: password);
+      }
+    }
+    throw StateError('Progress changed repeatedly during backup export.');
   }
 
   Future<PendingBackupImport> preview(
@@ -62,14 +78,16 @@ final class BackupCoordinator {
             session.phase == LearningSessionPhase.retest)) {
       final relatedEventId = session.correctionOfEventId;
       final related = availableAttempts[relatedEventId];
+      final currentQuestionId =
+          session.questionId ?? _sessionQuestionIdResolver?.call(session);
       if (related == null ||
           related.isCorrect ||
           !_isRemediationOrigin(related.kind) ||
           related.sessionId != session.id ||
           related.skillId != session.focusSkillId ||
           (session.phase == LearningSessionPhase.correction &&
-              session.questionId != null &&
-              related.questionId != session.questionId)) {
+              (currentQuestionId == null ||
+                  related.questionId != currentQuestionId))) {
         throw const FormatException(
           'Remediation session requires an originating attempt',
         );
@@ -106,7 +124,9 @@ final class BackupCoordinator {
               (step.kind != StudyStepKind.retrieval &&
                   step.kind != StudyStepKind.practice) ||
               related.sessionId != decoded.sessionId ||
-              related.skillId != step.skillId) {
+              related.skillId != step.skillId ||
+              (decoded.phase == StudyPhase.correction &&
+                  related.questionId != _studyQuestionId(decoded))) {
             throw const FormatException(
               'Study remediation requires an originating attempt',
             );
@@ -137,6 +157,34 @@ final class BackupCoordinator {
       studyState: pending._payload.studyState,
     );
   }
+}
+
+bool _sameAttempts(List<AttemptEvent> left, List<AttemptEvent> right) {
+  if (left.length != right.length) return false;
+  for (var index = 0; index < left.length; index++) {
+    if (!left[index].hasSameImmutableContentAs(right[index])) return false;
+  }
+  return true;
+}
+
+String _studyQuestionId(StudyState state) {
+  final step = state.step!;
+  final question = StudyCurriculum().question(
+    step.skillId,
+    step.level,
+    state.seed,
+    state.questionIndex,
+    templateVersion: step.templateVersion,
+    legacyBrowser: state.generator == 'legacy-browser',
+    markingVersion: step.markingVersion,
+    scoringVersion: step.scoringVersion,
+  );
+  var identity = question.id;
+  if (step.templateVersion == 1 &&
+      StudyCurriculum.currentTemplateVersion(question.skillId) == 2) {
+    identity = '$identity.origin-${state.generator == 'legacy-browser' ? 'browser' : 'portable'}';
+  }
+  return step.multipleChoice ? '$identity.mcq' : identity;
 }
 
 bool _isRemediationOrigin(AttemptKind kind) =>
