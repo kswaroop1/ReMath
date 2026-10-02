@@ -182,12 +182,16 @@ String _studyQuestionId(StudyState state) {
   var identity = question.id;
   if (step.templateVersion == 1 &&
       StudyCurriculum.currentTemplateVersion(question.skillId) == 2) {
-    final origin = state.generator == 'legacy-browser'
-        ? 'browser'
-        : 'portable';
-    identity = '$identity.origin-$origin';
+    identity = '$identity.origin-${_studyQuestionOrigin(state)}';
   }
   return step.multipleChoice ? '$identity.mcq' : identity;
+}
+
+String _studyQuestionOrigin(StudyState state) {
+  if (state.generator == 'legacy-browser') {
+    return 'browser';
+  }
+  return 'portable';
 }
 
 bool _isRemediationOrigin(AttemptKind kind) =>
