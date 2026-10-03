@@ -39,6 +39,16 @@ final class BackupCoordinator {
   final BackupSessionQuestionIdResolver? _sessionQuestionIdResolver;
 
   Future<String> export({required String password}) async {
+    if (_repository case final ProgressSnapshotRepository repository) {
+      final snapshot = await repository.loadSnapshot();
+      final payload = BackupPayload(
+        attempts: snapshot.attempts,
+        createdAt: _clock().toUtc(),
+        session: snapshot.session,
+        studyState: snapshot.studyState,
+      );
+      return _cipher.encrypt(plaintext: payload.encode(), password: password);
+    }
     for (var attempt = 0; attempt < 3; attempt++) {
       final before = await _repository.loadAttempts();
       final session = await _repository.loadSession();

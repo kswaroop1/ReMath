@@ -20,6 +20,23 @@ abstract interface class ProgressRepository {
   Future<void> saveSession(LearningSession session);
 }
 
+abstract interface class ProgressSnapshotRepository
+    implements ProgressRepository {
+  Future<ProgressSnapshot> loadSnapshot();
+}
+
+final class ProgressSnapshot {
+  const ProgressSnapshot({
+    required this.attempts,
+    required this.session,
+    required this.studyState,
+  });
+
+  final List<AttemptEvent> attempts;
+  final LearningSession? session;
+  final String? studyState;
+}
+
 final class ProgressMergeResult {
   const ProgressMergeResult({
     required this.duplicateAttemptCount,

@@ -760,9 +760,18 @@ AttemptEvent _attempt(
   );
 }
 
-final class _ChangingExportRepository implements ProgressRepository {
+final class _ChangingExportRepository implements ProgressSnapshotRepository {
   final _delegate = InMemoryProgressRepository();
   var _attemptReads = 0;
+
+  @override
+  Future<ProgressSnapshot> loadSnapshot() async {
+    await _delegate.recordAttempt(
+      _attempt('event-1', isCorrect: false, sessionId: 'session-1'),
+    );
+    await _delegate.saveSession(_session('session-1'));
+    return _delegate.loadSnapshot();
+  }
 
   @override
   Future<List<AttemptEvent>> loadAttempts() async {

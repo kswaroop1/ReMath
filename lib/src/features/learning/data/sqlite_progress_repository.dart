@@ -5,7 +5,7 @@ import '../domain/attempt_event.dart';
 import '../domain/learning_session.dart';
 import '../domain/progress_repository.dart';
 
-final class SqliteProgressRepository implements ProgressRepository {
+final class SqliteProgressRepository implements ProgressSnapshotRepository {
   SqliteProgressRepository(this._database) {
     _migrate();
   }
@@ -294,6 +294,38 @@ final class SqliteProgressRepository implements ProgressRepository {
       .toList(growable: false);
 
   @override
+  Future<ProgressSnapshot> loadSnapshot() async {
+    _database.execute('BEGIN');
+    try {
+      final attempts = _database
+          .select('SELECT * FROM attempt_events ORDER BY occurred_at, event_id')
+          .map(_attemptFromRow)
+          .toList(growable: false);
+      final sessionRows = _database.select(
+        'SELECT * FROM active_session WHERE singleton = 1',
+      );
+      final session = sessionRows.isEmpty
+          ? null
+          : _sessionFromRow(sessionRows.single);
+      final studyRows = _database.select(
+        'SELECT state FROM study_state WHERE singleton = 1',
+      );
+      final studyState = studyRows.isEmpty
+          ? null
+          : studyRows.single['state'] as String;
+      _database.execute('COMMIT');
+      return ProgressSnapshot(
+        attempts: attempts,
+        session: session,
+        studyState: studyState,
+      );
+    } catch (_) {
+      _database.execute('ROLLBACK');
+      rethrow;
+    }
+  }
+
+  @override
   Future<LearningSession?> loadSession() async {
     final rows = _database.select(
       'SELECT * FROM active_session WHERE singleton = 1',
@@ -301,7 +333,10 @@ final class SqliteProgressRepository implements ProgressRepository {
     if (rows.isEmpty) {
       return null;
     }
-    final row = rows.single;
+    return _sessionFromRow(rows.single);
+  }
+
+  LearningSession _sessionFromRow(Row row) {
     return LearningSession(
       answerDraft: row['answer_draft'] as String,
       correctionOfEventId: row['correction_of_event_id'] as String?,

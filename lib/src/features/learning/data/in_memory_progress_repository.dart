@@ -3,7 +3,7 @@ import '../domain/attempt_event.dart';
 import '../domain/learning_session.dart';
 import '../domain/progress_repository.dart';
 
-final class InMemoryProgressRepository implements ProgressRepository {
+final class InMemoryProgressRepository implements ProgressSnapshotRepository {
   final Map<String, AttemptEvent> _attempts = {};
   LearningSession? _session;
   String? _studyState;
@@ -40,6 +40,13 @@ final class InMemoryProgressRepository implements ProgressRepository {
   @override
   Future<List<AttemptEvent>> loadAttempts() async =>
       List.unmodifiable(_attempts.values);
+
+  @override
+  Future<ProgressSnapshot> loadSnapshot() async => ProgressSnapshot(
+    attempts: List.unmodifiable(_attempts.values),
+    session: _session,
+    studyState: _studyState,
+  );
 
   @override
   Future<LearningSession?> loadSession() async => _session;
