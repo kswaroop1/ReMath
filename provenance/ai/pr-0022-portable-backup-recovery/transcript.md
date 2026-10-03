@@ -624,6 +624,12 @@ Commit `ffb4c94` corrects the fixture to the published `number.fractions` skill
 and applies the formatter's tall declaration layout together before rerunning
 the full suite.
 
+CI run 37113959500 confirms all 383 behavior tests pass but the SQLite file
+still differs from Dart 3.13 canonical formatting. Because local Flutter
+execution is unavailable and two inferred layouts were rejected, the next
+bounded diagnostic run temporarily prints the formatter diff; the diagnostic
+workflow change will be reverted in the same commit as the exact correction.
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
