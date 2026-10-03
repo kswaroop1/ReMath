@@ -450,6 +450,35 @@ void main() {
       },
     );
 
+    test('preview rejects a failed correction as a Home origin', () async {
+      final payload = BackupPayload(
+        attempts: [
+          _attempt(
+            'event-1',
+            isCorrect: false,
+            kind: AttemptKind.correction,
+            sessionId: 'session-1',
+          ),
+        ],
+        createdAt: DateTime.utc(2026, 9, 20, 12),
+        session: _session('session-1'),
+        studyState: null,
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: payload.encode(),
+        password: password,
+      );
+
+      await expectLater(
+        BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+        ).preview(encrypted, password: password),
+        throwsFormatException,
+      );
+    });
+
     test('preview accepts consistently linked study remediation', () async {
       final state = StudyState(
         phase: StudyPhase.correction,
@@ -691,7 +720,12 @@ void main() {
         phase: StudyPhase.retest,
         plan: StudyPlan(
           steps: const [
-            StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
+            StudyStep(
+              StudyStepKind.practice,
+              'arithmetic.addition',
+              1,
+              multipleChoice: true,
+            ),
           ],
           reason: 'Focused practice',
         ),
