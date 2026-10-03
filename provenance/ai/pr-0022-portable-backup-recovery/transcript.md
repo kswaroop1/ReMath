@@ -568,6 +568,16 @@ snapshot retry. Exact findings are [records-head provenance][r74], [legacy
 correction identity][r75], [study correction identity][r76], and [consistent
 export snapshot][r77].
 
+CI runs 37068583001, 37069823698, and 37078340924 confirmed all 379
+native behavior tests while isolating a Dart 3.13 formatter-only mismatch in the
+backup coordinator. Diagnostic CI run 37082308650 printed the exact canonical
+diff because local Flutter execution remained unavailable; commit `8be7351`
+restores the normal formatting gate and applies that output. Final correction-
+head CI run 37085470873 is fully green across formatting, static analysis,
+dependency-lock and content validation, the Chrome contract suite, all 379
+native tests, coverage enforcement, and secret scanning. The four records-head
+review findings are answered with their red/green commits and this verification.
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
