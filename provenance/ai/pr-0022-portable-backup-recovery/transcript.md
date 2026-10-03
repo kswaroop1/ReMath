@@ -778,3 +778,12 @@ stopped at an omitted required argument and a controller fixture that never
 entered Learn mode, corrected only in `51ca9e9` after production implementation.
 The shared cycle is therefore recorded as both a batching deviation and a
 production-first TDD deviation rather than compliant test-first evidence.
+
+CI 37147954291 verified formatting, analysis, content packs, browser contracts,
+and 388 native tests at `0b7254e`, but exposed one contradictory legacy test:
+it still listed `AttemptKind.correction` among accepted Home remediation roots
+while the adjacent final-review regression correctly rejects that same kind.
+The acceptance contract is failed answer or failed retest for Home, so the
+legacy parameterized example is corrected to cover answer and retest. This is
+a requirement/test reconciliation, not new production behaviour; the final
+review's production restriction remains unchanged.

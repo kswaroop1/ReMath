@@ -420,7 +420,7 @@ void main() {
     test(
       'preview accepts failed Home remediation attempts as origins',
       () async {
-        for (final kind in [AttemptKind.correction, AttemptKind.retest]) {
+        for (final kind in [AttemptKind.answer, AttemptKind.retest]) {
           final payload = BackupPayload(
             attempts: [
               _attempt(
