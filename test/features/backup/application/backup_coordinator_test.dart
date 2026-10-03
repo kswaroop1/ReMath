@@ -622,7 +622,7 @@ void main() {
         phase: StudyPhase.correction,
         plan: StudyPlan(
           steps: const [
-            StudyStep(StudyStepKind.practice, 'fractions.addition', 1),
+            StudyStep(StudyStepKind.practice, 'number.fractions', 1),
           ],
           reason: 'Legacy practice',
         ),
@@ -636,7 +636,7 @@ void main() {
             isCorrect: false,
             questionId: _questionIdForState(state).split('.origin-').first,
             sessionId: 'study-session',
-            skillId: 'fractions.addition',
+            skillId: 'number.fractions',
           ),
         ],
         createdAt: DateTime.utc(2026, 9, 20, 12),

@@ -6,7 +6,9 @@ import '../domain/learning_session.dart';
 import '../domain/progress_repository.dart';
 
 final class SqliteProgressRepository
-    implements ProgressSnapshotRepository, LearningTransitionRepository {
+    implements
+        ProgressSnapshotRepository,
+        LearningTransitionRepository {
   SqliteProgressRepository(this._database) {
     _migrate();
   }
