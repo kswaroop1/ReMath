@@ -609,10 +609,10 @@ boundaries: Home attempts and their resulting session transition must commit
 atomically rather than merely be read atomically; repeated multiple-choice
 remediation records the canonical base question identity; and unresolved
 legacy study state must preserve its pre-origin-suffix identity until the
-learner chooses a generator. Commit `d720737` states the two study-identity
-contracts before `7e9f54d` implements their phase-aware canonical comparison.
-Commit `e07e2f4` states the atomic Home-transition repository contract before
-`7700ea8` implements it for in-memory and SQLite persistence and routes Home
+learner chooses a generator. Commit `c81f541` states the two study-identity
+contracts before `37efd9f` implements their phase-aware canonical comparison.
+Commit `798cc99` states the atomic Home-transition repository contract before
+`a489c4f` implements it for in-memory and SQLite persistence and routes Home
 submission through that transaction. Exact findings are [atomic Home
 transition][r82], [records-head verification][r83], [multiple-choice
 remediation identity][r84], and [unresolved legacy identity][r85].
@@ -620,7 +620,7 @@ remediation identity][r84], and [unresolved legacy identity][r85].
 Batch CI run 37110105815 passed 382 tests and exposed the complete remaining
 failure set: the new legacy fixture used a non-existent skill identifier, and
 SQLite's two-interface declaration differed from Dart 3.13 canonical layout.
-Commit `ffb4c94` corrects the fixture to the published `number.fractions` skill
+Commit `ea69f29` corrects the fixture to the published `number.fractions` skill
 and applies the formatter's tall declaration layout together before rerunning
 the full suite.
 
@@ -628,11 +628,11 @@ CI run 37113959500 confirms all 383 behavior tests pass but the SQLite file
 still differs from Dart 3.13 canonical formatting. Because local Flutter
 execution is unavailable and two inferred layouts were rejected, the next
 bounded diagnostic run temporarily prints the formatter diff; the diagnostic
-workflow change will be reverted in the same commit as the exact correction.
+workflow change will be reverted with the exact correction.
 
 Diagnostic CI run 37115022260 passed all 383 behavior tests and printed the
 exact remaining formatter changes: the compact two-interface declaration and
-the tall argument-list layout for the session deletion. Commit `d046713`
+the tall argument-list layout for the session deletion. Commit `8b524d6`
 applies that output and restores the normal non-mutating formatting gate. The
 diagnostic also showed Flutter regenerating the existing macOS plugin
 registrant after dependency installation; that transient generated diff is not
@@ -642,6 +642,28 @@ Final correction-head CI run 37119459425 is fully green across formatting,
 static analysis, dependency-lock and content validation, Chrome contracts, all
 383 native tests, coverage enforcement, and secret scanning. The four review
 threads are answered with the focused red/green commits and this verification.
+
+Records-head CI run 37123443291 verifies submitted head `35da773` with every
+gate green. The final independent review then identified remediation-integrity
+boundaries for successful hinted study answers, Home and study retest identity,
+atomic Home hint transitions, assisted-state calibration, and observable
+controller routing, together with four records corrections. Commit `3647171`
+defines those behavior contracts before `7d93d67` implements them.
+
+Process disclosure: `c81f541` batched the repeated-MCQ and unresolved-legacy
+contracts in one red commit and `37efd9f` implemented them in one green commit,
+so that cycle did not provide the distinct red/green pairs required for separate
+behaviors. In addition, the unresolved-legacy example in `c81f541` used the
+nonexistent `fractions.addition` skill and failed during state decoding rather
+than at the intended identity boundary; the valid `number.fractions` fixture
+first appears in `ea69f29`, after its production implementation. The repository
+history is preserved and both facts are recorded as TDD-process deviations.
+
+The original atomic-transition red commit `798cc99` exercised the repository
+operation directly but did not observe `LearningController` routing. Production
+routing first appeared in `a489c4f`; controller-level answer and hint routing is
+therefore explicitly covered in `3647171`, and the earlier production-first gap
+is retained here as a TDD-process deviation.
 
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
@@ -729,3 +751,13 @@ threads are answered with the focused red/green commits and this verification.
 [r83]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4172097382
 [r84]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4172097388
 [r85]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4172097392
+[r86]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4173395534
+[r87]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4173395537
+[r88]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4173395541
+[r89]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4173395544
+[r90]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4173395547
+[r91]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4173395550
+[r92]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4173395551
+[r93]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4173395553
+[r94]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4173395560
+[r95]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4173395563
