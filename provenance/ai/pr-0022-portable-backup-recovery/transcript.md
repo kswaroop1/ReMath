@@ -630,6 +630,14 @@ execution is unavailable and two inferred layouts were rejected, the next
 bounded diagnostic run temporarily prints the formatter diff; the diagnostic
 workflow change will be reverted in the same commit as the exact correction.
 
+Diagnostic CI run 37115022260 passed all 383 behavior tests and printed the
+exact remaining formatter changes: the compact two-interface declaration and
+the tall argument-list layout for the session deletion. Commit `d046713`
+applies that output and restores the normal non-mutating formatting gate. The
+diagnostic also showed Flutter regenerating the existing macOS plugin
+registrant after dependency installation; that transient generated diff is not
+part of the Dart formatting gate or this correction.
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
