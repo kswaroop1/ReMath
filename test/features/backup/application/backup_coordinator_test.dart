@@ -625,6 +625,7 @@ void main() {
             isCorrect: false,
             kind: AttemptKind.correction,
             questionId: _questionIdForState(state).replaceFirst('.mcq', ''),
+            relatedEventId: 'initial-answer',
             sessionId: 'study-session',
           ),
         ],
@@ -633,6 +634,50 @@ void main() {
       );
       final encrypted = await cipher.encrypt(
         plaintext: payload.encode(),
+        password: password,
+      );
+
+      final pending = await BackupCoordinator(
+        cipher: cipher,
+        clock: DateTime.now,
+        repository: InMemoryProgressRepository(),
+      ).preview(encrypted, password: password);
+
+      expect(pending.preview.hasStudyState, isTrue);
+    });
+
+    test('preview preserves a failed hinted MCQ answer', () async {
+      final correction = StudyState(
+        phase: StudyPhase.correction,
+        plan: StudyPlan(
+          steps: const [
+            StudyStep(
+              StudyStepKind.practice,
+              'arithmetic.addition',
+              1,
+              multipleChoice: true,
+            ),
+          ],
+          reason: 'Focused practice',
+        ),
+        questionIndex: 3,
+        relatedEventId: 'hinted-answer',
+        sessionId: 'study-session',
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: BackupPayload(
+          attempts: [
+            _attempt(
+              'hinted-answer',
+              isCorrect: false,
+              kind: AttemptKind.correction,
+              questionId: _questionIdForState(correction),
+              sessionId: 'study-session',
+            ),
+          ],
+          createdAt: DateTime.utc(2026, 9, 20, 12),
+          studyState: correction.encode(),
+        ).encode(),
         password: password,
       );
 
