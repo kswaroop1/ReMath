@@ -98,7 +98,7 @@ final class BackupCoordinator {
           : session.questionId ?? _sessionQuestionIdResolver?.call(session);
       if (related == null ||
           related.isCorrect ||
-          !_isRemediationOrigin(related.kind) ||
+          !_isHomeRemediationOrigin(related.kind) ||
           related.sessionId != session.id ||
           related.skillId != session.focusSkillId ||
           (expectedQuestionId == null ||
@@ -160,6 +160,7 @@ final class BackupCoordinator {
                           )
                         : decoded,
                     related.kind,
+                    relatedIsCorrect: related.isCorrect,
                   )) {
             throw const FormatException(
               'Study remediation requires an originating attempt',
@@ -221,9 +222,19 @@ String _studyQuestionId(StudyState state) {
   return step.multipleChoice ? '$identity.mcq' : identity;
 }
 
-String _studyRemediationQuestionId(StudyState state, AttemptKind originKind) {
+String _studyRemediationQuestionId(
+  StudyState state,
+  AttemptKind originKind, {
+  bool relatedIsCorrect = false,
+}) {
   var identity = _studyQuestionId(state);
-  if (originKind != AttemptKind.answer && identity.endsWith('.mcq')) {
+  final hintedFirstAnswer =
+      state.phase == StudyPhase.retest &&
+      originKind == AttemptKind.correction &&
+      relatedIsCorrect;
+  if (originKind != AttemptKind.answer &&
+      !hintedFirstAnswer &&
+      identity.endsWith('.mcq')) {
     identity = identity.substring(0, identity.length - '.mcq'.length);
   }
   if (state.generator == null) {
@@ -243,3 +254,6 @@ bool _isRemediationOrigin(AttemptKind kind) =>
     kind == AttemptKind.answer ||
     kind == AttemptKind.correction ||
     kind == AttemptKind.retest;
+
+bool _isHomeRemediationOrigin(AttemptKind kind) =>
+    kind == AttemptKind.answer || kind == AttemptKind.retest;
