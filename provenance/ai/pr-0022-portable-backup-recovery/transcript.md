@@ -647,8 +647,8 @@ Records-head CI run 37123443291 verifies submitted head `35da773` with every
 gate green. The final independent review then identified remediation-integrity
 boundaries for successful hinted study answers, Home and study retest identity,
 atomic Home hint transitions, assisted-state calibration, and observable
-controller routing, together with four records corrections. Commit `3647171`
-defines those behavior contracts before `7d93d67` implements them.
+controller routing, together with four records corrections. Commit `1d62f04`
+defines those behavior contracts before `fde7365` implements them.
 
 Process disclosure: `c81f541` batched the repeated-MCQ and unresolved-legacy
 contracts in one red commit and `37efd9f` implemented them in one green commit,
@@ -662,7 +662,7 @@ history is preserved and both facts are recorded as TDD-process deviations.
 The original atomic-transition red commit `798cc99` exercised the repository
 operation directly but did not observe `LearningController` routing. Production
 routing first appeared in `a489c4f`; controller-level answer and hint routing is
-therefore explicitly covered in `3647171`, and the earlier production-first gap
+therefore explicitly covered in `1d62f04`, and the earlier production-first gap
 is retained here as a TDD-process deviation.
 
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
@@ -761,3 +761,5 @@ is retained here as a TDD-process deviation.
 [r93]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4173395553
 [r94]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4173395560
 [r95]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4173395563
+
+Final review integration CI 37130458568 exposed a missing required studyState argument and a controller fixture that did not enter Learn mode. Commit `51ca9e9` corrects those fixtures; CI 37131508974 passes all 388 native tests, with only formatting remaining. Diagnostic CI 37135751696 again passes all 388 tests and supplies the exact two test-file formatting deltas applied in the following formatting commit, which also restores the normal non-mutating gate. Generated analysis-options and macOS registrant differences printed by the diagnostic are dependency-installation changes, not Dart formatter changes. Local SDK execution remains unavailable.
