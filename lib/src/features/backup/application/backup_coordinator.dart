@@ -142,7 +142,8 @@ final class BackupCoordinator {
               decoded.phase != StudyPhase.retest || decoded.questionIndex > 0;
           final allowsSuccessfulAssistedOrigin =
               decoded.phase == StudyPhase.retest &&
-              related?.kind == AttemptKind.correction;
+              related?.kind == AttemptKind.correction &&
+              related?.relatedEventId == null;
           if (related == null ||
               !validRetestIndex ||
               (related.isCorrect && !allowsSuccessfulAssistedOrigin) ||
