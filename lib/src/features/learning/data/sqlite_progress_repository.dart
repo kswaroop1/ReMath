@@ -6,9 +6,7 @@ import '../domain/learning_session.dart';
 import '../domain/progress_repository.dart';
 
 final class SqliteProgressRepository
-    implements
-        ProgressSnapshotRepository,
-        LearningTransitionRepository {
+    implements ProgressSnapshotRepository, LearningTransitionRepository {
   SqliteProgressRepository(this._database) {
     _migrate();
   }
@@ -445,10 +443,9 @@ final class SqliteProgressRepository
       final inserted = _insertAttempt(event);
       if (inserted) {
         if (nextSession == null) {
-          _database.execute(
-            'DELETE FROM active_session WHERE session_id = ?',
-            [event.sessionId],
-          );
+          _database.execute('DELETE FROM active_session WHERE session_id = ?', [
+            event.sessionId,
+          ]);
         } else {
           _writeSession(nextSession);
         }
