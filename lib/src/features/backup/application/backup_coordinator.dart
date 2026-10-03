@@ -9,9 +9,8 @@ import '../domain/backup_preview.dart';
 
 typedef BackupClock = DateTime Function();
 typedef BackupSessionValidator = bool Function(LearningSession session);
-typedef BackupSessionQuestionIdResolver = String? Function(
-  LearningSession session,
-);
+typedef BackupSessionQuestionIdResolver =
+    String? Function(LearningSession session);
 
 final class PendingBackupImport {
   const PendingBackupImport._(this._payload, {required this.preview});
