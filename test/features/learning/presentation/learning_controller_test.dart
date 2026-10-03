@@ -55,10 +55,7 @@ void main() {
 
     controller.updateDraft(controller.currentQuestion!.answer.toString());
     await controller.submitAnswer();
-    expect(repository.transitionKinds, [
-      AttemptKind.hint,
-      AttemptKind.answer,
-    ]);
+    expect(repository.transitionKinds, [AttemptKind.hint, AttemptKind.answer]);
   });
 
   test('refreshing unchanged recovery state preserves answer timing', () async {

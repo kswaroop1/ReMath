@@ -659,18 +659,13 @@ void main() {
     );
 
     test('preview binds Home retest to the preceding question', () async {
-      final session = _session('session-1').copyWith(
-        currentQuestionIndex: 4,
-        phase: LearningSessionPhase.retest,
-      );
+      final session = _session(
+        'session-1',
+      ).copyWith(currentQuestionIndex: 4, phase: LearningSessionPhase.retest);
       final encrypted = await cipher.encrypt(
         plaintext: BackupPayload(
           attempts: [
-            _attempt(
-              'event-1',
-              isCorrect: false,
-              questionId: 'question-0',
-            ),
+            _attempt('event-1', isCorrect: false, questionId: 'question-0'),
           ],
           createdAt: DateTime.utc(2026, 9, 20, 12),
           session: session,
