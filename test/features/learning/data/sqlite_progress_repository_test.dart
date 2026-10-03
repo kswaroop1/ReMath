@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/data/sqlite_progress_repository.dart';
 import 'package:remath/src/features/learning/domain/attempt_event.dart';
 import 'package:remath/src/features/learning/domain/learning_session.dart';
+import 'package:remath/src/features/learning/domain/progress_repository.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
@@ -81,6 +82,36 @@ void main() {
       expect(attempts.single.surprise, SurpriseRating.surprising);
     },
   );
+
+  test('commits a Home attempt and next session as one transition', () async {
+    final transition = repository as LearningTransitionRepository;
+    final event = AttemptEvent(
+      answer: '12',
+      eventId: 'event-1',
+      isCorrect: false,
+      occurredAt: DateTime.utc(2026, 8, 27, 8, 1),
+      questionId: 'question-1',
+      responseTime: const Duration(seconds: 3),
+      sessionId: 'session-1',
+      skillId: 'arithmetic.addition',
+    );
+    final next = LearningSession(
+      correctionOfEventId: 'event-1',
+      currentQuestionIndex: 0,
+      focusSkillId: 'arithmetic.addition',
+      id: 'session-1',
+      phase: LearningSessionPhase.correction,
+      seed: 91,
+      startedAt: DateTime.utc(2026, 8, 27, 8),
+    );
+
+    expect(await transition.commitLearningAttempt(event, next), isTrue);
+
+    final snapshot = await repository.loadSnapshot();
+    expect(snapshot.attempts.single.eventId, 'event-1');
+    expect(snapshot.session?.phase, LearningSessionPhase.correction);
+    expect(snapshot.session?.correctionOfEventId, 'event-1');
+  });
 
   test('rejects calibration metadata on assisted events', () async {
     final assisted = AttemptEvent(

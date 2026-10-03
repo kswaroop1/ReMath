@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/data/in_memory_progress_repository.dart';
 import 'package:remath/src/features/learning/domain/attempt_event.dart';
 import 'package:remath/src/features/learning/domain/learning_session.dart';
+import 'package:remath/src/features/learning/domain/progress_repository.dart';
 
 void main() {
   AttemptEvent attempt(String id) => AttemptEvent(
@@ -40,6 +41,23 @@ void main() {
     final loaded = await repository.loadAttempts();
     expect(loaded.map((event) => event.eventId), ['event-1', 'event-2']);
     expect(() => loaded.add(attempt('event-3')), throwsUnsupportedError);
+  });
+
+  test('commits a Home attempt and next session as one transition', () async {
+    final repository = InMemoryProgressRepository();
+    final transition = repository as LearningTransitionRepository;
+
+    expect(
+      await transition.commitLearningAttempt(
+        attempt('event-1'),
+        session('next-session'),
+      ),
+      isTrue,
+    );
+
+    final snapshot = await repository.loadSnapshot();
+    expect(snapshot.attempts.single.eventId, 'event-1');
+    expect(snapshot.session?.id, 'next-session');
   });
 
   test('rejects calibration metadata on assisted events', () async {

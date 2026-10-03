@@ -25,6 +25,15 @@ abstract interface class ProgressSnapshotRepository
   Future<ProgressSnapshot> loadSnapshot();
 }
 
+abstract interface class LearningTransitionRepository
+    implements ProgressRepository {
+  /// Commits a Home attempt and its resulting resumable session atomically.
+  Future<bool> commitLearningAttempt(
+    AttemptEvent event,
+    LearningSession? nextSession,
+  );
+}
+
 final class ProgressSnapshot {
   const ProgressSnapshot({
     required this.attempts,
