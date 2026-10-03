@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/data/in_memory_progress_repository.dart';
 import 'package:remath/src/features/learning/domain/fluency.dart';
 import 'package:remath/src/features/learning/domain/learning_session.dart';
+import 'package:remath/src/features/learning/domain/attempt_event.dart';
+import 'package:remath/src/features/learning/domain/progress_repository.dart';
 import 'package:remath/src/features/learning/presentation/learning_controller.dart';
 
 import '../../../support/foundation_pack.dart';
@@ -33,6 +35,30 @@ void main() {
       (await repository.loadAttempts()).single.responseTime,
       const Duration(seconds: 4),
     );
+  });
+
+  test('routes answers and hints through atomic Home transitions', () async {
+    final repository = _TransitionTrackingRepository();
+    var nextId = 0;
+    final controller = LearningController(
+      contentPack: foundationPackForTest(),
+      repository: repository,
+      clock: () => DateTime.utc(2026, 8, 27, 8),
+      idFactory: () => 'id-${nextId++}',
+    );
+    await controller.initialise();
+    await controller.startChunk();
+
+    await controller.revealNextHint();
+    expect(repository.transitionKinds, [AttemptKind.hint]);
+    expect((await repository.loadSession())?.revealedHintCount, 1);
+
+    controller.updateDraft(controller.currentQuestion!.answer.toString());
+    await controller.submitAnswer();
+    expect(repository.transitionKinds, [
+      AttemptKind.hint,
+      AttemptKind.answer,
+    ]);
   });
 
   test('refreshing unchanged recovery state preserves answer timing', () async {
@@ -164,4 +190,55 @@ void main() {
       expect(await repository.loadSession(), isNull);
     },
   );
+}
+
+final class _TransitionTrackingRepository
+    implements LearningTransitionRepository {
+  final InMemoryProgressRepository _delegate = InMemoryProgressRepository();
+  final List<AttemptKind> transitionKinds = [];
+
+  @override
+  Future<bool> commitLearningAttempt(
+    AttemptEvent event,
+    LearningSession? nextSession,
+  ) async {
+    transitionKinds.add(event.kind);
+    return (_delegate as LearningTransitionRepository).commitLearningAttempt(
+      event,
+      nextSession,
+    );
+  }
+
+  @override
+  Future<bool> commitStudyAttempt(AttemptEvent event, String state) =>
+      _delegate.commitStudyAttempt(event, state);
+  @override
+  Future<void> saveStudyState(String state) => _delegate.saveStudyState(state);
+  @override
+  Future<String?> loadStudyState() => _delegate.loadStudyState();
+  @override
+  Future<void> close() => _delegate.close();
+  @override
+  Future<void> completeSession(String sessionId) =>
+      _delegate.completeSession(sessionId);
+  @override
+  Future<List<AttemptEvent>> loadAttempts() => _delegate.loadAttempts();
+  @override
+  Future<LearningSession?> loadSession() => _delegate.loadSession();
+  @override
+  Future<ProgressMergeResult> mergeProgress({
+    required List<AttemptEvent> attempts,
+    required String? studyState,
+    LearningSession? session,
+  }) => _delegate.mergeProgress(
+    attempts: attempts,
+    studyState: studyState,
+    session: session,
+  );
+  @override
+  Future<bool> recordAttempt(AttemptEvent event) =>
+      _delegate.recordAttempt(event);
+  @override
+  Future<void> saveSession(LearningSession session) =>
+      _delegate.saveSession(session);
 }

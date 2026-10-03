@@ -616,6 +616,168 @@ void main() {
       expect(pending.preview.hasStudyState, isTrue);
     });
 
+    test('preview accepts a successful hinted answer as retest origin', () async {
+      final retest = StudyState(
+        phase: StudyPhase.retest,
+        plan: StudyPlan(
+          steps: const [
+            StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
+          ],
+          reason: 'Focused practice',
+        ),
+        questionIndex: 4,
+        relatedEventId: 'assisted-answer',
+        sessionId: 'study-session',
+      );
+      final origin = retest.copyWith(questionIndex: 3);
+      final encrypted = await cipher.encrypt(
+        plaintext: BackupPayload(
+          attempts: [
+            _attempt(
+              'assisted-answer',
+              kind: AttemptKind.correction,
+              questionId: _questionIdForState(origin),
+              sessionId: 'study-session',
+            ),
+          ],
+          createdAt: DateTime.utc(2026, 9, 20, 12),
+          studyState: retest.encode(),
+        ).encode(),
+        password: password,
+      );
+
+      final pending = await BackupCoordinator(
+        cipher: cipher,
+        clock: DateTime.now,
+        repository: InMemoryProgressRepository(),
+      ).preview(encrypted, password: password);
+
+      expect(pending.preview.hasStudyState, isTrue);
+    });
+
+    test('preview binds Home retest to the preceding question', () async {
+      final session = _session('session-1').copyWith(
+        currentQuestionIndex: 4,
+        phase: LearningSessionPhase.retest,
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: BackupPayload(
+          attempts: [
+            _attempt(
+              'event-1',
+              isCorrect: false,
+              questionId: 'question-0',
+            ),
+          ],
+          createdAt: DateTime.utc(2026, 9, 20, 12),
+          session: session,
+        ).encode(),
+        password: password,
+      );
+
+      await expectLater(
+        BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+          sessionQuestionIdResolver: (candidate) =>
+              'question-${candidate.currentQuestionIndex}',
+        ).preview(encrypted, password: password),
+        throwsFormatException,
+      );
+    });
+
+    test('preview binds study retest to the preceding question', () async {
+      final retest = StudyState(
+        phase: StudyPhase.retest,
+        plan: StudyPlan(
+          steps: const [
+            StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
+          ],
+          reason: 'Focused practice',
+        ),
+        questionIndex: 4,
+        relatedEventId: 'old-answer',
+        sessionId: 'study-session',
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: BackupPayload(
+          attempts: [
+            _attempt(
+              'old-answer',
+              isCorrect: false,
+              questionId: _questionIdForState(
+                retest.copyWith(questionIndex: 0),
+              ),
+              sessionId: 'study-session',
+            ),
+          ],
+          createdAt: DateTime.utc(2026, 9, 20, 12),
+          studyState: retest.encode(),
+        ).encode(),
+        password: password,
+      );
+
+      await expectLater(
+        BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+        ).preview(encrypted, password: password),
+        throwsFormatException,
+      );
+    });
+
+    test('preview rejects confidence retained by assisted study', () async {
+      for (final state in [
+        StudyState(
+          confidence: ConfidenceRating.high,
+          hintCount: 1,
+          plan: StudyPlanner().plan(
+            'number-fluency',
+            const [],
+            DateTime.utc(2026, 9, 20),
+          ),
+          sessionId: 'study-session',
+        ),
+        StudyState(
+          confidence: ConfidenceRating.high,
+          phase: StudyPhase.correction,
+          plan: StudyPlanner().plan(
+            'number-fluency',
+            const [],
+            DateTime.utc(2026, 9, 20),
+          ),
+          relatedEventId: 'event-1',
+          sessionId: 'study-session',
+        ),
+      ]) {
+        final encrypted = await cipher.encrypt(
+          plaintext: BackupPayload(
+            attempts: [
+              _attempt(
+                'event-1',
+                isCorrect: false,
+                questionId: _questionIdForState(state),
+                sessionId: 'study-session',
+              ),
+            ],
+            createdAt: DateTime.utc(2026, 9, 20, 12),
+            studyState: state.encode(),
+          ).encode(),
+          password: password,
+        );
+        await expectLater(
+          BackupCoordinator(
+            cipher: cipher,
+            clock: DateTime.now,
+            repository: InMemoryProgressRepository(),
+          ).preview(encrypted, password: password),
+          throwsFormatException,
+        );
+      }
+    });
+
     test('preview preserves unresolved legacy study correction', () async {
       final state = StudyState(
         generator: null,
