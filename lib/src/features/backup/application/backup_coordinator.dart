@@ -87,7 +87,8 @@ final class BackupCoordinator {
             session.phase == LearningSessionPhase.retest)) {
       final relatedEventId = session.correctionOfEventId;
       final related = availableAttempts[relatedEventId];
-      final expectedQuestionId = session.phase == LearningSessionPhase.retest &&
+      final expectedQuestionId =
+          session.phase == LearningSessionPhase.retest &&
               session.currentQuestionIndex > 0
           ? _sessionQuestionIdResolver?.call(
               session.copyWith(
@@ -128,8 +129,7 @@ final class BackupCoordinator {
           );
         }
         if (decoded.confidence != null &&
-            (decoded.hintCount > 0 ||
-                decoded.phase != StudyPhase.question)) {
+            (decoded.hintCount > 0 || decoded.phase != StudyPhase.question)) {
           throw const FormatException(
             'Assisted study cannot retain calibration confidence',
           );

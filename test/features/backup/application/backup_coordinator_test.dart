@@ -616,44 +616,47 @@ void main() {
       expect(pending.preview.hasStudyState, isTrue);
     });
 
-    test('preview accepts a successful hinted answer as retest origin', () async {
-      final retest = StudyState(
-        phase: StudyPhase.retest,
-        plan: StudyPlan(
-          steps: const [
-            StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
-          ],
-          reason: 'Focused practice',
-        ),
-        questionIndex: 4,
-        relatedEventId: 'assisted-answer',
-        sessionId: 'study-session',
-      );
-      final origin = retest.copyWith(questionIndex: 3);
-      final encrypted = await cipher.encrypt(
-        plaintext: BackupPayload(
-          attempts: [
-            _attempt(
-              'assisted-answer',
-              kind: AttemptKind.correction,
-              questionId: _questionIdForState(origin),
-              sessionId: 'study-session',
-            ),
-          ],
-          createdAt: DateTime.utc(2026, 9, 20, 12),
-          studyState: retest.encode(),
-        ).encode(),
-        password: password,
-      );
+    test(
+      'preview accepts a successful hinted answer as retest origin',
+      () async {
+        final retest = StudyState(
+          phase: StudyPhase.retest,
+          plan: StudyPlan(
+            steps: const [
+              StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
+            ],
+            reason: 'Focused practice',
+          ),
+          questionIndex: 4,
+          relatedEventId: 'assisted-answer',
+          sessionId: 'study-session',
+        );
+        final origin = retest.copyWith(questionIndex: 3);
+        final encrypted = await cipher.encrypt(
+          plaintext: BackupPayload(
+            attempts: [
+              _attempt(
+                'assisted-answer',
+                kind: AttemptKind.correction,
+                questionId: _questionIdForState(origin),
+                sessionId: 'study-session',
+              ),
+            ],
+            createdAt: DateTime.utc(2026, 9, 20, 12),
+            studyState: retest.encode(),
+          ).encode(),
+          password: password,
+        );
 
-      final pending = await BackupCoordinator(
-        cipher: cipher,
-        clock: DateTime.now,
-        repository: InMemoryProgressRepository(),
-      ).preview(encrypted, password: password);
+        final pending = await BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+        ).preview(encrypted, password: password);
 
-      expect(pending.preview.hasStudyState, isTrue);
-    });
+        expect(pending.preview.hasStudyState, isTrue);
+      },
+    );
 
     test('preview binds Home retest to the preceding question', () async {
       final session = _session('session-1').copyWith(
@@ -671,6 +674,7 @@ void main() {
           ],
           createdAt: DateTime.utc(2026, 9, 20, 12),
           session: session,
+          studyState: null,
         ).encode(),
         password: password,
       );

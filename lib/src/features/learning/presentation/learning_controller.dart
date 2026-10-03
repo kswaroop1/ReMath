@@ -315,16 +315,16 @@ final class LearningController extends ChangeNotifier {
     final level = HintLevel.values[session.revealedHintCount];
     final now = _clock().toUtc();
     final event = AttemptEvent(
-        answer: level.name,
-        eventId: _idFactory(),
-        isCorrect: false,
-        kind: AttemptKind.hint,
-        occurredAt: now,
-        questionId: card.id,
-        responseTime: now.difference(_questionBeganAt ?? now),
-        sessionId: session.id,
-        skillId: card.skillId,
-      );
+      answer: level.name,
+      eventId: _idFactory(),
+      isCorrect: false,
+      kind: AttemptKind.hint,
+      occurredAt: now,
+      questionId: card.id,
+      responseTime: now.difference(_questionBeganAt ?? now),
+      sessionId: session.id,
+      skillId: card.skillId,
+    );
     final nextSession = session.copyWith(
       revealedHintCount: session.revealedHintCount + 1,
     );

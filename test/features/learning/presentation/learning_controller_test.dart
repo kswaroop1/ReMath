@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/data/in_memory_progress_repository.dart';
+import 'package:remath/src/features/learning/domain/attempt_event.dart';
 import 'package:remath/src/features/learning/domain/fluency.dart';
 import 'package:remath/src/features/learning/domain/learning_session.dart';
-import 'package:remath/src/features/learning/domain/attempt_event.dart';
 import 'package:remath/src/features/learning/domain/progress_repository.dart';
 import 'package:remath/src/features/learning/presentation/learning_controller.dart';
 
@@ -47,7 +47,7 @@ void main() {
       idFactory: () => 'id-${nextId++}',
     );
     await controller.initialise();
-    await controller.startChunk();
+    await controller.startLearn('arithmetic.addition');
 
     await controller.revealNextHint();
     expect(repository.transitionKinds, [AttemptKind.hint]);
