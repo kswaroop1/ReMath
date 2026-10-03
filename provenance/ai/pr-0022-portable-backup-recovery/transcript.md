@@ -768,8 +768,11 @@ Final-head CI run 37140196085 verifies `e7d1dc0` with every gate green and
 all 388 native tests passing. Independent review then identified two remaining
 native-state boundaries: hinted multiple-choice first answers retain their MCQ
 identity when they become retest origins, and Home remediation roots permit
-failed answers and retests but not failed corrections. Commit `731f319` defines
-both contracts before `1feda88` implements their phase-specific validation.
+failed answers and retests but not failed corrections. Published commit
+`c2bd9ec` defines both contracts before `3b6e525` implements their
+phase-specific validation. Combining those separate recovery contracts in one
+red/green pair is an additional TDD batching deviation; the history is
+preserved and is not presented as separate compliant cycles.
 
 Process disclosure: published red `1d62f04` combined distinct backup-validation
 and atomic Home-hint contracts, with their implementation combined in
@@ -792,3 +795,13 @@ Replacement CI 37151224357 verifies commit `116c2fb` with every gate green,
 including all 389 native tests and the Chrome browser contracts. This is the
 authoritative final behavioural-head verification after reconciling the
 contradictory legacy Home-remediation example.
+
+Records-head CI 37154693406 verifies `c167e67` with every gate green. The final
+independent review of that head identified four further native Study-state
+boundaries: distinguish hinted first answers from intermediate corrections,
+preserve failed hinted MCQ identity, permit confidence on independent retests,
+and validate a retained causal remediation root across repeated assisted
+retests. Each boundary is addressed in its own ordered local red/green pair;
+local Flutter execution remains unavailable, so the focused missing-behaviour
+failures are established by the reviewed pre-fix conditions and the complete
+published stack receives one authoritative CI run.
