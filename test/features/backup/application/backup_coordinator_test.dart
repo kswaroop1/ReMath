@@ -898,6 +898,48 @@ void main() {
       }
     });
 
+    test('preview accepts confidence on an independent retest', () async {
+      final retest = StudyState(
+        awaitingSurprise: true,
+        confidence: ConfidenceRating.high,
+        phase: StudyPhase.retest,
+        plan: StudyPlan(
+          steps: const [
+            StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
+          ],
+          reason: 'Focused practice',
+        ),
+        questionIndex: 1,
+        relatedEventId: 'failed-answer',
+        sessionId: 'study-session',
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: BackupPayload(
+          attempts: [
+            _attempt(
+              'failed-answer',
+              isCorrect: false,
+              questionId: _questionIdForState(
+                retest.copyWith(questionIndex: 0),
+              ),
+              sessionId: 'study-session',
+            ),
+          ],
+          createdAt: DateTime.utc(2026, 9, 20, 12),
+          studyState: retest.encode(),
+        ).encode(),
+        password: password,
+      );
+
+      final pending = await BackupCoordinator(
+        cipher: cipher,
+        clock: DateTime.now,
+        repository: InMemoryProgressRepository(),
+      ).preview(encrypted, password: password);
+
+      expect(pending.preview.hasStudyState, isTrue);
+    });
+
     test('preview preserves unresolved legacy study correction', () async {
       final state = StudyState(
         generator: null,
