@@ -13,8 +13,11 @@ appropriate, its SHA-256 value against `SHA256SUMS.txt` on the release page.
 
 The current CI-generated Android signing identity is **not upgrade-stable**.
 Do not assume that a later prerelease APK can be installed over an earlier one.
-Uninstalling an APK can remove its local ReMath progress, and export/restore is
-not implemented yet. **EN-013 remains incomplete** until an owner-controlled
+Uninstalling an APK can remove its local ReMath progress. Before uninstalling,
+open **Backup & recovery** in ReMath, export an encrypted backup, choose a
+strong password, and keep both the file and password safely. After installing
+the replacement APK, return to **Backup & recovery**, preview that file, verify
+its scope, and apply it. **EN-013 remains incomplete** until an owner-controlled
 release keystore is stored securely and used consistently by the release job.
 
 ### Windows

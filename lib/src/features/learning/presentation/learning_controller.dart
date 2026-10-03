@@ -13,6 +13,7 @@ import '../domain/curriculum_graph.dart';
 import '../domain/diagnostic_placement.dart';
 import '../domain/fluency.dart';
 import '../domain/learning_session.dart';
+import '../domain/learning_session_compatibility.dart';
 import '../domain/mastery_summary.dart';
 import '../domain/progress_dashboard.dart';
 import '../domain/progress_repository.dart';
@@ -161,18 +162,22 @@ final class LearningController extends ChangeNotifier {
       return null;
     }
     final focusedOperation = ArithmeticOperationDefinition.fromSkillId(
-      session.focusSkillId ?? '',
+      session.questionSkillId ?? session.focusSkillId ?? '',
     );
     final operation =
         focusedOperation ??
         (isDiagnostic
             ? ArithmeticOperation.values[session.currentQuestionIndex ~/ 3]
             : _scheduler.choose(fluency: _fluency, now: _clock().toUtc()));
-    return _questionFor(
+    final question = _questionFor(
       seed: session.seed,
       index: session.currentQuestionIndex,
       operation: operation,
     );
+    if (session.questionId != null && session.questionId != question.id) {
+      return null;
+    }
+    return question;
   }
 
   Duration get remaining {
@@ -191,8 +196,36 @@ final class LearningController extends ChangeNotifier {
     _attempts = await _repository.loadAttempts();
     _latestDiagnosticSessionId = _latestDiagnosticId(_attempts);
     _recalculateProgress();
+    var restored = _session;
+    if (restored != null &&
+        !isLearningSessionCompatible(
+          restored,
+          contentPack: _contentPack,
+          generator: _generator,
+        )) {
+      await _repository.completeSession(restored.id);
+      _session = null;
+      restored = null;
+    }
+    if (restored != null &&
+        !isLearning &&
+        restored.questionId == null &&
+        restored.questionSkillId == null) {
+      await _persistSession();
+    }
     _questionBeganAt = _clock().toUtc();
     notifyListeners();
+  }
+
+  Future<void> refreshPersistedState() async {
+    final previousSessionId = _session?.id;
+    final previousQuestionId = currentQuestion?.id;
+    final previousQuestionBeganAt = _questionBeganAt;
+    await initialise();
+    if (_session?.id == previousSessionId &&
+        currentQuestion?.id == previousQuestionId) {
+      _questionBeganAt = previousQuestionBeganAt;
+    }
   }
 
   Future<void> startChunk() async {
@@ -211,7 +244,7 @@ final class LearningController extends ChangeNotifier {
     _questionBeganAt = now;
     _lastCompletedOperation = null;
     _lastAssessment = null;
-    await _repository.saveSession(_session!);
+    await _persistSession();
     notifyListeners();
   }
 
@@ -228,7 +261,7 @@ final class LearningController extends ChangeNotifier {
     _questionBeganAt = now;
     _lastCompletedOperation = null;
     _lastAssessment = null;
-    await _repository.saveSession(_session!);
+    await _persistSession();
     notifyListeners();
   }
 
@@ -246,7 +279,7 @@ final class LearningController extends ChangeNotifier {
     _questionBeganAt = now;
     _lastCompletedOperation = null;
     _lastAssessment = null;
-    await _repository.saveSession(_session!);
+    await _persistSession();
     notifyListeners();
   }
 
@@ -268,7 +301,7 @@ final class LearningController extends ChangeNotifier {
     _questionBeganAt = now;
     _lastCompletedOperation = null;
     _lastAssessment = null;
-    await _repository.saveSession(_session!);
+    await _persistSession();
     notifyListeners();
     return true;
   }
@@ -281,24 +314,28 @@ final class LearningController extends ChangeNotifier {
     }
     final level = HintLevel.values[session.revealedHintCount];
     final now = _clock().toUtc();
-    await _repository.recordAttempt(
-      AttemptEvent(
-        answer: level.name,
-        eventId: _idFactory(),
-        isCorrect: false,
-        kind: AttemptKind.hint,
-        occurredAt: now,
-        questionId: card.id,
-        responseTime: now.difference(_questionBeganAt ?? now),
-        sessionId: session.id,
-        skillId: card.skillId,
-      ),
+    final event = AttemptEvent(
+      answer: level.name,
+      eventId: _idFactory(),
+      isCorrect: false,
+      kind: AttemptKind.hint,
+      occurredAt: now,
+      questionId: card.id,
+      responseTime: now.difference(_questionBeganAt ?? now),
+      sessionId: session.id,
+      skillId: card.skillId,
     );
-    _attempts = await _repository.loadAttempts();
-    _session = session.copyWith(
+    final nextSession = session.copyWith(
       revealedHintCount: session.revealedHintCount + 1,
     );
-    await _repository.saveSession(_session!);
+    if (_repository case final LearningTransitionRepository repository) {
+      await repository.commitLearningAttempt(event, nextSession);
+    } else {
+      await _repository.recordAttempt(event);
+      await _repository.saveSession(nextSession);
+    }
+    _attempts = await _repository.loadAttempts();
+    _session = nextSession;
     _recalculateProgress();
     notifyListeners();
   }
@@ -308,8 +345,13 @@ final class LearningController extends ChangeNotifier {
     if (session == null) {
       return;
     }
-    _session = session.copyWith(answerDraft: value);
-    unawaited(_repository.saveSession(_session!));
+    final question = currentQuestion;
+    _session = session.copyWith(
+      answerDraft: value,
+      questionId: question?.id,
+      questionSkillId: question?.skillId,
+    );
+    unawaited(_persistSession());
   }
 
   Future<void> submitAnswer() async {
@@ -351,10 +393,6 @@ final class LearningController extends ChangeNotifier {
       sessionId: session.id,
       skillId: question.skillId,
     );
-    await _repository.recordAttempt(event);
-    _attempts = await _repository.loadAttempts();
-    _lastAssessment = AttemptAssessment.fromEvent(event);
-    _recalculateProgress();
     if (isCorrecting) {
       if (isCorrect) {
         _session = session.copyWith(
@@ -365,10 +403,7 @@ final class LearningController extends ChangeNotifier {
       } else {
         _session = session.copyWith(answerDraft: '');
       }
-      await _repository.saveSession(_session!);
-      _questionBeganAt = now;
-      _isBusy = false;
-      notifyListeners();
+      await _commitSubmission(event, now);
       return;
     }
     if (isRetesting) {
@@ -379,19 +414,18 @@ final class LearningController extends ChangeNotifier {
           phase: LearningSessionPhase.correction,
         );
       } else {
+        final returningToReview = session.id.startsWith(_reviewPrefix);
         _session = session.copyWith(
           answerDraft: '',
-          clearRemediation: true,
+          clearCorrection: returningToReview,
+          clearRemediation: !returningToReview,
           currentQuestionIndex: question.index + 1,
-          phase: session.id.startsWith(_reviewPrefix)
+          phase: returningToReview
               ? LearningSessionPhase.review
               : LearningSessionPhase.question,
         );
       }
-      await _repository.saveSession(_session!);
-      _questionBeganAt = now;
-      _isBusy = false;
-      notifyListeners();
+      await _commitSubmission(event, now);
       return;
     }
     if (!isCorrect && !isDiagnostic) {
@@ -401,17 +435,13 @@ final class LearningController extends ChangeNotifier {
         focusSkillId: question.skillId,
         phase: LearningSessionPhase.correction,
       );
-      await _repository.saveSession(_session!);
-      _questionBeganAt = now;
-      _isBusy = false;
-      notifyListeners();
+      await _commitSubmission(event, now);
       return;
     }
     final diagnosticComplete =
         isDiagnostic &&
         session.currentQuestionIndex + 1 >= _diagnosticQuestionCount;
     if (remaining == Duration.zero || diagnosticComplete) {
-      await _repository.completeSession(session.id);
       _session = null;
       if (!session.id.startsWith(_diagnosticPrefix)) {
         _lastCompletedOperation = question.operation;
@@ -421,8 +451,25 @@ final class LearningController extends ChangeNotifier {
         answerDraft: '',
         currentQuestionIndex: session.currentQuestionIndex + 1,
       );
-      await _repository.saveSession(_session!);
     }
+    await _commitSubmission(event, now);
+  }
+
+  Future<void> _commitSubmission(AttemptEvent event, DateTime now) async {
+    if (_repository case final LearningTransitionRepository repository) {
+      await repository.commitLearningAttempt(event, _session);
+    } else {
+      await _repository.recordAttempt(event);
+      final session = _session;
+      if (session == null) {
+        await _repository.completeSession(event.sessionId);
+      } else {
+        await _repository.saveSession(session);
+      }
+    }
+    _attempts = await _repository.loadAttempts();
+    _lastAssessment = AttemptAssessment.fromEvent(event);
+    _recalculateProgress();
     _questionBeganAt = now;
     _isBusy = false;
     notifyListeners();
@@ -463,6 +510,21 @@ final class LearningController extends ChangeNotifier {
   void _recalculateProgress() {
     _mastery = MasterySummary.fromAttempts(_attempts);
     _fluency = _fluencyCalculator.calculate(_attempts);
+  }
+
+  Future<void> _persistSession() async {
+    final session = _session;
+    if (session == null) {
+      return;
+    }
+    final question = isLearning ? null : currentQuestion;
+    if (question != null) {
+      _session = session.copyWith(
+        questionId: question.id,
+        questionSkillId: question.skillId,
+      );
+    }
+    await _repository.saveSession(_session!);
   }
 
   static String _randomId() {
