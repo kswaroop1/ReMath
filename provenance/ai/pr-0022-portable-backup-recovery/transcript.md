@@ -617,6 +617,13 @@ submission through that transaction. Exact findings are [atomic Home
 transition][r82], [records-head verification][r83], [multiple-choice
 remediation identity][r84], and [unresolved legacy identity][r85].
 
+Batch CI run 37110105815 passed 382 tests and exposed the complete remaining
+failure set: the new legacy fixture used a non-existent skill identifier, and
+SQLite's two-interface declaration differed from Dart 3.13 canonical layout.
+Commit `ffb4c94` corrects the fixture to the published `number.fractions` skill
+and applies the formatter's tall declaration layout together before rerunning
+the full suite.
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
