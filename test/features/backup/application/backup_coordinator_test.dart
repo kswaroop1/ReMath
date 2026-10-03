@@ -47,7 +47,7 @@ void main() {
     });
 
     test(
-      'export retries until attempts and active state are coherent',
+      'export snapshots attempts and active state atomically',
       () async {
         final repository = _ChangingExportRepository();
         final encrypted = await BackupCoordinator(
@@ -767,17 +767,20 @@ final class _ChangingExportRepository implements ProgressRepository {
   @override
   Future<List<AttemptEvent>> loadAttempts() async {
     _attemptReads++;
-    if (_attemptReads == 2) {
+    if (_attemptReads == 1) {
       await _delegate.recordAttempt(
         _attempt('event-1', isCorrect: false, sessionId: 'session-1'),
       );
-      await _delegate.saveSession(_session('session-1'));
     }
     return _delegate.loadAttempts();
   }
 
   @override
-  Future<LearningSession?> loadSession() => _delegate.loadSession();
+  Future<LearningSession?> loadSession() async {
+    final session = await _delegate.loadSession();
+    await _delegate.saveSession(_session('session-1'));
+    return session;
+  }
 
   @override
   Future<String?> loadStudyState() => _delegate.loadStudyState();
