@@ -763,3 +763,18 @@ is retained here as a TDD-process deviation.
 [r95]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4173395563
 
 Final review integration CI 37130458568 exposed a missing required studyState argument and a controller fixture that did not enter Learn mode. Commit `51ca9e9` corrects those fixtures; CI 37131508974 passes all 388 native tests, with only formatting remaining. Diagnostic CI 37135751696 again passes all 388 tests and supplies the exact two test-file formatting deltas applied in the following formatting commit, which also restores the normal non-mutating gate. Generated analysis-options and macOS registrant differences printed by the diagnostic are dependency-installation changes, not Dart formatter changes. Local SDK execution remains unavailable.
+
+Final-head CI run 37140196085 verifies `e7d1dc0` with every gate green and
+all 388 native tests passing. Independent review then identified two remaining
+native-state boundaries: hinted multiple-choice first answers retain their MCQ
+identity when they become retest origins, and Home remediation roots permit
+failed answers and retests but not failed corrections. Commit `731f319` defines
+both contracts before `1feda88` implements their phase-specific validation.
+
+Process disclosure: published red `1d62f04` combined distinct backup-validation
+and atomic Home-hint contracts, with their implementation combined in
+`fde7365`; this does not satisfy the separate-pair rule. That red commit also
+stopped at an omitted required argument and a controller fixture that never
+entered Learn mode, corrected only in `51ca9e9` after production implementation.
+The shared cycle is therefore recorded as both a batching deviation and a
+production-first TDD deviation rather than compliant test-first evidence.
