@@ -603,6 +603,20 @@ CI run 37104305649 then verifies the complete correction head with every gate
 green. The four review threads are answered with their commits and that final
 verification.
 
+Records-head CI run 37104503538 verifies submitted head `59b8218` with every
+gate green. Independent review then identified three further behavior
+boundaries: Home attempts and their resulting session transition must commit
+atomically rather than merely be read atomically; repeated multiple-choice
+remediation records the canonical base question identity; and unresolved
+legacy study state must preserve its pre-origin-suffix identity until the
+learner chooses a generator. Commit `d720737` states the two study-identity
+contracts before `7e9f54d` implements their phase-aware canonical comparison.
+Commit `e07e2f4` states the atomic Home-transition repository contract before
+`7700ea8` implements it for in-memory and SQLite persistence and routes Home
+submission through that transaction. Exact findings are [atomic Home
+transition][r82], [records-head verification][r83], [multiple-choice
+remediation identity][r84], and [unresolved legacy identity][r85].
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
@@ -685,3 +699,7 @@ verification.
 [r79]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4171534570
 [r80]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4171534571
 [r81]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4171534574
+[r82]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4172097375
+[r83]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4172097382
+[r84]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4172097388
+[r85]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4172097392
