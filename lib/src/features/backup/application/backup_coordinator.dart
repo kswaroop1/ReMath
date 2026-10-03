@@ -160,8 +160,7 @@ final class BackupCoordinator {
                             questionIndex: decoded.questionIndex - 1,
                           )
                         : decoded,
-                    related.kind,
-                    relatedIsCorrect: related.isCorrect,
+                    related,
                   )) {
             throw const FormatException(
               'Study remediation requires an originating attempt',
@@ -225,15 +224,12 @@ String _studyQuestionId(StudyState state) {
 
 String _studyRemediationQuestionId(
   StudyState state,
-  AttemptKind originKind, {
-  bool relatedIsCorrect = false,
-}) {
+  AttemptEvent origin,
+) {
   var identity = _studyQuestionId(state);
   final hintedFirstAnswer =
-      state.phase == StudyPhase.retest &&
-      originKind == AttemptKind.correction &&
-      relatedIsCorrect;
-  if (originKind != AttemptKind.answer &&
+      origin.kind == AttemptKind.correction && origin.relatedEventId == null;
+  if (origin.kind != AttemptKind.answer &&
       !hintedFirstAnswer &&
       identity.endsWith('.mcq')) {
     identity = identity.substring(0, identity.length - '.mcq'.length);
