@@ -389,10 +389,6 @@ final class LearningController extends ChangeNotifier {
       sessionId: session.id,
       skillId: question.skillId,
     );
-    await _repository.recordAttempt(event);
-    _attempts = await _repository.loadAttempts();
-    _lastAssessment = AttemptAssessment.fromEvent(event);
-    _recalculateProgress();
     if (isCorrecting) {
       if (isCorrect) {
         _session = session.copyWith(
@@ -403,10 +399,7 @@ final class LearningController extends ChangeNotifier {
       } else {
         _session = session.copyWith(answerDraft: '');
       }
-      await _persistSession();
-      _questionBeganAt = now;
-      _isBusy = false;
-      notifyListeners();
+      await _commitSubmission(event, now);
       return;
     }
     if (isRetesting) {
@@ -428,10 +421,7 @@ final class LearningController extends ChangeNotifier {
               : LearningSessionPhase.question,
         );
       }
-      await _persistSession();
-      _questionBeganAt = now;
-      _isBusy = false;
-      notifyListeners();
+      await _commitSubmission(event, now);
       return;
     }
     if (!isCorrect && !isDiagnostic) {
@@ -441,17 +431,13 @@ final class LearningController extends ChangeNotifier {
         focusSkillId: question.skillId,
         phase: LearningSessionPhase.correction,
       );
-      await _persistSession();
-      _questionBeganAt = now;
-      _isBusy = false;
-      notifyListeners();
+      await _commitSubmission(event, now);
       return;
     }
     final diagnosticComplete =
         isDiagnostic &&
         session.currentQuestionIndex + 1 >= _diagnosticQuestionCount;
     if (remaining == Duration.zero || diagnosticComplete) {
-      await _repository.completeSession(session.id);
       _session = null;
       if (!session.id.startsWith(_diagnosticPrefix)) {
         _lastCompletedOperation = question.operation;
@@ -461,8 +447,25 @@ final class LearningController extends ChangeNotifier {
         answerDraft: '',
         currentQuestionIndex: session.currentQuestionIndex + 1,
       );
-      await _persistSession();
     }
+    await _commitSubmission(event, now);
+  }
+
+  Future<void> _commitSubmission(AttemptEvent event, DateTime now) async {
+    if (_repository case final LearningTransitionRepository repository) {
+      await repository.commitLearningAttempt(event, _session);
+    } else {
+      await _repository.recordAttempt(event);
+      final session = _session;
+      if (session == null) {
+        await _repository.completeSession(event.sessionId);
+      } else {
+        await _repository.saveSession(session);
+      }
+    }
+    _attempts = await _repository.loadAttempts();
+    _lastAssessment = AttemptAssessment.fromEvent(event);
+    _recalculateProgress();
     _questionBeganAt = now;
     _isBusy = false;
     notifyListeners();

@@ -5,7 +5,8 @@ import '../domain/attempt_event.dart';
 import '../domain/learning_session.dart';
 import '../domain/progress_repository.dart';
 
-final class SqliteProgressRepository implements ProgressSnapshotRepository {
+final class SqliteProgressRepository
+    implements ProgressSnapshotRepository, LearningTransitionRepository {
   SqliteProgressRepository(this._database) {
     _migrate();
   }
@@ -429,6 +430,33 @@ final class SqliteProgressRepository implements ProgressSnapshotRepository {
   Future<bool> recordAttempt(AttemptEvent event) async {
     event.validateCalibrationEvidence();
     return _insertAttempt(event);
+  }
+
+  @override
+  Future<bool> commitLearningAttempt(
+    AttemptEvent event,
+    LearningSession? nextSession,
+  ) async {
+    event.validateCalibrationEvidence();
+    _database.execute('BEGIN IMMEDIATE');
+    try {
+      final inserted = _insertAttempt(event);
+      if (inserted) {
+        if (nextSession == null) {
+          _database.execute(
+            'DELETE FROM active_session WHERE session_id = ?',
+            [event.sessionId],
+          );
+        } else {
+          _writeSession(nextSession);
+        }
+      }
+      _database.execute('COMMIT');
+      return inserted;
+    } catch (_) {
+      _database.execute('ROLLBACK');
+      rethrow;
+    }
   }
 
   bool _insertAttempt(AttemptEvent event) {

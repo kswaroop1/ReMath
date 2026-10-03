@@ -3,7 +3,8 @@ import '../domain/attempt_event.dart';
 import '../domain/learning_session.dart';
 import '../domain/progress_repository.dart';
 
-final class InMemoryProgressRepository implements ProgressSnapshotRepository {
+final class InMemoryProgressRepository
+    implements ProgressSnapshotRepository, LearningTransitionRepository {
   final Map<String, AttemptEvent> _attempts = {};
   LearningSession? _session;
   String? _studyState;
@@ -114,6 +115,18 @@ final class InMemoryProgressRepository implements ProgressSnapshotRepository {
       return false;
     }
     _attempts[event.eventId] = event;
+    return true;
+  }
+
+  @override
+  Future<bool> commitLearningAttempt(
+    AttemptEvent event,
+    LearningSession? nextSession,
+  ) async {
+    event.validateCalibrationEvidence();
+    if (_attempts.containsKey(event.eventId)) return false;
+    _attempts[event.eventId] = event;
+    _session = nextSession;
     return true;
   }
 
