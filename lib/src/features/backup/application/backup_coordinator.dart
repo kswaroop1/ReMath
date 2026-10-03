@@ -153,15 +153,7 @@ final class BackupCoordinator {
                   step.kind != StudyStepKind.practice) ||
               related.sessionId != decoded.sessionId ||
               related.skillId != step.skillId ||
-              related.questionId !=
-                  _studyRemediationQuestionId(
-                    decoded.phase == StudyPhase.retest
-                        ? decoded.copyWith(
-                            questionIndex: decoded.questionIndex - 1,
-                          )
-                        : decoded,
-                    related,
-                  )) {
+              !_matchesStudyRemediationQuestion(decoded, related)) {
             throw const FormatException(
               'Study remediation requires an originating attempt',
             );
@@ -200,6 +192,25 @@ bool _sameAttempts(List<AttemptEvent> left, List<AttemptEvent> right) {
     if (!left[index].hasSameImmutableContentAs(right[index])) return false;
   }
   return true;
+}
+
+bool _matchesStudyRemediationQuestion(
+  StudyState state,
+  AttemptEvent origin,
+) {
+  if (state.phase != StudyPhase.retest) {
+    return origin.questionId == _studyRemediationQuestionId(state, origin);
+  }
+  for (var index = 0; index < state.questionIndex; index++) {
+    if (origin.questionId ==
+        _studyRemediationQuestionId(
+          state.copyWith(questionIndex: index),
+          origin,
+        )) {
+      return true;
+    }
+  }
+  return false;
 }
 
 String _studyQuestionId(StudyState state) {
