@@ -596,6 +596,13 @@ commit pairs for differing behaviors. It is retained rather than rewritten and
 recorded here as a TDD-process deviation. The new atomic-snapshot behavior uses
 its own separate red/green pair.
 
+Batch-head CI run 37103219762 passed all 379 behavior tests but exposed one
+Dart 3.13 formatting mismatch in the focused atomic-snapshot test. Commit
+`7da4fdf` applies the formatter's canonical layout without changing behavior;
+CI run 37104305649 then verifies the complete correction head with every gate
+green. The four review threads are answered with their commits and that final
+verification.
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
