@@ -46,24 +46,21 @@ void main() {
       expect((await target.loadAttempts()).single.eventId, 'event-1');
     });
 
-    test(
-      'export snapshots attempts and active state atomically',
-      () async {
-        final repository = _ChangingExportRepository();
-        final encrypted = await BackupCoordinator(
-          cipher: cipher,
-          clock: () => DateTime.utc(2026, 9, 20, 12),
-          repository: repository,
-        ).export(password: password);
+    test('export snapshots attempts and active state atomically', () async {
+      final repository = _ChangingExportRepository();
+      final encrypted = await BackupCoordinator(
+        cipher: cipher,
+        clock: () => DateTime.utc(2026, 9, 20, 12),
+        repository: repository,
+      ).export(password: password);
 
-        final payload = BackupPayload.decode(
-          await cipher.decrypt(encrypted, password: password),
-        );
+      final payload = BackupPayload.decode(
+        await cipher.decrypt(encrypted, password: password),
+      );
 
-        expect(payload.attempts.single.eventId, 'event-1');
-        expect(payload.session?.correctionOfEventId, 'event-1');
-      },
-    );
+      expect(payload.attempts.single.eventId, 'event-1');
+      expect(payload.session?.correctionOfEventId, 'event-1');
+    });
 
     test('preview rejects an unsafe active-study snapshot', () async {
       final payload = BackupPayload(
