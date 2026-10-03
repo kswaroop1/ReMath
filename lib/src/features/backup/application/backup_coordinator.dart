@@ -135,7 +135,8 @@ final class BackupCoordinator {
               related.sessionId != decoded.sessionId ||
               related.skillId != step.skillId ||
               (decoded.phase == StudyPhase.correction &&
-                  related.questionId != _studyQuestionId(decoded))) {
+                  related.questionId !=
+                      _studyRemediationQuestionId(decoded, related.kind))) {
             throw const FormatException(
               'Study remediation requires an originating attempt',
             );
@@ -194,6 +195,17 @@ String _studyQuestionId(StudyState state) {
     identity = '$identity.origin-${_studyQuestionOrigin(state)}';
   }
   return step.multipleChoice ? '$identity.mcq' : identity;
+}
+
+String _studyRemediationQuestionId(StudyState state, AttemptKind originKind) {
+  var identity = _studyQuestionId(state);
+  if (originKind != AttemptKind.answer && identity.endsWith('.mcq')) {
+    identity = identity.substring(0, identity.length - '.mcq'.length);
+  }
+  if (state.generator == null) {
+    identity = identity.split('.origin-').first;
+  }
+  return identity;
 }
 
 String _studyQuestionOrigin(StudyState state) {
