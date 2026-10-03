@@ -802,7 +802,7 @@ void main() {
       );
     });
 
-    test('preview binds study retest to the preceding question', () async {
+    test('preview preserves a retained Study retest origin', () async {
       final retest = StudyState(
         phase: StudyPhase.retest,
         plan: StudyPlan(
@@ -838,14 +838,13 @@ void main() {
         password: password,
       );
 
-      await expectLater(
-        BackupCoordinator(
-          cipher: cipher,
-          clock: DateTime.now,
-          repository: InMemoryProgressRepository(),
-        ).preview(encrypted, password: password),
-        throwsFormatException,
-      );
+      final pending = await BackupCoordinator(
+        cipher: cipher,
+        clock: DateTime.now,
+        repository: InMemoryProgressRepository(),
+      ).preview(encrypted, password: password);
+
+      expect(pending.preview.hasStudyState, isTrue);
     });
 
     test('preview rejects confidence retained by assisted study', () async {
