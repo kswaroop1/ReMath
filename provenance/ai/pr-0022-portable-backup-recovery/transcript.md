@@ -578,6 +578,24 @@ dependency-lock and content validation, the Chrome contract suite, all 379
 native tests, coverage enforcement, and secret scanning. The four records-head
 review findings are answered with their red/green commits and this verification.
 
+Records-head CI run 37088830717 verifies submitted head `b8182e0` with every
+gate green. Independent review found that the retry cannot cover the interval
+between Home attempt persistence and its next session-state persistence, so
+commit `1096fcc` states an atomic repository-snapshot contract before commit
+`b5557a2` implements it for production SQLite and in-memory repositories.
+Commit `315d797` also replaces the obsolete Android warning with the shipped
+encrypted backup/recovery steps. Exact findings are [records-head
+verification][r78], [atomic Home snapshot][r79], [Android recovery
+instructions][r80], and [batched TDD disclosure][r81].
+
+Process disclosure: the earlier `ff7131a` / `bff3a12` cycle batched three
+distinct review corrections into one red commit and one green commit. Although
+the tests preceded implementation and remain independently focused, that
+history does not satisfy the repository rule requiring separate red/green
+commit pairs for differing behaviors. It is retained rather than rewritten and
+recorded here as a TDD-process deviation. The new atomic-snapshot behavior uses
+its own separate red/green pair.
+
 [r1]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815397
 [r2]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815400
 [r3]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4058815402
@@ -655,3 +673,8 @@ review findings are answered with their red/green commits and this verification.
 [r75]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4119606376
 [r76]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4119606383
 [r77]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4119606392
+
+[r78]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4171534564
+[r79]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4171534570
+[r80]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4171534571
+[r81]: https://github.com/kswaroop1/ReMath/pull/22#discussion_r4171534574
