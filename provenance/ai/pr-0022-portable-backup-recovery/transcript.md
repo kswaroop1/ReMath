@@ -787,3 +787,8 @@ The acceptance contract is failed answer or failed retest for Home, so the
 legacy parameterized example is corrected to cover answer and retest. This is
 a requirement/test reconciliation, not new production behaviour; the final
 review's production restriction remains unchanged.
+
+Replacement CI 37151224357 verifies commit `116c2fb` with every gate green,
+including all 389 native tests and the Chrome browser contracts. This is the
+authoritative final behavioural-head verification after reconciling the
+contradictory legacy Home-remediation example.
