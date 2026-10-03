@@ -129,7 +129,7 @@ final class BackupCoordinator {
           );
         }
         if (decoded.confidence != null &&
-            (decoded.hintCount > 0 || decoded.phase != StudyPhase.question)) {
+            (decoded.hintCount > 0 || decoded.phase == StudyPhase.correction)) {
           throw const FormatException(
             'Assisted study cannot retain calibration confidence',
           );
