@@ -572,6 +572,90 @@ void main() {
       },
     );
 
+    test('preview accepts repeated multiple-choice remediation', () async {
+      final state = StudyState(
+        phase: StudyPhase.correction,
+        plan: StudyPlan(
+          steps: const [
+            StudyStep(
+              StudyStepKind.practice,
+              'arithmetic.addition',
+              1,
+              multipleChoice: true,
+            ),
+          ],
+          reason: 'Focused practice',
+        ),
+        relatedEventId: 'event-1',
+        sessionId: 'study-session',
+      );
+      final payload = BackupPayload(
+        attempts: [
+          _attempt(
+            'event-1',
+            isCorrect: false,
+            kind: AttemptKind.correction,
+            questionId: _questionIdForState(state).replaceFirst('.mcq', ''),
+            sessionId: 'study-session',
+          ),
+        ],
+        createdAt: DateTime.utc(2026, 9, 20, 12),
+        studyState: state.encode(),
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: payload.encode(),
+        password: password,
+      );
+
+      final pending = await BackupCoordinator(
+        cipher: cipher,
+        clock: DateTime.now,
+        repository: InMemoryProgressRepository(),
+      ).preview(encrypted, password: password);
+
+      expect(pending.preview.hasStudyState, isTrue);
+    });
+
+    test('preview preserves unresolved legacy study correction', () async {
+      final state = StudyState(
+        generator: null,
+        phase: StudyPhase.correction,
+        plan: StudyPlan(
+          steps: const [
+            StudyStep(StudyStepKind.practice, 'fractions.addition', 1),
+          ],
+          reason: 'Legacy practice',
+        ),
+        relatedEventId: 'event-1',
+        sessionId: 'study-session',
+      );
+      final payload = BackupPayload(
+        attempts: [
+          _attempt(
+            'event-1',
+            isCorrect: false,
+            questionId: _questionIdForState(state).split('.origin-').first,
+            sessionId: 'study-session',
+            skillId: 'fractions.addition',
+          ),
+        ],
+        createdAt: DateTime.utc(2026, 9, 20, 12),
+        studyState: state.encode(),
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: payload.encode(),
+        password: password,
+      );
+
+      final pending = await BackupCoordinator(
+        cipher: cipher,
+        clock: DateTime.now,
+        repository: InMemoryProgressRepository(),
+      ).preview(encrypted, password: password);
+
+      expect(pending.preview.hasStudyState, isTrue);
+    });
+
     test(
       'preview rejects related events in question-phase study state',
       () async {
