@@ -87,16 +87,21 @@ final class BackupCoordinator {
             session.phase == LearningSessionPhase.retest)) {
       final relatedEventId = session.correctionOfEventId;
       final related = availableAttempts[relatedEventId];
-      final currentQuestionId =
-          session.questionId ?? _sessionQuestionIdResolver?.call(session);
+      final expectedQuestionId = session.phase == LearningSessionPhase.retest &&
+              session.currentQuestionIndex > 0
+          ? _sessionQuestionIdResolver?.call(
+              session.copyWith(
+                currentQuestionIndex: session.currentQuestionIndex - 1,
+              ),
+            )
+          : session.questionId ?? _sessionQuestionIdResolver?.call(session);
       if (related == null ||
           related.isCorrect ||
           !_isRemediationOrigin(related.kind) ||
           related.sessionId != session.id ||
           related.skillId != session.focusSkillId ||
-          (session.phase == LearningSessionPhase.correction &&
-              (currentQuestionId == null ||
-                  related.questionId != currentQuestionId))) {
+          (expectedQuestionId == null ||
+              related.questionId != expectedQuestionId)) {
         throw const FormatException(
           'Remediation session requires an originating attempt',
         );
@@ -122,21 +127,40 @@ final class BackupCoordinator {
             'Question-phase study cannot reference remediation history',
           );
         }
+        if (decoded.confidence != null &&
+            (decoded.hintCount > 0 ||
+                decoded.phase != StudyPhase.question)) {
+          throw const FormatException(
+            'Assisted study cannot retain calibration confidence',
+          );
+        }
         if (decoded.phase != StudyPhase.question &&
             decoded.relatedEventId != null) {
           final related = availableAttempts[decoded.relatedEventId];
           final step = decoded.step;
+          final validRetestIndex =
+              decoded.phase != StudyPhase.retest || decoded.questionIndex > 0;
+          final allowsSuccessfulAssistedOrigin =
+              decoded.phase == StudyPhase.retest &&
+              related?.kind == AttemptKind.correction;
           if (related == null ||
-              related.isCorrect ||
+              !validRetestIndex ||
+              (related.isCorrect && !allowsSuccessfulAssistedOrigin) ||
               !_isRemediationOrigin(related.kind) ||
               step == null ||
               (step.kind != StudyStepKind.retrieval &&
                   step.kind != StudyStepKind.practice) ||
               related.sessionId != decoded.sessionId ||
               related.skillId != step.skillId ||
-              (decoded.phase == StudyPhase.correction &&
-                  related.questionId !=
-                      _studyRemediationQuestionId(decoded, related.kind))) {
+              related.questionId !=
+                  _studyRemediationQuestionId(
+                    decoded.phase == StudyPhase.retest
+                        ? decoded.copyWith(
+                            questionIndex: decoded.questionIndex - 1,
+                          )
+                        : decoded,
+                    related.kind,
+                  )) {
             throw const FormatException(
               'Study remediation requires an originating attempt',
             );

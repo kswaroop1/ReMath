@@ -314,8 +314,7 @@ final class LearningController extends ChangeNotifier {
     }
     final level = HintLevel.values[session.revealedHintCount];
     final now = _clock().toUtc();
-    await _repository.recordAttempt(
-      AttemptEvent(
+    final event = AttemptEvent(
         answer: level.name,
         eventId: _idFactory(),
         isCorrect: false,
@@ -325,13 +324,18 @@ final class LearningController extends ChangeNotifier {
         responseTime: now.difference(_questionBeganAt ?? now),
         sessionId: session.id,
         skillId: card.skillId,
-      ),
-    );
-    _attempts = await _repository.loadAttempts();
-    _session = session.copyWith(
+      );
+    final nextSession = session.copyWith(
       revealedHintCount: session.revealedHintCount + 1,
     );
-    await _persistSession();
+    if (_repository case final LearningTransitionRepository repository) {
+      await repository.commitLearningAttempt(event, nextSession);
+    } else {
+      await _repository.recordAttempt(event);
+      await _repository.saveSession(nextSession);
+    }
+    _attempts = await _repository.loadAttempts();
+    _session = nextSession;
     _recalculateProgress();
     notifyListeners();
   }
