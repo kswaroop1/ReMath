@@ -854,3 +854,9 @@ native identity, and local implementation commit `6cc1de8` validates each
 intervening transition using its retest remediation identity. Local Flutter
 execution remains unavailable, so this ordered pair likewise has no executed
 red result and is not overstated as verified red evidence.
+
+Published commits `e96f35e` / `5aad2db` preserve that ordered test and
+implementation history, with provenance commit `d4dc26d`. CI 37189729173
+passed all 396 native tests but identified one canonical formatter wrap in the
+new validation. Formatter-only commit `4239aaf` applies it, and replacement CI
+37192721533 verifies every gate green, including the Chrome contracts.
