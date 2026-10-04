@@ -221,10 +221,23 @@ bool _matchesStudyRemediationQuestion(
     if (origin.questionId == _studyRemediationQuestionId(candidate, origin)) {
       return true;
     }
-    if (!assistedTransitions.remove(_studyQuestionId(candidate))) return false;
+    if (!assistedTransitions.remove(_studyAssistedRetestQuestionId(candidate))) {
+      return false;
+    }
     index--;
   }
   return false;
+}
+
+String _studyAssistedRetestQuestionId(StudyState state) {
+  var identity = _studyQuestionId(state);
+  if (identity.endsWith('.mcq')) {
+    identity = identity.substring(0, identity.length - '.mcq'.length);
+  }
+  if (state.generator == null) {
+    identity = identity.split('.origin-').first;
+  }
+  return identity;
 }
 
 String _studyQuestionId(StudyState state) {
