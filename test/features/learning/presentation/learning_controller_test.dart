@@ -60,11 +60,12 @@ void main() {
 
   test('duplicate Home transitions reload their persisted session', () async {
     final repository = InMemoryProgressRepository();
-    final ids = ['session', 'duplicate', 'duplicate', 'duplicate'].iterator;
+    var now = DateTime.utc(2026, 8, 27, 8);
+    final ids = ['session', 'duplicate', 'duplicate', 'fresh'].iterator;
     final controller = LearningController(
       contentPack: foundationPackForTest(),
       repository: repository,
-      clock: () => DateTime.utc(2026, 8, 27, 8),
+      clock: () => now,
       idFactory: () {
         ids.moveNext();
         return ids.current;
@@ -80,11 +81,20 @@ void main() {
 
     final question = controller.currentQuestion!;
     controller.updateDraft(question.answer.toString());
+    now = now.add(const Duration(seconds: 3));
     await controller.submitAnswer();
 
     expect(controller.currentQuestion?.id, question.id);
     expect(controller.lastAssessment, isNull);
     expect((await repository.loadSession())?.currentQuestionIndex, 0);
+
+    controller.updateDraft(question.answer.toString());
+    now = now.add(const Duration(seconds: 2));
+    await controller.submitAnswer();
+
+    final acceptedAnswer = (await repository.loadAttempts()).last;
+    expect(acceptedAnswer.eventId, 'fresh');
+    expect(acceptedAnswer.responseTime, const Duration(seconds: 5));
   });
 
   test('refreshing unchanged recovery state preserves answer timing', () async {
