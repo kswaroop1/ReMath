@@ -897,3 +897,8 @@ adds the missing duplicate ID so the first answer is rejected before the fresh
 retry. Because this fixture correction follows the production change, the
 timing cycle is additionally recorded as a production-first TDD deviation
 rather than compliant executed-red evidence.
+
+Replacement CI 37238111650 verifies `7bc6d99` with every gate green, including
+all 398 native tests and the Chrome browser contracts. This is the
+authoritative behavioural-head verification for the duplicate-answer timing
+correction.
