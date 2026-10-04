@@ -194,10 +194,7 @@ bool _sameAttempts(List<AttemptEvent> left, List<AttemptEvent> right) {
   return true;
 }
 
-bool _matchesStudyRemediationQuestion(
-  StudyState state,
-  AttemptEvent origin,
-) {
+bool _matchesStudyRemediationQuestion(StudyState state, AttemptEvent origin) {
   if (state.phase != StudyPhase.retest) {
     return origin.questionId == _studyRemediationQuestionId(state, origin);
   }

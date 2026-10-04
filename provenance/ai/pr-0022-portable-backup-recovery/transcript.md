@@ -813,3 +813,8 @@ fixture omitted the required answer draft. Because the latter setup defect was
 corrected only after its production condition changed, that confidence cycle
 is recorded as a production-first TDD deviation rather than valid red evidence.
 The other three focused pre-fix tests exercised their intended boundaries.
+
+Replacement CI 37164488533 passes all 392 native tests. Its only remaining
+failure is the formatter's single-line layout for the 78-column retained-chain
+helper signature; the canonical Dart 3.13 layout is applied without behavioural
+change in the following commit.
