@@ -831,6 +831,16 @@ void main() {
               ),
               sessionId: 'study-session',
             ),
+            for (var index = 1; index < 4; index++)
+              _attempt(
+                'assisted-$index',
+                kind: AttemptKind.correction,
+                questionId: _questionIdForState(
+                  retest.copyWith(questionIndex: index),
+                ),
+                relatedEventId: 'old-answer',
+                sessionId: 'study-session',
+              ),
           ],
           createdAt: DateTime.utc(2026, 9, 20, 12),
           studyState: retest.encode(),
@@ -845,6 +855,88 @@ void main() {
       ).preview(encrypted, password: password);
 
       expect(pending.preview.hasStudyState, isTrue);
+    });
+
+    test('preview rejects a retained retest with a broken event chain', () async {
+      final retest = StudyState(
+        phase: StudyPhase.retest,
+        plan: StudyPlan(
+          steps: const [
+            StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
+          ],
+          reason: 'Focused practice',
+        ),
+        questionIndex: 4,
+        relatedEventId: 'old-answer',
+        sessionId: 'study-session',
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: BackupPayload(
+          attempts: [
+            _attempt(
+              'old-answer',
+              isCorrect: false,
+              questionId: _questionIdForState(
+                retest.copyWith(questionIndex: 0),
+              ),
+              sessionId: 'study-session',
+            ),
+          ],
+          createdAt: DateTime.utc(2026, 9, 20, 12),
+          studyState: retest.encode(),
+        ).encode(),
+        password: password,
+      );
+
+      await expectLater(
+        BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+        ).preview(encrypted, password: password),
+        throwsFormatException,
+      );
+    });
+
+    test('preview bounds untrusted retest identity work', () async {
+      final retest = StudyState(
+        phase: StudyPhase.retest,
+        plan: StudyPlan(
+          steps: const [
+            StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
+          ],
+          reason: 'Focused practice',
+        ),
+        questionIndex: 1000000000,
+        relatedEventId: 'old-answer',
+        sessionId: 'study-session',
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: BackupPayload(
+          attempts: [
+            _attempt(
+              'old-answer',
+              isCorrect: false,
+              questionId: _questionIdForState(
+                retest.copyWith(questionIndex: 0),
+              ),
+              sessionId: 'study-session',
+            ),
+          ],
+          createdAt: DateTime.utc(2026, 9, 20, 12),
+          studyState: retest.encode(),
+        ).encode(),
+        password: password,
+      );
+
+      await expectLater(
+        BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+        ).preview(encrypted, password: password),
+        throwsFormatException,
+      );
     });
 
     test('preview rejects confidence retained by assisted study', () async {
