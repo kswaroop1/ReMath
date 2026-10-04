@@ -823,3 +823,19 @@ Final implementation CI 37167419811 verifies `848cb9c` with every gate green,
 including all 392 native tests and the Chrome browser contracts. This is the
 authoritative behavioural-head verification for the complete final Study-state
 review batch.
+
+Records-head CI 37171935009 verifies `81adfc1` with every gate green. The
+subsequent independent review identified five remaining boundaries: prove each
+intervening assisted Study transition in a retained retest chain, bound work for
+an untrusted question index, reload persisted Home state after duplicate atomic
+answer and hint transitions, keep SQLite merge reads synchronous inside the
+transaction, and append this records-head result.
+
+Those behavioral corrections were developed as three separate local red/green
+pairs and published together: retained-chain and bounded-validation commits
+`d2f66ca` / `764d0ad`, duplicate Home-transition commits `e697764` /
+`fc4feeb`, and synchronous SQLite-transaction commits `b894a2d` / `eb71cb2`.
+CI 37177068872 passed all 396 native tests but failed only because the new
+retained-chain regression required canonical Dart formatting. Commit `fc43f34`
+applies that formatter-only change. Replacement CI 37178577618 verifies it with
+every gate green, including all 396 native tests and the Chrome contracts.
