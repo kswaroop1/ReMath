@@ -485,7 +485,7 @@ final class LearningController extends ChangeNotifier {
     _attempts = await _repository.loadAttempts();
     if (!inserted) _lastAssessment = null;
     _recalculateProgress();
-    _questionBeganAt = now;
+    if (inserted) _questionBeganAt = now;
     _isBusy = false;
     notifyListeners();
   }
