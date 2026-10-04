@@ -802,36 +802,39 @@ void main() {
       );
     });
 
-    test('preview rejects a Home retest without a preceding question', () async {
-      final session = _session('session-1').copyWith(
-        currentQuestionIndex: 0,
-        phase: LearningSessionPhase.retest,
-      );
-      final encrypted = await cipher.encrypt(
-        plaintext: BackupPayload(
-          attempts: [
-            _attempt(
-              'event-1',
-              isCorrect: false,
-              questionId: 'question-event-1',
-            ),
-          ],
-          createdAt: DateTime.utc(2026, 9, 20, 12),
-          session: session,
-          studyState: null,
-        ).encode(),
-        password: password,
-      );
+    test(
+      'preview rejects a Home retest without a preceding question',
+      () async {
+        final session = _session('session-1').copyWith(
+          currentQuestionIndex: 0,
+          phase: LearningSessionPhase.retest,
+        );
+        final encrypted = await cipher.encrypt(
+          plaintext: BackupPayload(
+            attempts: [
+              _attempt(
+                'event-1',
+                isCorrect: false,
+                questionId: 'question-event-1',
+              ),
+            ],
+            createdAt: DateTime.utc(2026, 9, 20, 12),
+            session: session,
+            studyState: null,
+          ).encode(),
+          password: password,
+        );
 
-      await expectLater(
-        BackupCoordinator(
-          cipher: cipher,
-          clock: DateTime.now,
-          repository: InMemoryProgressRepository(),
-        ).preview(encrypted, password: password),
-        throwsFormatException,
-      );
-    });
+        await expectLater(
+          BackupCoordinator(
+            cipher: cipher,
+            clock: DateTime.now,
+            repository: InMemoryProgressRepository(),
+          ).preview(encrypted, password: password),
+          throwsFormatException,
+        );
+      },
+    );
 
     test('preview preserves a retained Study retest origin', () async {
       final retest = StudyState(
