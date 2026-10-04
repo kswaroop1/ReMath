@@ -837,7 +837,7 @@ void main() {
                 kind: AttemptKind.correction,
                 questionId: _questionIdForState(
                   retest.copyWith(questionIndex: index),
-                ),
+                ).replaceFirst('.mcq', ''),
                 relatedEventId: 'old-answer',
                 sessionId: 'study-session',
               ),
