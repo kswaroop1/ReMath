@@ -317,6 +317,29 @@ void main() {
       expect((await repository.loadSession())?.id, 'imported');
     });
 
+    test('SQLite recovery cannot yield its open transaction', () async {
+      final database = sqlite3.openInMemory();
+      final repository = SqliteProgressRepository(database);
+      addTearDown(repository.close);
+      final transition = repository as LearningTransitionRepository;
+
+      final merge = repository.mergeProgress(
+        attempts: [_attempt('imported')],
+        studyState: null,
+        session: _session('imported-session'),
+      );
+      final commit = transition.commitLearningAttempt(
+        _attempt('concurrent'),
+        _session('concurrent-session'),
+      );
+
+      final results = await Future.wait([merge, commit]);
+
+      expect((results.first as ProgressMergeResult).insertedAttemptCount, 1);
+      expect(results.last, isTrue);
+      expect(await repository.loadAttempts(), hasLength(2));
+    });
+
     test('SQLite rolls back all writes when session import fails', () async {
       final database = sqlite3.openInMemory();
       final repository = SqliteProgressRepository(database);
