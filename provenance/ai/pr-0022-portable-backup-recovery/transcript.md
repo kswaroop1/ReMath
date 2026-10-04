@@ -835,7 +835,22 @@ Those behavioral corrections were developed as three separate local red/green
 pairs and published together: retained-chain and bounded-validation commits
 `d2f66ca` / `764d0ad`, duplicate Home-transition commits `e697764` /
 `fc4feeb`, and synchronous SQLite-transaction commits `b894a2d` / `eb71cb2`.
+The retained-chain and work-bounding contracts were combined in the first pair,
+so that pair is an additional TDD batching deviation rather than two compliant
+cycles. Local Flutter execution was unavailable for all three pairs and no
+executed red result exists for their test commits; their ordering is preserved,
+but they are recorded as unverified red/green process deviations rather than
+verified red evidence.
 CI 37177068872 passed all 396 native tests but failed only because the new
 retained-chain regression required canonical Dart formatting. Commit `fc43f34`
 applies that formatter-only change. Replacement CI 37178577618 verifies it with
 every gate green, including all 396 native tests and the Chrome contracts.
+
+Records-head CI 37183235074 verifies `58ad11b` with every gate green. Review of
+that head identified a phase-specific identity defect in retained MCQ retest
+chains: native assisted retest transitions omit the question-phase `.mcq`
+suffix. Local test commit `0ad40b3` changes the retained-chain fixture to the
+native identity, and local implementation commit `6cc1de8` validates each
+intervening transition using its retest remediation identity. Local Flutter
+execution remains unavailable, so this ordered pair likewise has no executed
+red result and is not overstated as verified red evidence.
