@@ -87,6 +87,9 @@ final class BackupCoordinator {
             session.phase == LearningSessionPhase.retest)) {
       final relatedEventId = session.correctionOfEventId;
       final related = availableAttempts[relatedEventId];
+      final missingPrecedingQuestion =
+          session.phase == LearningSessionPhase.retest &&
+          session.currentQuestionIndex == 0;
       final expectedQuestionId =
           session.phase == LearningSessionPhase.retest &&
               session.currentQuestionIndex > 0
@@ -96,7 +99,8 @@ final class BackupCoordinator {
               ),
             )
           : session.questionId ?? _sessionQuestionIdResolver?.call(session);
-      if (related == null ||
+      if (missingPrecedingQuestion ||
+          related == null ||
           related.isCorrect ||
           !_isHomeRemediationOrigin(related.kind) ||
           related.sessionId != session.id ||
