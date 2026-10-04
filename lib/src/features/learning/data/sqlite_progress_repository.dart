@@ -289,7 +289,9 @@ final class SqliteProgressRepository
   }
 
   @override
-  Future<List<AttemptEvent>> loadAttempts() async => _database
+  Future<List<AttemptEvent>> loadAttempts() async => _loadAttemptsSync();
+
+  List<AttemptEvent> _loadAttemptsSync() => _database
       .select('SELECT * FROM attempt_events ORDER BY occurred_at, event_id')
       .map(_attemptFromRow)
       .toList(growable: false);
@@ -327,7 +329,9 @@ final class SqliteProgressRepository
   }
 
   @override
-  Future<LearningSession?> loadSession() async {
+  Future<LearningSession?> loadSession() async => _loadSessionSync();
+
+  LearningSession? _loadSessionSync() {
     final rows = _database.select(
       'SELECT * FROM active_session WHERE singleton = 1',
     );
@@ -370,7 +374,7 @@ final class SqliteProgressRepository
     try {
       final sessionStreamAdvanced =
           session != null &&
-          (await loadAttempts()).any(
+          _loadAttemptsSync().any(
             (attempt) =>
                 attempt.sessionId == session.id &&
                 !incomingIds.contains(attempt.eventId),
@@ -394,7 +398,7 @@ final class SqliteProgressRepository
       for (final attempt in newAttempts) {
         _insertAttempt(attempt);
       }
-      final localStudyState = await loadStudyState();
+      final localStudyState = _loadStudyStateSync();
       final importStudyState =
           studyState != null &&
           _canImportStudyState(studyState, _containsAttemptEvent) &&
@@ -402,7 +406,7 @@ final class SqliteProgressRepository
       if (importStudyState) _writeStudyState(studyState);
       final importSession =
           session != null &&
-          await loadSession() == null &&
+          _loadSessionSync() == null &&
           !sessionStreamAdvanced;
       if (importSession) _writeSession(session);
       _database.execute('COMMIT');
@@ -530,7 +534,9 @@ final class SqliteProgressRepository
   }
 
   @override
-  Future<String?> loadStudyState() async {
+  Future<String?> loadStudyState() async => _loadStudyStateSync();
+
+  String? _loadStudyStateSync() {
     final rows = _database.select(
       'SELECT state FROM study_state WHERE singleton = 1',
     );
