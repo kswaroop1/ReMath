@@ -328,14 +328,21 @@ final class LearningController extends ChangeNotifier {
     final nextSession = session.copyWith(
       revealedHintCount: session.revealedHintCount + 1,
     );
+    final bool inserted;
     if (_repository case final LearningTransitionRepository repository) {
-      await repository.commitLearningAttempt(event, nextSession);
+      inserted = await repository.commitLearningAttempt(event, nextSession);
     } else {
-      await _repository.recordAttempt(event);
+      inserted = await _repository.recordAttempt(event);
+    }
+    if (_repository is! LearningTransitionRepository && inserted) {
       await _repository.saveSession(nextSession);
     }
+    if (inserted) {
+      _session = nextSession;
+    } else {
+      _session = await _repository.loadSession();
+    }
     _attempts = await _repository.loadAttempts();
-    _session = nextSession;
     _recalculateProgress();
     notifyListeners();
   }
@@ -456,10 +463,13 @@ final class LearningController extends ChangeNotifier {
   }
 
   Future<void> _commitSubmission(AttemptEvent event, DateTime now) async {
+    final bool inserted;
     if (_repository case final LearningTransitionRepository repository) {
-      await repository.commitLearningAttempt(event, _session);
+      inserted = await repository.commitLearningAttempt(event, _session);
     } else {
-      await _repository.recordAttempt(event);
+      inserted = await _repository.recordAttempt(event);
+    }
+    if (_repository is! LearningTransitionRepository && inserted) {
       final session = _session;
       if (session == null) {
         await _repository.completeSession(event.sessionId);
@@ -467,8 +477,13 @@ final class LearningController extends ChangeNotifier {
         await _repository.saveSession(session);
       }
     }
+    if (!inserted) {
+      _session = await _repository.loadSession();
+    } else {
+      _lastAssessment = AttemptAssessment.fromEvent(event);
+    }
     _attempts = await _repository.loadAttempts();
-    _lastAssessment = AttemptAssessment.fromEvent(event);
+    if (!inserted) _lastAssessment = null;
     _recalculateProgress();
     _questionBeganAt = now;
     _isBusy = false;
