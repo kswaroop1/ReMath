@@ -805,3 +805,11 @@ retests. Each boundary is addressed in its own ordered local red/green pair;
 local Flutter execution remains unavailable, so the focused missing-behaviour
 failures are established by the reviewed pre-fix conditions and the complete
 published stack receives one authoritative CI run.
+
+CI 37161632268 confirmed three new Study boundaries and the retained-chain
+contract, but exposed two batch defects together: one canonical formatting
+change in `backup_coordinator.dart`, and the confidence test's feedback-lock
+fixture omitted the required answer draft. Because the latter setup defect was
+corrected only after its production condition changed, that confidence cycle
+is recorded as a production-first TDD deviation rather than valid red evidence.
+The other three focused pre-fix tests exercised their intended boundaries.

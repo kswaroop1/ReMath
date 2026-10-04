@@ -901,6 +901,7 @@ void main() {
       final retest = StudyState(
         awaitingSurprise: true,
         confidence: ConfidenceRating.high,
+        draft: '0',
         phase: StudyPhase.retest,
         plan: StudyPlan(
           steps: const [

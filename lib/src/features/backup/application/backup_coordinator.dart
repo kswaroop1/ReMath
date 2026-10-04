@@ -233,10 +233,7 @@ String _studyQuestionId(StudyState state) {
   return step.multipleChoice ? '$identity.mcq' : identity;
 }
 
-String _studyRemediationQuestionId(
-  StudyState state,
-  AttemptEvent origin,
-) {
+String _studyRemediationQuestionId(StudyState state, AttemptEvent origin) {
   var identity = _studyQuestionId(state);
   final hintedFirstAnswer =
       origin.kind == AttemptKind.correction && origin.relatedEventId == null;
