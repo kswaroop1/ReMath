@@ -153,7 +153,11 @@ final class BackupCoordinator {
                   step.kind != StudyStepKind.practice) ||
               related.sessionId != decoded.sessionId ||
               related.skillId != step.skillId ||
-              !_matchesStudyRemediationQuestion(decoded, related)) {
+              !_matchesStudyRemediationQuestion(
+                decoded,
+                related,
+                availableAttempts.values,
+              )) {
             throw const FormatException(
               'Study remediation requires an originating attempt',
             );
@@ -194,18 +198,31 @@ bool _sameAttempts(List<AttemptEvent> left, List<AttemptEvent> right) {
   return true;
 }
 
-bool _matchesStudyRemediationQuestion(StudyState state, AttemptEvent origin) {
+bool _matchesStudyRemediationQuestion(
+  StudyState state,
+  AttemptEvent origin,
+  Iterable<AttemptEvent> attempts,
+) {
   if (state.phase != StudyPhase.retest) {
     return origin.questionId == _studyRemediationQuestionId(state, origin);
   }
-  for (var index = 0; index < state.questionIndex; index++) {
-    if (origin.questionId ==
-        _studyRemediationQuestionId(
-          state.copyWith(questionIndex: index),
-          origin,
-        )) {
+  final assistedTransitions = {
+    for (final attempt in attempts)
+      if (attempt.isCorrect &&
+          attempt.kind == AttemptKind.correction &&
+          attempt.relatedEventId == origin.eventId &&
+          attempt.sessionId == state.sessionId &&
+          attempt.skillId == state.step!.skillId)
+        attempt.questionId,
+  };
+  var index = state.questionIndex - 1;
+  while (index >= 0) {
+    final candidate = state.copyWith(questionIndex: index);
+    if (origin.questionId == _studyRemediationQuestionId(candidate, origin)) {
       return true;
     }
+    if (!assistedTransitions.remove(_studyQuestionId(candidate))) return false;
+    index--;
   }
   return false;
 }
