@@ -818,3 +818,8 @@ Replacement CI 37164488533 passes all 392 native tests. Its only remaining
 failure is the formatter's single-line layout for the 78-column retained-chain
 helper signature; the canonical Dart 3.13 layout is applied without behavioural
 change in the following commit.
+
+Final implementation CI 37167419811 verifies `848cb9c` with every gate green,
+including all 392 native tests and the Chrome browser contracts. This is the
+authoritative behavioural-head verification for the complete final Study-state
+review batch.
