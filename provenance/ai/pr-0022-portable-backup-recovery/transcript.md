@@ -868,3 +868,15 @@ remediation could have advanced. Local test commit `7687253` defines that
 boundary before local implementation commit `d2e272d` rejects it. Local Flutter
 execution remains unavailable, so this pair has ordered test/implementation
 history but no executed-red evidence and is recorded accordingly.
+
+Published commits `883b0dc` / `576997f` preserve that ordered test and
+implementation history, with provenance commit `1845de2`. CI 37201641675
+passed all 397 native tests but found only a canonical formatter change in the
+new regression. Two manual formatter guesses in commits `72bdb6b` and
+`b87533a` were incorrect because the blocked environment did not expose the
+current Dart formatter. Diagnostic commit `b235d08` temporarily printed the
+CI-generated patch; commit `33decb5` applies that exact patch and restores the
+normal non-mutating formatting gate. Diagnostic runs 37206860494,
+37213954042, and 37220943099 all passed the full 397-test suite while failing
+only formatting. Replacement CI 37223183993 verifies `33decb5` with every gate
+green, including Chrome browser contracts and all 397 native tests.
