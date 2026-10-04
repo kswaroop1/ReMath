@@ -880,3 +880,12 @@ normal non-mutating formatting gate. Diagnostic runs 37206860494,
 37213954042, and 37220943099 all passed the full 397-test suite while failing
 only formatting. Replacement CI 37223183993 verifies `33decb5` with every gate
 green, including Chrome browser contracts and all 397 native tests.
+
+Records-head CI 37228656684 verifies `c3f173d` with every gate green. Review of
+that head identified one remaining runtime boundary: rejecting an idempotent
+duplicate answer must not reset the active question's response-time origin.
+Local test commit `341e7a4` extends the existing duplicate-transition contract
+to retry with a fresh event ID and require the full five-second response time;
+local implementation commit `52409f4` advances `_questionBeganAt` only after a
+successful insertion. Local Flutter execution remains unavailable, so this
+ordered pair has no executed-red evidence and is recorded accordingly.
