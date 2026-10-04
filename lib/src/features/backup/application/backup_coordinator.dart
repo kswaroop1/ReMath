@@ -221,7 +221,9 @@ bool _matchesStudyRemediationQuestion(
     if (origin.questionId == _studyRemediationQuestionId(candidate, origin)) {
       return true;
     }
-    if (!assistedTransitions.remove(_studyAssistedRetestQuestionId(candidate))) {
+    if (!assistedTransitions.remove(
+      _studyAssistedRetestQuestionId(candidate),
+    )) {
       return false;
     }
     index--;
