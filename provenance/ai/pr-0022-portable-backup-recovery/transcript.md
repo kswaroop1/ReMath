@@ -860,3 +860,11 @@ implementation history, with provenance commit `d4dc26d`. CI 37189729173
 passed all 396 native tests but identified one canonical formatter wrap in the
 new validation. Formatter-only commit `4239aaf` applies it, and replacement CI
 37192721533 verifies every gate green, including the Chrome contracts.
+
+Records-head CI 37196254175 verifies `0993c3f` with every gate green. Review of
+that head identified an impossible Home state still accepted by preview: a
+retest at question index zero has no preceding question from which native Home
+remediation could have advanced. Local test commit `7687253` defines that
+boundary before local implementation commit `d2e272d` rejects it. Local Flutter
+execution remains unavailable, so this pair has ordered test/implementation
+history but no executed-red evidence and is recorded accordingly.
