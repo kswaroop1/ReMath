@@ -61,7 +61,13 @@ void main() {
   test('duplicate Home transitions reload their persisted session', () async {
     final repository = InMemoryProgressRepository();
     var now = DateTime.utc(2026, 8, 27, 8);
-    final ids = ['session', 'duplicate', 'duplicate', 'fresh'].iterator;
+    final ids = [
+      'session',
+      'duplicate',
+      'duplicate',
+      'duplicate',
+      'fresh',
+    ].iterator;
     final controller = LearningController(
       contentPack: foundationPackForTest(),
       repository: repository,
