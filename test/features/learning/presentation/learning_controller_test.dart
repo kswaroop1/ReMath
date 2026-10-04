@@ -58,6 +58,35 @@ void main() {
     expect(repository.transitionKinds, [AttemptKind.hint, AttemptKind.answer]);
   });
 
+  test('duplicate Home transitions reload their persisted session', () async {
+    final repository = InMemoryProgressRepository();
+    final ids = ['session', 'duplicate', 'duplicate', 'duplicate'].iterator;
+    final controller = LearningController(
+      contentPack: foundationPackForTest(),
+      repository: repository,
+      clock: () => DateTime.utc(2026, 8, 27, 8),
+      idFactory: () {
+        ids.moveNext();
+        return ids.current;
+      },
+    );
+    await controller.initialise();
+    await controller.startLearn('arithmetic.addition');
+
+    await controller.revealNextHint();
+    await controller.revealNextHint();
+    expect(controller.revealedHints, hasLength(1));
+    expect((await repository.loadSession())?.revealedHintCount, 1);
+
+    final question = controller.currentQuestion!;
+    controller.updateDraft(question.answer.toString());
+    await controller.submitAnswer();
+
+    expect(controller.currentQuestion?.id, question.id);
+    expect(controller.lastAssessment, isNull);
+    expect((await repository.loadSession())?.currentQuestionIndex, 0);
+  });
+
   test('refreshing unchanged recovery state preserves answer timing', () async {
     final repository = InMemoryProgressRepository();
     var now = DateTime.utc(2026, 8, 27, 8);
