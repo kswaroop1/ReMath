@@ -889,3 +889,11 @@ to retry with a fresh event ID and require the full five-second response time;
 local implementation commit `52409f4` advances `_questionBeganAt` only after a
 successful insertion. Local Flutter execution remains unavailable, so this
 ordered pair has no executed-red evidence and is recorded accordingly.
+
+CI 37235207348 passed formatting, analysis, content validation, browser
+contracts, and the full pre-existing suite, but the new timing regression's ID
+fixture advanced to a fresh answer one transition too early. Commit `d2bfd58`
+adds the missing duplicate ID so the first answer is rejected before the fresh
+retry. Because this fixture correction follows the production change, the
+timing cycle is additionally recorded as a production-first TDD deviation
+rather than compliant executed-red evidence.
