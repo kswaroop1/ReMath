@@ -37,6 +37,26 @@ void main() {
     );
   });
 
+  test('successful answers atomically pin the next question', () async {
+    final repository = InMemoryProgressRepository();
+    final controller = LearningController(
+      contentPack: foundationPackForTest(),
+      repository: repository,
+      clock: () => DateTime.utc(2026, 8, 27, 8),
+      idFactory: () => 'session',
+    );
+    await controller.initialise();
+    await controller.startChunk();
+
+    controller.updateDraft(controller.currentQuestion!.answer.toString());
+    await controller.submitAnswer();
+
+    final persisted = await repository.loadSession();
+    expect(persisted?.questionId, controller.currentQuestion?.id);
+    expect(persisted?.questionSkillId, controller.currentQuestion?.skillId);
+    expect(persisted?.questionId, isNotNull);
+  });
+
   test('routes answers and hints through atomic Home transitions', () async {
     final repository = _TransitionTrackingRepository();
     var nextId = 0;
