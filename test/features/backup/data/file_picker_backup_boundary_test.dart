@@ -8,7 +8,9 @@ void main() {
     'file picker boundary transfers backup text without changing bytes',
     () async {
       final gateway = _MemoryFilePickerGateway()
-        ..openedBytes = utf8.encode('encrypted progress ✓');
+        ..selection = _MemoryBackupSelection(
+          utf8.encode('encrypted progress ✓'),
+        );
       final boundary = FilePickerBackupBoundary(gateway: gateway);
 
       expect(await boundary.openText(), 'encrypted progress ✓');
@@ -34,16 +36,29 @@ void main() {
       isFalse,
     );
   });
+
+  test('file picker boundary rejects oversized backups before reading', () async {
+    final selection = _MemoryBackupSelection(
+      const [1],
+      reportedLength: maxPortableBackupBytes + 1,
+    );
+    final boundary = FilePickerBackupBoundary(
+      gateway: _MemoryFilePickerGateway()..selection = selection,
+    );
+
+    await expectLater(boundary.openText(), throwsFormatException);
+    expect(selection.readCount, 0);
+  });
 }
 
 final class _MemoryFilePickerGateway implements BackupFilePickerGateway {
-  List<int>? openedBytes;
+  BackupFileSelection? selection;
   List<int>? savedBytes;
   String? savedName;
   bool saveAccepted = true;
 
   @override
-  Future<List<int>?> openBackup() async => openedBytes;
+  Future<BackupFileSelection?> selectBackup() async => selection;
 
   @override
   Future<bool> saveBackup({
@@ -53,5 +68,23 @@ final class _MemoryFilePickerGateway implements BackupFilePickerGateway {
     savedBytes = bytes;
     savedName = suggestedName;
     return saveAccepted;
+  }
+}
+
+final class _MemoryBackupSelection implements BackupFileSelection {
+  _MemoryBackupSelection(this.bytes, {int? reportedLength})
+    : _reportedLength = reportedLength ?? bytes.length;
+
+  final List<int> bytes;
+  final int _reportedLength;
+  int readCount = 0;
+
+  @override
+  Future<int> length() async => _reportedLength;
+
+  @override
+  Future<List<int>> readAsBytes() async {
+    readCount++;
+    return bytes;
   }
 }
