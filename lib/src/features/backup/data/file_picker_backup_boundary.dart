@@ -5,8 +5,15 @@ import 'package:file_picker/file_picker.dart';
 
 import '../application/backup_file_transfer.dart';
 
+const maxPortableBackupBytes = 8 * 1024 * 1024;
+
+abstract interface class BackupFileSelection {
+  Future<int> length();
+  Future<List<int>> readAsBytes();
+}
+
 abstract interface class BackupFilePickerGateway {
-  Future<List<int>?> openBackup();
+  Future<BackupFileSelection?> selectBackup();
   Future<bool> saveBackup({
     required List<int> bytes,
     required String suggestedName,
@@ -17,12 +24,13 @@ final class FilePickerBackupGateway implements BackupFilePickerGateway {
   const FilePickerBackupGateway();
 
   @override
-  Future<List<int>?> openBackup() async {
+  Future<BackupFileSelection?> selectBackup() async {
     final file = await FilePicker.pickFile(
       allowedExtensions: const ['remath-backup'],
       type: FileType.custom,
     );
-    return file?.readAsBytes();
+    if (file == null) return null;
+    return _FilePickerSelection(file.length, file.readAsBytes);
   }
 
   @override
@@ -46,8 +54,16 @@ final class FilePickerBackupBoundary implements BackupFileBoundary {
 
   @override
   Future<String?> openText() async {
-    final bytes = await _gateway.openBackup();
-    return bytes == null ? null : utf8.decode(bytes);
+    final selection = await _gateway.selectBackup();
+    if (selection == null) return null;
+    if (await selection.length() > maxPortableBackupBytes) {
+      throw const FormatException('Backup file exceeds the size limit');
+    }
+    final bytes = await selection.readAsBytes();
+    if (bytes.length > maxPortableBackupBytes) {
+      throw const FormatException('Backup file exceeds the size limit');
+    }
+    return utf8.decode(bytes);
   }
 
   @override
@@ -60,4 +76,17 @@ final class FilePickerBackupBoundary implements BackupFileBoundary {
       suggestedName: suggestedName,
     );
   }
+}
+
+final class _FilePickerSelection implements BackupFileSelection {
+  const _FilePickerSelection(this._length, this._readAsBytes);
+
+  final Future<int> Function() _length;
+  final Future<List<int>> Function() _readAsBytes;
+
+  @override
+  Future<int> length() => _length();
+
+  @override
+  Future<List<int>> readAsBytes() => _readAsBytes();
 }
