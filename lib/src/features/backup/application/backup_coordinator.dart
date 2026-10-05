@@ -86,6 +86,7 @@ final class BackupCoordinator {
         session.questionId == null &&
         session.questionSkillId == null &&
         session.focusSkillId == null &&
+        !session.id.startsWith('diagnostic-') &&
         _mergedHistoryDiffers(payload.attempts, localAttempts)) {
       throw const FormatException(
         'Unpinned legacy learning session cannot follow merged history',
