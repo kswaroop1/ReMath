@@ -914,3 +914,9 @@ Local commits `265913f` / `37d07b5`, `d143d4f` / `0f48fc2`, and `fbeb23c` /
 `bb602d1` preserve separate test/implementation ordering for those three
 boundaries. Local Flutter execution remains unavailable, so these pairs have no
 executed-red evidence and are not overstated as verified red/green cycles.
+
+CI 37255840455 verified the retained-hint and legacy-session regressions but
+failed the final stack on two canonical test-format changes and a file-picker
+API detail: its reported length is nullable. The following corrective commit
+rejects an unavailable length without reading, preserving the fail-closed size
+boundary, and applies the canonical multiline test layout.

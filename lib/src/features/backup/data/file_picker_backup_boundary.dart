@@ -8,7 +8,7 @@ import '../application/backup_file_transfer.dart';
 const maxPortableBackupBytes = 8 * 1024 * 1024;
 
 abstract interface class BackupFileSelection {
-  Future<int> length();
+  Future<int?> length();
   Future<List<int>> readAsBytes();
 }
 
@@ -56,7 +56,8 @@ final class FilePickerBackupBoundary implements BackupFileBoundary {
   Future<String?> openText() async {
     final selection = await _gateway.selectBackup();
     if (selection == null) return null;
-    if (await selection.length() > maxPortableBackupBytes) {
+    final reportedLength = await selection.length();
+    if (reportedLength == null || reportedLength > maxPortableBackupBytes) {
       throw const FormatException('Backup file exceeds the size limit');
     }
     final bytes = await selection.readAsBytes();
@@ -81,11 +82,11 @@ final class FilePickerBackupBoundary implements BackupFileBoundary {
 final class _FilePickerSelection implements BackupFileSelection {
   const _FilePickerSelection(this._length, this._readAsBytes);
 
-  final Future<int> Function() _length;
+  final Future<int?> Function() _length;
   final Future<List<int>> Function() _readAsBytes;
 
   @override
-  Future<int> length() => _length();
+  Future<int?> length() => _length();
 
   @override
   Future<List<int>> readAsBytes() => _readAsBytes();
