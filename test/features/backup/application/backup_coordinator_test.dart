@@ -228,6 +228,34 @@ void main() {
       },
     );
 
+    test('preview preserves deterministic legacy diagnostic after merge', () async {
+      final encrypted = await cipher.encrypt(
+        plaintext: BackupPayload(
+          attempts: const [],
+          createdAt: DateTime.utc(2026, 9, 20, 12),
+          session: LearningSession(
+            currentQuestionIndex: 3,
+            id: 'diagnostic-legacy',
+            phase: LearningSessionPhase.question,
+            seed: 42,
+            startedAt: DateTime.utc(2026, 9, 20, 10),
+          ),
+          studyState: null,
+        ).encode(),
+        password: password,
+      );
+      final target = InMemoryProgressRepository();
+      await target.recordAttempt(_attempt('local-history'));
+
+      final pending = await BackupCoordinator(
+        cipher: cipher,
+        clock: DateTime.now,
+        repository: target,
+      ).preview(encrypted, password: password);
+
+      expect(pending.preview.hasLearningSession, isTrue);
+    });
+
     test(
       'preview rejects an incompatible generated question identity',
       () async {
