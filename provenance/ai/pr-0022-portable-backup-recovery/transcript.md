@@ -952,3 +952,8 @@ production commit `5aafa96`; explicit null-length coverage is added later in
 `8663457`, so that behavior is recorded as a production-first TDD deviation.
 Local Flutter execution remains unavailable and these ordered pairs have no
 executed-red evidence.
+
+CI 37267389950 passes all 403 native tests and secret scanning; only canonical
+formatting changes remain across the five corrected source/test files. The
+following temporary diagnostic commit prints the exact current-Dart patch before
+restoring the normal non-mutating gate.
