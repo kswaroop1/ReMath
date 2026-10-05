@@ -930,3 +930,9 @@ for this blocked local toolchain.
 Diagnostic CI 37256420431 passes all 399 native tests and prints the two exact
 test-only formatter changes. The following commit applies that patch and
 restores the normal non-mutating formatting gate.
+
+Replacement CI 37256710494 verifies `150cef0` with every gate green, including
+all 399 native tests, Chrome browser contracts, coverage enforcement, static
+analysis, content validation, dependency-lock verification, and secret scanning.
+This is the authoritative behavioural-head verification for the final recovery
+review batch.
