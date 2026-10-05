@@ -136,6 +136,15 @@ final class BackupCoordinator {
             );
           }
         }
+        if (decoded.hintCount > 0 &&
+            !_hasCurrentStudyHintEvidence(
+              decoded,
+              availableAttempts.values,
+            )) {
+          throw const FormatException(
+            'Active study hints require immutable evidence',
+          );
+        }
         if (decoded.phase == StudyPhase.question &&
             decoded.relatedEventId != null) {
           throw const FormatException(
@@ -263,6 +272,27 @@ bool _matchesStudyRemediationQuestion(
     index--;
   }
   return false;
+}
+
+bool _hasCurrentStudyHintEvidence(
+  StudyState state,
+  Iterable<AttemptEvent> attempts,
+) {
+  final step = state.step;
+  if (step == null) return false;
+  final questionId = _studyAssistedRetestQuestionId(state);
+  final representedHints = {
+    for (final attempt in attempts)
+      if (attempt.kind == AttemptKind.hint &&
+          attempt.sessionId == state.sessionId &&
+          attempt.skillId == step.skillId &&
+          attempt.questionId == questionId)
+        attempt.answer,
+  };
+  return Iterable<int>.generate(
+    state.hintCount,
+    (index) => index + 1,
+  ).every((level) => representedHints.contains('hint-$level'));
 }
 
 String _studyAssistedRetestQuestionId(StudyState state) {
