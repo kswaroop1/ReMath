@@ -195,6 +195,36 @@ void main() {
       expect((await target.loadSession())?.id, 'local-session');
     });
 
+    test('preview rejects an unpinned legacy Home session after a merge', () async {
+      final legacySession = LearningSession(
+        currentQuestionIndex: 3,
+        id: 'legacy-home',
+        phase: LearningSessionPhase.question,
+        seed: 42,
+        startedAt: DateTime.utc(2026, 9, 20, 10),
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: BackupPayload(
+          attempts: const [],
+          createdAt: DateTime.utc(2026, 9, 20, 12),
+          session: legacySession,
+          studyState: null,
+        ).encode(),
+        password: password,
+      );
+      final target = InMemoryProgressRepository();
+      await target.recordAttempt(_attempt('local-history'));
+
+      await expectLater(
+        BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: target,
+        ).preview(encrypted, password: password),
+        throwsFormatException,
+      );
+    });
+
     test(
       'preview rejects an incompatible generated question identity',
       () async {
