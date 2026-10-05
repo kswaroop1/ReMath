@@ -71,9 +71,13 @@ final class FilePickerBackupBoundary implements BackupFileBoundary {
   Future<bool> saveText({
     required String contents,
     required String suggestedName,
-  }) {
+  }) async {
+    final bytes = utf8.encode(contents);
+    if (bytes.length > maxPortableBackupBytes) {
+      throw const FormatException('Backup file exceeds the size limit');
+    }
     return _gateway.saveBackup(
-      bytes: utf8.encode(contents),
+      bytes: bytes,
       suggestedName: suggestedName,
     );
   }
