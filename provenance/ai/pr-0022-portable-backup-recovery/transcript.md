@@ -961,3 +961,9 @@ restoring the normal non-mutating gate.
 Diagnostic CI 37267767150 passes all 403 native tests and prints the exact five
 file formatting patch. The following commit applies it and restores the normal
 formatting gate.
+
+Replacement CI 37268229796 verifies `5156a44` with every gate green, including
+all 403 native tests, Chrome browser contracts, coverage enforcement, static
+analysis, content validation, dependency-lock verification, formatting, and
+secret scanning. This is the authoritative behavioural-head verification for
+the final review corrections.
