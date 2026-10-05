@@ -76,10 +76,7 @@ final class FilePickerBackupBoundary implements BackupFileBoundary {
     if (bytes.length > maxPortableBackupBytes) {
       throw const FormatException('Backup file exceeds the size limit');
     }
-    return _gateway.saveBackup(
-      bytes: bytes,
-      suggestedName: suggestedName,
-    );
+    return _gateway.saveBackup(bytes: bytes, suggestedName: suggestedName);
   }
 }
 

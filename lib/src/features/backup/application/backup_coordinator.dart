@@ -137,10 +137,7 @@ final class BackupCoordinator {
           }
         }
         if (decoded.hintCount > 0 &&
-            !_hasCurrentStudyHintEvidence(
-              decoded,
-              availableAttempts.values,
-            )) {
+            !_hasCurrentStudyHintEvidence(decoded, availableAttempts.values)) {
           throw const FormatException(
             'Active study hints require immutable evidence',
           );

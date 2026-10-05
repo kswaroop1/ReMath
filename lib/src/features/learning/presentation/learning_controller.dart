@@ -550,8 +550,7 @@ final class LearningController extends ChangeNotifier {
     final operation =
         focusedOperation ??
         (session.id.startsWith(_diagnosticPrefix)
-            ? ArithmeticOperation
-                  .values[session.currentQuestionIndex ~/ 3]
+            ? ArithmeticOperation.values[session.currentQuestionIndex ~/ 3]
             : _scheduler.choose(
                 fluency: _fluencyCalculator.calculate([..._attempts, event]),
                 now: now,

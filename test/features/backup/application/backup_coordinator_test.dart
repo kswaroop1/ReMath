@@ -112,35 +112,38 @@ void main() {
       );
     });
 
-    test('preview rejects active Study hints without immutable evidence', () async {
-      final state = StudyState(
-        hintCount: 1,
-        plan: StudyPlan(
-          steps: const [
-            StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
-          ],
-          reason: 'Focused practice',
-        ),
-        sessionId: 'study-session',
-      );
-      final encrypted = await cipher.encrypt(
-        plaintext: BackupPayload(
-          attempts: const [],
-          createdAt: DateTime.utc(2026, 9, 20, 12),
-          studyState: state.encode(),
-        ).encode(),
-        password: password,
-      );
+    test(
+      'preview rejects active Study hints without immutable evidence',
+      () async {
+        final state = StudyState(
+          hintCount: 1,
+          plan: StudyPlan(
+            steps: const [
+              StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
+            ],
+            reason: 'Focused practice',
+          ),
+          sessionId: 'study-session',
+        );
+        final encrypted = await cipher.encrypt(
+          plaintext: BackupPayload(
+            attempts: const [],
+            createdAt: DateTime.utc(2026, 9, 20, 12),
+            studyState: state.encode(),
+          ).encode(),
+          password: password,
+        );
 
-      await expectLater(
-        BackupCoordinator(
-          cipher: cipher,
-          clock: DateTime.now,
-          repository: InMemoryProgressRepository(),
-        ).preview(encrypted, password: password),
-        throwsFormatException,
-      );
-    });
+        await expectLater(
+          BackupCoordinator(
+            cipher: cipher,
+            clock: DateTime.now,
+            repository: InMemoryProgressRepository(),
+          ).preview(encrypted, password: password),
+          throwsFormatException,
+        );
+      },
+    );
 
     test('cannot apply a preview containing immutable conflicts', () async {
       final source = InMemoryProgressRepository();
@@ -258,33 +261,36 @@ void main() {
       },
     );
 
-    test('preview preserves deterministic legacy diagnostic after merge', () async {
-      final encrypted = await cipher.encrypt(
-        plaintext: BackupPayload(
-          attempts: const [],
-          createdAt: DateTime.utc(2026, 9, 20, 12),
-          session: LearningSession(
-            currentQuestionIndex: 3,
-            id: 'diagnostic-legacy',
-            phase: LearningSessionPhase.question,
-            seed: 42,
-            startedAt: DateTime.utc(2026, 9, 20, 10),
-          ),
-          studyState: null,
-        ).encode(),
-        password: password,
-      );
-      final target = InMemoryProgressRepository();
-      await target.recordAttempt(_attempt('local-history'));
+    test(
+      'preview preserves deterministic legacy diagnostic after merge',
+      () async {
+        final encrypted = await cipher.encrypt(
+          plaintext: BackupPayload(
+            attempts: const [],
+            createdAt: DateTime.utc(2026, 9, 20, 12),
+            session: LearningSession(
+              currentQuestionIndex: 3,
+              id: 'diagnostic-legacy',
+              phase: LearningSessionPhase.question,
+              seed: 42,
+              startedAt: DateTime.utc(2026, 9, 20, 10),
+            ),
+            studyState: null,
+          ).encode(),
+          password: password,
+        );
+        final target = InMemoryProgressRepository();
+        await target.recordAttempt(_attempt('local-history'));
 
-      final pending = await BackupCoordinator(
-        cipher: cipher,
-        clock: DateTime.now,
-        repository: target,
-      ).preview(encrypted, password: password);
+        final pending = await BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: target,
+        ).preview(encrypted, password: password);
 
-      expect(pending.preview.hasLearningSession, isTrue);
-    });
+        expect(pending.preview.hasLearningSession, isTrue);
+      },
+    );
 
     test(
       'preview rejects an incompatible generated question identity',

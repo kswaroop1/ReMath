@@ -53,10 +53,9 @@ void main() {
   );
 
   test('file picker boundary rejects unknown sizes before reading', () async {
-    final selection = _MemoryBackupSelection(
-      const [1],
-      hasReportedLength: false,
-    );
+    final selection = _MemoryBackupSelection(const [
+      1,
+    ], hasReportedLength: false);
     final boundary = FilePickerBackupBoundary(
       gateway: _MemoryFilePickerGateway()..selection = selection,
     );
@@ -65,19 +64,22 @@ void main() {
     expect(selection.readCount, 0);
   });
 
-  test('file picker boundary rejects oversized exports before saving', () async {
-    final gateway = _MemoryFilePickerGateway();
-    final boundary = FilePickerBackupBoundary(gateway: gateway);
+  test(
+    'file picker boundary rejects oversized exports before saving',
+    () async {
+      final gateway = _MemoryFilePickerGateway();
+      final boundary = FilePickerBackupBoundary(gateway: gateway);
 
-    await expectLater(
-      boundary.saveText(
-        contents: 'x' * (maxPortableBackupBytes + 1),
-        suggestedName: 'oversized.remath-backup',
-      ),
-      throwsFormatException,
-    );
-    expect(gateway.saveCalls, 0);
-  });
+      await expectLater(
+        boundary.saveText(
+          contents: 'x' * (maxPortableBackupBytes + 1),
+          suggestedName: 'oversized.remath-backup',
+        ),
+        throwsFormatException,
+      );
+      expect(gateway.saveCalls, 0);
+    },
+  );
 }
 
 final class _MemoryFilePickerGateway implements BackupFilePickerGateway {

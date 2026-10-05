@@ -957,3 +957,7 @@ CI 37267389950 passes all 403 native tests and secret scanning; only canonical
 formatting changes remain across the five corrected source/test files. The
 following temporary diagnostic commit prints the exact current-Dart patch before
 restoring the normal non-mutating gate.
+
+Diagnostic CI 37267767150 passes all 403 native tests and prints the exact five
+file formatting patch. The following commit applies it and restores the normal
+formatting gate.
