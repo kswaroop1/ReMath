@@ -51,6 +51,33 @@ void main() {
       expect(selection.readCount, 0);
     },
   );
+
+  test('file picker boundary rejects unknown sizes before reading', () async {
+    final selection = _MemoryBackupSelection(
+      const [1],
+      hasReportedLength: false,
+    );
+    final boundary = FilePickerBackupBoundary(
+      gateway: _MemoryFilePickerGateway()..selection = selection,
+    );
+
+    await expectLater(boundary.openText(), throwsFormatException);
+    expect(selection.readCount, 0);
+  });
+
+  test('file picker boundary rejects oversized exports before saving', () async {
+    final gateway = _MemoryFilePickerGateway();
+    final boundary = FilePickerBackupBoundary(gateway: gateway);
+
+    await expectLater(
+      boundary.saveText(
+        contents: 'x' * (maxPortableBackupBytes + 1),
+        suggestedName: 'oversized.remath-backup',
+      ),
+      throwsFormatException,
+    );
+    expect(gateway.saveCalls, 0);
+  });
 }
 
 final class _MemoryFilePickerGateway implements BackupFilePickerGateway {
@@ -58,6 +85,7 @@ final class _MemoryFilePickerGateway implements BackupFilePickerGateway {
   List<int>? savedBytes;
   String? savedName;
   bool saveAccepted = true;
+  int saveCalls = 0;
 
   @override
   Future<BackupFileSelection?> selectBackup() async => selection;
@@ -67,6 +95,7 @@ final class _MemoryFilePickerGateway implements BackupFilePickerGateway {
     required List<int> bytes,
     required String suggestedName,
   }) async {
+    saveCalls++;
     savedBytes = bytes;
     savedName = suggestedName;
     return saveAccepted;
@@ -74,15 +103,20 @@ final class _MemoryFilePickerGateway implements BackupFilePickerGateway {
 }
 
 final class _MemoryBackupSelection implements BackupFileSelection {
-  _MemoryBackupSelection(this.bytes, {int? reportedLength})
-    : _reportedLength = reportedLength ?? bytes.length;
+  _MemoryBackupSelection(
+    this.bytes, {
+    bool hasReportedLength = true,
+    int? reportedLength,
+  }) : _reportedLength = hasReportedLength
+           ? reportedLength ?? bytes.length
+           : null;
 
   final List<int> bytes;
-  final int _reportedLength;
+  final int? _reportedLength;
   int readCount = 0;
 
   @override
-  Future<int> length() async => _reportedLength;
+  Future<int?> length() async => _reportedLength;
 
   @override
   Future<List<int>> readAsBytes() async {
