@@ -902,3 +902,15 @@ Replacement CI 37238111650 verifies `7bc6d99` with every gate green, including
 all 398 native tests and the Chrome browser contracts. This is the
 authoritative behavioural-head verification for the duplicate-answer timing
 correction.
+
+Records-head CI 37243112518 verifies `f37347b` with every gate green. Review of
+that head identified three remaining import boundaries: every retained assisted
+Study transition needs both hint and correction evidence; an identity-less,
+unfocused legacy Home session must not resume after merged local history changes
+its scheduler context; and selected backup size must be checked before bytes are
+materialized.
+
+Local commits `265913f` / `37d07b5`, `d143d4f` / `0f48fc2`, and `fbeb23c` /
+`bb602d1` preserve separate test/implementation ordering for those three
+boundaries. Local Flutter execution remains unavailable, so these pairs have no
+executed-red evidence and are not overstated as verified red/green cycles.
