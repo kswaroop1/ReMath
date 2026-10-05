@@ -402,10 +402,14 @@ final class LearningController extends ChangeNotifier {
     );
     if (isCorrecting) {
       if (isCorrect) {
-        _session = session.copyWith(
-          answerDraft: '',
-          currentQuestionIndex: question.index + 1,
-          phase: LearningSessionPhase.retest,
+        _session = _pinNextQuestion(
+          session.copyWith(
+            answerDraft: '',
+            currentQuestionIndex: question.index + 1,
+            phase: LearningSessionPhase.retest,
+          ),
+          event,
+          now,
         );
       } else {
         _session = session.copyWith(answerDraft: '');
@@ -422,14 +426,18 @@ final class LearningController extends ChangeNotifier {
         );
       } else {
         final returningToReview = session.id.startsWith(_reviewPrefix);
-        _session = session.copyWith(
-          answerDraft: '',
-          clearCorrection: returningToReview,
-          clearRemediation: !returningToReview,
-          currentQuestionIndex: question.index + 1,
-          phase: returningToReview
-              ? LearningSessionPhase.review
-              : LearningSessionPhase.question,
+        _session = _pinNextQuestion(
+          session.copyWith(
+            answerDraft: '',
+            clearCorrection: returningToReview,
+            clearRemediation: !returningToReview,
+            currentQuestionIndex: question.index + 1,
+            phase: returningToReview
+                ? LearningSessionPhase.review
+                : LearningSessionPhase.question,
+          ),
+          event,
+          now,
         );
       }
       await _commitSubmission(event, now);
@@ -454,9 +462,13 @@ final class LearningController extends ChangeNotifier {
         _lastCompletedOperation = question.operation;
       }
     } else {
-      _session = session.copyWith(
-        answerDraft: '',
-        currentQuestionIndex: session.currentQuestionIndex + 1,
+      _session = _pinNextQuestion(
+        session.copyWith(
+          answerDraft: '',
+          currentQuestionIndex: session.currentQuestionIndex + 1,
+        ),
+        event,
+        now,
       );
     }
     await _commitSubmission(event, now);
@@ -525,6 +537,34 @@ final class LearningController extends ChangeNotifier {
   void _recalculateProgress() {
     _mastery = MasterySummary.fromAttempts(_attempts);
     _fluency = _fluencyCalculator.calculate(_attempts);
+  }
+
+  LearningSession _pinNextQuestion(
+    LearningSession session,
+    AttemptEvent event,
+    DateTime now,
+  ) {
+    final focusedOperation = ArithmeticOperationDefinition.fromSkillId(
+      session.focusSkillId ?? '',
+    );
+    final operation =
+        focusedOperation ??
+        (session.id.startsWith(_diagnosticPrefix)
+            ? ArithmeticOperation
+                  .values[session.currentQuestionIndex ~/ 3]
+            : _scheduler.choose(
+                fluency: _fluencyCalculator.calculate([..._attempts, event]),
+                now: now,
+              ));
+    final question = _questionFor(
+      seed: session.seed,
+      index: session.currentQuestionIndex,
+      operation: operation,
+    );
+    return session.copyWith(
+      questionId: question.id,
+      questionSkillId: question.skillId,
+    );
   }
 
   Future<void> _persistSession() async {
