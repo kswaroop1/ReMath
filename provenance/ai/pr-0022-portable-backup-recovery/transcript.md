@@ -926,3 +926,7 @@ the current Dart formatter still changes the two new test files. The following
 temporary diagnostic commit prints that exact formatter patch before restoring
 the normal non-mutating gate, following the already documented recovery used
 for this blocked local toolchain.
+
+Diagnostic CI 37256420431 passes all 399 native tests and prints the two exact
+test-only formatter changes. The following commit applies that patch and
+restores the normal non-mutating formatting gate.

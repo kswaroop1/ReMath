@@ -40,10 +40,9 @@ void main() {
   test(
     'file picker boundary rejects oversized backups before reading',
     () async {
-      final selection = _MemoryBackupSelection(
-        const [1],
-        reportedLength: maxPortableBackupBytes + 1,
-      );
+      final selection = _MemoryBackupSelection(const [
+        1,
+      ], reportedLength: maxPortableBackupBytes + 1);
       final boundary = FilePickerBackupBoundary(
         gateway: _MemoryFilePickerGateway()..selection = selection,
       );
