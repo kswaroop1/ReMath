@@ -112,6 +112,36 @@ void main() {
       );
     });
 
+    test('preview rejects active Study hints without immutable evidence', () async {
+      final state = StudyState(
+        hintCount: 1,
+        plan: StudyPlan(
+          steps: const [
+            StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
+          ],
+          reason: 'Focused practice',
+        ),
+        sessionId: 'study-session',
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: BackupPayload(
+          attempts: const [],
+          createdAt: DateTime.utc(2026, 9, 20, 12),
+          studyState: state.encode(),
+        ).encode(),
+        password: password,
+      );
+
+      await expectLater(
+        BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+        ).preview(encrypted, password: password),
+        throwsFormatException,
+      );
+    });
+
     test('cannot apply a preview containing immutable conflicts', () async {
       final source = InMemoryProgressRepository();
       await source.recordAttempt(_attempt('conflict'));
