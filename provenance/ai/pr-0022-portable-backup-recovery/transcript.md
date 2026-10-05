@@ -920,3 +920,9 @@ failed the final stack on two canonical test-format changes and a file-picker
 API detail: its reported length is nullable. The following corrective commit
 rejects an unavailable length without reading, preserving the fail-closed size
 boundary, and applies the canonical multiline test layout.
+
+Replacement CI 37256177763 passes all 399 native tests and secret scanning, but
+the current Dart formatter still changes the two new test files. The following
+temporary diagnostic commit prints that exact formatter patch before restoring
+the normal non-mutating gate, following the already documented recovery used
+for this blocked local toolchain.
