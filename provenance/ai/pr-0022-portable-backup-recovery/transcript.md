@@ -910,8 +910,8 @@ unfocused legacy Home session must not resume after merged local history changes
 its scheduler context; and selected backup size must be checked before bytes are
 materialized.
 
-Local commits `265913f` / `37d07b5`, `d143d4f` / `0f48fc2`, and `fbeb23c` /
-`bb602d1` preserve separate test/implementation ordering for those three
+Published commits `3f7a0ce` / `c382a74`, `802537b` / `e33580f`, and `d2e0844` /
+`a858d8e` preserve separate test/implementation ordering for those three
 boundaries. Local Flutter execution remains unavailable, so these pairs have no
 executed-red evidence and are not overstated as verified red/green cycles.
 
@@ -936,3 +936,19 @@ all 399 native tests, Chrome browser contracts, coverage enforcement, static
 analysis, content validation, dependency-lock verification, and secret scanning.
 This is the authoritative behavioural-head verification for the final recovery
 review batch.
+
+Records-head CI 37256951598 verifies `598c0eb` with every gate green. Review of
+that head identified export/import size asymmetry, missing explicit coverage for
+the production-first nullable-length correction, absent current-question Study
+hint evidence, an over-broad legacy Home guard affecting deterministic
+diagnostics, and an unpinned next adaptive Home question. It also identified the
+unpublished local hashes above, which are replaced with their durable IDs.
+
+Published pairs `8663457` / `e13d95c`, `65212c1` / `5c37439`, `17907de` /
+`0c0edf8`, and `b1e1b3f` / `30664c1` preserve focused ordering for symmetric
+file limits, deterministic legacy diagnostics, active Study hint evidence, and
+atomic next-question pinning. The nullable-length rejection first entered in
+production commit `5aafa96`; explicit null-length coverage is added later in
+`8663457`, so that behavior is recorded as a production-first TDD deviation.
+Local Flutter execution remains unavailable and these ordered pairs have no
+executed-red evidence.
