@@ -865,15 +865,26 @@ void main() {
               sessionId: 'study-session',
             ),
             for (var index = 1; index < 4; index++)
-              _attempt(
-                'assisted-$index',
-                kind: AttemptKind.correction,
-                questionId: _questionIdForState(
-                  retest.copyWith(questionIndex: index),
-                ).replaceFirst('.mcq', ''),
-                relatedEventId: 'old-answer',
-                sessionId: 'study-session',
-              ),
+              ...[
+                _attempt(
+                  'hint-$index',
+                  isCorrect: false,
+                  kind: AttemptKind.hint,
+                  questionId: _questionIdForState(
+                    retest.copyWith(questionIndex: index),
+                  ).replaceFirst('.mcq', ''),
+                  sessionId: 'study-session',
+                ),
+                _attempt(
+                  'assisted-$index',
+                  kind: AttemptKind.correction,
+                  questionId: _questionIdForState(
+                    retest.copyWith(questionIndex: index),
+                  ).replaceFirst('.mcq', ''),
+                  relatedEventId: 'old-answer',
+                  sessionId: 'study-session',
+                ),
+              ],
           ],
           createdAt: DateTime.utc(2026, 9, 20, 12),
           studyState: retest.encode(),

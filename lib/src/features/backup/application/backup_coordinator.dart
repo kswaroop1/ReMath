@@ -210,11 +210,18 @@ bool _matchesStudyRemediationQuestion(
   if (state.phase != StudyPhase.retest) {
     return origin.questionId == _studyRemediationQuestionId(state, origin);
   }
-  final assistedTransitions = {
+  final correctionTransitions = {
     for (final attempt in attempts)
       if (attempt.isCorrect &&
           attempt.kind == AttemptKind.correction &&
           attempt.relatedEventId == origin.eventId &&
+          attempt.sessionId == state.sessionId &&
+          attempt.skillId == state.step!.skillId)
+        attempt.questionId,
+  };
+  final hintTransitions = {
+    for (final attempt in attempts)
+      if (attempt.kind == AttemptKind.hint &&
           attempt.sessionId == state.sessionId &&
           attempt.skillId == state.step!.skillId)
         attempt.questionId,
@@ -225,9 +232,9 @@ bool _matchesStudyRemediationQuestion(
     if (origin.questionId == _studyRemediationQuestionId(candidate, origin)) {
       return true;
     }
-    if (!assistedTransitions.remove(
-      _studyAssistedRetestQuestionId(candidate),
-    )) {
+    final assistedQuestionId = _studyAssistedRetestQuestionId(candidate);
+    if (!correctionTransitions.remove(assistedQuestionId) ||
+        !hintTransitions.remove(assistedQuestionId)) {
       return false;
     }
     index--;
