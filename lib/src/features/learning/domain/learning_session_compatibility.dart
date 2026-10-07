@@ -21,7 +21,8 @@ bool isLearningSessionCompatible(
   }
   if (session.id.startsWith('diagnostic-')) {
     if (session.phase != LearningSessionPhase.question ||
-        session.currentQuestionIndex >= ArithmeticOperation.values.length * 3) {
+        session.currentQuestionIndex >= ArithmeticOperation.values.length * 3 ||
+        session.focusSkillId != null) {
       return false;
     }
   }
@@ -57,14 +58,6 @@ bool isLearningSessionCompatible(
     } on StateError {
       return false;
     }
-  }
-  if (session.id.startsWith('diagnostic-') &&
-      focusSkillId != null &&
-      focusSkillId !=
-          ArithmeticOperation
-              .values[session.currentQuestionIndex ~/ 3]
-              .skillId) {
-    return false;
   }
   final questionId = session.questionId;
   final skillId = session.questionSkillId;
