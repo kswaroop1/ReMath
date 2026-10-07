@@ -50,9 +50,7 @@ jobs:
         run: git diff --exit-code -- pubspec.lock
       - name: Verify formatting
         run: |
-          dart format lib test tool
-          git diff --patch
-          exit 1
+          dart format --output=none --set-exit-if-changed lib test tool
       - name: Static analysis
         run: flutter analyze --fatal-infos --fatal-warnings
       - name: Validate content packs

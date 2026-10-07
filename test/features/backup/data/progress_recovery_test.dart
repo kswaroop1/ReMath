@@ -259,25 +259,22 @@ void main() {
       },
     );
 
-    test(
-      'an imported event stream blocks its stale Home session',
-      () async {
-        for (final fixture in _fixtures()) {
-          final repository = fixture.repository;
-          addTearDown(fixture.close);
+    test('an imported event stream blocks its stale Home session', () async {
+      for (final fixture in _fixtures()) {
+        final repository = fixture.repository;
+        addTearDown(fixture.close);
 
-          final result = await repository.mergeProgress(
-            attempts: [_attempt('imported-session-progress')],
-            studyState: null,
-            session: _session('session-1'),
-          );
+        final result = await repository.mergeProgress(
+          attempts: [_attempt('imported-session-progress')],
+          studyState: null,
+          session: _session('session-1'),
+        );
 
-          expect(result.insertedAttemptCount, 1);
-          expect(result.importedSession, isFalse);
-          expect(await repository.loadSession(), isNull);
-        }
-      },
-    );
+        expect(result.insertedAttemptCount, 1);
+        expect(result.importedSession, isFalse);
+        expect(await repository.loadSession(), isNull);
+      }
+    });
 
     test(
       'a SQLite write interruption rolls back attempts and study state',
