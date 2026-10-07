@@ -276,6 +276,31 @@ void main() {
       }
     });
 
+    test('earlier diagnostic answers preserve a legacy session', () async {
+      for (final fixture in _fixtures()) {
+        final repository = fixture.repository;
+        addTearDown(fixture.close);
+        final session = LearningSession(
+          currentQuestionIndex: 2,
+          id: 'diagnostic-session',
+          seed: 42,
+          startedAt: DateTime.utc(2026, 9, 20, 9),
+        );
+
+        final result = await repository.mergeProgress(
+          attempts: [
+            _attempt('diagnostic-0', sessionId: session.id),
+            _attempt('diagnostic-1', sessionId: session.id),
+          ],
+          studyState: null,
+          session: session,
+        );
+
+        expect(result.importedSession, isTrue);
+        expect((await repository.loadSession())?.id, session.id);
+      }
+    });
+
     test(
       'a SQLite write interruption rolls back attempts and study state',
       () async {
@@ -410,6 +435,7 @@ AttemptEvent _attempt(
   String answer = '4',
   DateTime? occurredAt,
   Duration responseTime = const Duration(milliseconds: 500),
+  String sessionId = 'session-1',
 }) {
   return AttemptEvent(
     answer: answer,
@@ -418,7 +444,7 @@ AttemptEvent _attempt(
     occurredAt: occurredAt ?? DateTime.utc(2026, 9, 20, 10),
     questionId: 'question-$id',
     responseTime: responseTime,
-    sessionId: 'session-1',
+    sessionId: sessionId,
     skillId: 'arithmetic.addition',
   );
 }
