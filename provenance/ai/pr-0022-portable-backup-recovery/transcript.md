@@ -967,3 +967,33 @@ all 403 native tests, Chrome browser contracts, coverage enforcement, static
 analysis, content validation, dependency-lock verification, formatting, and
 secret scanning. This is the authoritative behavioural-head verification for
 the final review corrections.
+
+Records-head CI 37269720927 verifies `6920a54` with every gate green. Review of
+that head identified five further recovery invariants: every adaptive legacy
+Home session must be pinned even when histories are identical; active Home hint
+counts require immutable concept-card and hint-level evidence; imported answers
+must not restore the stale session they already advanced; diagnostic sessions
+must never retain a focus; and Home retest recovery requires the successful
+correction that created the retest.
+
+Published pairs `de98f2d` / `9c5a948`, `12c0abb` / `f76ce25`, `91bd0cc` /
+`3480ac6`, `dd79568` / `56909a3`, and `cccfce7` / `25ee4b6` preserve separate
+test/implementation ordering for those five boundaries. Local Flutter execution
+remains unavailable, so these pairs have no executed-red evidence and are not
+overstated as verified red/green cycles.
+
+CI 37570561742 passes all 409 native tests and secret scanning; only canonical
+formatting changes remain in the two new regression files. Diagnostic commit
+`84fe998` was malformed during remote tree construction and therefore started
+no workflow. Its repair `1e19fbc` contained only the workflow file, so CI
+37581507258 failed the project-structure boundary before dependencies or tests.
+Neither failed publication is treated as behavioral evidence.
+
+Commit `35e131a` restores the complete source tree and diagnostic CI
+37589329840 passes all 409 native tests while printing the exact two-file Dart
+formatter patch. Commit `4a4272e` applies only that canonical formatting and
+restores the normal non-mutating formatting gate. Replacement CI 37595411167
+verifies every gate green, including all 409 native tests, Chrome browser
+contracts, coverage enforcement, static analysis, content validation,
+dependency-lock verification, formatting, and secret scanning. This is the
+authoritative behavioral-head verification for the five final invariants.
