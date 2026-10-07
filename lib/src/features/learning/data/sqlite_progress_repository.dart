@@ -1,0 +1,635 @@
+import 'package:sqlite3/common.dart';
+
+import '../../numbers/domain/study_plan.dart';
+import '../domain/attempt_event.dart';
+import '../domain/learning_session.dart';
+import '../domain/progress_repository.dart';
+
+final class SqliteProgressRepository
+    implements ProgressSnapshotRepository, LearningTransitionRepository {
+  SqliteProgressRepository(this._database) {
+    _migrate();
+  }
+
+  final CommonDatabase _database;
+  static const _currentSchemaVersion = 9;
+
+  void _migrate() {
+    _database.execute('PRAGMA foreign_keys = ON');
+    _database.execute('''
+      CREATE TABLE IF NOT EXISTS schema_version (
+        version INTEGER NOT NULL
+      ) STRICT
+    ''');
+    if (_database.select('SELECT version FROM schema_version').isEmpty) {
+      _database.execute('INSERT INTO schema_version (version) VALUES (1)');
+    }
+    _database.execute('''
+      CREATE TABLE IF NOT EXISTS attempt_events (
+        event_id TEXT NOT NULL PRIMARY KEY,
+        session_id TEXT NOT NULL,
+        question_id TEXT NOT NULL,
+        answer TEXT NOT NULL,
+        is_correct INTEGER NOT NULL CHECK (is_correct IN (0, 1)),
+        response_ms INTEGER NOT NULL CHECK (response_ms >= 0),
+        occurred_at TEXT NOT NULL
+      ) STRICT
+    ''');
+    final version =
+        _database.select('SELECT version FROM schema_version').single['version']
+            as int;
+    if (version > _currentSchemaVersion) {
+      throw StateError('Unsupported progress schema version $version');
+    }
+    if (version < 2) {
+      _database.execute('BEGIN IMMEDIATE');
+      try {
+        _database.execute(
+          'ALTER TABLE attempt_events ADD COLUMN skill_id TEXT NOT NULL '
+          'DEFAULT \'arithmetic.mixed.legacy\'',
+        );
+        _database.execute('UPDATE schema_version SET version = 2');
+        _database.execute('COMMIT');
+      } catch (_) {
+        _database.execute('ROLLBACK');
+        rethrow;
+      }
+    }
+    _database.execute('''
+      CREATE TABLE IF NOT EXISTS active_session (
+        singleton INTEGER NOT NULL PRIMARY KEY CHECK (singleton = 1),
+        session_id TEXT NOT NULL,
+        seed INTEGER NOT NULL,
+        started_at TEXT NOT NULL,
+        current_question_index INTEGER NOT NULL CHECK (current_question_index >= 0),
+        answer_draft TEXT NOT NULL
+      ) STRICT
+    ''');
+    if (version < 3) {
+      _database.execute('BEGIN IMMEDIATE');
+      try {
+        _database
+          ..execute(
+            'ALTER TABLE attempt_events ADD COLUMN event_kind TEXT NOT NULL '
+            'DEFAULT \'answer\' CHECK (event_kind IN '
+            '(\'answer\', \'correction\', \'retest\'))',
+          )
+          ..execute(
+            'ALTER TABLE attempt_events ADD COLUMN related_event_id TEXT',
+          )
+          ..execute(
+            'ALTER TABLE attempt_events ADD COLUMN misconception_id TEXT',
+          )
+          ..execute(
+            'ALTER TABLE active_session ADD COLUMN phase TEXT NOT NULL '
+            'DEFAULT \'question\' CHECK (phase IN '
+            '(\'question\', \'correction\', \'retest\'))',
+          )
+          ..execute('ALTER TABLE active_session ADD COLUMN focus_skill_id TEXT')
+          ..execute(
+            'ALTER TABLE active_session ADD COLUMN correction_of_event_id TEXT',
+          )
+          ..execute('UPDATE schema_version SET version = 3')
+          ..execute('COMMIT');
+      } catch (_) {
+        _database.execute('ROLLBACK');
+        rethrow;
+      }
+    }
+    if (version < 4) {
+      _database.execute('BEGIN IMMEDIATE');
+      try {
+        _database
+          ..execute('ALTER TABLE attempt_events RENAME TO attempt_events_v3')
+          ..execute('''
+            CREATE TABLE attempt_events (
+              event_id TEXT NOT NULL PRIMARY KEY,
+              session_id TEXT NOT NULL,
+              question_id TEXT NOT NULL,
+              answer TEXT NOT NULL,
+              is_correct INTEGER NOT NULL CHECK (is_correct IN (0, 1)),
+              response_ms INTEGER NOT NULL CHECK (response_ms >= 0),
+              occurred_at TEXT NOT NULL,
+              skill_id TEXT NOT NULL,
+              event_kind TEXT NOT NULL CHECK (event_kind IN
+                ('answer', 'correction', 'retest', 'hint')),
+              related_event_id TEXT,
+              misconception_id TEXT
+            ) STRICT
+          ''')
+          ..execute('''
+            INSERT INTO attempt_events SELECT * FROM attempt_events_v3
+          ''')
+          ..execute('DROP TABLE attempt_events_v3')
+          ..execute('ALTER TABLE active_session RENAME TO active_session_v3')
+          ..execute('''
+            CREATE TABLE active_session (
+              singleton INTEGER NOT NULL PRIMARY KEY CHECK (singleton = 1),
+              session_id TEXT NOT NULL,
+              seed INTEGER NOT NULL,
+              started_at TEXT NOT NULL,
+              current_question_index INTEGER NOT NULL
+                CHECK (current_question_index >= 0),
+              answer_draft TEXT NOT NULL,
+              phase TEXT NOT NULL CHECK (phase IN
+                ('question', 'correction', 'retest', 'learn')),
+              focus_skill_id TEXT,
+              correction_of_event_id TEXT,
+              revealed_hint_count INTEGER NOT NULL DEFAULT 0
+                CHECK (revealed_hint_count BETWEEN 0 AND 4)
+            ) STRICT
+          ''')
+          ..execute('''
+            INSERT INTO active_session (
+              singleton, session_id, seed, started_at, current_question_index,
+              answer_draft, phase, focus_skill_id, correction_of_event_id
+            ) SELECT * FROM active_session_v3
+          ''')
+          ..execute('DROP TABLE active_session_v3')
+          ..execute('UPDATE schema_version SET version = 4')
+          ..execute('COMMIT');
+      } catch (_) {
+        _database.execute('ROLLBACK');
+        rethrow;
+      }
+    }
+    if (version < 5) {
+      _database.execute('BEGIN IMMEDIATE');
+      try {
+        _database
+          ..execute('ALTER TABLE active_session RENAME TO active_session_v4')
+          ..execute('''
+            CREATE TABLE active_session (
+              singleton INTEGER NOT NULL PRIMARY KEY CHECK (singleton = 1),
+              session_id TEXT NOT NULL,
+              seed INTEGER NOT NULL,
+              started_at TEXT NOT NULL,
+              current_question_index INTEGER NOT NULL
+                CHECK (current_question_index >= 0),
+              answer_draft TEXT NOT NULL,
+              phase TEXT NOT NULL CHECK (phase IN
+                ('question', 'correction', 'retest', 'learn', 'review')),
+              focus_skill_id TEXT,
+              correction_of_event_id TEXT,
+              revealed_hint_count INTEGER NOT NULL DEFAULT 0
+                CHECK (revealed_hint_count BETWEEN 0 AND 4)
+            ) STRICT
+          ''')
+          ..execute('''
+            INSERT INTO active_session SELECT * FROM active_session_v4
+          ''')
+          ..execute('DROP TABLE active_session_v4')
+          ..execute('UPDATE schema_version SET version = 5')
+          ..execute('COMMIT');
+      } catch (_) {
+        _database.execute('ROLLBACK');
+        rethrow;
+      }
+    }
+    if (version < 6) {
+      _database.execute('BEGIN IMMEDIATE');
+      try {
+        _database.execute(
+          'CREATE TABLE study_state ('
+          'singleton INTEGER NOT NULL PRIMARY KEY CHECK (singleton = 1), '
+          'state TEXT NOT NULL) STRICT',
+        );
+        _database.execute('UPDATE schema_version SET version = 6');
+        _database.execute('COMMIT');
+      } catch (_) {
+        _database.execute('ROLLBACK');
+        rethrow;
+      }
+    }
+    if (version < 7) {
+      _database.execute('BEGIN IMMEDIATE');
+      try {
+        final columns = _database
+            .select('PRAGMA table_info(attempt_events)')
+            .map((row) => row['name'] as String)
+            .toSet();
+        if (!columns.contains('confidence')) {
+          _database.execute(
+            '''ALTER TABLE attempt_events ADD COLUMN confidence TEXT
+            CHECK (confidence IN ('low', 'medium', 'high'))''',
+          );
+        }
+        if (!columns.contains('surprise')) {
+          _database.execute(
+            '''ALTER TABLE attempt_events ADD COLUMN surprise TEXT
+            CHECK (surprise IN ('unsurprising', 'surprising'))''',
+          );
+        }
+        _database.execute('UPDATE schema_version SET version = 7');
+        _database.execute('COMMIT');
+      } catch (_) {
+        _database.execute('ROLLBACK');
+        rethrow;
+      }
+    }
+    if (version < 8) {
+      _database.execute('BEGIN IMMEDIATE');
+      try {
+        final columns = _database
+            .select('PRAGMA table_info(active_session)')
+            .map((row) => row['name'] as String)
+            .toSet();
+        if (!columns.contains('question_id')) {
+          _database.execute(
+            'ALTER TABLE active_session ADD COLUMN question_id TEXT',
+          );
+        }
+        if (!columns.contains('question_skill_id')) {
+          _database.execute(
+            'ALTER TABLE active_session ADD COLUMN question_skill_id TEXT',
+          );
+        }
+        _database.execute('UPDATE schema_version SET version = 8');
+        _database.execute('COMMIT');
+      } catch (_) {
+        _database.execute('ROLLBACK');
+        rethrow;
+      }
+    }
+    if (version < 9) {
+      _database.execute('BEGIN IMMEDIATE');
+      try {
+        final columns = _database
+            .select('PRAGMA table_info(attempt_events)')
+            .map((row) => row['name'] as String)
+            .toSet();
+        if (!columns.contains('response_us')) {
+          _database.execute(
+            'ALTER TABLE attempt_events ADD COLUMN response_us INTEGER '
+            'CHECK (response_us >= 0)',
+          );
+        }
+        _database.execute(
+          'UPDATE attempt_events SET response_us = response_ms * 1000 '
+          'WHERE response_us IS NULL',
+        );
+        _database.execute('UPDATE schema_version SET version = 9');
+        _database.execute('COMMIT');
+      } catch (_) {
+        _database.execute('ROLLBACK');
+        rethrow;
+      }
+    }
+  }
+
+  @override
+  Future<void> close() async => _database.close();
+
+  @override
+  Future<void> completeSession(String sessionId) async {
+    _database.execute(
+      'DELETE FROM active_session WHERE singleton = 1 AND session_id = ?',
+      [sessionId],
+    );
+  }
+
+  @override
+  Future<List<AttemptEvent>> loadAttempts() async => _loadAttemptsSync();
+
+  List<AttemptEvent> _loadAttemptsSync() => _database
+      .select('SELECT * FROM attempt_events ORDER BY occurred_at, event_id')
+      .map(_attemptFromRow)
+      .toList(growable: false);
+
+  @override
+  Future<ProgressSnapshot> loadSnapshot() async {
+    _database.execute('BEGIN');
+    try {
+      final attempts = _database
+          .select('SELECT * FROM attempt_events ORDER BY occurred_at, event_id')
+          .map(_attemptFromRow)
+          .toList(growable: false);
+      final sessionRows = _database.select(
+        'SELECT * FROM active_session WHERE singleton = 1',
+      );
+      final session = sessionRows.isEmpty
+          ? null
+          : _sessionFromRow(sessionRows.single);
+      final studyRows = _database.select(
+        'SELECT state FROM study_state WHERE singleton = 1',
+      );
+      final studyState = studyRows.isEmpty
+          ? null
+          : studyRows.single['state'] as String;
+      _database.execute('COMMIT');
+      return ProgressSnapshot(
+        attempts: attempts,
+        session: session,
+        studyState: studyState,
+      );
+    } catch (_) {
+      _database.execute('ROLLBACK');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<LearningSession?> loadSession() async => _loadSessionSync();
+
+  LearningSession? _loadSessionSync() {
+    final rows = _database.select(
+      'SELECT * FROM active_session WHERE singleton = 1',
+    );
+    if (rows.isEmpty) {
+      return null;
+    }
+    return _sessionFromRow(rows.single);
+  }
+
+  LearningSession _sessionFromRow(Row row) {
+    return LearningSession(
+      answerDraft: row['answer_draft'] as String,
+      correctionOfEventId: row['correction_of_event_id'] as String?,
+      currentQuestionIndex: row['current_question_index'] as int,
+      focusSkillId: row['focus_skill_id'] as String?,
+      id: row['session_id'] as String,
+      phase: LearningSessionPhase.values.byName(row['phase'] as String),
+      questionId: row['question_id'] as String?,
+      questionSkillId: row['question_skill_id'] as String?,
+      revealedHintCount: row['revealed_hint_count'] as int,
+      seed: row['seed'] as int,
+      startedAt: DateTime.parse(row['started_at'] as String).toUtc(),
+    );
+  }
+
+  @override
+  Future<ProgressMergeResult> mergeProgress({
+    required List<AttemptEvent> attempts,
+    required String? studyState,
+    LearningSession? session,
+  }) async {
+    final incomingIds = <String>{};
+    for (final attempt in attempts) {
+      attempt.validateCalibrationEvidence();
+      if (!incomingIds.add(attempt.eventId)) {
+        throw ArgumentError.value(attempts, 'attempts', 'IDs must be unique');
+      }
+    }
+    _database.execute('BEGIN IMMEDIATE');
+    try {
+      final sessionStreamAdvanced =
+          session != null &&
+          _loadAttemptsSync().any(
+            (attempt) =>
+                attempt.sessionId == session.id &&
+                !incomingIds.contains(attempt.eventId) &&
+                _advancesSavedSession(session, attempt),
+          );
+      final incomingSessionAdvanced =
+          session != null &&
+          attempts.any(
+            (attempt) =>
+                attempt.sessionId == session.id &&
+                _advancesSavedSession(session, attempt),
+          );
+      var duplicateAttemptCount = 0;
+      final newAttempts = <AttemptEvent>[];
+      for (final attempt in attempts) {
+        final rows = _database.select(
+          'SELECT * FROM attempt_events WHERE event_id = ?',
+          [attempt.eventId],
+        );
+        if (rows.isEmpty) {
+          newAttempts.add(attempt);
+          continue;
+        }
+        if (!_attemptFromRow(rows.single).hasSameImmutableContentAs(attempt)) {
+          throw ProgressConflictException(attempt.eventId);
+        }
+        duplicateAttemptCount++;
+      }
+      for (final attempt in newAttempts) {
+        _insertAttempt(attempt);
+      }
+      final localStudyState = _loadStudyStateSync();
+      final importStudyState =
+          studyState != null &&
+          _canImportStudyState(studyState, _containsAttemptEvent) &&
+          !_hasActiveStudyState(localStudyState);
+      if (importStudyState) _writeStudyState(studyState);
+      final importSession =
+          session != null &&
+          _loadSessionSync() == null &&
+          !sessionStreamAdvanced &&
+          !incomingSessionAdvanced;
+      if (importSession) _writeSession(session);
+      _database.execute('COMMIT');
+      return ProgressMergeResult(
+        duplicateAttemptCount: duplicateAttemptCount,
+        importedStudyState: importStudyState,
+        importedSession: importSession,
+        insertedAttemptCount: newAttempts.length,
+      );
+    } catch (_) {
+      _database.execute('ROLLBACK');
+      rethrow;
+    }
+  }
+
+  bool _containsAttemptEvent(String eventId) {
+    final rows = _database.select(
+      'SELECT 1 FROM attempt_events WHERE event_id = ? LIMIT 1',
+      [eventId],
+    );
+    return rows.isNotEmpty;
+  }
+
+  @override
+  Future<bool> recordAttempt(AttemptEvent event) async {
+    event.validateCalibrationEvidence();
+    return _insertAttempt(event);
+  }
+
+  @override
+  Future<bool> commitLearningAttempt(
+    AttemptEvent event,
+    LearningSession? nextSession,
+  ) async {
+    event.validateCalibrationEvidence();
+    _database.execute('BEGIN IMMEDIATE');
+    try {
+      final inserted = _insertAttempt(event);
+      if (inserted) {
+        if (nextSession == null) {
+          _database.execute('DELETE FROM active_session WHERE session_id = ?', [
+            event.sessionId,
+          ]);
+        } else {
+          _writeSession(nextSession);
+        }
+      }
+      _database.execute('COMMIT');
+      return inserted;
+    } catch (_) {
+      _database.execute('ROLLBACK');
+      rethrow;
+    }
+  }
+
+  bool _insertAttempt(AttemptEvent event) {
+    _database.execute(
+      '''
+      INSERT OR IGNORE INTO attempt_events (
+        event_id, session_id, question_id, answer, is_correct,
+        response_ms, response_us, occurred_at, skill_id, event_kind,
+        related_event_id, misconception_id, confidence, surprise
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ''',
+      [
+        event.eventId,
+        event.sessionId,
+        event.questionId,
+        event.answer,
+        event.isCorrect ? 1 : 0,
+        event.responseTime.inMilliseconds,
+        event.responseTime.inMicroseconds,
+        event.occurredAt.toUtc().toIso8601String(),
+        event.skillId,
+        event.kind.name,
+        event.relatedEventId,
+        event.misconceptionId,
+        event.confidence?.name,
+        event.surprise?.name,
+      ],
+    );
+    return _database.updatedRows == 1;
+  }
+
+  @override
+  Future<void> saveSession(LearningSession session) async {
+    _writeSession(session);
+  }
+
+  void _writeSession(LearningSession session) {
+    _database.execute(
+      '''
+      INSERT INTO active_session (
+        singleton, session_id, seed, started_at, current_question_index,
+        answer_draft, phase, focus_skill_id, correction_of_event_id,
+        revealed_hint_count, question_id, question_skill_id
+      ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(singleton) DO UPDATE SET
+        session_id = excluded.session_id,
+        seed = excluded.seed,
+        started_at = excluded.started_at,
+        current_question_index = excluded.current_question_index,
+        answer_draft = excluded.answer_draft,
+        phase = excluded.phase,
+        focus_skill_id = excluded.focus_skill_id,
+        correction_of_event_id = excluded.correction_of_event_id
+        , revealed_hint_count = excluded.revealed_hint_count,
+        question_id = excluded.question_id,
+        question_skill_id = excluded.question_skill_id
+      ''',
+      [
+        session.id,
+        session.seed,
+        session.startedAt.toUtc().toIso8601String(),
+        session.currentQuestionIndex,
+        session.answerDraft,
+        session.phase.name,
+        session.focusSkillId,
+        session.correctionOfEventId,
+        session.revealedHintCount,
+        session.questionId,
+        session.questionSkillId,
+      ],
+    );
+  }
+
+  @override
+  Future<String?> loadStudyState() async => _loadStudyStateSync();
+
+  String? _loadStudyStateSync() {
+    final rows = _database.select(
+      'SELECT state FROM study_state WHERE singleton = 1',
+    );
+    return rows.isEmpty ? null : rows.single['state'] as String;
+  }
+
+  void _writeStudyState(String state) {
+    _database.execute(
+      'INSERT INTO study_state (singleton, state) VALUES (1, ?) '
+      'ON CONFLICT(singleton) DO UPDATE SET state = excluded.state',
+      [state],
+    );
+  }
+
+  @override
+  Future<void> saveStudyState(String state) async => _writeStudyState(state);
+
+  @override
+  Future<bool> commitStudyAttempt(AttemptEvent event, String state) async {
+    event.validateCalibrationEvidence();
+    _database.execute('BEGIN IMMEDIATE');
+    try {
+      final inserted = _insertAttempt(event);
+      if (inserted) {
+        _writeStudyState(state);
+      }
+      _database.execute('COMMIT');
+      return inserted;
+    } catch (_) {
+      _database.execute('ROLLBACK');
+      rethrow;
+    }
+  }
+
+  AttemptEvent _attemptFromRow(Row row) => AttemptEvent(
+    answer: row['answer'] as String,
+    eventId: row['event_id'] as String,
+    isCorrect: (row['is_correct'] as int) == 1,
+    kind: AttemptKind.values.byName(row['event_kind'] as String),
+    misconceptionId: row['misconception_id'] as String?,
+    occurredAt: DateTime.parse(row['occurred_at'] as String).toUtc(),
+    questionId: row['question_id'] as String,
+    responseTime: Duration(microseconds: row['response_us'] as int),
+    relatedEventId: row['related_event_id'] as String?,
+    sessionId: row['session_id'] as String,
+    skillId: row['skill_id'] as String,
+    confidence: row['confidence'] == null
+        ? null
+        : ConfidenceRating.values.byName(row['confidence'] as String),
+    surprise: row['surprise'] == null
+        ? null
+        : SurpriseRating.values.byName(row['surprise'] as String),
+  );
+}
+
+bool _advancesSavedSession(LearningSession session, AttemptEvent attempt) {
+  if (session.phase == LearningSessionPhase.correction ||
+      session.phase == LearningSessionPhase.learn) {
+    return false;
+  }
+  final questionId = session.questionId;
+  return questionId == null
+      ? attempt.kind != AttemptKind.hint
+      : attempt.questionId == questionId && attempt.kind.contributesToMastery;
+}
+
+bool _hasActiveStudyState(String? source) {
+  if (source == null) return false;
+  try {
+    return StudyState.decode(source).plan != null;
+  } on Object {
+    return true;
+  }
+}
+
+bool _canImportStudyState(
+  String source,
+  bool Function(String eventId) containsEvent,
+) {
+  try {
+    final state = StudyState.decode(source);
+    return state.plan != null &&
+        !containsEvent('${state.sessionId}.${state.serial}');
+  } on Object {
+    return false;
+  }
+}

@@ -1,0 +1,20 @@
+schema_version: 1
+pull_request: 11
+title: Add release installation guidance
+human_owner: kswaroop1
+agents:
+  - product: OpenAI Codex
+    model: not exposed to repository session
+started_at: 2026-08-31T00:00:00Z
+finalized_at: null
+scope:
+  - EN-021 cross-platform installation guidance
+  - EN-013 Android signing boundary
+  - EN-015 Windows signing boundary
+  - release-note publication contract
+redactions: []
+excluded_context:
+  - hidden system and developer instructions
+  - model internal reasoning
+  - routine raw tool telemetry unless it changed the implementation
+ci_runs: []

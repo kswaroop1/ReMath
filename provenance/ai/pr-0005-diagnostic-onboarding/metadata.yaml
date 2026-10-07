@@ -1,0 +1,30 @@
+schema_version: 1
+pull_request: 5
+title: Add diagnostic onboarding and placement
+human_owner: kswaroop1
+agents:
+  - product: OpenAI Codex
+    model: not exposed to repository session
+started_at: 2026-08-28T11:48:00Z
+finalized_at: 2026-08-28T16:05:01Z
+scope:
+  - LX-001 diagnostic onboarding
+  - CG-003 multi-track placement foundation
+  - CG-004 objective separation foundation
+  - business-focused TDD
+  - local persistence and resumability
+  - onboarding and result presentation
+redactions: []
+excluded_context:
+  - hidden system and developer instructions
+  - model internal reasoning
+  - routine raw tool telemetry unless it changed the implementation
+ci_runs:
+  - https://github.com/kswaroop1/ReMath/actions/runs/33184924312
+  - https://github.com/kswaroop1/ReMath/actions/runs/33185112005
+  - https://github.com/kswaroop1/ReMath/actions/runs/33186405183
+  - https://github.com/kswaroop1/ReMath/actions/runs/33186820450
+  - https://github.com/kswaroop1/ReMath/actions/runs/33186947308
+  - https://github.com/kswaroop1/ReMath/actions/runs/33187640910
+  - https://github.com/kswaroop1/ReMath/actions/runs/33187906149
+  - https://github.com/kswaroop1/ReMath/actions/runs/33188135366

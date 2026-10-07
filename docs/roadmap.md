@@ -1,0 +1,156 @@
+# Delivery roadmap
+
+This roadmap records the recommended sequence after the correction and
+remediation work merged in PR #6. Each pull request remains independently
+reviewable and follows the repository's strict business-focused
+red–green–refactor process.
+
+## PR #7 — Offline learning packs and hint ladder
+
+Close the first complete learn-before-drill loop without introducing a network
+or paid-AI dependency.
+
+### Feature scope
+
+- **LX-006 — Learn chunk:** a concise concept introduction followed by immediate
+  practice inside a standard 15-minute chunk.
+- **QA-021 — Hint ladder:** concept cue, method cue, next-step cue, and worked
+  solution with increasing assistance.
+- **MP-004 — Attempt and correction tracking:** complete the foundation with
+  immutable hint and revealed-step evidence.
+- Extend the content-pack contract for original offline concept cards, formula
+  cards, worked examples, common mistakes, applications, and optional external
+  refresher links.
+- Prove the reusable contract with mental addition, subtraction, and
+  multiplication resources. Broader mathematics belongs in later content packs.
+
+### Acceptance direction
+
+- A remediation recommendation opens the matching concept card.
+- A learner can start and resume a Learn chunk, including revealed hint state.
+- Core explanations, examples, hints, and practice work entirely offline.
+- Assistance remains immutable, idempotent evidence and cannot count as
+  unaided mastery.
+- Optional external links are never required to complete a chunk.
+- Content validation rejects incomplete, malformed, unlicensed, or unsafe
+  learning resources.
+- Permanent CI retains fatal warnings/infos, secret scanning, and meaningful
+  production coverage at or near 100%.
+
+## PR #8 — Curriculum and prerequisite graph
+
+Implement **CG-002**, the general part of **CG-007**, and foundations for
+**CG-006** and **CG-010**: directed prerequisites, readiness recommendations,
+goal-to-skill relationships, and explainable navigation. Recommendations should
+guide without unnecessarily blocking exploration.
+
+## PR #9 — Review chunks and retained mastery
+
+Implement **LX-008**, **CG-008**, **MP-012**, and the next stage of **MP-011**:
+delayed retrieval sessions, retained-success evidence, lapse handling, and
+review selection based on due or at-risk skills rather than immediate accuracy
+alone.
+
+## PR #10 — Progress dashboard and skill history
+
+Implement **MP-016** and **MP-017**, with foundations for **MP-007**, **MP-008**,
+and **MP-014**: an explainable view of attempts, accuracy, fluency, assistance,
+retention, and why each skill recommendation or score changed.
+
+Learner-facing acceptance criteria:
+
+- The dashboard distinguishes independent attempts from coached corrections and
+  hints, and never presents assisted work as independent mastery.
+- Every arithmetic skill shows accuracy, fluency, retained evidence, review
+  timing, and an explainable knowledge/performance indicator.
+- Forgetting risk rises predictably as a scheduled review approaches and is
+  explicit when overdue; an unattempted skill is shown as having no evidence.
+- A learner can open a skill history and understand how each answer, retest,
+  correction, or hint affected—or did not affect—the displayed progress.
+- Empty and partially populated histories are honest, deterministic, available
+  offline, and derived without mutating persisted attempt events.
+
+## Intended product sequence
+
+1. Diagnose a learner's current foundation.
+2. Teach or refresh the recommended concept.
+3. Practise, correct, and retest it.
+4. Revisit it later to confirm retention.
+5. Explain progress and the next recommendation.
+
+The roadmap is directional rather than permission to expand a pull request.
+Each PR must restate its exact feature IDs and learner-facing acceptance criteria
+before its first test-only commit.
+
+## PR #11 — Release installation guidance
+
+Implement **EN-021** and clarify the boundary of **EN-013** and **EN-015** after
+installing the first real release:
+
+- Future GitHub release pages explain how to install Android and Windows assets.
+- Windows ZIP instructions include unblocking the downloaded archive before
+  extraction and a PowerShell recovery command for an already extracted tree.
+- Documentation distinguishes a successful portable build from trusted Windows
+  code signing.
+- Documentation warns that the current CI-generated Android signing identity is
+  not suitable for reliable in-place upgrades; EN-013 remains incomplete until
+  an owner-controlled keystore is configured.
+
+## PR #13 — Number fluency and proportional reasoning
+
+Deliver the next vertical slice across MA-001/002 and the supporting goal,
+planning, assessment, progression and persistence capabilities. See the exact
+[scope and acceptance criteria](slices/number-learning.md). Broader mathematical
+module completion is not implied by this bounded slice.
+
+The next proposed slice is the algebra bridge: powers/roots, scientific notation,
+basic manipulation and linear equations, adding constrained symbolic marking and
+structured steps when those learning journeys require them. It remains proposed,
+not part of PR13. No release is included in PR13.
+
+
+## Algebra reasoning programme — accepted after PR13
+
+Four sequential, independently usable increments:
+
+1. **PR14 — Solve algebra:** bounded exact symbolic marking, collecting terms,
+   expansion and linear equations, goal/diagnostic, original teaching,
+   correction/retest and resumable drafts through the shared journey. Begin
+   versioned marking/scoring evidence and preserve legacy numeric sessions.
+2. **PR15 — Explain algebra (implemented):** ordered/missing/invalid steps, multiple-select assessment,
+   error classification and targeted remediation.
+3. **PR16 engine + PR17 journey — Apply algebra:** method/assumption selection, unlabelled mixed challenges,
+   application chunks and separate technique-selection progress.
+4. **Calibrate and continue (implemented):** optional confidence reporting,
+   configurable session lengths, complete end-of-session choices and verified
+   scoring replay.
+
+The first increment's [acceptance criteria](slices/algebra-solving.md) are bounded;
+its completion does not mark later programme features complete. Every increment
+keeps separate red/green evidence and requests review explicitly after CI. No
+release is included in this programme's implementation requests.
+
+## PR #21 — Reproducible engineering baseline
+
+Pause new mathematics content and complete EN-012, with bounded
+foundations for EN-011, EN-019 and EN-020. Commit reviewed platform runners and the
+application dependency lock, prove a production-composed critical journey, and
+introduce stable initial performance measurements. The exact
+[scope and acceptance criteria](slices/engineering-baseline.md) preserve the
+boundary between this foundation and later device-farm, signing, supply-chain,
+sync, and content-pack work. No release or `VERSION` change is included.
+
+EN-011 remains incomplete until release jobs build unchanged committed projects
+and their generation steps are removed under the existing permission boundary.
+
+## PR #22 — Portable backup and recovery
+
+Deliver a local-first recovery path before cloud sync. Implement a versioned,
+password-encrypted export with authenticated integrity metadata, a read-only
+import preview, and an idempotent event merge that never replaces the complete
+database. Preserve active study state only when it is safe to apply. See the
+exact [scope and acceptance criteria](slices/portable-backup-recovery.md).
+
+Cloud providers, OAuth, automatic background sync, content-pack transfer, and a
+release remain outside PR22. PR23 follows with the content-pack lifecycle; PR24
+then addresses the broader operational-security foundation.

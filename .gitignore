@@ -1,0 +1,21 @@
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+build/
+coverage/
+
+# IDE and platform files
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Generated platform signing/configuration
+android/key.properties
+**/*.jks
+**/*.keystore
+ios/Flutter/ephemeral/
+macos/Flutter/ephemeral/

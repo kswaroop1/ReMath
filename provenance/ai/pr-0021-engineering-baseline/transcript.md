@@ -1,0 +1,210 @@
+# Engineering baseline
+
+User observed that delivery had progressed through content-led vertical slices
+but expressed concern about the relative lack of non-functional,
+infrastructure, and technical feature progress. After reviewing the original
+feature register, roadmap, architecture, tests, workflows, and implementation,
+the agent confirmed that the concern was justified and recommended pausing new
+mathematics content for a bounded infrastructure programme.
+
+User confirmed that PR19 was closed and PR20 merged, then requested that the
+feature register first be reconciled and committed, potentially as part of
+PR21.
+
+Reconciliation: compare every claimed infrastructure foundation with repository
+evidence rather than interpreting an architectural intention as implementation.
+Keep incomplete capabilities unchecked and state their delivered boundary.
+Correct the stale review date, the generated-versus-committed platform-runner
+boundary, existing ADR coverage, content-pack parser/validator/CI foundations,
+database migrations through schema v7, local idempotency and session snapshots,
+the absence of behavioural analytics, and the current CI test boundary.
+
+The documentation-only reconciliation was committed separately and published
+as the first checkpoint of draft PR21. Its planned bounded implementation scope
+is EN-011, EN-012, an EN-019 critical-journey integration foundation, and EN-020
+performance-budget foundations. No release, signing credential, cloud sync,
+content expansion, or VERSION change is included.
+
+After the user asked whether work was continuing, clarify that the prior
+continuation automation ended with PR20 and that no background work occurred
+between messages. Resume PR21 and verify reconciliation CI run 34893291023 is
+green. Select the engineering baseline before behavioral work: record exact
+learner/owner outcomes, platform-runner and dependency-lock invariants, the
+bounded integration and performance foundations, failure behavior, and explicit
+out-of-scope boundaries in `docs/slices/engineering-baseline.md` and the roadmap.
+
+Cycle 1 select/red: EN-011 and EN-012 require reviewed platform projects and an
+application dependency lock to exist at checkout, before dependency installation
+or packaging can silently generate them. Add a CI structure check naming the
+minimum Android, iOS, Linux, macOS, web, and Windows entry files plus
+`pubspec.lock`. The current repository should fail this technical invariant at
+the intended missing-file boundary; no runner or lock production files are added
+in the red commit.
+
+Cycle 1 red: CI run 34971033181 failed at the intended committed-structure
+check before dependency installation. The missing boundary includes
+`pubspec.lock` and the required Android, iOS, Linux, macOS, web, and Windows
+runner entry files. Add a temporary pull-request-only CI job that uses the same
+Flutter stable action as repository CI to generate and archive those sources.
+The quality job remains red until the generated sources themselves are reviewed
+and committed; this job is generation transport, not the EN-011/EN-012 fix.
+
+Generation run 34994064139 produced the expected projects and lock file, but the
+artifact action's default omitted the platform `.gitignore` files. Preserve
+those generated exclusions in the review input by enabling hidden-file upload
+for the explicitly bounded platform directories; root metadata and repository
+state remain outside the artifact paths.
+
+Cycle 1 green implementation: generation run 34994408835 successfully archived
+the stable-toolchain platform sources including their exclusions. Review the
+archive and omit ignored machine-local or ephemeral output: Android local
+properties/IDE files and wrapper binaries, Apple generated configuration and
+ephemeral packages, and Flutter ephemeral directories. Commit the remaining
+reviewed Android, iOS, Linux, macOS, web, and Windows projects plus
+`pubspec.lock`. Remove the temporary archive job so ordinary CI consumes the
+committed projects. After dependency installation, CI must also reject any
+lock-file diff.
+
+The repository write guard rejected replacing the existing release workflow
+because that file contains publication permissions. Do not retry or circumvent
+the denial. Leave the release workflow unchanged in this cycle; removing its
+now-redundant `flutter create` steps is deferred until the owner explicitly
+authorizes that workflow edit.
+
+Cycle 1 green: CI run 34997125517 passed the committed structure check,
+dependency installation, unchanged-lock check, formatting, analysis, content
+validation, Chrome contracts, native tests, coverage, and secret scan. The
+checkout is now reproducible from reviewed platform projects and the committed
+application lock. The release workflow remains intentionally unchanged under
+the recorded write-guard boundary.
+
+Cycle 2 characterization: EN-019 requires one production-composed critical
+journey without claiming a full device farm. Add a widget integration
+characterization that loads the shipped foundation asset through
+`AssetContentPackRepository`, uses the real schema-v7
+`SqliteProgressRepository`, starts the real app, records an incorrect answer,
+rebuilds the app, and verifies the exact correction journey and immutable
+attempt restore. This is existing-behavior coverage, so do not manufacture a
+red production failure.
+
+CI run 34997671946 executed all 287 native tests successfully, including the new
+journey, but failed the formatting gate because the submitted test did not match
+the CI Dart formatter. Publish a formatting-only correction. In corrected run
+34998014550, structure, lock reproducibility, formatting, analysis, content
+validation, Chrome contracts, 287 native tests, coverage, and secret scanning
+all passed; GitHub job bookkeeping was still completing when recorded.
+
+Cycle 3 select/red: EN-020 needs a shared measurement policy before individual
+operations receive thresholds. Require an odd sample count of at least three,
+median evaluation, explicit measured-versus-allowed failure text, and a runner
+that performs declared warm-ups before collecting exactly the declared samples.
+CI run 34998437602 failed at the missing evaluator boundary. The first green
+implementation passed in run 34998636778. The separate runner test then failed
+as intended in run 35006521053 because `measure` did not exist. Implement only
+the warm-up and measured-sample loop; CI run 35434742167 passed.
+
+Cycle 3 characterization: add initial shared-runner budgets for the shipped
+foundation-content load, production-composed application startup, SQLite
+attempt persistence, and a correct-answer question transition. Each operation
+uses two warm-ups, five measured samples, the median, and deliberately broad
+headroom suitable for debug-mode shared CI. The first run, 35434903122, passed
+all 291 tests but failed formatting. A guessed formatting correction still
+failed in run 35435005902. Because local Flutter execution is prohibited, add a
+temporary CI diagnostic that runs the repository formatter and prints its diff;
+run 35435079350 produced the canonical formatting while all tests passed.
+Apply that exact result, remove the diagnostic completely, and verify the clean
+workflow. Final run 35435264259 passed structure, lock reproducibility,
+formatting, analysis, content validation, Chrome contracts, 291 native tests,
+98.90% line coverage, and secret scanning.
+
+Reconcile the feature register against the verified head. EN-011 and EN-012 are
+complete: reviewed cross-platform projects and the application lock are
+committed and checked in CI. EN-019 remains incomplete but its foundation now
+includes the production-composed persistence/restoration journey. EN-020 remains
+incomplete but its initial four enforced budgets are delivered; downloads,
+memory, larger packs, physical devices, and representative installable-app
+journeys remain future work. The redundant release-workflow generation remains
+deferred under the previously recorded write-permission denial.
+
+## 19 September 2026 — provenance correction and disclosure
+
+The preceding narrative is retained unchanged as historical evidence, not
+a verbatim transcript. Its earlier assertion that EN-011 was complete is
+withdrawn: release generation remains. Its restoration/startup claims were
+also too broad because the tests retained in-memory storage.
+
+Exact pre-review user/agent exports are unavailable in this checkout and current
+session. Those exchanges are explicitly omitted; the earlier narrative must not
+be represented as their exact text. No missing quotations have been invented.
+The earlier `redactions: []` did not disclose this omission. Reviewers should
+assess that historical limitation before approving provenance integrity.
+
+Available current user/agent and linked reviewer exchanges are preserved in
+[review-exchanges.md](review-exchanges.md). Routine retrieval output is omitted.
+The original review was against 3b6004f; CI run 35436081227 succeeded on that head.
+
+### Assistant — correction approach
+
+> I’ll keep the application’s startup wiring unchanged and substitute only the OS directory provider in tests. That will exercise `main()`, shipped assets, directory creation, SQLite initialization, and restoration after closing and reopening the database. The historical provenance also lacks exact exchanges; I’ll preserve it, append the available review and user messages, and explicitly identify the missing exports.
+
+### Local validation restriction
+
+Automatic approval review rejected local Flutter polling/execution because the
+Flutter command targeted the cloud metadata endpoint. No successful local Flutter
+validation is claimed. GitHub Actions is used for executable verification.
+
+Direct HTTPS git push had no credentials; the authorized GitHub connector is
+used to publish commits. This is an authentication transport change, not a
+change to the repository permission boundary. Release workflow remains untouched.
+
+### CI — negative warm-up regression
+
+Test-first commit 6a6b97a, run [35438756404](https://github.com/kswaroop1/ReMath/actions/runs/35438756404):
+`flutter test --coverage` failed specifically in
+`negative warm-up counts cannot silently change sampling policy`.
+
+```text
+Expected: throws <Instance of 'ArgumentError'>
+Actual: <Closure: () => PerformanceBudget>
+Which: returned <Instance of 'PerformanceBudget'>
+```
+
+Formatting, analysis, lock guard, Chrome tests and secret scan passed. The next
+implementation adds only the non-negative guard for this behavior. Production
+bootstrap remains unchanged; the disk-backed journey/benchmarks are explicitly
+existing-behavior characterization, with green-before evidence at 3b6004f.
+
+### CI — first correction verification
+
+Commit 290486f, run [35438935397](https://github.com/kswaroop1/ReMath/actions/runs/35438935397)
+passed the complete native suite, including negative warm-up rejection, production
+main startup, file-backed correction restoration and disk-backed performance
+budgets. The lock no-diff guard passed. Formatting failed, so analysis/Chrome and
+coverage-floor steps were skipped; this is not a fully green CI claim.
+
+The next test-first commit reproduces fractional-millisecond diagnostic loss and
+adds characterization of exact-threshold acceptance and invalid sample counts.
+It also makes formatting failures print the canonical diff, while retaining a
+failing exit status. No formatting threshold or test assertion is weakened.
+
+
+### CI — precise-diagnostic red phase
+
+Commit 621c44e, run [35439081562](https://github.com/kswaroop1/ReMath/actions/runs/35439081562)
+failed at the focused performance-budget assertion: a measured 100.5 ms median
+was reported as 100 ms against an allowed 100 ms. The run also printed the
+canonical Dart formatter diff. The other 293 native tests passed; secret
+scanning passed.
+
+### Agent — precise-diagnostic correction
+
+Commit 73ccd38 preserves fractional milliseconds in failure messages, applies
+the exact CI formatter output, and removes the temporary formatting diagnostic.
+No budget, sample count, or acceptance threshold changed.
+
+### CI — review-correction verification
+
+Run [35449955466](https://github.com/kswaroop1/ReMath/actions/runs/35449955466)
+passed all checks: committed structure, dependency-lock no-diff, formatting,
+static analysis, content validation, 7 Chrome tests, 294 native tests, 98.99%
+line coverage, and secret scanning.
