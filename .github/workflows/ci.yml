@@ -49,7 +49,10 @@ jobs:
       - name: Verify dependency lock is unchanged
         run: git diff --exit-code -- pubspec.lock
       - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed lib test tool
+        run: |
+          dart format lib test tool
+          git diff --patch
+          exit 1
       - name: Static analysis
         run: flutter analyze --fatal-infos --fatal-warnings
       - name: Validate content packs
@@ -64,3 +67,4 @@ jobs:
         run: flutter test --coverage
       - name: Enforce coverage floor
         run: dart run tool/check_coverage.dart 90
+b3f20e3472f056bb317b3e51de19a58c9b9b5e85
