@@ -211,19 +211,29 @@ bool _activeStudyStateAdvanced(String? source, Iterable<String> eventIds) {
 bool _hasStudyEventAtOrAfter(
   StudyState state,
   Iterable<String> eventIds,
+) => _studyEventSerials(state, eventIds).any(
+  (serial) => serial >= state.serial,
+);
+
+Set<int> _studyEventSerials(
+  StudyState state,
+  Iterable<String> eventIds,
 ) {
   final prefix = '${state.sessionId}.';
-  return eventIds.any((eventId) {
-    if (!eventId.startsWith(prefix)) return false;
-    final serial = int.tryParse(eventId.substring(prefix.length));
-    return serial != null && serial >= state.serial;
-  });
+  return {
+    for (final eventId in eventIds)
+      if (eventId.startsWith(prefix))
+        int.tryParse(eventId.substring(prefix.length)),
+  }.whereType<int>().toSet();
 }
 
 bool _canImportStudyState(String source, Iterable<String> eventIds) {
   try {
     final state = StudyState.decode(source);
-    return state.plan != null && !_hasStudyEventAtOrAfter(state, eventIds);
+    final serials = _studyEventSerials(state, eventIds);
+    return state.plan != null &&
+        !serials.any((serial) => serial >= state.serial) &&
+        Iterable<int>.generate(state.serial).every(serials.contains);
   } on Object {
     return false;
   }
