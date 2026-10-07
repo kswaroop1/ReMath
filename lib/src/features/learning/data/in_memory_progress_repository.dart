@@ -77,7 +77,15 @@ final class InMemoryProgressRepository
         _attempts.values.any(
           (attempt) =>
               attempt.sessionId == session.id &&
-              !incomingIds.contains(attempt.eventId),
+              !incomingIds.contains(attempt.eventId) &&
+              _advancesSavedSession(session, attempt),
+        );
+    final incomingSessionAdvanced =
+        session != null &&
+        attempts.any(
+          (attempt) =>
+              attempt.sessionId == session.id &&
+              _advancesSavedSession(session, attempt),
         );
     for (final attempt in attempts) {
       _attempts.putIfAbsent(attempt.eventId, () => attempt);
@@ -98,7 +106,10 @@ final class InMemoryProgressRepository
         !_hasActiveStudyState(_studyState);
     if (importStudyState) _studyState = studyState;
     final importSession =
-        session != null && _session == null && !sessionStreamAdvanced;
+        session != null &&
+        _session == null &&
+        !sessionStreamAdvanced &&
+        !incomingSessionAdvanced;
     if (importSession) _session = session;
     return ProgressMergeResult(
       duplicateAttemptCount: duplicateAttemptCount,
@@ -134,6 +145,17 @@ final class InMemoryProgressRepository
   Future<void> saveSession(LearningSession session) async {
     _session = session;
   }
+}
+
+bool _advancesSavedSession(LearningSession session, AttemptEvent attempt) {
+  if (session.phase == LearningSessionPhase.correction ||
+      session.phase == LearningSessionPhase.learn) {
+    return false;
+  }
+  final questionId = session.questionId;
+  return questionId == null
+      ? attempt.kind != AttemptKind.hint
+      : attempt.questionId == questionId && attempt.kind.contributesToMastery;
 }
 
 bool _hasActiveStudyState(String? source) {

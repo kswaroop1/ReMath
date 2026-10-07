@@ -377,7 +377,15 @@ final class SqliteProgressRepository
           _loadAttemptsSync().any(
             (attempt) =>
                 attempt.sessionId == session.id &&
-                !incomingIds.contains(attempt.eventId),
+                !incomingIds.contains(attempt.eventId) &&
+                _advancesSavedSession(session, attempt),
+          );
+      final incomingSessionAdvanced =
+          session != null &&
+          attempts.any(
+            (attempt) =>
+                attempt.sessionId == session.id &&
+                _advancesSavedSession(session, attempt),
           );
       var duplicateAttemptCount = 0;
       final newAttempts = <AttemptEvent>[];
@@ -407,7 +415,8 @@ final class SqliteProgressRepository
       final importSession =
           session != null &&
           _loadSessionSync() == null &&
-          !sessionStreamAdvanced;
+          !sessionStreamAdvanced &&
+          !incomingSessionAdvanced;
       if (importSession) _writeSession(session);
       _database.execute('COMMIT');
       return ProgressMergeResult(
@@ -590,6 +599,17 @@ final class SqliteProgressRepository
         ? null
         : SurpriseRating.values.byName(row['surprise'] as String),
   );
+}
+
+bool _advancesSavedSession(LearningSession session, AttemptEvent attempt) {
+  if (session.phase == LearningSessionPhase.correction ||
+      session.phase == LearningSessionPhase.learn) {
+    return false;
+  }
+  final questionId = session.questionId;
+  return questionId == null
+      ? attempt.kind != AttemptKind.hint
+      : attempt.questionId == questionId && attempt.kind.contributesToMastery;
 }
 
 bool _hasActiveStudyState(String? source) {
