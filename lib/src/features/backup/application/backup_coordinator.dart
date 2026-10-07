@@ -86,10 +86,9 @@ final class BackupCoordinator {
         session.questionId == null &&
         session.questionSkillId == null &&
         session.focusSkillId == null &&
-        !session.id.startsWith('diagnostic-') &&
-        _mergedHistoryDiffers(payload.attempts, localAttempts)) {
+        !session.id.startsWith('diagnostic-')) {
       throw const FormatException(
-        'Unpinned legacy learning session cannot follow merged history',
+        'Unpinned adaptive learning session cannot be restored',
       );
     }
     if (session != null &&
@@ -216,19 +215,6 @@ bool _sameAttempts(List<AttemptEvent> left, List<AttemptEvent> right) {
     if (!left[index].hasSameImmutableContentAs(right[index])) return false;
   }
   return true;
-}
-
-bool _mergedHistoryDiffers(
-  List<AttemptEvent> exported,
-  List<AttemptEvent> local,
-) {
-  final exportedById = {
-    for (final attempt in exported) attempt.eventId: attempt,
-  };
-  return local.any((attempt) {
-    final matching = exportedById[attempt.eventId];
-    return matching == null || !matching.hasSameImmutableContentAs(attempt);
-  });
 }
 
 bool _matchesStudyRemediationQuestion(
