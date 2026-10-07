@@ -310,7 +310,8 @@ bool _matchesStudyRemediationQuestion(
   while (index >= 0) {
     final candidate = state.copyWith(questionIndex: index);
     if (origin.questionId == _studyRemediationQuestionId(candidate, origin)) {
-      return true;
+      return origin.isCorrect ||
+          correctionTransitions.contains(_studyAssistedRetestQuestionId(candidate));
     }
     final assistedQuestionId = _studyAssistedRetestQuestionId(candidate);
     if (!correctionTransitions.remove(assistedQuestionId) ||

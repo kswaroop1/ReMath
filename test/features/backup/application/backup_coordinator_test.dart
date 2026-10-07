@@ -1149,6 +1149,15 @@ void main() {
         plaintext: BackupPayload(
           attempts: [
             _attempt(
+              'first-successful-correction',
+              kind: AttemptKind.correction,
+              questionId: _questionIdForState(
+                retest.copyWith(questionIndex: 0),
+              ).replaceFirst('.mcq', ''),
+              relatedEventId: 'old-answer',
+              sessionId: 'study-session',
+            ),
+            _attempt(
               'old-answer',
               isCorrect: false,
               questionId: _questionIdForState(
@@ -1404,6 +1413,15 @@ void main() {
       final encrypted = await cipher.encrypt(
         plaintext: BackupPayload(
           attempts: [
+            _attempt(
+              'first-successful-correction',
+              kind: AttemptKind.correction,
+              questionId: _questionIdForState(
+                retest.copyWith(questionIndex: 0),
+              ).replaceFirst('.mcq', ''),
+              relatedEventId: 'failed-answer',
+              sessionId: 'study-session',
+            ),
             _attempt(
               'failed-answer',
               isCorrect: false,
