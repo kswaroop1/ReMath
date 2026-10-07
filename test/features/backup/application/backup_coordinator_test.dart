@@ -825,6 +825,13 @@ void main() {
         plaintext: BackupPayload(
           attempts: [
             _attempt(
+              'hint-before-failed-answer',
+              answer: 'hint-1',
+              kind: AttemptKind.hint,
+              questionId: _questionIdForState(correction).replaceFirst('.mcq', ''),
+              sessionId: 'study-session',
+            ),
+            _attempt(
               'hinted-answer',
               isCorrect: false,
               kind: AttemptKind.correction,

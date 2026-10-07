@@ -194,7 +194,8 @@ final class BackupCoordinator {
               related?.kind == AttemptKind.correction &&
               related?.relatedEventId == null;
           final hasAssistedOriginHint =
-              !allowsSuccessfulAssistedOrigin ||
+              related?.kind != AttemptKind.correction ||
+              related?.relatedEventId != null ||
               _hasStudyOriginHintEvidence(
                 decoded,
                 related!,
