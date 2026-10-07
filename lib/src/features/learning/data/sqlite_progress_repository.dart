@@ -632,10 +632,7 @@ bool _hasActiveStudyState(String? source) {
   }
 }
 
-bool _canImportStudyState(
-  String source,
-  Iterable<String> eventIds,
-) {
+bool _canImportStudyState(String source, Iterable<String> eventIds) {
   try {
     final state = StudyState.decode(source);
     final prefix = '${state.sessionId}.';
