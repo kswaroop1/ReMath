@@ -1086,3 +1086,17 @@ tests, Chrome browser contracts, coverage enforcement, static analysis, content
 validation, dependency-lock verification, formatting, and secret scanning. The
 five review threads were answered with their exact test/implementation pairs and
 this full-CI evidence before requesting the final independent review.
+
+Records-head CI 37678206416 verifies `50cb1da` with every gate green. Independent
+review 5447679353 then identified three further recovery invariants: imported
+events must advance an earlier local Study snapshot, imported answers must
+invalidate an advanced local Home session, and an imported Study snapshot must
+have every preceding immutable serial.
+
+Published pairs `d4a908a` / `bedcd76`, `e9be697` / `db571ba`, and `58e16fd` /
+`a659575` preserve separate test/implementation ordering for those three
+boundaries. Their corresponding local commits were `691332e` / `e6dc03f`,
+`0f2f4d7` / `75bf3d4`, and `c4e986f` / `6338837`. Local Flutter execution
+remains unavailable, so these pairs have no executed-red evidence and are not
+overstated as verified red/green cycles. The complete stack is published
+together for one authoritative full CI run.
