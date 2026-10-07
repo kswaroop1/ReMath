@@ -847,6 +847,51 @@ void main() {
       expect(pending.preview.hasStudyState, isTrue);
     });
 
+    test('preview rejects failed hinted origins without hint evidence', () async {
+      final correction = StudyState(
+        phase: StudyPhase.correction,
+        plan: StudyPlan(
+          steps: const [
+            StudyStep(
+              StudyStepKind.practice,
+              'arithmetic.addition',
+              1,
+              multipleChoice: true,
+            ),
+          ],
+          reason: 'Focused practice',
+        ),
+        questionIndex: 3,
+        relatedEventId: 'hinted-answer',
+        sessionId: 'study-session',
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: BackupPayload(
+          attempts: [
+            _attempt(
+              'hinted-answer',
+              isCorrect: false,
+              kind: AttemptKind.correction,
+              questionId: _questionIdForState(correction),
+              sessionId: 'study-session',
+            ),
+          ],
+          createdAt: DateTime.utc(2026, 9, 20, 12),
+          studyState: correction.encode(),
+        ).encode(),
+        password: password,
+      );
+
+      await expectLater(
+        BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+        ).preview(encrypted, password: password),
+        throwsFormatException,
+      );
+    });
+
     test(
       'preview accepts a successful hinted answer as retest origin',
       () async {
