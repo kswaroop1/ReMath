@@ -1079,3 +1079,10 @@ because the new hint was initially inserted into the similarly shaped Home
 fixture, where no Study state exists. The following correction moves that hint
 to the intended Study fixture, applies the exact CI formatter output, and
 restores the normal non-mutating formatting gate.
+
+Commit `8dceb35` contains that corrected fixture and the exact formatter output.
+Replacement CI 37675125614 verifies every gate green, including all 418 native
+tests, Chrome browser contracts, coverage enforcement, static analysis, content
+validation, dependency-lock verification, formatting, and secret scanning. The
+five review threads were answered with their exact test/implementation pairs and
+this full-CI evidence before requesting the final independent review.
