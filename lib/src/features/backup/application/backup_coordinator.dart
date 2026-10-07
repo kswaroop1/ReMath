@@ -193,9 +193,17 @@ final class BackupCoordinator {
               decoded.phase == StudyPhase.retest &&
               related?.kind == AttemptKind.correction &&
               related?.relatedEventId == null;
+          final hasAssistedOriginHint =
+              !allowsSuccessfulAssistedOrigin ||
+              _hasStudyOriginHintEvidence(
+                decoded,
+                related!,
+                availableAttempts.values,
+              );
           if (related == null ||
               !validRetestIndex ||
               (related.isCorrect && !allowsSuccessfulAssistedOrigin) ||
+              !hasAssistedOriginHint ||
               !_isRemediationOrigin(related.kind) ||
               step == null ||
               (step.kind != StudyStepKind.retrieval &&
@@ -333,6 +341,22 @@ bool _hasCurrentStudyHintEvidence(
     state.hintCount,
     (index) => index + 1,
   ).every((level) => representedHints.contains('hint-$level'));
+}
+
+bool _hasStudyOriginHintEvidence(
+  StudyState state,
+  AttemptEvent origin,
+  Iterable<AttemptEvent> attempts,
+) {
+  final step = state.step;
+  if (step == null) return false;
+  return attempts.any(
+    (attempt) =>
+        attempt.kind == AttemptKind.hint &&
+        attempt.sessionId == state.sessionId &&
+        attempt.skillId == step.skillId &&
+        attempt.questionId == origin.questionId,
+  );
 }
 
 String _studyAssistedRetestQuestionId(StudyState state) {
