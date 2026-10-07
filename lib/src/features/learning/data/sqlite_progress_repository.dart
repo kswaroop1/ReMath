@@ -400,14 +400,22 @@ final class SqliteProgressRepository
         _insertAttempt(attempt);
       }
       final localStudyState = _loadStudyStateSync();
+      final mergedEventIds = _loadAttemptsSync().map(
+        (attempt) => attempt.eventId,
+      );
+      final localStudyStateAdvanced = _activeStudyStateAdvanced(
+        localStudyState,
+        mergedEventIds,
+      );
       final importStudyState =
           studyState != null &&
-          _canImportStudyState(
-            studyState,
-            _loadAttemptsSync().map((attempt) => attempt.eventId),
-          ) &&
-          !_hasActiveStudyState(localStudyState);
-      if (importStudyState) _writeStudyState(studyState);
+          _canImportStudyState(studyState, mergedEventIds) &&
+          (!_hasActiveStudyState(localStudyState) || localStudyStateAdvanced);
+      if (importStudyState) {
+        _writeStudyState(studyState);
+      } else if (localStudyStateAdvanced) {
+        _database.execute('DELETE FROM study_state WHERE singleton = 1');
+      }
       final importSession =
           session != null &&
           _loadSessionSync() == null &&
@@ -638,16 +646,32 @@ bool _hasActiveStudyState(String? source) {
   }
 }
 
+bool _activeStudyStateAdvanced(String? source, Iterable<String> eventIds) {
+  if (source == null) return false;
+  try {
+    final state = StudyState.decode(source);
+    return state.plan != null && _hasStudyEventAtOrAfter(state, eventIds);
+  } on Object {
+    return false;
+  }
+}
+
+bool _hasStudyEventAtOrAfter(
+  StudyState state,
+  Iterable<String> eventIds,
+) {
+  final prefix = '${state.sessionId}.';
+  return eventIds.any((eventId) {
+    if (!eventId.startsWith(prefix)) return false;
+    final serial = int.tryParse(eventId.substring(prefix.length));
+    return serial != null && serial >= state.serial;
+  });
+}
+
 bool _canImportStudyState(String source, Iterable<String> eventIds) {
   try {
     final state = StudyState.decode(source);
-    final prefix = '${state.sessionId}.';
-    final hasCurrentOrLaterEvent = eventIds.any((eventId) {
-      if (!eventId.startsWith(prefix)) return false;
-      final serial = int.tryParse(eventId.substring(prefix.length));
-      return serial != null && serial >= state.serial;
-    });
-    return state.plan != null && !hasCurrentOrLaterEvent;
+    return state.plan != null && !_hasStudyEventAtOrAfter(state, eventIds);
   } on Object {
     return false;
   }

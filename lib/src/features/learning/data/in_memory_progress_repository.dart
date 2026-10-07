@@ -93,11 +93,19 @@ final class InMemoryProgressRepository
       ..addEntries(
         orderedAttempts.map((attempt) => MapEntry(attempt.eventId, attempt)),
       );
+    final localStudyStateAdvanced = _activeStudyStateAdvanced(
+      _studyState,
+      _attempts.keys,
+    );
     final importStudyState =
         studyState != null &&
         _canImportStudyState(studyState, _attempts.keys) &&
-        !_hasActiveStudyState(_studyState);
-    if (importStudyState) _studyState = studyState;
+        (!_hasActiveStudyState(_studyState) || localStudyStateAdvanced);
+    if (importStudyState) {
+      _studyState = studyState;
+    } else if (localStudyStateAdvanced) {
+      _studyState = null;
+    }
     final importSession =
         session != null && _session == null && !sessionStreamAdvanced;
     if (importSession) _session = session;
@@ -187,16 +195,32 @@ bool _hasActiveStudyState(String? source) {
   }
 }
 
+bool _activeStudyStateAdvanced(String? source, Iterable<String> eventIds) {
+  if (source == null) return false;
+  try {
+    final state = StudyState.decode(source);
+    return state.plan != null && _hasStudyEventAtOrAfter(state, eventIds);
+  } on Object {
+    return false;
+  }
+}
+
+bool _hasStudyEventAtOrAfter(
+  StudyState state,
+  Iterable<String> eventIds,
+) {
+  final prefix = '${state.sessionId}.';
+  return eventIds.any((eventId) {
+    if (!eventId.startsWith(prefix)) return false;
+    final serial = int.tryParse(eventId.substring(prefix.length));
+    return serial != null && serial >= state.serial;
+  });
+}
+
 bool _canImportStudyState(String source, Iterable<String> eventIds) {
   try {
     final state = StudyState.decode(source);
-    final prefix = '${state.sessionId}.';
-    final hasCurrentOrLaterEvent = eventIds.any((eventId) {
-      if (!eventId.startsWith(prefix)) return false;
-      final serial = int.tryParse(eventId.substring(prefix.length));
-      return serial != null && serial >= state.serial;
-    });
-    return state.plan != null && !hasCurrentOrLaterEvent;
+    return state.plan != null && !_hasStudyEventAtOrAfter(state, eventIds);
   } on Object {
     return false;
   }
