@@ -76,12 +76,13 @@ final class InMemoryProgressRepository
         session != null &&
         _sessionStreamAdvanced(
           session,
-          _attempts.values.where(
-            (attempt) => !incomingIds.contains(attempt.eventId),
-          ),
+          [
+            ..._attempts.values.where(
+              (attempt) => !incomingIds.contains(attempt.eventId),
+            ),
+            ...attempts,
+          ],
         );
-    final incomingSessionAdvanced =
-        session != null && _sessionStreamAdvanced(session, attempts);
     for (final attempt in attempts) {
       _attempts.putIfAbsent(attempt.eventId, () => attempt);
     }
@@ -103,8 +104,7 @@ final class InMemoryProgressRepository
     final importSession =
         session != null &&
         _session == null &&
-        !sessionStreamAdvanced &&
-        !incomingSessionAdvanced;
+        !sessionStreamAdvanced;
     if (importSession) _session = session;
     return ProgressMergeResult(
       duplicateAttemptCount: duplicateAttemptCount,

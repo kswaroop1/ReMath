@@ -376,12 +376,13 @@ final class SqliteProgressRepository
           session != null &&
           _sessionStreamAdvanced(
             session,
-            _loadAttemptsSync().where(
-              (attempt) => !incomingIds.contains(attempt.eventId),
-            ),
+            [
+              ..._loadAttemptsSync().where(
+                (attempt) => !incomingIds.contains(attempt.eventId),
+              ),
+              ...attempts,
+            ],
           );
-      final incomingSessionAdvanced =
-          session != null && _sessionStreamAdvanced(session, attempts);
       var duplicateAttemptCount = 0;
       final newAttempts = <AttemptEvent>[];
       for (final attempt in attempts) {
@@ -413,8 +414,7 @@ final class SqliteProgressRepository
       final importSession =
           session != null &&
           _loadSessionSync() == null &&
-          !sessionStreamAdvanced &&
-          !incomingSessionAdvanced;
+          !sessionStreamAdvanced;
       if (importSession) _writeSession(session);
       _database.execute('COMMIT');
       return ProgressMergeResult(
