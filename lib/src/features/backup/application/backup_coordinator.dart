@@ -350,12 +350,15 @@ bool _hasStudyOriginHintEvidence(
 ) {
   final step = state.step;
   if (step == null) return false;
+  final hintQuestionId = origin.questionId.endsWith('.mcq')
+      ? origin.questionId.substring(0, origin.questionId.length - 4)
+      : origin.questionId;
   return attempts.any(
     (attempt) =>
         attempt.kind == AttemptKind.hint &&
         attempt.sessionId == state.sessionId &&
         attempt.skillId == step.skillId &&
-        attempt.questionId == origin.questionId,
+        attempt.questionId == hintQuestionId,
   );
 }
 
