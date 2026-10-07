@@ -473,6 +473,36 @@ void main() {
     });
 
     test(
+      'Study recovery rejects a snapshot with missing earlier serials',
+      () async {
+        final state = StudyState(
+          plan: StudyPlanner().plan(
+            'number-fluency',
+            const [],
+            DateTime.utc(2026, 9, 20),
+          ),
+          serial: 2,
+          sessionId: 'study-session',
+        ).encode();
+        for (final fixture in _fixtures()) {
+          final repository = fixture.repository;
+          addTearDown(fixture.close);
+
+          final result = await repository.mergeProgress(
+            attempts: [
+              _attempt('study-session.0', sessionId: 'study-session'),
+            ],
+            studyState: state,
+          );
+
+          expect(result.insertedAttemptCount, 1);
+          expect(result.importedStudyState, isFalse);
+          expect(await repository.loadStudyState(), isNull);
+        }
+      },
+    );
+
+    test(
       'a SQLite write interruption rolls back attempts and study state',
       () async {
         final database = sqlite3.openInMemory();
