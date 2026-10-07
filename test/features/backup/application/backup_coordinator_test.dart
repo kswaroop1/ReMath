@@ -867,6 +867,13 @@ void main() {
           plaintext: BackupPayload(
             attempts: [
               _attempt(
+                'assisted-hint',
+                answer: 'hint-1',
+                kind: AttemptKind.hint,
+                questionId: _questionIdForState(origin),
+                sessionId: 'study-session',
+              ),
+              _attempt(
                 'assisted-answer',
                 kind: AttemptKind.correction,
                 questionId: _questionIdForState(origin),
@@ -886,6 +893,49 @@ void main() {
         ).preview(encrypted, password: password);
 
         expect(pending.preview.hasStudyState, isTrue);
+      },
+    );
+
+    test(
+      'preview rejects a hinted retest origin without hint evidence',
+      () async {
+        final retest = StudyState(
+          phase: StudyPhase.retest,
+          plan: StudyPlan(
+            steps: const [
+              StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
+            ],
+            reason: 'Focused practice',
+          ),
+          questionIndex: 4,
+          relatedEventId: 'assisted-answer',
+          sessionId: 'study-session',
+        );
+        final origin = retest.copyWith(questionIndex: 3);
+        final encrypted = await cipher.encrypt(
+          plaintext: BackupPayload(
+            attempts: [
+              _attempt(
+                'assisted-answer',
+                kind: AttemptKind.correction,
+                questionId: _questionIdForState(origin),
+                sessionId: 'study-session',
+              ),
+            ],
+            createdAt: DateTime.utc(2026, 9, 20, 12),
+            studyState: retest.encode(),
+          ).encode(),
+          password: password,
+        );
+
+        await expectLater(
+          BackupCoordinator(
+            cipher: cipher,
+            clock: DateTime.now,
+            repository: InMemoryProgressRepository(),
+          ).preview(encrypted, password: password),
+          throwsFormatException,
+        );
       },
     );
 
