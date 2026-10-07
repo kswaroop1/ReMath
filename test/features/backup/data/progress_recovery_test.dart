@@ -301,6 +301,38 @@ void main() {
       }
     });
 
+    test('merged diagnostic answers block a stale legacy session', () async {
+      for (final fixture in _fixtures()) {
+        final repository = fixture.repository;
+        addTearDown(fixture.close);
+        final session = LearningSession(
+          currentQuestionIndex: 2,
+          id: 'diagnostic-session',
+          seed: 42,
+          startedAt: DateTime.utc(2026, 9, 20, 9),
+        );
+        final earlier = [
+          _attempt('diagnostic-0', sessionId: session.id),
+          _attempt('diagnostic-1', sessionId: session.id),
+        ];
+        await repository.recordAttempt(earlier.first);
+        await repository.recordAttempt(
+          _attempt('diagnostic-2', sessionId: session.id),
+        );
+
+        final result = await repository.mergeProgress(
+          attempts: earlier,
+          studyState: null,
+          session: session,
+        );
+
+        expect(result.importedSession, isFalse);
+        expect(await repository.loadSession(), isNull);
+        expect(await repository.loadAttempts(), hasLength(3));
+        expect(result.duplicateAttemptCount, 1);
+      }
+    });
+
     test('a later correction event blocks its stale session', () async {
       for (final fixture in _fixtures()) {
         final repository = fixture.repository;
