@@ -1065,3 +1065,17 @@ history), `32cb7a7` / `6f5f820` (learn hints), `9b679ac` / `f80ba26` (MCQ hint
 identity), `953a7af` / `6bb581e` (first retest correction), and `503ce18` /
 `34cda14` (failed assisted-origin hints). These are published together with this
 provenance checkpoint before one full CI run.
+
+CI 37659593588 passed 417 of 418 native tests and secret scanning. The sole
+behavioral failure was an older positive fixture for failed Study remediation:
+its first-answer correction lacked the hint event that the newly enforced
+runtime path necessarily records. The run also identified canonical formatting
+changes in the five touched files.
+
+Diagnostic commit `95aa77e` adds the missing native hint evidence to that
+positive fixture and temporarily prints the formatter patch. Diagnostic CI
+37662243625 exposed the exact formatting changes; its test compile failed
+because the new hint was initially inserted into the similarly shaped Home
+fixture, where no Study state exists. The following correction moves that hint
+to the intended Study fixture, applies the exact CI formatter output, and
+restores the normal non-mutating formatting gate.

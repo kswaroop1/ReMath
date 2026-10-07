@@ -374,15 +374,12 @@ final class SqliteProgressRepository
     try {
       final sessionStreamAdvanced =
           session != null &&
-          _sessionStreamAdvanced(
-            session,
-            [
-              ..._loadAttemptsSync().where(
-                (attempt) => !incomingIds.contains(attempt.eventId),
-              ),
-              ...attempts,
-            ],
-          );
+          _sessionStreamAdvanced(session, [
+            ..._loadAttemptsSync().where(
+              (attempt) => !incomingIds.contains(attempt.eventId),
+            ),
+            ...attempts,
+          ]);
       var duplicateAttemptCount = 0;
       final newAttempts = <AttemptEvent>[];
       for (final attempt in attempts) {

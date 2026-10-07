@@ -74,15 +74,12 @@ final class InMemoryProgressRepository
     }
     final sessionStreamAdvanced =
         session != null &&
-        _sessionStreamAdvanced(
-          session,
-          [
-            ..._attempts.values.where(
-              (attempt) => !incomingIds.contains(attempt.eventId),
-            ),
-            ...attempts,
-          ],
-        );
+        _sessionStreamAdvanced(session, [
+          ..._attempts.values.where(
+            (attempt) => !incomingIds.contains(attempt.eventId),
+          ),
+          ...attempts,
+        ]);
     for (final attempt in attempts) {
       _attempts.putIfAbsent(attempt.eventId, () => attempt);
     }
@@ -102,9 +99,7 @@ final class InMemoryProgressRepository
         !_hasActiveStudyState(_studyState);
     if (importStudyState) _studyState = studyState;
     final importSession =
-        session != null &&
-        _session == null &&
-        !sessionStreamAdvanced;
+        session != null && _session == null && !sessionStreamAdvanced;
     if (importSession) _session = session;
     return ProgressMergeResult(
       duplicateAttemptCount: duplicateAttemptCount,

@@ -312,7 +312,9 @@ bool _matchesStudyRemediationQuestion(
     final candidate = state.copyWith(questionIndex: index);
     if (origin.questionId == _studyRemediationQuestionId(candidate, origin)) {
       return origin.isCorrect ||
-          correctionTransitions.contains(_studyAssistedRetestQuestionId(candidate));
+          correctionTransitions.contains(
+            _studyAssistedRetestQuestionId(candidate),
+          );
     }
     final assistedQuestionId = _studyAssistedRetestQuestionId(candidate);
     if (!correctionTransitions.remove(assistedQuestionId) ||

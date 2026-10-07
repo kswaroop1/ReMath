@@ -369,10 +369,9 @@ void main() {
       for (final fixture in _fixtures()) {
         final repository = fixture.repository;
         addTearDown(fixture.close);
-        final session = _session('session-1').copyWith(
-          phase: LearningSessionPhase.learn,
-          revealedHintCount: 0,
-        );
+        final session = _session(
+          'session-1',
+        ).copyWith(phase: LearningSessionPhase.learn, revealedHintCount: 0);
         await repository.recordAttempt(
           _attempt('local-hint', answer: 'concept', kind: AttemptKind.hint),
         );

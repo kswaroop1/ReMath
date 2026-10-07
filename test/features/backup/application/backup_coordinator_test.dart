@@ -580,14 +580,6 @@ void main() {
         for (final kind in [AttemptKind.answer, AttemptKind.retest]) {
           final payload = BackupPayload(
             attempts: [
-              if (kind == AttemptKind.correction)
-                _attempt(
-                  'hint-before-event-1',
-                  answer: 'hint-1',
-                  kind: AttemptKind.hint,
-                  questionId: _questionIdForState(state),
-                  sessionId: 'study-session',
-                ),
               _attempt(
                 'event-1',
                 isCorrect: false,
@@ -739,6 +731,14 @@ void main() {
           );
           final payload = BackupPayload(
             attempts: [
+              if (kind == AttemptKind.correction)
+                _attempt(
+                  'hint-before-event-1',
+                  answer: 'hint-1',
+                  kind: AttemptKind.hint,
+                  questionId: _questionIdForState(state),
+                  sessionId: 'study-session',
+                ),
               _attempt(
                 'event-1',
                 isCorrect: false,
@@ -836,7 +836,9 @@ void main() {
               'hint-before-failed-answer',
               answer: 'hint-1',
               kind: AttemptKind.hint,
-              questionId: _questionIdForState(correction).replaceFirst('.mcq', ''),
+              questionId: _questionIdForState(
+                correction,
+              ).replaceFirst('.mcq', ''),
               sessionId: 'study-session',
             ),
             _attempt(
@@ -862,50 +864,53 @@ void main() {
       expect(pending.preview.hasStudyState, isTrue);
     });
 
-    test('preview rejects failed hinted origins without hint evidence', () async {
-      final correction = StudyState(
-        phase: StudyPhase.correction,
-        plan: StudyPlan(
-          steps: const [
-            StudyStep(
-              StudyStepKind.practice,
-              'arithmetic.addition',
-              1,
-              multipleChoice: true,
-            ),
-          ],
-          reason: 'Focused practice',
-        ),
-        questionIndex: 3,
-        relatedEventId: 'hinted-answer',
-        sessionId: 'study-session',
-      );
-      final encrypted = await cipher.encrypt(
-        plaintext: BackupPayload(
-          attempts: [
-            _attempt(
-              'hinted-answer',
-              isCorrect: false,
-              kind: AttemptKind.correction,
-              questionId: _questionIdForState(correction),
-              sessionId: 'study-session',
-            ),
-          ],
-          createdAt: DateTime.utc(2026, 9, 20, 12),
-          studyState: correction.encode(),
-        ).encode(),
-        password: password,
-      );
+    test(
+      'preview rejects failed hinted origins without hint evidence',
+      () async {
+        final correction = StudyState(
+          phase: StudyPhase.correction,
+          plan: StudyPlan(
+            steps: const [
+              StudyStep(
+                StudyStepKind.practice,
+                'arithmetic.addition',
+                1,
+                multipleChoice: true,
+              ),
+            ],
+            reason: 'Focused practice',
+          ),
+          questionIndex: 3,
+          relatedEventId: 'hinted-answer',
+          sessionId: 'study-session',
+        );
+        final encrypted = await cipher.encrypt(
+          plaintext: BackupPayload(
+            attempts: [
+              _attempt(
+                'hinted-answer',
+                isCorrect: false,
+                kind: AttemptKind.correction,
+                questionId: _questionIdForState(correction),
+                sessionId: 'study-session',
+              ),
+            ],
+            createdAt: DateTime.utc(2026, 9, 20, 12),
+            studyState: correction.encode(),
+          ).encode(),
+          password: password,
+        );
 
-      await expectLater(
-        BackupCoordinator(
-          cipher: cipher,
-          clock: DateTime.now,
-          repository: InMemoryProgressRepository(),
-        ).preview(encrypted, password: password),
-        throwsFormatException,
-      );
-    });
+        await expectLater(
+          BackupCoordinator(
+            cipher: cipher,
+            clock: DateTime.now,
+            repository: InMemoryProgressRepository(),
+          ).preview(encrypted, password: password),
+          throwsFormatException,
+        );
+      },
+    );
 
     test(
       'preview accepts a successful hinted answer as retest origin',
@@ -984,7 +989,9 @@ void main() {
                 'assisted-hint',
                 answer: 'hint-1',
                 kind: AttemptKind.hint,
-                questionId: _questionIdForState(origin).replaceFirst('.mcq', ''),
+                questionId: _questionIdForState(
+                  origin,
+                ).replaceFirst('.mcq', ''),
                 sessionId: 'study-session',
               ),
               _attempt(
@@ -1506,49 +1513,52 @@ void main() {
       expect(pending.preview.hasStudyState, isTrue);
     });
 
-    test('preview rejects retest before its first successful correction', () async {
-      final retest = StudyState(
-        awaitingSurprise: true,
-        confidence: ConfidenceRating.high,
-        draft: '0',
-        phase: StudyPhase.retest,
-        plan: StudyPlan(
-          steps: const [
-            StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
-          ],
-          reason: 'Focused practice',
-        ),
-        questionIndex: 1,
-        relatedEventId: 'failed-answer',
-        sessionId: 'study-session',
-      );
-      final encrypted = await cipher.encrypt(
-        plaintext: BackupPayload(
-          attempts: [
-            _attempt(
-              'failed-answer',
-              isCorrect: false,
-              questionId: _questionIdForState(
-                retest.copyWith(questionIndex: 0),
+    test(
+      'preview rejects retest before its first successful correction',
+      () async {
+        final retest = StudyState(
+          awaitingSurprise: true,
+          confidence: ConfidenceRating.high,
+          draft: '0',
+          phase: StudyPhase.retest,
+          plan: StudyPlan(
+            steps: const [
+              StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
+            ],
+            reason: 'Focused practice',
+          ),
+          questionIndex: 1,
+          relatedEventId: 'failed-answer',
+          sessionId: 'study-session',
+        );
+        final encrypted = await cipher.encrypt(
+          plaintext: BackupPayload(
+            attempts: [
+              _attempt(
+                'failed-answer',
+                isCorrect: false,
+                questionId: _questionIdForState(
+                  retest.copyWith(questionIndex: 0),
+                ),
+                sessionId: 'study-session',
               ),
-              sessionId: 'study-session',
-            ),
-          ],
-          createdAt: DateTime.utc(2026, 9, 20, 12),
-          studyState: retest.encode(),
-        ).encode(),
-        password: password,
-      );
+            ],
+            createdAt: DateTime.utc(2026, 9, 20, 12),
+            studyState: retest.encode(),
+          ).encode(),
+          password: password,
+        );
 
-      await expectLater(
-        BackupCoordinator(
-          cipher: cipher,
-          clock: DateTime.now,
-          repository: InMemoryProgressRepository(),
-        ).preview(encrypted, password: password),
-        throwsFormatException,
-      );
-    });
+        await expectLater(
+          BackupCoordinator(
+            cipher: cipher,
+            clock: DateTime.now,
+            repository: InMemoryProgressRepository(),
+          ).preview(encrypted, password: password),
+          throwsFormatException,
+        );
+      },
+    );
 
     test('preview preserves unresolved legacy study correction', () async {
       final state = StudyState(
