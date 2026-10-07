@@ -230,12 +230,12 @@ void main() {
     );
   });
 
-  test('rejects legacy diagnostic focus for the wrong index operation', () {
+  test('rejects every focused legacy diagnostic session', () {
     expect(
       isLearningSessionCompatible(
         LearningSession(
           currentQuestionIndex: 3,
-          focusSkillId: 'arithmetic.addition',
+          focusSkillId: 'arithmetic.subtraction',
           id: 'diagnostic-legacy-focus',
           seed: 42,
           startedAt: DateTime.utc(2026, 9, 26),
