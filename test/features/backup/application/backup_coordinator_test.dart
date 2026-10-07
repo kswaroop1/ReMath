@@ -262,6 +262,36 @@ void main() {
     );
 
     test(
+      'preview rejects an unpinned legacy Home session without a merge',
+      () async {
+        final encrypted = await cipher.encrypt(
+          plaintext: BackupPayload(
+            attempts: const [],
+            createdAt: DateTime.utc(2026, 9, 20, 12),
+            session: LearningSession(
+              currentQuestionIndex: 3,
+              id: 'legacy-home',
+              phase: LearningSessionPhase.question,
+              seed: 42,
+              startedAt: DateTime.utc(2026, 9, 20, 10),
+            ),
+            studyState: null,
+          ).encode(),
+          password: password,
+        );
+
+        await expectLater(
+          BackupCoordinator(
+            cipher: cipher,
+            clock: DateTime.now,
+            repository: InMemoryProgressRepository(),
+          ).preview(encrypted, password: password),
+          throwsFormatException,
+        );
+      },
+    );
+
+    test(
       'preview preserves deterministic legacy diagnostic after merge',
       () async {
         final encrypted = await cipher.encrypt(
