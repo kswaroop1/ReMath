@@ -1,4 +1,5 @@
 import '../../learning/domain/attempt_event.dart';
+import '../../learning/domain/content_pack.dart';
 import '../../learning/domain/learning_session.dart';
 import '../../learning/domain/progress_repository.dart';
 import '../../numbers/domain/study_curriculum.dart';
@@ -10,6 +11,8 @@ import '../domain/backup_preview.dart';
 typedef BackupClock = DateTime Function();
 typedef BackupSessionValidator = bool Function(LearningSession session);
 typedef BackupSessionQuestionIdResolver =
+    String? Function(LearningSession session);
+typedef BackupSessionConceptCardIdResolver =
     String? Function(LearningSession session);
 
 final class PendingBackupImport {
@@ -26,17 +29,20 @@ final class BackupCoordinator {
     required ProgressRepository repository,
     BackupSessionValidator? sessionValidator,
     BackupSessionQuestionIdResolver? sessionQuestionIdResolver,
+    BackupSessionConceptCardIdResolver? sessionConceptCardIdResolver,
   }) : _cipher = cipher,
        _clock = clock,
        _repository = repository,
        _sessionValidator = sessionValidator,
-       _sessionQuestionIdResolver = sessionQuestionIdResolver;
+       _sessionQuestionIdResolver = sessionQuestionIdResolver,
+       _sessionConceptCardIdResolver = sessionConceptCardIdResolver;
 
   final BackupCipher _cipher;
   final BackupClock _clock;
   final ProgressRepository _repository;
   final BackupSessionValidator? _sessionValidator;
   final BackupSessionQuestionIdResolver? _sessionQuestionIdResolver;
+  final BackupSessionConceptCardIdResolver? _sessionConceptCardIdResolver;
 
   Future<String> export({required String password}) async {
     if (_repository case final ProgressSnapshotRepository repository) {
@@ -89,6 +95,18 @@ final class BackupCoordinator {
         !session.id.startsWith('diagnostic-')) {
       throw const FormatException(
         'Unpinned adaptive learning session cannot be restored',
+      );
+    }
+    if (session != null &&
+        session.phase == LearningSessionPhase.learn &&
+        session.revealedHintCount > 0 &&
+        !_hasCurrentHomeHintEvidence(
+          session,
+          availableAttempts.values,
+          _sessionConceptCardIdResolver?.call(session),
+        )) {
+      throw const FormatException(
+        'Active Home hints require immutable evidence',
       );
     }
     if (session != null &&
@@ -207,6 +225,33 @@ final class BackupCoordinator {
       studyState: pending._payload.studyState,
     );
   }
+}
+
+bool _hasCurrentHomeHintEvidence(
+  LearningSession session,
+  Iterable<AttemptEvent> attempts,
+  String? conceptCardId,
+) {
+  final skillId = session.focusSkillId;
+  if (skillId == null ||
+      conceptCardId == null ||
+      session.revealedHintCount > HintLevel.values.length) {
+    return false;
+  }
+  for (var index = 0; index < session.revealedHintCount; index++) {
+    final level = HintLevel.values[index].name;
+    if (!attempts.any(
+      (attempt) =>
+          attempt.kind == AttemptKind.hint &&
+          attempt.sessionId == session.id &&
+          attempt.skillId == skillId &&
+          attempt.questionId == conceptCardId &&
+          attempt.answer == level,
+    )) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool _sameAttempts(List<AttemptEvent> left, List<AttemptEvent> right) {

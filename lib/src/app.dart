@@ -35,6 +35,15 @@ class ReMathApp extends StatelessWidget {
               ),
               sessionQuestionIdResolver: (session) =>
                   learningSessionQuestionId(session, contentPack: contentPack),
+              sessionConceptCardIdResolver: (session) {
+                final skillId = session.focusSkillId;
+                if (skillId == null) return null;
+                try {
+                  return contentPack.conceptCardFor(skillId).id;
+                } on StateError {
+                  return null;
+                }
+              },
             ),
             files: files,
           );
