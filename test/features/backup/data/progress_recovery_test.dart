@@ -365,6 +365,36 @@ void main() {
       }
     });
 
+    test('learn snapshots cannot lag behind merged hint levels', () async {
+      for (final fixture in _fixtures()) {
+        final repository = fixture.repository;
+        addTearDown(fixture.close);
+        final session = _session('session-1').copyWith(
+          phase: LearningSessionPhase.learn,
+          revealedHintCount: 0,
+        );
+        await repository.recordAttempt(
+          _attempt('local-hint', answer: 'concept', kind: AttemptKind.hint),
+        );
+
+        final stale = await repository.mergeProgress(
+          attempts: [],
+          studyState: null,
+          session: session,
+        );
+        expect(stale.importedSession, isFalse);
+        expect(await repository.loadSession(), isNull);
+
+        final current = await repository.mergeProgress(
+          attempts: [],
+          studyState: null,
+          session: session.copyWith(revealedHintCount: 1),
+        );
+        expect(current.importedSession, isTrue);
+        expect((await repository.loadSession())?.revealedHintCount, 1);
+      }
+    });
+
     test('a later Study serial blocks a stale snapshot', () async {
       for (final fixture in _fixtures()) {
         final repository = fixture.repository;
