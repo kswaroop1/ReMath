@@ -240,6 +240,41 @@ void main() {
     );
 
     test(
+      'recovery advances an earlier local Study snapshot',
+      () async {
+        final plan = StudyPlanner().plan(
+          'number-fluency',
+          const [],
+          DateTime.utc(2026, 9, 20),
+        );
+        final local = StudyState(
+          plan: plan,
+          sessionId: 'study-session',
+        ).encode();
+        final incoming = StudyState(
+          plan: plan,
+          serial: 1,
+          sessionId: 'study-session',
+        ).encode();
+        for (final fixture in _fixtures()) {
+          final repository = fixture.repository;
+          addTearDown(fixture.close);
+          await repository.saveStudyState(local);
+
+          final result = await repository.mergeProgress(
+            attempts: [
+              _attempt('study-session.0', sessionId: 'study-session'),
+            ],
+            studyState: incoming,
+          );
+
+          expect(result.importedStudyState, isTrue);
+          expect(await repository.loadStudyState(), incoming);
+        }
+      },
+    );
+
+    test(
       'an advanced event stream blocks stale Home-session recovery',
       () async {
         for (final fixture in _fixtures()) {
