@@ -72,21 +72,15 @@ final class InMemoryProgressRepository
       }
       duplicateAttemptCount++;
     }
-    final sessionStreamAdvanced =
-        session != null &&
-        _attempts.values.any(
-          (attempt) =>
-              attempt.sessionId == session.id &&
-              !incomingIds.contains(attempt.eventId) &&
-              _advancesSavedSession(session, attempt),
+    final sessionStreamAdvanced = session != null &&
+        _sessionStreamAdvanced(
+          session,
+          _attempts.values.where(
+            (attempt) => !incomingIds.contains(attempt.eventId),
+          ),
         );
     final incomingSessionAdvanced =
-        session != null &&
-        attempts.any(
-          (attempt) =>
-              attempt.sessionId == session.id &&
-              _advancesSavedSession(session, attempt),
-        );
+        session != null && _sessionStreamAdvanced(session, attempts);
     for (final attempt in attempts) {
       _attempts.putIfAbsent(attempt.eventId, () => attempt);
     }
@@ -156,6 +150,24 @@ bool _advancesSavedSession(LearningSession session, AttemptEvent attempt) {
   return questionId == null
       ? attempt.kind != AttemptKind.hint
       : attempt.questionId == questionId && attempt.kind.contributesToMastery;
+}
+
+bool _sessionStreamAdvanced(
+  LearningSession session,
+  Iterable<AttemptEvent> attempts,
+) {
+  final sessionAttempts = attempts.where(
+    (attempt) => attempt.sessionId == session.id,
+  );
+  if (session.id.startsWith('diagnostic-') && session.questionId == null) {
+    return sessionAttempts
+            .where((attempt) => attempt.kind.contributesToMastery)
+            .length >
+        session.currentQuestionIndex;
+  }
+  return sessionAttempts.any(
+    (attempt) => _advancesSavedSession(session, attempt),
+  );
 }
 
 bool _hasActiveStudyState(String? source) {
