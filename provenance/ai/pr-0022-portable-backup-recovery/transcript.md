@@ -1100,3 +1100,10 @@ boundaries. Their corresponding local commits were `691332e` / `e6dc03f`,
 remains unavailable, so these pairs have no executed-red evidence and are not
 overstated as verified red/green cycles. The complete stack is published
 together for one authoritative full CI run.
+
+CI 37686114087 passed all 421 native tests and secret scanning; only canonical
+formatting changes remained in the three touched files. Diagnostic commit
+`a15068c` temporarily applies the formatter and prints its exact patch.
+Diagnostic CI 37692814653 again passes all 421 tests and provides the complete
+three-file patch. The following correction applies that output exactly and
+restores the normal non-mutating formatting gate before replacement full CI.

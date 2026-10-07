@@ -663,17 +663,10 @@ bool _activeStudyStateAdvanced(String? source, Iterable<String> eventIds) {
   }
 }
 
-bool _hasStudyEventAtOrAfter(
-  StudyState state,
-  Iterable<String> eventIds,
-) => _studyEventSerials(state, eventIds).any(
-  (serial) => serial >= state.serial,
-);
+bool _hasStudyEventAtOrAfter(StudyState state, Iterable<String> eventIds) =>
+    _studyEventSerials(state, eventIds).any((serial) => serial >= state.serial);
 
-Set<int> _studyEventSerials(
-  StudyState state,
-  Iterable<String> eventIds,
-) {
+Set<int> _studyEventSerials(StudyState state, Iterable<String> eventIds) {
   final prefix = '${state.sessionId}.';
   return {
     for (final eventId in eventIds)
