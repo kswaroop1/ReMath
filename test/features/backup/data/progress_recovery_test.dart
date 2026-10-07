@@ -311,6 +311,26 @@ void main() {
       }
     });
 
+    test(
+      'imported progress invalidates an advanced local Home session',
+      () async {
+        for (final fixture in _fixtures()) {
+          final repository = fixture.repository;
+          addTearDown(fixture.close);
+          await repository.saveSession(_session('session-1'));
+
+          final result = await repository.mergeProgress(
+            attempts: [_attempt('remote-answer')],
+            studyState: null,
+          );
+
+          expect(result.insertedAttemptCount, 1);
+          expect(result.importedSession, isFalse);
+          expect(await repository.loadSession(), isNull);
+        }
+      },
+    );
+
     test('earlier diagnostic answers preserve a legacy session', () async {
       for (final fixture in _fixtures()) {
         final repository = fixture.repository;
