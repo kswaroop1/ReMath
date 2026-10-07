@@ -1027,3 +1027,41 @@ all 413 native tests, Chrome browser contracts, coverage enforcement, static
 analysis, content validation, dependency-lock verification, formatting, and
 secret scanning. This is the authoritative behavioral-head verification for
 the four latest review corrections.
+
+
+## 7 October 2026 — merged-stream and remediation review corrections
+
+**User:** “Is the PR now ready to be merged?”
+
+**Agent:** “Not yet. PR #22 has green full CI (`37647045648`), but the latest
+independent review found five further recovery bugs. Those need fixing and
+re-review before I can recommend merging.”
+
+**CI:** Records head `17df7ed` passed full CI 37647045648. Independent review
+5444895901 then identified five bounded corrections: merged diagnostic event
+advancement, MCQ hint-phase identity, learn-phase hint advancement, the first
+successful Study correction before retest, and failed assisted-origin hint
+evidence. The exact findings are in review threads 4209042080, 4209042086,
+4209042101, 4209042113, and 4209042122.
+
+**Agent:** “EN-021: I’m addressing the five latest review findings as one batch,
+with separate test-first commits before publishing and running full CI.”
+
+**Implementation:** Each finding has a separate test-first commit followed by
+a focused implementation commit. The merged-history regression includes a
+local duplicate to verify deduplication; the learn regression verifies both
+rejection of a stale snapshot and acceptance of a current one. The Study
+regressions preserve legitimate hinted MCQ recovery and reject histories
+missing required immutable hints or corrections. Two pre-existing positive
+fixtures lacked native transition evidence and were corrected by adding that
+evidence, without weakening their positive assertions.
+
+Local Flutter/Dart execution remains unavailable. These are ordered
+regression/implementation pairs, with no executed-red evidence. `git diff
+--check` passed; full verification is delegated to the permitted GitHub CI.
+
+Durable test/implementation pairs are `cba046f` / `8054039` (merged diagnostic
+history), `32cb7a7` / `6f5f820` (learn hints), `9b679ac` / `f80ba26` (MCQ hint
+identity), `953a7af` / `6bb581e` (first retest correction), and `503ce18` /
+`34cda14` (failed assisted-origin hints). These are published together with this
+provenance checkpoint before one full CI run.
