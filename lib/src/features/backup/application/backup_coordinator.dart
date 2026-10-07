@@ -126,7 +126,19 @@ final class BackupCoordinator {
               ),
             )
           : session.questionId ?? _sessionQuestionIdResolver?.call(session);
+      final missingSuccessfulCorrection =
+          session.phase == LearningSessionPhase.retest &&
+          !availableAttempts.values.any(
+            (attempt) =>
+                attempt.kind == AttemptKind.correction &&
+                attempt.isCorrect &&
+                attempt.relatedEventId == relatedEventId &&
+                attempt.sessionId == session.id &&
+                attempt.skillId == session.focusSkillId &&
+                attempt.questionId == expectedQuestionId,
+          );
       if (missingPrecedingQuestion ||
+          missingSuccessfulCorrection ||
           related == null ||
           related.isCorrect ||
           !_isHomeRemediationOrigin(related.kind) ||
