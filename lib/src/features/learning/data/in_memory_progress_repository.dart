@@ -142,8 +142,11 @@ final class InMemoryProgressRepository
 }
 
 bool _advancesSavedSession(LearningSession session, AttemptEvent attempt) {
-  if (session.phase == LearningSessionPhase.correction ||
-      session.phase == LearningSessionPhase.learn) {
+  if (session.phase == LearningSessionPhase.correction) {
+    return attempt.kind == AttemptKind.correction &&
+        attempt.relatedEventId == session.correctionOfEventId;
+  }
+  if (session.phase == LearningSessionPhase.learn) {
     return false;
   }
   final questionId = session.questionId;
