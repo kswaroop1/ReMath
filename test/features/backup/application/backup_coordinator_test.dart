@@ -352,6 +352,36 @@ void main() {
       },
     );
 
+    test('preview rejects Home hints without immutable evidence', () async {
+      final encrypted = await cipher.encrypt(
+        plaintext: BackupPayload(
+          attempts: const [],
+          createdAt: DateTime.utc(2026, 9, 20, 12),
+          session: LearningSession(
+            currentQuestionIndex: 0,
+            focusSkillId: 'arithmetic.addition',
+            id: 'learn-session',
+            phase: LearningSessionPhase.learn,
+            revealedHintCount: 1,
+            seed: 42,
+            startedAt: DateTime.utc(2026, 9, 20, 10),
+          ),
+          studyState: null,
+        ).encode(),
+        password: password,
+      );
+
+      await expectLater(
+        BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+          sessionConceptCardIdResolver: (_) => 'addition-concept',
+        ).preview(encrypted, password: password),
+        throwsFormatException,
+      );
+    });
+
     test(
       'preview rejects remediation without an originating attempt',
       () async {
