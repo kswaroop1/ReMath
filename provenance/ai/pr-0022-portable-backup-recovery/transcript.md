@@ -997,3 +997,33 @@ verifies every gate green, including all 409 native tests, Chrome browser
 contracts, coverage enforcement, static analysis, content validation,
 dependency-lock verification, formatting, and secret scanning. This is the
 authoritative behavioral-head verification for the five final invariants.
+
+Records-head CI 37601865067 verifies `c87a9f6` with every gate green. Review of
+that head identified four further recovery invariants: legacy diagnostic
+sessions must retain earlier attempts; later correction events must advance a
+stale correction session; a Study snapshot must be rejected when any later
+serial exists; and a successful hinted first-answer origin requires immutable
+hint evidence.
+
+Published pairs `db87804` / `ec4c642`, `5c991ed` / `cde4e1e`, `5b95522` /
+`5ff98f4`, and `43779a8` / `d156bac` preserve separate test/implementation
+ordering for those four boundaries. Their corresponding local commits were
+`bd4a748` / `5cdb4ec`, `cec3d9d` / `a64bf05`, `68f4eab` / `ac8e888`, and
+`cec08b1` / `410fd0e`. Local Flutter execution remains unavailable, so these
+pairs have no executed-red evidence and are not overstated as verified
+red/green cycles.
+
+CI 37615618995 passes all 413 native tests and every behavioral gate; only two
+canonical repository formatting changes remain. Commit `a358384` attempts the
+repository style, and replacement CI 37617023859 again passes all 413 tests but
+retains the same two formatting changes. Diagnostic commit `89f3c45`
+temporarily prints the exact current-Dart formatter patch; diagnostic CI
+37628682986 passes all 413 tests and produces the two exact one-line signature
+changes. Commit `18ce7c9` applies that patch and restores the normal
+non-mutating formatting gate.
+
+Replacement CI 37634551383 verifies `18ce7c9` with every gate green, including
+all 413 native tests, Chrome browser contracts, coverage enforcement, static
+analysis, content validation, dependency-lock verification, formatting, and
+secret scanning. This is the authoritative behavioral-head verification for
+the four latest review corrections.
