@@ -372,7 +372,8 @@ final class SqliteProgressRepository
     }
     _database.execute('BEGIN IMMEDIATE');
     try {
-      final sessionStreamAdvanced = session != null &&
+      final sessionStreamAdvanced =
+          session != null &&
           _sessionStreamAdvanced(
             session,
             _loadAttemptsSync().where(

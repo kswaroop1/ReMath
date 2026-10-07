@@ -72,7 +72,8 @@ final class InMemoryProgressRepository
       }
       duplicateAttemptCount++;
     }
-    final sessionStreamAdvanced = session != null &&
+    final sessionStreamAdvanced =
+        session != null &&
         _sessionStreamAdvanced(
           session,
           _attempts.values.where(
