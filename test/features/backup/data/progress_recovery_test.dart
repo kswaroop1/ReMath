@@ -301,6 +301,38 @@ void main() {
       }
     });
 
+    test('a later correction event blocks its stale session', () async {
+      for (final fixture in _fixtures()) {
+        final repository = fixture.repository;
+        addTearDown(fixture.close);
+        final session = _session('session-1').copyWith(
+          correctionOfEventId: 'failed-answer',
+          phase: LearningSessionPhase.correction,
+        );
+
+        final result = await repository.mergeProgress(
+          attempts: [
+            _attempt(
+              'failed-answer',
+              isCorrect: false,
+              questionId: 'question-3',
+            ),
+            _attempt(
+              'successful-correction',
+              kind: AttemptKind.correction,
+              questionId: 'question-3',
+              relatedEventId: 'failed-answer',
+            ),
+          ],
+          studyState: null,
+          session: session,
+        );
+
+        expect(result.importedSession, isFalse);
+        expect(await repository.loadSession(), isNull);
+      }
+    });
+
     test(
       'a SQLite write interruption rolls back attempts and study state',
       () async {
@@ -435,14 +467,20 @@ AttemptEvent _attempt(
   String answer = '4',
   DateTime? occurredAt,
   Duration responseTime = const Duration(milliseconds: 500),
+  bool isCorrect = true,
+  AttemptKind kind = AttemptKind.answer,
+  String? questionId,
+  String? relatedEventId,
   String sessionId = 'session-1',
 }) {
   return AttemptEvent(
     answer: answer,
     eventId: id,
-    isCorrect: true,
+    isCorrect: isCorrect,
+    kind: kind,
     occurredAt: occurredAt ?? DateTime.utc(2026, 9, 20, 10),
-    questionId: 'question-$id',
+    questionId: questionId ?? 'question-$id',
+    relatedEventId: relatedEventId,
     responseTime: responseTime,
     sessionId: sessionId,
     skillId: 'arithmetic.addition',
