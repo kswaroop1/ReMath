@@ -72,14 +72,16 @@ final class InMemoryProgressRepository
       }
       duplicateAttemptCount++;
     }
+    final mergedAttempts = [
+      ..._attempts.values.where(
+        (attempt) => !incomingIds.contains(attempt.eventId),
+      ),
+      ...attempts,
+    ];
     final sessionStreamAdvanced =
-        session != null &&
-        _sessionStreamAdvanced(session, [
-          ..._attempts.values.where(
-            (attempt) => !incomingIds.contains(attempt.eventId),
-          ),
-          ...attempts,
-        ]);
+        session != null && _sessionStreamAdvanced(session, mergedAttempts);
+    final localSessionStreamAdvanced =
+        _session != null && _sessionStreamAdvanced(_session!, mergedAttempts);
     for (final attempt in attempts) {
       _attempts.putIfAbsent(attempt.eventId, () => attempt);
     }
@@ -106,6 +108,7 @@ final class InMemoryProgressRepository
     } else if (localStudyStateAdvanced) {
       _studyState = null;
     }
+    if (localSessionStreamAdvanced) _session = null;
     final importSession =
         session != null && _session == null && !sessionStreamAdvanced;
     if (importSession) _session = session;

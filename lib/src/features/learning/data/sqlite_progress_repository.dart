@@ -372,14 +372,18 @@ final class SqliteProgressRepository
     }
     _database.execute('BEGIN IMMEDIATE');
     try {
+      final mergedAttempts = [
+        ..._loadAttemptsSync().where(
+          (attempt) => !incomingIds.contains(attempt.eventId),
+        ),
+        ...attempts,
+      ];
       final sessionStreamAdvanced =
-          session != null &&
-          _sessionStreamAdvanced(session, [
-            ..._loadAttemptsSync().where(
-              (attempt) => !incomingIds.contains(attempt.eventId),
-            ),
-            ...attempts,
-          ]);
+          session != null && _sessionStreamAdvanced(session, mergedAttempts);
+      final localSession = _loadSessionSync();
+      final localSessionStreamAdvanced =
+          localSession != null &&
+          _sessionStreamAdvanced(localSession, mergedAttempts);
       var duplicateAttemptCount = 0;
       final newAttempts = <AttemptEvent>[];
       for (final attempt in attempts) {
@@ -415,6 +419,9 @@ final class SqliteProgressRepository
         _writeStudyState(studyState);
       } else if (localStudyStateAdvanced) {
         _database.execute('DELETE FROM study_state WHERE singleton = 1');
+      }
+      if (localSessionStreamAdvanced) {
+        _database.execute('DELETE FROM active_session WHERE singleton = 1');
       }
       final importSession =
           session != null &&
