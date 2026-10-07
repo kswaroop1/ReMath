@@ -96,7 +96,7 @@ final class InMemoryProgressRepository
       );
     final importStudyState =
         studyState != null &&
-        _canImportStudyState(studyState, _attempts.containsKey) &&
+        _canImportStudyState(studyState, _attempts.keys) &&
         !_hasActiveStudyState(_studyState);
     if (importStudyState) _studyState = studyState;
     final importSession =
@@ -184,12 +184,17 @@ bool _hasActiveStudyState(String? source) {
 
 bool _canImportStudyState(
   String source,
-  bool Function(String eventId) containsEvent,
+  Iterable<String> eventIds,
 ) {
   try {
     final state = StudyState.decode(source);
-    return state.plan != null &&
-        !containsEvent('${state.sessionId}.${state.serial}');
+    final prefix = '${state.sessionId}.';
+    final hasCurrentOrLaterEvent = eventIds.any((eventId) {
+      if (!eventId.startsWith(prefix)) return false;
+      final serial = int.tryParse(eventId.substring(prefix.length));
+      return serial != null && serial >= state.serial;
+    });
+    return state.plan != null && !hasCurrentOrLaterEvent;
   } on Object {
     return false;
   }

@@ -403,7 +403,10 @@ final class SqliteProgressRepository
       final localStudyState = _loadStudyStateSync();
       final importStudyState =
           studyState != null &&
-          _canImportStudyState(studyState, _containsAttemptEvent) &&
+          _canImportStudyState(
+            studyState,
+            _loadAttemptsSync().map((attempt) => attempt.eventId),
+          ) &&
           !_hasActiveStudyState(localStudyState);
       if (importStudyState) _writeStudyState(studyState);
       final importSession =
@@ -423,14 +426,6 @@ final class SqliteProgressRepository
       _database.execute('ROLLBACK');
       rethrow;
     }
-  }
-
-  bool _containsAttemptEvent(String eventId) {
-    final rows = _database.select(
-      'SELECT 1 FROM attempt_events WHERE event_id = ? LIMIT 1',
-      [eventId],
-    );
-    return rows.isNotEmpty;
   }
 
   @override
@@ -638,12 +633,17 @@ bool _hasActiveStudyState(String? source) {
 
 bool _canImportStudyState(
   String source,
-  bool Function(String eventId) containsEvent,
+  Iterable<String> eventIds,
 ) {
   try {
     final state = StudyState.decode(source);
-    return state.plan != null &&
-        !containsEvent('${state.sessionId}.${state.serial}');
+    final prefix = '${state.sessionId}.';
+    final hasCurrentOrLaterEvent = eventIds.any((eventId) {
+      if (!eventId.startsWith(prefix)) return false;
+      final serial = int.tryParse(eventId.substring(prefix.length));
+      return serial != null && serial >= state.serial;
+    });
+    return state.plan != null && !hasCurrentOrLaterEvent;
   } on Object {
     return false;
   }
