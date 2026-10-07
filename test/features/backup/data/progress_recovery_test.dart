@@ -333,6 +333,29 @@ void main() {
       }
     });
 
+    test('a later Study serial blocks a stale snapshot', () async {
+      for (final fixture in _fixtures()) {
+        final repository = fixture.repository;
+        addTearDown(fixture.close);
+        final state = StudyState(
+          plan: StudyPlanner().plan(
+            'number-fluency',
+            const [],
+            DateTime.utc(2026, 9, 20),
+          ),
+          sessionId: 'study-session',
+        ).encode();
+
+        final result = await repository.mergeProgress(
+          attempts: [_attempt('study-session.1', sessionId: 'study-session')],
+          studyState: state,
+        );
+
+        expect(result.importedStudyState, isFalse);
+        expect(await repository.loadStudyState(), isNull);
+      }
+    });
+
     test(
       'a SQLite write interruption rolls back attempts and study state',
       () async {
