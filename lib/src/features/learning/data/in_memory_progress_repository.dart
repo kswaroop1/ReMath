@@ -163,6 +163,15 @@ bool _sessionStreamAdvanced(
   final sessionAttempts = attempts.where(
     (attempt) => attempt.sessionId == session.id,
   );
+  if (session.phase == LearningSessionPhase.learn) {
+    final hintLevels = {
+      for (final attempt in sessionAttempts)
+        if (attempt.kind == AttemptKind.hint &&
+            attempt.skillId == session.focusSkillId)
+          attempt.answer,
+    };
+    return hintLevels.length > session.revealedHintCount;
+  }
   if (session.id.startsWith('diagnostic-') && session.questionId == null) {
     return sessionAttempts
             .where((attempt) => attempt.kind.contributesToMastery)
