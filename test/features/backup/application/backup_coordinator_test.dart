@@ -580,6 +580,14 @@ void main() {
         for (final kind in [AttemptKind.answer, AttemptKind.retest]) {
           final payload = BackupPayload(
             attempts: [
+              if (kind == AttemptKind.correction)
+                _attempt(
+                  'hint-before-event-1',
+                  answer: 'hint-1',
+                  kind: AttemptKind.hint,
+                  questionId: _questionIdForState(state),
+                  sessionId: 'study-session',
+                ),
               _attempt(
                 'event-1',
                 isCorrect: false,
