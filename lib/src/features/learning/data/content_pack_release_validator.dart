@@ -7,14 +7,8 @@ final class ContentPackReleaseValidator {
 
   static const maximumCompressedSizeBytes = 512 * 1024 * 1024;
   static const maximumInstalledSizeBytes = 2 * 1024 * 1024 * 1024;
-  static const _allowedLicenses = {
-    'CC-BY-SA-4.0',
-    'CC-BY-4.0',
-    'GPL-3.0-only',
-  };
-  static final _idPattern = RegExp(
-    r'^[a-z][a-z0-9]*(\.[a-z][a-z0-9-]*)+$',
-  );
+  static const _allowedLicenses = {'CC-BY-SA-4.0', 'CC-BY-4.0', 'GPL-3.0-only'};
+  static final _idPattern = RegExp(r'^[a-z][a-z0-9]*(\.[a-z][a-z0-9-]*)+$');
   static final _languagePattern = RegExp(
     r'^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$',
   );
@@ -27,7 +21,9 @@ final class ContentPackReleaseValidator {
       issues.add('Unsupported manifestVersion ${release.manifestVersion}.');
     }
     if (!_idPattern.hasMatch(release.packId)) {
-      issues.add('Pack id is not a stable dotted identifier: ${release.packId}.');
+      issues.add(
+        'Pack id is not a stable dotted identifier: ${release.packId}.',
+      );
     }
     if (!_versionPattern.hasMatch(release.version)) {
       issues.add(
@@ -40,8 +36,7 @@ final class ContentPackReleaseValidator {
         '${release.minimumAppVersion}.',
       );
     }
-    if (release.minimumSchemaVersion < 1 ||
-        release.minimumSchemaVersion > 3) {
+    if (release.minimumSchemaVersion < 1 || release.minimumSchemaVersion > 3) {
       issues.add(
         'Unsupported minimum schemaVersion '
         '${release.minimumSchemaVersion}.',

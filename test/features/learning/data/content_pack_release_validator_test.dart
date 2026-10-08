@@ -72,7 +72,8 @@ void main() {
       objectives: ['Collect like terms'],
       packId: 'org.remath.algebra.foundation',
       publisherKeyId: 'org.remath.publisher.primary',
-      sha256: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      sha256:
+          'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
       signature: 'c2lnbmF0dXJl',
       title: 'Algebra foundation',
       version: '2.1.0',
