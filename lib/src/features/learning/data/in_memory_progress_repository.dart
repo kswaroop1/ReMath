@@ -215,15 +215,9 @@ bool _hasStudyEventAtOrAfter(
   StudyState state,
   Iterable<AttemptEvent> attempts,
 ) =>
-    _studyEventSerials(
-      state,
-      attempts,
-    ).any((serial) => serial >= state.serial);
+    _studyEventSerials(state, attempts).any((serial) => serial >= state.serial);
 
-Set<int> _studyEventSerials(
-  StudyState state,
-  Iterable<AttemptEvent> attempts,
-) {
+Set<int> _studyEventSerials(StudyState state, Iterable<AttemptEvent> attempts) {
   final prefix = '${state.sessionId}.';
   return {
     for (final attempt in attempts)
@@ -233,10 +227,7 @@ Set<int> _studyEventSerials(
   }.whereType<int>().toSet();
 }
 
-bool _canImportStudyState(
-  String source,
-  Iterable<AttemptEvent> attempts,
-) {
+bool _canImportStudyState(String source, Iterable<AttemptEvent> attempts) {
   try {
     final state = StudyState.decode(source);
     final serials = _studyEventSerials(state, attempts);

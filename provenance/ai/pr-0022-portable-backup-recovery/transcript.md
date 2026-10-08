@@ -1152,3 +1152,8 @@ from Dart 3.13 in three touched files. A temporary diagnostic formatting gate
 now applies the formatter and prints its exact patch. The subsequent checkpoint
 will apply that output and restore the normal non-mutating gate before the
 authoritative full run.
+
+Diagnostic CI 37718927072 again passes all 422 native tests and prints the
+complete remaining two-file formatter patch. The next checkpoint applies that
+output exactly and restores the standard non-mutating formatting gate for the
+replacement full CI run.
