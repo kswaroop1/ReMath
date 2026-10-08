@@ -37,46 +37,11 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
-      - name: Verify focused red evidence
-        run: |
-          set -euo pipefail
-          verify_red() {
-            local sha="$1"
-            local name="$2"
-            local worktree
-            local log
-            worktree="$(mktemp -d)"
-            log="$(mktemp)"
-            git worktree add --detach "$worktree" "$sha"
-            if (
-              cd "$worktree"
-              flutter pub get >/dev/null
-              flutter test -r expanded \
-                test/features/backup/data/progress_recovery_test.dart \
-                --plain-name "$name"
-            ) >"$log" 2>&1; then
-              cat "$log"
-              echo "Expected focused red test to fail: $name" >&2
-              exit 1
-            fi
-            cat "$log"
-            git worktree remove --force "$worktree"
-          }
-          verify_red d4a908a30ecdd0510c74d0a1b70fb49f56b6c65e \
-            "recovery advances an earlier local Study snapshot"
-          verify_red e9be6970af3c65d1f5f6cc9b465d104716abaf35 \
-            "imported progress invalidates an advanced local Home session"
-          verify_red 58e16fd539ffa44fe95060d51ccc25a2dcfcc0a1 \
-            "Study recovery rejects a snapshot with missing earlier serials"
-          verify_red bf2ef133111e0fc75968282349355a61af91211f \
-            "Study serial evidence must belong to its session"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies

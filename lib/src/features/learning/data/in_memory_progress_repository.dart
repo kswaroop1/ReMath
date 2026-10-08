@@ -214,10 +214,11 @@ bool _activeStudyStateAdvanced(
 bool _hasStudyEventAtOrAfter(
   StudyState state,
   Iterable<AttemptEvent> attempts,
-) => _studyEventSerials(
-  state,
-  attempts,
-).any((serial) => serial >= state.serial);
+) =>
+    _studyEventSerials(
+      state,
+      attempts,
+    ).any((serial) => serial >= state.serial);
 
 Set<int> _studyEventSerials(
   StudyState state,

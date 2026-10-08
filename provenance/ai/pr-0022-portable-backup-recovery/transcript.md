@@ -1127,3 +1127,20 @@ temporary CI-only evidence step checks out the four exact test-only commits and
 runs each focused regression before its implementation. The step is required to
 observe each intended failure; a focused test that passes makes the evidence run
 fail. The normal head suite continues in the same run.
+
+CI 37710543812 executed all four test-only commits and observed the intended
+missing-behaviour failures: the earlier local Study snapshot remained unchanged
+(`Expected: true`, `Actual: false`); the advanced local Home session remained
+present (`Expected: null`, actual `LearningSession`); an incomplete Study
+history was accepted (`Expected: false`, `Actual: true`); and an event whose ID
+matched the Study prefix but whose `sessionId` differed was accepted
+(`Expected: false`, `Actual: true`). This closes the executed-red evidence gap
+identified by review 5450041796.
+
+The same run exposed one pre-existing positive fixture whose synthetic attempt
+used the helper's default session ID rather than the Study session it was meant
+to advance. Commit `8078065` aligns that fixture identity without weakening its
+assertions. The run also identified canonical formatting changes in the two
+repository helpers and the new regression. The following checkpoint applies
+that formatting, removes the temporary evidence-only workflow step, and
+restores the standard consolidated CI gate.

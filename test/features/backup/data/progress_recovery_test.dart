@@ -509,9 +509,7 @@ void main() {
         addTearDown(fixture.close);
 
         final result = await repository.mergeProgress(
-          attempts: [
-            _attempt('study-session.0', sessionId: 'another-session'),
-          ],
+          attempts: [_attempt('study-session.0', sessionId: 'another-session')],
           studyState: state,
         );
 
