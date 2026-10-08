@@ -11,15 +11,11 @@ void main() {
       ContentPackCatalogueStatus.available,
     );
     expect(
-      classifier
-          .classify(_release('2.0.0'), installedVersion: '2.0.0')
-          .status,
+      classifier.classify(_release('2.0.0'), installedVersion: '2.0.0').status,
       ContentPackCatalogueStatus.installed,
     );
     expect(
-      classifier
-          .classify(_release('2.0.0'), installedVersion: '1.0.0')
-          .status,
+      classifier.classify(_release('2.0.0'), installedVersion: '1.0.0').status,
       ContentPackCatalogueStatus.updateAvailable,
     );
     final pinned = classifier.classify(
@@ -41,18 +37,21 @@ void main() {
     expect(failed.failureReason, 'Signature verification failed.');
   });
 
-  test('catalogue exposes prerequisites, objectives, and missing dependencies', () {
-    final entry = classifier.classify(
-      _release('2.0.0'),
-      missingDependencyIds: const ['org.remath.number.foundation'],
-    );
+  test(
+    'catalogue exposes prerequisites, objectives, and missing dependencies',
+    () {
+      final entry = classifier.classify(
+        _release('2.0.0'),
+        missingDependencyIds: const ['org.remath.number.foundation'],
+      );
 
-    expect(entry.status, ContentPackCatalogueStatus.incompatible);
-    expect(entry.prerequisiteIds, ['org.remath.number.foundation']);
-    expect(entry.missingDependencyIds, ['org.remath.number.foundation']);
-    expect(entry.objectives, ['Collect like terms']);
-    expect(() => entry.objectives.add('mutate'), throwsUnsupportedError);
-  });
+      expect(entry.status, ContentPackCatalogueStatus.incompatible);
+      expect(entry.prerequisiteIds, ['org.remath.number.foundation']);
+      expect(entry.missingDependencyIds, ['org.remath.number.foundation']);
+      expect(entry.objectives, ['Collect like terms']);
+      expect(() => entry.objectives.add('mutate'), throwsUnsupportedError);
+    },
+  );
 }
 
 ContentPackRelease _release(String version) => ContentPackRelease(

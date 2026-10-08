@@ -42,7 +42,8 @@ final class ContentPackCatalogueClassifier {
     String? failureReason,
     List<String> missingDependencyIds = const [],
   }) {
-    final updateAvailable = installedVersion != null &&
+    final updateAvailable =
+        installedVersion != null &&
         _compareVersions(release.version, installedVersion) > 0;
     final status = switch ((
       failureReason,
@@ -53,8 +54,8 @@ final class ContentPackCatalogueClassifier {
       updateAvailable,
     )) {
       (String _, _, _, _, _, _) => ContentPackCatalogueStatus.failed,
-      (_, false, _, _, _, _) || (_, _, true, _, _, _) =>
-        ContentPackCatalogueStatus.incompatible,
+      (_, false, _, _, _, _) ||
+      (_, _, true, _, _, _) => ContentPackCatalogueStatus.incompatible,
       (_, _, _, null, _, _) => ContentPackCatalogueStatus.available,
       (_, _, _, _, true, _) => ContentPackCatalogueStatus.pinned,
       (_, _, _, _, _, true) => ContentPackCatalogueStatus.updateAvailable,
@@ -89,11 +90,19 @@ final class ContentPackCatalogueClassifier {
   List<int> _versionParts(String version) {
     final parts = version.split('.');
     if (parts.length != 3) {
-      throw ArgumentError.value(version, 'version', 'Expected semantic version.');
+      throw ArgumentError.value(
+        version,
+        'version',
+        'Expected semantic version.',
+      );
     }
     final parsed = parts.map(int.tryParse).toList(growable: false);
     if (parsed.any((part) => part == null)) {
-      throw ArgumentError.value(version, 'version', 'Expected semantic version.');
+      throw ArgumentError.value(
+        version,
+        'version',
+        'Expected semantic version.',
+      );
     }
     return parsed.cast<int>();
   }
