@@ -1114,3 +1114,16 @@ analysis, content validation, dependency-lock verification, formatting, and
 secret scanning. The three review threads were answered with their exact
 test/implementation pairs and this full-CI evidence before requesting the next
 independent review.
+
+Records-head CI 37708042723 verifies `bf5072f` with every gate green. Independent
+review 5450041796 identified one further recovery invariant: a Study serial must
+be backed by an immutable event whose `sessionId`, not only event-ID prefix,
+belongs to that Study session. It also required executed-red evidence for the
+three preceding review corrections.
+
+Published pair `bf2ef13` / `7807327` preserves test-first ordering for the
+session-bound serial invariant. Because Flutter remains unavailable locally, a
+temporary CI-only evidence step checks out the four exact test-only commits and
+runs each focused regression before its implementation. The step is required to
+observe each intended failure; a focused test that passes makes the evidence run
+fail. The normal head suite continues in the same run.
