@@ -49,13 +49,17 @@ jobs:
       - name: Verify dependency lock is unchanged
         run: git diff --exit-code -- pubspec.lock
       - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed lib test tool
+        run: |
+          dart format --output=none --set-exit-if-changed lib test tool
       - name: Static analysis
         run: flutter analyze --fatal-infos --fatal-warnings
       - name: Validate content packs
         run: dart run tool/validate_content.dart assets/content/foundation_arithmetic/pack.json
-      - name: Verify algebra contracts in Chrome
-        run: flutter test --platform chrome test/features/algebra/domain/algebra_review_test.dart
+      - name: Verify browser contracts in Chrome
+        run: >-
+          flutter test --platform chrome
+          test/features/algebra/domain/algebra_review_test.dart
+          test/features/backup/data/open_backup_file_boundary_web_test.dart
       - name: Run tests with coverage
         if: ${{ !cancelled() }}
         run: flutter test --coverage

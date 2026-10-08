@@ -1,0 +1,300 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:remath/src/features/learning/domain/arithmetic_generator.dart';
+import 'package:remath/src/features/learning/domain/learning_session.dart';
+import 'package:remath/src/features/learning/domain/learning_session_compatibility.dart';
+
+import '../../../support/foundation_pack.dart';
+
+void main() {
+  final pack = foundationPackForTest();
+  final question = const ArithmeticGenerator().generate(
+    seed: 42,
+    index: 3,
+    packId: pack.id,
+    template: pack.templates.first,
+  );
+  final base = LearningSession(
+    currentQuestionIndex: 3,
+    id: 'session',
+    seed: 42,
+    startedAt: DateTime.utc(2026, 9, 26),
+  );
+
+  test('accepts legacy sessions and exact generated identity', () {
+    expect(isLearningSessionCompatible(base, contentPack: pack), isTrue);
+    expect(
+      isLearningSessionCompatible(
+        base.copyWith(
+          questionId: question.id,
+          questionSkillId: question.skillId,
+        ),
+        contentPack: pack,
+      ),
+      isTrue,
+    );
+  });
+
+  test('rejects partial, unknown, and mismatched question identity', () {
+    expect(
+      isLearningSessionCompatible(
+        base.copyWith(questionId: question.id),
+        contentPack: pack,
+      ),
+      isFalse,
+    );
+    expect(
+      isLearningSessionCompatible(
+        base.copyWith(
+          questionId: question.id,
+          questionSkillId: 'arithmetic.retired',
+        ),
+        contentPack: pack,
+      ),
+      isFalse,
+    );
+    expect(
+      isLearningSessionCompatible(
+        base.copyWith(
+          questionId: 'retired-pack.addition.v9.42.3',
+          questionSkillId: question.skillId,
+        ),
+        contentPack: pack,
+      ),
+      isFalse,
+    );
+  });
+
+  test('rejects a Learn focus missing from the installed content pack', () {
+    expect(
+      isLearningSessionCompatible(
+        base.copyWith(
+          focusSkillId: 'arithmetic.retired',
+          phase: LearningSessionPhase.learn,
+        ),
+        contentPack: pack,
+      ),
+      isFalse,
+    );
+  });
+
+  test('rejects remediation whose focus disagrees with question identity', () {
+    for (final phase in [
+      LearningSessionPhase.correction,
+      LearningSessionPhase.retest,
+    ]) {
+      expect(
+        isLearningSessionCompatible(
+          base.copyWith(
+            focusSkillId: 'arithmetic.subtraction',
+            phase: phase,
+            questionId: question.id,
+            questionSkillId: question.skillId,
+          ),
+          contentPack: pack,
+        ),
+        isFalse,
+      );
+    }
+  });
+
+  test('rejects any focused session whose pinned skill disagrees', () {
+    for (final phase in [
+      LearningSessionPhase.question,
+      LearningSessionPhase.review,
+    ]) {
+      expect(
+        isLearningSessionCompatible(
+          base.copyWith(
+            focusSkillId: 'arithmetic.subtraction',
+            phase: phase,
+            questionId: question.id,
+            questionSkillId: question.skillId,
+          ),
+          contentPack: pack,
+        ),
+        isFalse,
+      );
+    }
+  });
+
+  test('requires focus for remediation and review sessions', () {
+    for (final phase in [
+      LearningSessionPhase.correction,
+      LearningSessionPhase.retest,
+      LearningSessionPhase.review,
+    ]) {
+      expect(
+        isLearningSessionCompatible(
+          base.copyWith(
+            phase: phase,
+            questionId: question.id,
+            questionSkillId: question.skillId,
+          ),
+          contentPack: pack,
+        ),
+        isFalse,
+      );
+    }
+  });
+
+  test('requires focus before accepting a legacy identity-less session', () {
+    for (final phase in [
+      LearningSessionPhase.correction,
+      LearningSessionPhase.retest,
+      LearningSessionPhase.review,
+    ]) {
+      expect(
+        isLearningSessionCompatible(
+          base.copyWith(phase: phase),
+          contentPack: pack,
+        ),
+        isFalse,
+      );
+    }
+  });
+
+  test('rejects unsupported focus in a legacy identity-less session', () {
+    for (final phase in [
+      LearningSessionPhase.correction,
+      LearningSessionPhase.retest,
+      LearningSessionPhase.review,
+    ]) {
+      expect(
+        isLearningSessionCompatible(
+          base.copyWith(focusSkillId: 'arithmetic.retired', phase: phase),
+          contentPack: pack,
+        ),
+        isFalse,
+      );
+    }
+  });
+
+  test('rejects an identity-less diagnostic beyond its fixed question set', () {
+    expect(
+      isLearningSessionCompatible(
+        LearningSession(
+          currentQuestionIndex: 9,
+          id: 'diagnostic-legacy',
+          seed: 42,
+          startedAt: DateTime.utc(2026, 9, 26),
+        ),
+        contentPack: pack,
+      ),
+      isFalse,
+    );
+  });
+
+  test('rejects a pinned diagnostic beyond its fixed question set', () {
+    final outOfRangeQuestion = const ArithmeticGenerator().generate(
+      seed: 42,
+      index: 9,
+      packId: pack.id,
+      template: pack.templates.first,
+    );
+    expect(
+      isLearningSessionCompatible(
+        LearningSession(
+          currentQuestionIndex: 9,
+          id: 'diagnostic-pinned',
+          questionId: outOfRangeQuestion.id,
+          questionSkillId: outOfRangeQuestion.skillId,
+          seed: 42,
+          startedAt: DateTime.utc(2026, 9, 26),
+        ),
+        contentPack: pack,
+      ),
+      isFalse,
+    );
+  });
+
+  test('rejects a diagnostic pinned to the wrong operation', () {
+    final wrongOperation = const ArithmeticGenerator().generate(
+      seed: 42,
+      index: 3,
+      packId: pack.id,
+      template: pack.templates.first,
+    );
+    expect(
+      isLearningSessionCompatible(
+        LearningSession(
+          currentQuestionIndex: 3,
+          id: 'diagnostic-wrong-operation',
+          questionId: wrongOperation.id,
+          questionSkillId: wrongOperation.skillId,
+          seed: 42,
+          startedAt: DateTime.utc(2026, 9, 26),
+        ),
+        contentPack: pack,
+      ),
+      isFalse,
+    );
+  });
+
+  test('rejects every focused legacy diagnostic session', () {
+    expect(
+      isLearningSessionCompatible(
+        LearningSession(
+          currentQuestionIndex: 3,
+          focusSkillId: 'arithmetic.subtraction',
+          id: 'diagnostic-legacy-focus',
+          seed: 42,
+          startedAt: DateTime.utc(2026, 9, 26),
+        ),
+        contentPack: pack,
+      ),
+      isFalse,
+    );
+  });
+
+  test('rejects remediation phases in a diagnostic session', () {
+    for (final phase in [
+      LearningSessionPhase.correction,
+      LearningSessionPhase.retest,
+    ]) {
+      expect(
+        isLearningSessionCompatible(
+          LearningSession(
+            correctionOfEventId: 'attempt',
+            currentQuestionIndex: 3,
+            focusSkillId: 'arithmetic.subtraction',
+            id: 'diagnostic-remediation',
+            phase: phase,
+            seed: 42,
+            startedAt: DateTime.utc(2026, 9, 26),
+          ),
+          contentPack: pack,
+        ),
+        isFalse,
+      );
+    }
+  });
+
+  test('requires review phase to use a review session identity', () {
+    expect(
+      isLearningSessionCompatible(
+        base.copyWith(
+          focusSkillId: 'arithmetic.addition',
+          phase: LearningSessionPhase.review,
+        ),
+        contentPack: pack,
+      ),
+      isFalse,
+    );
+  });
+
+  test('rejects review identity in an ordinary question phase', () {
+    expect(
+      isLearningSessionCompatible(
+        LearningSession(
+          currentQuestionIndex: 3,
+          focusSkillId: 'arithmetic.addition',
+          id: 'review-restored',
+          seed: 42,
+          startedAt: DateTime.utc(2026, 9, 26),
+        ),
+        contentPack: pack,
+      ),
+      isFalse,
+    );
+  });
+}

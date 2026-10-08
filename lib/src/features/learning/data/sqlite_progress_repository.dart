@@ -1,16 +1,18 @@
 import 'package:sqlite3/common.dart';
 
+import '../../numbers/domain/study_plan.dart';
 import '../domain/attempt_event.dart';
 import '../domain/learning_session.dart';
 import '../domain/progress_repository.dart';
 
-final class SqliteProgressRepository implements ProgressRepository {
+final class SqliteProgressRepository
+    implements ProgressSnapshotRepository, LearningTransitionRepository {
   SqliteProgressRepository(this._database) {
     _migrate();
   }
 
   final CommonDatabase _database;
-  static const _currentSchemaVersion = 7;
+  static const _currentSchemaVersion = 9;
 
   void _migrate() {
     _database.execute('PRAGMA foreign_keys = ON');
@@ -225,6 +227,54 @@ final class SqliteProgressRepository implements ProgressRepository {
         rethrow;
       }
     }
+    if (version < 8) {
+      _database.execute('BEGIN IMMEDIATE');
+      try {
+        final columns = _database
+            .select('PRAGMA table_info(active_session)')
+            .map((row) => row['name'] as String)
+            .toSet();
+        if (!columns.contains('question_id')) {
+          _database.execute(
+            'ALTER TABLE active_session ADD COLUMN question_id TEXT',
+          );
+        }
+        if (!columns.contains('question_skill_id')) {
+          _database.execute(
+            'ALTER TABLE active_session ADD COLUMN question_skill_id TEXT',
+          );
+        }
+        _database.execute('UPDATE schema_version SET version = 8');
+        _database.execute('COMMIT');
+      } catch (_) {
+        _database.execute('ROLLBACK');
+        rethrow;
+      }
+    }
+    if (version < 9) {
+      _database.execute('BEGIN IMMEDIATE');
+      try {
+        final columns = _database
+            .select('PRAGMA table_info(attempt_events)')
+            .map((row) => row['name'] as String)
+            .toSet();
+        if (!columns.contains('response_us')) {
+          _database.execute(
+            'ALTER TABLE attempt_events ADD COLUMN response_us INTEGER '
+            'CHECK (response_us >= 0)',
+          );
+        }
+        _database.execute(
+          'UPDATE attempt_events SET response_us = response_ms * 1000 '
+          'WHERE response_us IS NULL',
+        );
+        _database.execute('UPDATE schema_version SET version = 9');
+        _database.execute('COMMIT');
+      } catch (_) {
+        _database.execute('ROLLBACK');
+        rethrow;
+      }
+    }
   }
 
   @override
@@ -239,20 +289,59 @@ final class SqliteProgressRepository implements ProgressRepository {
   }
 
   @override
-  Future<List<AttemptEvent>> loadAttempts() async => _database
+  Future<List<AttemptEvent>> loadAttempts() async => _loadAttemptsSync();
+
+  List<AttemptEvent> _loadAttemptsSync() => _database
       .select('SELECT * FROM attempt_events ORDER BY occurred_at, event_id')
       .map(_attemptFromRow)
       .toList(growable: false);
 
   @override
-  Future<LearningSession?> loadSession() async {
+  Future<ProgressSnapshot> loadSnapshot() async {
+    _database.execute('BEGIN');
+    try {
+      final attempts = _database
+          .select('SELECT * FROM attempt_events ORDER BY occurred_at, event_id')
+          .map(_attemptFromRow)
+          .toList(growable: false);
+      final sessionRows = _database.select(
+        'SELECT * FROM active_session WHERE singleton = 1',
+      );
+      final session = sessionRows.isEmpty
+          ? null
+          : _sessionFromRow(sessionRows.single);
+      final studyRows = _database.select(
+        'SELECT state FROM study_state WHERE singleton = 1',
+      );
+      final studyState = studyRows.isEmpty
+          ? null
+          : studyRows.single['state'] as String;
+      _database.execute('COMMIT');
+      return ProgressSnapshot(
+        attempts: attempts,
+        session: session,
+        studyState: studyState,
+      );
+    } catch (_) {
+      _database.execute('ROLLBACK');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<LearningSession?> loadSession() async => _loadSessionSync();
+
+  LearningSession? _loadSessionSync() {
     final rows = _database.select(
       'SELECT * FROM active_session WHERE singleton = 1',
     );
     if (rows.isEmpty) {
       return null;
     }
-    final row = rows.single;
+    return _sessionFromRow(rows.single);
+  }
+
+  LearningSession _sessionFromRow(Row row) {
     return LearningSession(
       answerDraft: row['answer_draft'] as String,
       correctionOfEventId: row['correction_of_event_id'] as String?,
@@ -260,10 +349,93 @@ final class SqliteProgressRepository implements ProgressRepository {
       focusSkillId: row['focus_skill_id'] as String?,
       id: row['session_id'] as String,
       phase: LearningSessionPhase.values.byName(row['phase'] as String),
+      questionId: row['question_id'] as String?,
+      questionSkillId: row['question_skill_id'] as String?,
       revealedHintCount: row['revealed_hint_count'] as int,
       seed: row['seed'] as int,
       startedAt: DateTime.parse(row['started_at'] as String).toUtc(),
     );
+  }
+
+  @override
+  Future<ProgressMergeResult> mergeProgress({
+    required List<AttemptEvent> attempts,
+    required String? studyState,
+    LearningSession? session,
+  }) async {
+    final incomingIds = <String>{};
+    for (final attempt in attempts) {
+      attempt.validateCalibrationEvidence();
+      if (!incomingIds.add(attempt.eventId)) {
+        throw ArgumentError.value(attempts, 'attempts', 'IDs must be unique');
+      }
+    }
+    _database.execute('BEGIN IMMEDIATE');
+    try {
+      final mergedAttempts = [
+        ..._loadAttemptsSync().where(
+          (attempt) => !incomingIds.contains(attempt.eventId),
+        ),
+        ...attempts,
+      ];
+      final sessionStreamAdvanced =
+          session != null && _sessionStreamAdvanced(session, mergedAttempts);
+      final localSession = _loadSessionSync();
+      final localSessionStreamAdvanced =
+          localSession != null &&
+          _sessionStreamAdvanced(localSession, mergedAttempts);
+      var duplicateAttemptCount = 0;
+      final newAttempts = <AttemptEvent>[];
+      for (final attempt in attempts) {
+        final rows = _database.select(
+          'SELECT * FROM attempt_events WHERE event_id = ?',
+          [attempt.eventId],
+        );
+        if (rows.isEmpty) {
+          newAttempts.add(attempt);
+          continue;
+        }
+        if (!_attemptFromRow(rows.single).hasSameImmutableContentAs(attempt)) {
+          throw ProgressConflictException(attempt.eventId);
+        }
+        duplicateAttemptCount++;
+      }
+      for (final attempt in newAttempts) {
+        _insertAttempt(attempt);
+      }
+      final localStudyState = _loadStudyStateSync();
+      final localStudyStateAdvanced = _activeStudyStateAdvanced(
+        localStudyState,
+        mergedAttempts,
+      );
+      final importStudyState =
+          studyState != null &&
+          _canImportStudyState(studyState, mergedAttempts) &&
+          (!_hasActiveStudyState(localStudyState) || localStudyStateAdvanced);
+      if (importStudyState) {
+        _writeStudyState(studyState);
+      } else if (localStudyStateAdvanced) {
+        _database.execute('DELETE FROM study_state WHERE singleton = 1');
+      }
+      if (localSessionStreamAdvanced) {
+        _database.execute('DELETE FROM active_session WHERE singleton = 1');
+      }
+      final importSession =
+          session != null &&
+          _loadSessionSync() == null &&
+          !sessionStreamAdvanced;
+      if (importSession) _writeSession(session);
+      _database.execute('COMMIT');
+      return ProgressMergeResult(
+        duplicateAttemptCount: duplicateAttemptCount,
+        importedStudyState: importStudyState,
+        importedSession: importSession,
+        insertedAttemptCount: newAttempts.length,
+      );
+    } catch (_) {
+      _database.execute('ROLLBACK');
+      rethrow;
+    }
   }
 
   @override
@@ -272,14 +444,40 @@ final class SqliteProgressRepository implements ProgressRepository {
     return _insertAttempt(event);
   }
 
+  @override
+  Future<bool> commitLearningAttempt(
+    AttemptEvent event,
+    LearningSession? nextSession,
+  ) async {
+    event.validateCalibrationEvidence();
+    _database.execute('BEGIN IMMEDIATE');
+    try {
+      final inserted = _insertAttempt(event);
+      if (inserted) {
+        if (nextSession == null) {
+          _database.execute('DELETE FROM active_session WHERE session_id = ?', [
+            event.sessionId,
+          ]);
+        } else {
+          _writeSession(nextSession);
+        }
+      }
+      _database.execute('COMMIT');
+      return inserted;
+    } catch (_) {
+      _database.execute('ROLLBACK');
+      rethrow;
+    }
+  }
+
   bool _insertAttempt(AttemptEvent event) {
     _database.execute(
       '''
       INSERT OR IGNORE INTO attempt_events (
         event_id, session_id, question_id, answer, is_correct,
-        response_ms, occurred_at, skill_id, event_kind, related_event_id,
-        misconception_id, confidence, surprise
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        response_ms, response_us, occurred_at, skill_id, event_kind,
+        related_event_id, misconception_id, confidence, surprise
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ''',
       [
         event.eventId,
@@ -288,6 +486,7 @@ final class SqliteProgressRepository implements ProgressRepository {
         event.answer,
         event.isCorrect ? 1 : 0,
         event.responseTime.inMilliseconds,
+        event.responseTime.inMicroseconds,
         event.occurredAt.toUtc().toIso8601String(),
         event.skillId,
         event.kind.name,
@@ -302,13 +501,17 @@ final class SqliteProgressRepository implements ProgressRepository {
 
   @override
   Future<void> saveSession(LearningSession session) async {
+    _writeSession(session);
+  }
+
+  void _writeSession(LearningSession session) {
     _database.execute(
       '''
       INSERT INTO active_session (
         singleton, session_id, seed, started_at, current_question_index,
         answer_draft, phase, focus_skill_id, correction_of_event_id,
-        revealed_hint_count
-      ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        revealed_hint_count, question_id, question_skill_id
+      ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(singleton) DO UPDATE SET
         session_id = excluded.session_id,
         seed = excluded.seed,
@@ -318,7 +521,9 @@ final class SqliteProgressRepository implements ProgressRepository {
         phase = excluded.phase,
         focus_skill_id = excluded.focus_skill_id,
         correction_of_event_id = excluded.correction_of_event_id
-        , revealed_hint_count = excluded.revealed_hint_count
+        , revealed_hint_count = excluded.revealed_hint_count,
+        question_id = excluded.question_id,
+        question_skill_id = excluded.question_skill_id
       ''',
       [
         session.id,
@@ -330,12 +535,16 @@ final class SqliteProgressRepository implements ProgressRepository {
         session.focusSkillId,
         session.correctionOfEventId,
         session.revealedHintCount,
+        session.questionId,
+        session.questionSkillId,
       ],
     );
   }
 
   @override
-  Future<String?> loadStudyState() async {
+  Future<String?> loadStudyState() async => _loadStudyStateSync();
+
+  String? _loadStudyStateSync() {
     final rows = _database.select(
       'SELECT state FROM study_state WHERE singleton = 1',
     );
@@ -378,7 +587,7 @@ final class SqliteProgressRepository implements ProgressRepository {
     misconceptionId: row['misconception_id'] as String?,
     occurredAt: DateTime.parse(row['occurred_at'] as String).toUtc(),
     questionId: row['question_id'] as String,
-    responseTime: Duration(milliseconds: row['response_ms'] as int),
+    responseTime: Duration(microseconds: row['response_us'] as int),
     relatedEventId: row['related_event_id'] as String?,
     sessionId: row['session_id'] as String,
     skillId: row['skill_id'] as String,
@@ -389,4 +598,96 @@ final class SqliteProgressRepository implements ProgressRepository {
         ? null
         : SurpriseRating.values.byName(row['surprise'] as String),
   );
+}
+
+bool _advancesSavedSession(LearningSession session, AttemptEvent attempt) {
+  if (session.phase == LearningSessionPhase.correction) {
+    return attempt.kind == AttemptKind.correction &&
+        attempt.isCorrect &&
+        attempt.relatedEventId == session.correctionOfEventId;
+  }
+  if (session.phase == LearningSessionPhase.learn) {
+    return false;
+  }
+  final questionId = session.questionId;
+  return questionId == null
+      ? attempt.kind != AttemptKind.hint
+      : attempt.questionId == questionId && attempt.kind.contributesToMastery;
+}
+
+bool _sessionStreamAdvanced(
+  LearningSession session,
+  Iterable<AttemptEvent> attempts,
+) {
+  final sessionAttempts = attempts.where(
+    (attempt) => attempt.sessionId == session.id,
+  );
+  if (session.phase == LearningSessionPhase.learn) {
+    final hintLevels = {
+      for (final attempt in sessionAttempts)
+        if (attempt.kind == AttemptKind.hint &&
+            attempt.skillId == session.focusSkillId)
+          attempt.answer,
+    };
+    return hintLevels.length > session.revealedHintCount;
+  }
+  if (session.id.startsWith('diagnostic-') && session.questionId == null) {
+    return sessionAttempts
+            .where((attempt) => attempt.kind.contributesToMastery)
+            .length >
+        session.currentQuestionIndex;
+  }
+  return sessionAttempts.any(
+    (attempt) => _advancesSavedSession(session, attempt),
+  );
+}
+
+bool _hasActiveStudyState(String? source) {
+  if (source == null) return false;
+  try {
+    return StudyState.decode(source).plan != null;
+  } on Object {
+    return true;
+  }
+}
+
+bool _activeStudyStateAdvanced(
+  String? source,
+  Iterable<AttemptEvent> attempts,
+) {
+  if (source == null) return false;
+  try {
+    final state = StudyState.decode(source);
+    return state.plan != null && _hasStudyEventAtOrAfter(state, attempts);
+  } on Object {
+    return false;
+  }
+}
+
+bool _hasStudyEventAtOrAfter(
+  StudyState state,
+  Iterable<AttemptEvent> attempts,
+) =>
+    _studyEventSerials(state, attempts).any((serial) => serial >= state.serial);
+
+Set<int> _studyEventSerials(StudyState state, Iterable<AttemptEvent> attempts) {
+  final prefix = '${state.sessionId}.';
+  return {
+    for (final attempt in attempts)
+      if (attempt.sessionId == state.sessionId &&
+          attempt.eventId.startsWith(prefix))
+        int.tryParse(attempt.eventId.substring(prefix.length)),
+  }.whereType<int>().toSet();
+}
+
+bool _canImportStudyState(String source, Iterable<AttemptEvent> attempts) {
+  try {
+    final state = StudyState.decode(source);
+    final serials = _studyEventSerials(state, attempts);
+    return state.plan != null &&
+        !serials.any((serial) => serial >= state.serial) &&
+        Iterable<int>.generate(state.serial).every(serials.contains);
+  } on Object {
+    return false;
+  }
 }

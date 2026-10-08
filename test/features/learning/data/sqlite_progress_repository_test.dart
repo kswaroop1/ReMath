@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/data/sqlite_progress_repository.dart';
 import 'package:remath/src/features/learning/domain/attempt_event.dart';
 import 'package:remath/src/features/learning/domain/learning_session.dart';
+import 'package:remath/src/features/learning/domain/progress_repository.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
@@ -25,6 +26,8 @@ void main() {
         focusSkillId: 'arithmetic.subtraction',
         id: 'session-1',
         phase: LearningSessionPhase.correction,
+        questionId: 'core.subtraction.v2.91.4',
+        questionSkillId: 'arithmetic.subtraction',
         seed: 91,
         startedAt: DateTime.utc(2026, 8, 27, 8),
       );
@@ -37,6 +40,8 @@ void main() {
       expect(restored?.currentQuestionIndex, 4);
       expect(restored?.answerDraft, '17');
       expect(restored?.phase, LearningSessionPhase.correction);
+      expect(restored?.questionId, 'core.subtraction.v2.91.4');
+      expect(restored?.questionSkillId, 'arithmetic.subtraction');
       expect(restored?.focusSkillId, 'arithmetic.subtraction');
       expect(restored?.correctionOfEventId, 'wrong-attempt');
       expect(restored?.startedAt, session.startedAt);
@@ -77,6 +82,36 @@ void main() {
       expect(attempts.single.surprise, SurpriseRating.surprising);
     },
   );
+
+  test('commits a Home attempt and next session as one transition', () async {
+    final transition = repository as LearningTransitionRepository;
+    final event = AttemptEvent(
+      answer: '12',
+      eventId: 'event-1',
+      isCorrect: false,
+      occurredAt: DateTime.utc(2026, 8, 27, 8, 1),
+      questionId: 'question-1',
+      responseTime: const Duration(seconds: 3),
+      sessionId: 'session-1',
+      skillId: 'arithmetic.addition',
+    );
+    final next = LearningSession(
+      correctionOfEventId: 'event-1',
+      currentQuestionIndex: 0,
+      focusSkillId: 'arithmetic.addition',
+      id: 'session-1',
+      phase: LearningSessionPhase.correction,
+      seed: 91,
+      startedAt: DateTime.utc(2026, 8, 27, 8),
+    );
+
+    expect(await transition.commitLearningAttempt(event, next), isTrue);
+
+    final snapshot = await repository.loadSnapshot();
+    expect(snapshot.attempts.single.eventId, 'event-1');
+    expect(snapshot.session?.phase, LearningSessionPhase.correction);
+    expect(snapshot.session?.correctionOfEventId, 'event-1');
+  });
 
   test('rejects calibration metadata on assisted events', () async {
     final assisted = AttemptEvent(
@@ -206,7 +241,7 @@ void main() {
     expect(attempts.single.misconceptionId, isNull);
     expect(
       database.select('SELECT version FROM schema_version').single['version'],
-      7,
+      9,
     );
     await migrated.close();
   });
@@ -302,7 +337,7 @@ void main() {
       expect(session?.focusSkillId, 'arithmetic.addition');
       expect(
         database.select('SELECT version FROM schema_version').single['version'],
-        7,
+        9,
       );
       await migrated.close();
     },
@@ -330,6 +365,54 @@ void main() {
     );
     database.close();
   });
+
+  test(
+    'a failed microsecond migration restores schema version eight',
+    () async {
+      final migrationDatabase = sqlite3.openInMemory();
+      addTearDown(migrationDatabase.close);
+      final seeded = SqliteProgressRepository(migrationDatabase);
+      await seeded.recordAttempt(
+        AttemptEvent(
+          answer: '4',
+          eventId: 'legacy-precision',
+          isCorrect: true,
+          occurredAt: DateTime.utc(2026, 9, 26),
+          questionId: 'question-1',
+          responseTime: const Duration(milliseconds: 500),
+          sessionId: 'session-1',
+          skillId: 'arithmetic.addition',
+        ),
+      );
+      migrationDatabase
+        ..execute('UPDATE schema_version SET version = 8')
+        ..execute('ALTER TABLE attempt_events DROP COLUMN response_us')
+        ..execute('''
+        CREATE TRIGGER interrupt_precision_migration
+        BEFORE UPDATE ON attempt_events
+        BEGIN
+          SELECT RAISE(ABORT, 'simulated precision migration failure');
+        END
+      ''');
+
+      expect(
+        () => SqliteProgressRepository(migrationDatabase),
+        throwsA(isA<SqliteException>()),
+      );
+      expect(
+        migrationDatabase
+            .select('SELECT version FROM schema_version')
+            .single['version'],
+        8,
+      );
+      expect(
+        migrationDatabase
+            .select('PRAGMA table_info(attempt_events)')
+            .map((row) => row['name']),
+        isNot(contains('response_us')),
+      );
+    },
+  );
 }
 
 Database _schemaFourDatabase() => sqlite3.openInMemory()

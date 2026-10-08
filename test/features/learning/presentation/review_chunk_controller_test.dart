@@ -81,6 +81,33 @@ void main() {
     expect(restored.answerDraft, '12');
     expect(restored.currentQuestion?.id, questionId);
   });
+
+  test('a successful review retest preserves its review focus', () async {
+    final repository = InMemoryProgressRepository();
+    await repository.recordAttempt(_success('addition', learnedAt));
+    var nextId = 0;
+    final controller = LearningController(
+      contentPack: foundationPackForTest(),
+      repository: repository,
+      clock: () => reviewAt,
+      idFactory: () => 'event-${nextId++}',
+    );
+    await controller.initialise();
+    await controller.startReviewChunk();
+    final reviewQuestion = controller.currentQuestion!;
+
+    controller.updateDraft((reviewQuestion.answer + 1).toString());
+    await controller.submitAnswer();
+    controller.updateDraft(reviewQuestion.answer.toString());
+    await controller.submitAnswer();
+    final retestQuestion = controller.currentQuestion!;
+    controller.updateDraft(retestQuestion.answer.toString());
+    await controller.submitAnswer();
+
+    final saved = await repository.loadSession();
+    expect(saved?.phase.name, 'review');
+    expect(saved?.focusSkillId, 'arithmetic.addition');
+  });
 }
 
 AttemptEvent _success(
