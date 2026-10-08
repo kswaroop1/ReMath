@@ -78,6 +78,9 @@ jobs:
           verify_red 8b31697250b144402bc95480ecaec9d4ad1ec2ee \
             test/features/learning/domain/content_pack_catalogue_test.dart \
             "CP-011 catalogue states are not implemented"
+          verify_red 9fa292874867eb04db053025df1a196d1dfc954d \
+            test/features/learning/application/content_pack_installer_test.dart \
+            "CP-006 transactional installation is not implemented"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
