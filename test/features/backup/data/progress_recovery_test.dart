@@ -414,6 +414,39 @@ void main() {
       }
     });
 
+    test('a failed correction preserves its resumable session', () async {
+      for (final fixture in _fixtures()) {
+        final repository = fixture.repository;
+        addTearDown(fixture.close);
+        final session = _session('session-1').copyWith(
+          correctionOfEventId: 'failed-answer',
+          phase: LearningSessionPhase.correction,
+        );
+
+        final result = await repository.mergeProgress(
+          attempts: [
+            _attempt(
+              'failed-answer',
+              isCorrect: false,
+              questionId: 'question-3',
+            ),
+            _attempt(
+              'failed-correction',
+              isCorrect: false,
+              kind: AttemptKind.correction,
+              questionId: 'question-3',
+              relatedEventId: 'failed-answer',
+            ),
+          ],
+          studyState: null,
+          session: session,
+        );
+
+        expect(result.importedSession, isTrue);
+        expect((await repository.loadSession())?.id, session.id);
+      }
+    });
+
     test('learn snapshots cannot lag behind merged hint levels', () async {
       for (final fixture in _fixtures()) {
         final repository = fixture.repository;
