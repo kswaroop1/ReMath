@@ -1,0 +1,14 @@
+pull_request: 23
+title: Add content-pack lifecycle
+human_owner: kswaroop1
+assistant: OpenAI Codex
+scope:
+  - content-pack distribution manifests
+  - offline catalogue and storage forecast
+  - transactional install, retention, and rollback
+  - tests and documentation
+excluded:
+  - network catalogues and OAuth
+  - signing credentials and publisher trust operations
+  - releases and VERSION changes
+
