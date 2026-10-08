@@ -23,63 +23,72 @@ void main() {
   );
   const archiveBytes = [1, 2, 3, 4];
 
-  test('stages and verifies a complete pack before atomic activation', () async {
-    final events = <String>[];
-    final store = _MemoryInstallStore(
-      activeVersions: {release.packId: '1.0.0'},
-      events: events,
-    );
-    final installer = ContentPackInstaller(
-      store: store,
-      verifier: _RecordingVerifier(events),
-    );
+  test(
+    'stages and verifies a complete pack before atomic activation',
+    () async {
+      final events = <String>[];
+      final store = _MemoryInstallStore(
+        activeVersions: {release.packId: '1.0.0'},
+        events: events,
+      );
+      final installer = ContentPackInstaller(
+        store: store,
+        verifier: _RecordingVerifier(events),
+      );
 
-    final outcome = await installer.install(release, archiveBytes);
+      final outcome = await installer.install(release, archiveBytes);
 
-    expect(outcome, ContentPackInstallOutcome.activated);
-    expect(events, ['stage', 'verify', 'activate']);
-    expect(await store.activeVersion(release.packId), release.version);
-    expect(store.hasStagedRelease, isFalse);
-  });
+      expect(outcome, ContentPackInstallOutcome.activated);
+      expect(events, ['stage', 'verify', 'activate']);
+      expect(await store.activeVersion(release.packId), release.version);
+      expect(store.hasStagedRelease, isFalse);
+    },
+  );
 
-  test('verification failure discards staging and preserves active pack', () async {
-    final events = <String>[];
-    final store = _MemoryInstallStore(
-      activeVersions: {release.packId: '1.0.0'},
-      events: events,
-    );
-    final installer = ContentPackInstaller(
-      store: store,
-      verifier: _RecordingVerifier(events, shouldFail: true),
-    );
+  test(
+    'verification failure discards staging and preserves active pack',
+    () async {
+      final events = <String>[];
+      final store = _MemoryInstallStore(
+        activeVersions: {release.packId: '1.0.0'},
+        events: events,
+      );
+      final installer = ContentPackInstaller(
+        store: store,
+        verifier: _RecordingVerifier(events, shouldFail: true),
+      );
 
-    await expectLater(
-      installer.install(release, archiveBytes),
-      throwsA(isA<StateError>()),
-    );
+      await expectLater(
+        installer.install(release, archiveBytes),
+        throwsA(isA<StateError>()),
+      );
 
-    expect(events, ['stage', 'verify', 'discard']);
-    expect(await store.activeVersion(release.packId), '1.0.0');
-    expect(store.hasStagedRelease, isFalse);
-  });
+      expect(events, ['stage', 'verify', 'discard']);
+      expect(await store.activeVersion(release.packId), '1.0.0');
+      expect(store.hasStagedRelease, isFalse);
+    },
+  );
 
-  test('installing the active version is idempotent and performs no writes', () async {
-    final events = <String>[];
-    final store = _MemoryInstallStore(
-      activeVersions: {release.packId: release.version},
-      events: events,
-    );
-    final installer = ContentPackInstaller(
-      store: store,
-      verifier: _RecordingVerifier(events),
-    );
+  test(
+    'installing the active version is idempotent and performs no writes',
+    () async {
+      final events = <String>[];
+      final store = _MemoryInstallStore(
+        activeVersions: {release.packId: release.version},
+        events: events,
+      );
+      final installer = ContentPackInstaller(
+        store: store,
+        verifier: _RecordingVerifier(events),
+      );
 
-    final outcome = await installer.install(release, archiveBytes);
+      final outcome = await installer.install(release, archiveBytes);
 
-    expect(outcome, ContentPackInstallOutcome.alreadyActive);
-    expect(events, isEmpty);
-    expect(store.hasStagedRelease, isFalse);
-  });
+      expect(outcome, ContentPackInstallOutcome.alreadyActive);
+      expect(events, isEmpty);
+      expect(store.hasStagedRelease, isFalse);
+    },
+  );
 }
 
 final class _MemoryInstallStore implements ContentPackInstallStore {
@@ -127,7 +136,10 @@ final class _RecordingVerifier implements ContentPackPayloadVerifier {
   final bool shouldFail;
 
   @override
-  Future<void> verify(ContentPackRelease release, List<int> archiveBytes) async {
+  Future<void> verify(
+    ContentPackRelease release,
+    List<int> archiveBytes,
+  ) async {
     events.add('verify');
     if (shouldFail) {
       throw StateError('The staged archive failed verification.');
