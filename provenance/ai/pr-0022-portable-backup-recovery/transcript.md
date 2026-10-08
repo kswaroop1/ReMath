@@ -1144,3 +1144,11 @@ assertions. The run also identified canonical formatting changes in the two
 repository helpers and the new regression. The following checkpoint applies
 that formatting, removes the temporary evidence-only workflow step, and
 restores the standard consolidated CI gate.
+
+Replacement CI 37718693633 passes all 422 native tests and secret scanning,
+confirming the session-aligned positive fixture and both repository behaviours.
+Only canonical formatting remains; the locally approximated layout differs
+from Dart 3.13 in three touched files. A temporary diagnostic formatting gate
+now applies the formatter and prints its exact patch. The subsequent checkpoint
+will apply that output and restore the normal non-mutating gate before the
+authoritative full run.
