@@ -37,11 +37,33 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
+      - name: Verify focused content lifecycle red evidence
+        run: |
+          set -euo pipefail
+          worktree="$(mktemp -d)"
+          log="$(mktemp)"
+          git worktree add --detach "$worktree" \
+            d806655da5cbf69b2dd3dfec4a19d91c8809ab96
+          if (
+            cd "$worktree"
+            flutter pub get >/dev/null
+            flutter test -r expanded \
+              test/features/learning/data/content_pack_release_validator_test.dart
+          ) >"$log" 2>&1; then
+            cat "$log"
+            echo "Expected CP-004 validation contract to fail." >&2
+            exit 1
+          fi
+          cat "$log"
+          grep -F "CP-004 release validation is not implemented" "$log"
+          git worktree remove --force "$worktree"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
