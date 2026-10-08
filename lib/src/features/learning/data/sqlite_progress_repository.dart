@@ -404,16 +404,13 @@ final class SqliteProgressRepository
         _insertAttempt(attempt);
       }
       final localStudyState = _loadStudyStateSync();
-      final mergedEventIds = _loadAttemptsSync().map(
-        (attempt) => attempt.eventId,
-      );
       final localStudyStateAdvanced = _activeStudyStateAdvanced(
         localStudyState,
-        mergedEventIds,
+        mergedAttempts,
       );
       final importStudyState =
           studyState != null &&
-          _canImportStudyState(studyState, mergedEventIds) &&
+          _canImportStudyState(studyState, mergedAttempts) &&
           (!_hasActiveStudyState(localStudyState) || localStudyStateAdvanced);
       if (importStudyState) {
         _writeStudyState(studyState);
@@ -653,32 +650,47 @@ bool _hasActiveStudyState(String? source) {
   }
 }
 
-bool _activeStudyStateAdvanced(String? source, Iterable<String> eventIds) {
+bool _activeStudyStateAdvanced(
+  String? source,
+  Iterable<AttemptEvent> attempts,
+) {
   if (source == null) return false;
   try {
     final state = StudyState.decode(source);
-    return state.plan != null && _hasStudyEventAtOrAfter(state, eventIds);
+    return state.plan != null && _hasStudyEventAtOrAfter(state, attempts);
   } on Object {
     return false;
   }
 }
 
-bool _hasStudyEventAtOrAfter(StudyState state, Iterable<String> eventIds) =>
-    _studyEventSerials(state, eventIds).any((serial) => serial >= state.serial);
+bool _hasStudyEventAtOrAfter(
+  StudyState state,
+  Iterable<AttemptEvent> attempts,
+) => _studyEventSerials(
+  state,
+  attempts,
+).any((serial) => serial >= state.serial);
 
-Set<int> _studyEventSerials(StudyState state, Iterable<String> eventIds) {
+Set<int> _studyEventSerials(
+  StudyState state,
+  Iterable<AttemptEvent> attempts,
+) {
   final prefix = '${state.sessionId}.';
   return {
-    for (final eventId in eventIds)
-      if (eventId.startsWith(prefix))
-        int.tryParse(eventId.substring(prefix.length)),
+    for (final attempt in attempts)
+      if (attempt.sessionId == state.sessionId &&
+          attempt.eventId.startsWith(prefix))
+        int.tryParse(attempt.eventId.substring(prefix.length)),
   }.whereType<int>().toSet();
 }
 
-bool _canImportStudyState(String source, Iterable<String> eventIds) {
+bool _canImportStudyState(
+  String source,
+  Iterable<AttemptEvent> attempts,
+) {
   try {
     final state = StudyState.decode(source);
-    final serials = _studyEventSerials(state, eventIds);
+    final serials = _studyEventSerials(state, attempts);
     return state.plan != null &&
         !serials.any((serial) => serial >= state.serial) &&
         Iterable<int>.generate(state.serial).every(serials.contains);
