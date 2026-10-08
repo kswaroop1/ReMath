@@ -1107,3 +1107,10 @@ formatting changes remained in the three touched files. Diagnostic commit
 Diagnostic CI 37692814653 again passes all 421 tests and provides the complete
 three-file patch. The following correction applies that output exactly and
 restores the normal non-mutating formatting gate before replacement full CI.
+
+Replacement CI 37702653286 verifies `0a283bd` with every gate green, including
+all 421 native tests, Chrome browser contracts, coverage enforcement, static
+analysis, content validation, dependency-lock verification, formatting, and
+secret scanning. The three review threads were answered with their exact
+test/implementation pairs and this full-CI evidence before requesting the next
+independent review.
