@@ -603,6 +603,7 @@ final class SqliteProgressRepository
 bool _advancesSavedSession(LearningSession session, AttemptEvent attempt) {
   if (session.phase == LearningSessionPhase.correction) {
     return attempt.kind == AttemptKind.correction &&
+        attempt.isCorrect &&
         attempt.relatedEventId == session.correctionOfEventId;
   }
   if (session.phase == LearningSessionPhase.learn) {
