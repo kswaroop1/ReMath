@@ -13,3 +13,12 @@ to the activation boundary, but publisher onboarding, trust-root distribution,
 key rotation/revocation, network catalogues, OAuth, delta updates, release work,
 credentials, and `VERSION` changes remain excluded. This contract is committed
 before the first test-only commit as required by `AGENTS.md`.
+
+## 2026-10-08 — CP-002 distribution manifest red
+
+The first behaviour test describes the complete offline install decision:
+identity/version, learner-facing catalogue metadata, compatibility, sizes,
+digest, publisher key identity, signature, dependencies, and objectives. The
+test-first commit contains only the public immutable data shape and a parser
+that deliberately throws `UnimplementedError`; parsing behaviour is absent so
+the focused test is expected to fail until its paired green commit.
