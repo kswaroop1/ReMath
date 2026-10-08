@@ -81,6 +81,9 @@ jobs:
           verify_red 9fa292874867eb04db053025df1a196d1dfc954d \
             test/features/learning/application/content_pack_installer_test.dart \
             "CP-006 transactional installation is not implemented"
+          verify_red 32758dd3b6fefbd5bd2433f70b239080099de424 \
+            test/features/learning/data/content_pack_archive_verifier_test.dart \
+            "CP-006 archive verification is not implemented"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
