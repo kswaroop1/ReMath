@@ -75,6 +75,9 @@ jobs:
           verify_red b5ef673128d48e7af4c2c820febd9ee5e206bc28 \
             test/features/learning/domain/content_pack_storage_forecast_test.dart \
             "CP-010 storage forecast is not implemented"
+          verify_red 8b31697250b144402bc95480ecaec9d4ad1ec2ee \
+            test/features/learning/domain/content_pack_catalogue_test.dart \
+            "CP-011 catalogue states are not implemented"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
