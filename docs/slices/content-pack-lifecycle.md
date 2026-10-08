@@ -1,6 +1,6 @@
 # Content-pack lifecycle slice
 
-PR #23 turns the existing bundled-pack parser and validator into a safe local
+PR #24 turns the existing bundled-pack parser and validator into a safe local
 content-pack lifecycle. It remains offline-first and provider-neutral: packs may
 arrive through a local file or a later catalogue adapter, but activation never
 depends on a network service.
@@ -52,7 +52,7 @@ depends on a network service.
 
 - Network catalogues, provider OAuth, background downloads, and cloud sync.
 - Publisher onboarding, trust-root distribution, key rotation or revocation,
-  transparency logs, and broader operational-security policy (PR #24).
+  transparency logs, and broader operational-security policy (PR #25).
 - Delta updates, pack authoring UI, new curriculum, release publication,
   signing credentials, and any `VERSION` change.
 
