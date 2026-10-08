@@ -1204,3 +1204,8 @@ verification, and secret scanning. Review threads 4214132356, 4214132360, and
 4214132363 were answered with the final records-head evidence, exact test/fix
 pairs, focused red failures, scope correction, and this authoritative green
 run. This records-only checkpoint precedes the final independent re-review.
+
+Records-head CI 37724534553 verifies `c3ac65e` with every gate green. This
+final chronological entry closes the records-head evidence requested by review
+5450836412; no production or test behaviour changes follow it. The final
+independent re-review is requested against this completed record.
