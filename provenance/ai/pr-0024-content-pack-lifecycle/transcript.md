@@ -32,3 +32,9 @@ with `UnimplementedError: Content-pack release parsing is not implemented`, as
 intended; the existing 424 tests passed and the secret scan passed. The same run
 also reported canonical-formatting changes in the new parser and test, which are
 applied with the paired implementation rather than weakening the format gate.
+
+Green-head CI `37799444308` passed all 425 tests and the secret scan; only the
+two new files differed from Dart 3.13 canonical formatting. Because the local
+Flutter/Dart runtime is unavailable, a temporary least-privilege diagnostic
+workflow prints that exact two-file formatter patch. It will be removed in the
+same correction that applies the output.
