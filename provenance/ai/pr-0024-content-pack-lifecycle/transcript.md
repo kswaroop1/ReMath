@@ -48,3 +48,10 @@ later quality gate.
 Diagnostic run `37800073565` printed the exact Dart 3.13 patch. The two source
 files now match it byte-for-byte, the temporary workflow is absent, and the
 ordinary non-mutating format gate is restored for replacement full CI.
+
+Replacement full CI `37800365348` passed the committed application structure,
+dependency lock, canonical formatting, fatal warnings/infos analysis, bundled
+content validation, 8 Chrome contracts, 425 native tests, the 90% coverage gate
+at 97.15% line coverage, and secret scanning on head `8bbb7c3`. CP-002's first
+manifest-reading behaviour is therefore green; invalid-manifest validation and
+the remaining lifecycle behaviours stay deliberately incomplete.
