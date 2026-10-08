@@ -44,3 +44,7 @@ on the base branch. The unused diagnostic file was therefore removed, and the
 existing CI format step was temporarily changed to format then fail on `git
 diff`, which prints the same bounded patch without changing permissions or any
 later quality gate.
+
+Diagnostic run `37800073565` printed the exact Dart 3.13 patch. The two source
+files now match it byte-for-byte, the temporary workflow is absent, and the
+ordinary non-mutating format gate is restored for replacement full CI.

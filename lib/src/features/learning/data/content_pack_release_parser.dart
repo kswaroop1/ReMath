@@ -8,7 +8,9 @@ final class ContentPackReleaseParser {
   ContentPackRelease parse(String source) {
     final decoded = jsonDecode(source);
     if (decoded is! Map<String, Object?>) {
-      throw const FormatException('Content-pack release root must be an object.');
+      throw const FormatException(
+        'Content-pack release root must be an object.',
+      );
     }
 
     return ContentPackRelease(
@@ -46,10 +48,7 @@ final class ContentPackReleaseParser {
     return value;
   }
 
-  List<Map<String, Object?>> _objects(
-    Map<String, Object?> map,
-    String key,
-  ) {
+  List<Map<String, Object?>> _objects(Map<String, Object?> map, String key) {
     final value = map[key];
     if (value is! List<Object?> ||
         value.any((item) => item is! Map<String, Object?>)) {

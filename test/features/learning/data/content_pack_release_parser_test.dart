@@ -49,9 +49,9 @@ void main() {
       'org.remath.arithmetic.foundation',
     );
     expect(release.dependencies.single.minimumVersion, '1.4.0');
-    expect(
-      release.objectives,
-      ['Collect like terms', 'Solve linear equations'],
-    );
+    expect(release.objectives, [
+      'Collect like terms',
+      'Solve linear equations',
+    ]);
   });
 }
