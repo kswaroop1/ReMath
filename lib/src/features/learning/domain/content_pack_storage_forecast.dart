@@ -25,6 +25,24 @@ final class ContentPackStoragePlanner {
     ContentPackRelease release, {
     required int availableBytes,
   }) {
-    throw UnimplementedError('CP-010 storage forecast is not implemented.');
+    if (availableBytes < 0) {
+      throw ArgumentError.value(
+        availableBytes,
+        'availableBytes',
+        'Available storage cannot be negative.',
+      );
+    }
+    final additionalRequiredBytes =
+        release.compressedSizeBytes + release.installedSizeBytes;
+    final shortfallBytes = additionalRequiredBytes > availableBytes
+        ? additionalRequiredBytes - availableBytes
+        : 0;
+    return ContentPackStorageForecast(
+      additionalRequiredBytes: additionalRequiredBytes,
+      availableBytes: availableBytes,
+      compressedSizeBytes: release.compressedSizeBytes,
+      installedSizeBytes: release.installedSizeBytes,
+      shortfallBytes: shortfallBytes,
+    );
   }
 }
