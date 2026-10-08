@@ -41,9 +41,7 @@ void main() {
 
   test('verifies length, digest, and publisher signature', () async {
     final signatures = _RecordingSignatureVerifier();
-    final verifier = ContentPackArchiveVerifier(
-      signatureVerifier: signatures,
-    );
+    final verifier = ContentPackArchiveVerifier(signatureVerifier: signatures);
 
     await verifier.verify(_release(), archiveBytes);
 
@@ -53,24 +51,25 @@ void main() {
     expect(signatures.signature, [1, 2, 3]);
   });
 
-  test('rejects payload length mismatch before signature verification', () async {
-    final signatures = _RecordingSignatureVerifier();
-    final verifier = ContentPackArchiveVerifier(
-      signatureVerifier: signatures,
-    );
+  test(
+    'rejects payload length mismatch before signature verification',
+    () async {
+      final signatures = _RecordingSignatureVerifier();
+      final verifier = ContentPackArchiveVerifier(
+        signatureVerifier: signatures,
+      );
 
-    await expectLater(
-      verifier.verify(_release(compressedSizeBytes: 5), archiveBytes),
-      throwsA(_verificationFailure('archive length')),
-    );
-    expect(signatures.calls, 0);
-  });
+      await expectLater(
+        verifier.verify(_release(compressedSizeBytes: 5), archiveBytes),
+        throwsA(_verificationFailure('archive length')),
+      );
+      expect(signatures.calls, 0);
+    },
+  );
 
   test('rejects digest mismatch before signature verification', () async {
     final signatures = _RecordingSignatureVerifier();
-    final verifier = ContentPackArchiveVerifier(
-      signatureVerifier: signatures,
-    );
+    final verifier = ContentPackArchiveVerifier(signatureVerifier: signatures);
 
     await expectLater(
       verifier.verify(
@@ -87,9 +86,7 @@ void main() {
 
   test('rejects malformed or untrusted publisher signatures', () async {
     final signatures = _RecordingSignatureVerifier(isTrusted: false);
-    final verifier = ContentPackArchiveVerifier(
-      signatureVerifier: signatures,
-    );
+    final verifier = ContentPackArchiveVerifier(signatureVerifier: signatures);
 
     await expectLater(
       verifier.verify(_release(), archiveBytes),
@@ -102,12 +99,17 @@ void main() {
   });
 }
 
-Matcher _verificationFailure(String messageFragment) => isA<ContentPackVerificationException>()
-    .having((error) => error.message, 'message', contains(messageFragment));
+Matcher _verificationFailure(String messageFragment) =>
+    isA<ContentPackVerificationException>().having(
+      (error) => error.message,
+      'message',
+      contains(messageFragment),
+    );
 
 ContentPackRelease _release({
   int compressedSizeBytes = 4,
-  String sha256 = '9f64a747e1b97f131fabb6b447296c9b6f0201e79fb3c5356e6c77e89b6a806a',
+  String sha256 =
+      '9f64a747e1b97f131fabb6b447296c9b6f0201e79fb3c5356e6c77e89b6a806a',
   String signature = 'AQID',
 }) => ContentPackRelease(
   compressedSizeBytes: compressedSizeBytes,
@@ -128,7 +130,8 @@ ContentPackRelease _release({
   version: '2.0.0',
 );
 
-final class _RecordingSignatureVerifier implements ContentPackSignatureVerifier {
+final class _RecordingSignatureVerifier
+    implements ContentPackSignatureVerifier {
   _RecordingSignatureVerifier({this.isTrusted = true});
 
   final bool isTrusted;
