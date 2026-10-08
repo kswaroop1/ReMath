@@ -165,7 +165,8 @@ final class BackupCoordinator {
             );
           }
         }
-        if (decoded.plan != null &&
+        if ((decoded.hintCount > 0 ||
+                decoded.phase == StudyPhase.question) &&
             !_hasCurrentStudyHintEvidence(decoded, availableAttempts.values)) {
           throw const FormatException(
             'Active study hints require immutable evidence',
