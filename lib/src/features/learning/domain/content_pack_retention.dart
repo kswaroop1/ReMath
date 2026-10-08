@@ -28,11 +28,39 @@ final class ContentPackRetentionPolicy {
   const ContentPackRetentionPolicy();
 
   ContentPackRetentionTransition pin(ContentPackRetentionState state) {
-    throw UnimplementedError('CP-008 retention controls are not implemented.');
+    final installedVersion = state.installedVersion;
+    if (installedVersion == null) {
+      throw StateError('Cannot pin a content pack that is not installed.');
+    }
+    if (state.pinnedVersion == installedVersion) {
+      return ContentPackRetentionTransition(
+        outcome: ContentPackRetentionOutcome.unchanged,
+        state: state,
+      );
+    }
+    return ContentPackRetentionTransition(
+      outcome: ContentPackRetentionOutcome.changed,
+      state: ContentPackRetentionState(
+        installedVersion: installedVersion,
+        pinnedVersion: installedVersion,
+      ),
+    );
   }
 
   ContentPackRetentionTransition unpin(ContentPackRetentionState state) {
-    throw UnimplementedError('CP-008 retention controls are not implemented.');
+    if (state.pinnedVersion == null) {
+      return ContentPackRetentionTransition(
+        outcome: ContentPackRetentionOutcome.unchanged,
+        state: state,
+      );
+    }
+    return ContentPackRetentionTransition(
+      outcome: ContentPackRetentionOutcome.changed,
+      state: ContentPackRetentionState(
+        installedVersion: state.installedVersion,
+        pinnedVersion: null,
+      ),
+    );
   }
 
   ContentPackRetentionTransition update(
@@ -40,10 +68,51 @@ final class ContentPackRetentionPolicy {
     required String requestedVersion,
     bool isExplicitVersionChoice = false,
   }) {
-    throw UnimplementedError('CP-008 retention controls are not implemented.');
+    if (requestedVersion.isEmpty) {
+      throw ArgumentError.value(
+        requestedVersion,
+        'requestedVersion',
+        'A content pack version is required.',
+      );
+    }
+    if (state.installedVersion == requestedVersion) {
+      return ContentPackRetentionTransition(
+        outcome: ContentPackRetentionOutcome.unchanged,
+        state: state,
+      );
+    }
+    final pinnedVersion = state.pinnedVersion;
+    if (pinnedVersion != null && !isExplicitVersionChoice) {
+      return ContentPackRetentionTransition(
+        outcome: ContentPackRetentionOutcome.blockedPinned,
+        state: state,
+      );
+    }
+    return ContentPackRetentionTransition(
+      outcome: ContentPackRetentionOutcome.changed,
+      state: ContentPackRetentionState(
+        installedVersion: requestedVersion,
+        pinnedVersion: pinnedVersion == null ? null : requestedVersion,
+      ),
+    );
   }
 
   ContentPackRetentionTransition remove(ContentPackRetentionState state) {
-    throw UnimplementedError('CP-008 retention controls are not implemented.');
+    if (state.installedVersion == null) {
+      return ContentPackRetentionTransition(
+        outcome: ContentPackRetentionOutcome.unchanged,
+        state: state,
+      );
+    }
+    if (state.pinnedVersion != null) {
+      return ContentPackRetentionTransition(
+        outcome: ContentPackRetentionOutcome.blockedPinned,
+        state: state,
+      );
+    }
+    return const ContentPackRetentionTransition(
+      outcome: ContentPackRetentionOutcome.changed,
+      state: ContentPackRetentionState.absent(),
+    );
   }
 }
