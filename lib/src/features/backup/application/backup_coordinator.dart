@@ -165,8 +165,7 @@ final class BackupCoordinator {
             );
           }
         }
-        if ((decoded.hintCount > 0 ||
-                decoded.phase == StudyPhase.question) &&
+        if ((decoded.hintCount > 0 || decoded.phase == StudyPhase.question) &&
             !_hasCurrentStudyHintEvidence(decoded, availableAttempts.values)) {
           throw const FormatException(
             'Active study hints require immutable evidence',
@@ -344,9 +343,9 @@ bool _hasCurrentStudyHintEvidence(
   };
   return representedHints.length == state.hintCount &&
       Iterable<int>.generate(
-    state.hintCount,
-    (index) => index + 1,
-  ).every((level) => representedHints.contains('hint-$level'));
+        state.hintCount,
+        (index) => index + 1,
+      ).every((level) => representedHints.contains('hint-$level'));
 }
 
 bool _hasStudyOriginHintEvidence(

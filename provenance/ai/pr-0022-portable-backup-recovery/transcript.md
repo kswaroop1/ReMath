@@ -1191,3 +1191,8 @@ snapshots while preserving the existing positive-count validation in other
 phases. The run also requested canonical formatting in the coordinator; a
 temporary diagnostic formatting gate now prints the exact patch before one
 replacement full run.
+
+Diagnostic CI 37723967999 passes all 424 native tests and secret scanning and
+prints the complete remaining coordinator formatter patch. The following
+checkpoint applies that output exactly and restores the standard non-mutating
+formatting gate before replacement full CI.
