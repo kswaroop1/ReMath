@@ -84,6 +84,9 @@ jobs:
           verify_red 32758dd3b6fefbd5bd2433f70b239080099de424 \
             test/features/learning/data/content_pack_archive_verifier_test.dart \
             "CP-006 archive verification is not implemented"
+          verify_red 250305284e6ceb9a7a4917b5db70becf9893e99d \
+            test/features/learning/domain/content_pack_retention_test.dart \
+            "CP-008 retention controls are not implemented"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
