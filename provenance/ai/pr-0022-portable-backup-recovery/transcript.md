@@ -1196,3 +1196,11 @@ Diagnostic CI 37723967999 passes all 424 native tests and secret scanning and
 prints the complete remaining coordinator formatter patch. The following
 checkpoint applies that output exactly and restores the standard non-mutating
 formatting gate before replacement full CI.
+
+Replacement CI 37724182779 verifies behavioural head `0b24178` with every gate
+green, including all 424 native tests, Chrome contracts, coverage enforcement,
+formatting, fatal static analysis, content validation, dependency-lock
+verification, and secret scanning. Review threads 4214132356, 4214132360, and
+4214132363 were answered with the final records-head evidence, exact test/fix
+pairs, focused red failures, scope correction, and this authoritative green
+run. This records-only checkpoint precedes the final independent re-review.
