@@ -20,7 +20,10 @@ void main() {
         "publisherKeyId": "org.remath.publisher.primary",
         "signature": "c2lnbmF0dXJl",
         "dependencies": [
-          {"packId": "org.remath.arithmetic.foundation", "minimumVersion": "1.4.0"}
+          {
+            "packId": "org.remath.arithmetic.foundation",
+            "minimumVersion": "1.4.0"
+          }
         ],
         "objectives": ["Collect like terms", "Solve linear equations"]
       }

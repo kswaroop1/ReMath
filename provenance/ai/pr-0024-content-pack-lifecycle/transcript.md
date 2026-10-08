@@ -26,3 +26,9 @@ digest, publisher key identity, signature, dependencies, and objectives. The
 test-first commit contains only the public immutable data shape and a parser
 that deliberately throws `UnimplementedError`; parsing behaviour is absent so
 the focused test is expected to fail until its paired green commit.
+
+CI run `37799001302` executed the red head `4ec7905`. The focused test failed
+with `UnimplementedError: Content-pack release parsing is not implemented`, as
+intended; the existing 424 tests passed and the secret scan passed. The same run
+also reported canonical-formatting changes in the new parser and test, which are
+applied with the paired implementation rather than weakening the format gate.
