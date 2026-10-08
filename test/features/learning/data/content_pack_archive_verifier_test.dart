@@ -61,7 +61,7 @@ void main() {
 
     await expectLater(
       verifier.verify(_release(compressedSizeBytes: 5), archiveBytes),
-      _verificationFailure('archive length'),
+      throwsA(_verificationFailure('archive length')),
     );
     expect(signatures.calls, 0);
   });
@@ -80,7 +80,7 @@ void main() {
         ),
         archiveBytes,
       ),
-      _verificationFailure('SHA-256'),
+      throwsA(_verificationFailure('SHA-256')),
     );
     expect(signatures.calls, 0);
   });
@@ -93,11 +93,11 @@ void main() {
 
     await expectLater(
       verifier.verify(_release(), archiveBytes),
-      _verificationFailure('publisher signature'),
+      throwsA(_verificationFailure('publisher signature')),
     );
     await expectLater(
       verifier.verify(_release(signature: '%%%'), archiveBytes),
-      _verificationFailure('publisher signature'),
+      throwsA(_verificationFailure('publisher signature')),
     );
   });
 }
