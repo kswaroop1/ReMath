@@ -145,6 +145,44 @@ void main() {
       },
     );
 
+    test('preview rejects Study snapshots behind recorded hints', () async {
+      final state = StudyState(
+        plan: StudyPlan(
+          steps: const [
+            StudyStep(StudyStepKind.practice, 'arithmetic.addition', 1),
+          ],
+          reason: 'Focused practice',
+        ),
+        serial: 1,
+        sessionId: 'study-session',
+      );
+      final encrypted = await cipher.encrypt(
+        plaintext: BackupPayload(
+          attempts: [
+            _attempt(
+              'study-session.0',
+              answer: 'hint-1',
+              kind: AttemptKind.hint,
+              questionId: _questionIdForState(state),
+              sessionId: state.sessionId,
+            ),
+          ],
+          createdAt: DateTime.utc(2026, 9, 20, 12),
+          studyState: state.encode(),
+        ).encode(),
+        password: password,
+      );
+
+      await expectLater(
+        BackupCoordinator(
+          cipher: cipher,
+          clock: DateTime.now,
+          repository: InMemoryProgressRepository(),
+        ).preview(encrypted, password: password),
+        throwsFormatException,
+      );
+    });
+
     test('cannot apply a preview containing immutable conflicts', () async {
       final source = InMemoryProgressRepository();
       await source.recordAttempt(_attempt('conflict'));
