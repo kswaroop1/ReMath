@@ -1165,3 +1165,17 @@ coverage, the coverage floor, and secret scanning. Review threads 4213433629
 and 4213433637 were answered with the exact four executed-red failures, the
 `bf2ef13` / `7807327` test-first pair, and this authoritative green run. This
 records-only checkpoint now precedes the final independent re-review request.
+
+Records-head CI 37719550826 verifies `d2694dd` with every gate green. Final
+independent review 5450836412 identified two further recovery boundaries: an
+incorrect correction is persisted without advancing a resumable correction
+session, and an active Study snapshot must not understate immutable hints for
+its current question. It also required this final records-head run to be added
+to the chronological provenance.
+
+Published pairs `a804425` / `bbb8b47` and `4d5d529` / `5472c8b` preserve
+test-first ordering for those behaviours. Because Flutter remains unavailable
+locally, a temporary CI-only evidence step checks out each exact test-only
+commit and requires its focused regression to fail before running the normal
+head suite. The following run will provide the executed-red results and one
+consolidated full verification for the bounded review set.
