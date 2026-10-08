@@ -1157,3 +1157,11 @@ Diagnostic CI 37718927072 again passes all 422 native tests and prints the
 complete remaining two-file formatter patch. The next checkpoint applies that
 output exactly and restores the standard non-mutating formatting gate for the
 replacement full CI run.
+
+Replacement CI 37719228069 verifies behavioural head `1a9a505` with every gate
+green: project structure, dependency lock, formatting, fatal static analysis,
+content validation, Chrome browser contracts, all 422 native tests with
+coverage, the coverage floor, and secret scanning. Review threads 4213433629
+and 4213433637 were answered with the exact four executed-red failures, the
+`bf2ef13` / `7807327` test-first pair, and this authoritative green run. This
+records-only checkpoint now precedes the final independent re-review request.
