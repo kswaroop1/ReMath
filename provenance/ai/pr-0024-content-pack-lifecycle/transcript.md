@@ -38,3 +38,9 @@ two new files differed from Dart 3.13 canonical formatting. Because the local
 Flutter/Dart runtime is unavailable, a temporary least-privilege diagnostic
 workflow prints that exact two-file formatter patch. It will be removed in the
 same correction that applies the output.
+
+GitHub does not start a newly introduced pull-request workflow until it exists
+on the base branch. The unused diagnostic file was therefore removed, and the
+existing CI format step was temporarily changed to format then fail on `git
+diff`, which prints the same bounded patch without changing permissions or any
+later quality gate.
