@@ -223,7 +223,9 @@ void main() {
           final repository = fixture.repository;
           addTearDown(fixture.close);
           await repository.saveStudyState(const StudyState().encode());
-          await repository.recordAttempt(_attempt('recovered-study.0'));
+          await repository.recordAttempt(
+            _attempt('recovered-study.0', sessionId: 'recovered-study'),
+          );
 
           final result = await repository.mergeProgress(
             attempts: const [],
