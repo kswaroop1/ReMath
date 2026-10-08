@@ -47,23 +47,34 @@ jobs:
       - name: Verify focused content lifecycle red evidence
         run: |
           set -euo pipefail
-          worktree="$(mktemp -d)"
-          log="$(mktemp)"
-          git worktree add --detach "$worktree" \
-            d806655da5cbf69b2dd3dfec4a19d91c8809ab96
-          if (
-            cd "$worktree"
-            flutter pub get >/dev/null
-            flutter test -r expanded \
-              test/features/learning/data/content_pack_release_validator_test.dart
-          ) >"$log" 2>&1; then
+          verify_red() {
+            local sha="$1"
+            local file="$2"
+            local expected="$3"
+            local worktree
+            local log
+            worktree="$(mktemp -d)"
+            log="$(mktemp)"
+            git worktree add --detach "$worktree" "$sha"
+            if (
+              cd "$worktree"
+              flutter pub get >/dev/null
+              flutter test -r expanded "$file"
+            ) >"$log" 2>&1; then
+              cat "$log"
+              echo "Expected focused content lifecycle test to fail." >&2
+              exit 1
+            fi
             cat "$log"
-            echo "Expected CP-004 validation contract to fail." >&2
-            exit 1
-          fi
-          cat "$log"
-          grep -F "CP-004 release validation is not implemented" "$log"
-          git worktree remove --force "$worktree"
+            grep -F "$expected" "$log"
+            git worktree remove --force "$worktree"
+          }
+          verify_red d806655da5cbf69b2dd3dfec4a19d91c8809ab96 \
+            test/features/learning/data/content_pack_release_validator_test.dart \
+            "CP-004 release validation is not implemented"
+          verify_red b5ef673128d48e7af4c2c820febd9ee5e206bc28 \
+            test/features/learning/domain/content_pack_storage_forecast_test.dart \
+            "CP-010 storage forecast is not implemented"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
