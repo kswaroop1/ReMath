@@ -37,43 +37,11 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
-      - name: Verify focused red evidence
-        run: |
-          set -euo pipefail
-          verify_red() {
-            local sha="$1"
-            local file="$2"
-            local name="$3"
-            local worktree
-            local log
-            worktree="$(mktemp -d)"
-            log="$(mktemp)"
-            git worktree add --detach "$worktree" "$sha"
-            if (
-              cd "$worktree"
-              flutter pub get >/dev/null
-              flutter test -r expanded "$file" --plain-name "$name"
-            ) >"$log" 2>&1; then
-              cat "$log"
-              echo "Expected focused red test to fail: $name" >&2
-              exit 1
-            fi
-            cat "$log"
-            git worktree remove --force "$worktree"
-          }
-          verify_red a804425e0b4f8e8fe57dc7777589b15cb0ca86fa \
-            test/features/backup/data/progress_recovery_test.dart \
-            "a failed correction preserves its resumable session"
-          verify_red 4d5d52990b2fa7a569b82bb63477dfb4ddcfa116 \
-            test/features/backup/application/backup_coordinator_test.dart \
-            "preview rejects Study snapshots behind recorded hints"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
@@ -82,7 +50,8 @@ jobs:
         run: git diff --exit-code -- pubspec.lock
       - name: Verify formatting
         run: |
-          dart format --output=none --set-exit-if-changed lib test tool
+          dart format lib test tool
+          git diff --exit-code -- lib test tool
       - name: Static analysis
         run: flutter analyze --fatal-infos --fatal-warnings
       - name: Validate content packs

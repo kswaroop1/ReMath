@@ -1179,3 +1179,15 @@ locally, a temporary CI-only evidence step checks out each exact test-only
 commit and requires its focused regression to fail before running the normal
 head suite. The following run will provide the executed-red results and one
 consolidated full verification for the bounded review set.
+
+CI 37723651799 executes both test-only commits and observes the intended red
+results: the failed-correction session was discarded (`Expected: true`,
+`Actual: false`), and the stale Study hint snapshot preview completed instead
+of throwing `FormatException`. The final head then exposed two existing
+positive remediation fixtures, where a correction-phase state legitimately
+retains origin-hint evidence while its current correction question has no
+revealed hints. Commit `28da1f7` scopes the new comparison to question-phase
+snapshots while preserving the existing positive-count validation in other
+phases. The run also requested canonical formatting in the coordinator; a
+temporary diagnostic formatting gate now prints the exact patch before one
+replacement full run.
