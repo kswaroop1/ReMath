@@ -16,9 +16,11 @@ final class ContentPackRemover {
   Future<ContentPackRetentionTransition> remove(
     String packId,
     ContentPackRetentionState state,
-  ) {
-    throw UnimplementedError(
-      'CP-012 progress-preserving removal is not implemented.',
-    );
+  ) async {
+    final transition = retentionPolicy.remove(state);
+    if (transition.outcome == ContentPackRetentionOutcome.changed) {
+      await availabilityStore.removeActive(packId);
+    }
+    return transition;
   }
 }
