@@ -14,7 +14,10 @@ void main() {
     expect(pinned.outcome, ContentPackRetentionOutcome.changed);
     expect(pinned.state.installedVersion, '1.0.0');
     expect(pinned.state.pinnedVersion, '1.0.0');
-    expect(policy.pin(pinned.state).outcome, ContentPackRetentionOutcome.unchanged);
+    expect(
+      policy.pin(pinned.state).outcome,
+      ContentPackRetentionOutcome.unchanged,
+    );
 
     final unpinned = policy.unpin(pinned.state);
     expect(unpinned.outcome, ContentPackRetentionOutcome.changed);
@@ -36,10 +39,7 @@ void main() {
       pinnedVersion: '1.0.0',
     );
 
-    final transition = policy.update(
-      pinned,
-      requestedVersion: '2.0.0',
-    );
+    final transition = policy.update(pinned, requestedVersion: '2.0.0');
 
     expect(transition.outcome, ContentPackRetentionOutcome.blockedPinned);
     expect(transition.state.installedVersion, '1.0.0');
