@@ -36,7 +36,33 @@ final class ContentPackRollbackCoordinator {
   Future<ContentPackRuntimeResult> verifyFirstLoad(
     String packId,
     String version,
-  ) {
-    throw UnimplementedError('CP-013 runtime rollback is not implemented.');
+  ) async {
+    final activeVersion = await store.activeVersion(packId);
+    if (activeVersion != version) {
+      return ContentPackRuntimeResult(
+        activeVersion: activeVersion,
+        outcome: ContentPackRuntimeOutcome.alreadyRecovered,
+      );
+    }
+
+    try {
+      await loader.load(packId, version);
+      return ContentPackRuntimeResult(
+        activeVersion: version,
+        outcome: ContentPackRuntimeOutcome.ready,
+      );
+    } on Object {
+      final previousVersion = await store.retainedPreviousVersion(packId);
+      await store.restorePrevious(packId);
+      await store.recordFailure(
+        packId,
+        'Content pack $packId version $version failed its first load. '
+        'Restored verified version $previousVersion.',
+      );
+      return ContentPackRuntimeResult(
+        activeVersion: previousVersion,
+        outcome: ContentPackRuntimeOutcome.rolledBack,
+      );
+    }
   }
 }
