@@ -87,6 +87,9 @@ jobs:
           verify_red 250305284e6ceb9a7a4917b5db70becf9893e99d \
             test/features/learning/domain/content_pack_retention_test.dart \
             "CP-008 retention controls are not implemented"
+          verify_red ffe48d11008f765a01179d09431b29c5bcfaaf31 \
+            test/features/learning/application/content_pack_remover_test.dart \
+            "CP-012 progress-preserving removal is not implemented"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
