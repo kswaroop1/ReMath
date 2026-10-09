@@ -31,41 +31,47 @@ void main() {
     expect(retained.single.hasSameImmutableContentAs(original), isTrue);
   });
 
-  test('blocked and duplicate removals perform no availability writes', () async {
-    final availability = _MemoryAvailabilityStore();
-    final remover = ContentPackRemover(availabilityStore: availability);
+  test(
+    'blocked and duplicate removals perform no availability writes',
+    () async {
+      final availability = _MemoryAvailabilityStore();
+      final remover = ContentPackRemover(availabilityStore: availability);
 
-    final blocked = await remover.remove(
-      packId,
-      const ContentPackRetentionState(
-        installedVersion: '1.0.0',
-        pinnedVersion: '1.0.0',
-      ),
-    );
-    final duplicate = await remover.remove(
-      packId,
-      const ContentPackRetentionState.absent(),
-    );
+      final blocked = await remover.remove(
+        packId,
+        const ContentPackRetentionState(
+          installedVersion: '1.0.0',
+          pinnedVersion: '1.0.0',
+        ),
+      );
+      final duplicate = await remover.remove(
+        packId,
+        const ContentPackRetentionState.absent(),
+      );
 
-    expect(blocked.outcome, ContentPackRetentionOutcome.blockedPinned);
-    expect(duplicate.outcome, ContentPackRetentionOutcome.unchanged);
-    expect(availability.removedPackIds, isEmpty);
-  });
+      expect(blocked.outcome, ContentPackRetentionOutcome.blockedPinned);
+      expect(duplicate.outcome, ContentPackRetentionOutcome.unchanged);
+      expect(availability.removedPackIds, isEmpty);
+    },
+  );
 
-  test('failed removal leaves stable-ID progress available for retry', () async {
-    final progress = InMemoryProgressRepository();
-    final original = _attempt();
-    await progress.recordAttempt(original);
-    final remover = ContentPackRemover(
-      availabilityStore: _MemoryAvailabilityStore(shouldFail: true),
-    );
+  test(
+    'failed removal leaves stable-ID progress available for retry',
+    () async {
+      final progress = InMemoryProgressRepository();
+      final original = _attempt();
+      await progress.recordAttempt(original);
+      final remover = ContentPackRemover(
+        availabilityStore: _MemoryAvailabilityStore(shouldFail: true),
+      );
 
-    await expectLater(remover.remove(packId, installed), throwsStateError);
+      await expectLater(remover.remove(packId, installed), throwsStateError);
 
-    final retained = await progress.loadAttempts();
-    expect(retained, hasLength(1));
-    expect(retained.single.hasSameImmutableContentAs(original), isTrue);
-  });
+      final retained = await progress.loadAttempts();
+      expect(retained, hasLength(1));
+      expect(retained.single.hasSameImmutableContentAs(original), isTrue);
+    },
+  );
 }
 
 AttemptEvent _attempt() => AttemptEvent(
