@@ -90,6 +90,9 @@ jobs:
           verify_red ffe48d11008f765a01179d09431b29c5bcfaaf31 \
             test/features/learning/application/content_pack_remover_test.dart \
             "CP-012 progress-preserving removal is not implemented"
+          verify_red 18dcc73d9b5883270c274c5802a4acc350217383 \
+            test/features/learning/application/content_pack_rollback_test.dart \
+            "CP-013 runtime rollback is not implemented"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
