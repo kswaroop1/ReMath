@@ -103,10 +103,7 @@ final class _ControlledLoader implements ContentPackRuntimeLoader {
 }
 
 final class _MemoryRollbackStore implements ContentPackRollbackStore {
-  _MemoryRollbackStore({
-    this.active = '2.0.0',
-    this.failRestoreOnce = false,
-  });
+  _MemoryRollbackStore({this.active = '2.0.0', this.failRestoreOnce = false});
 
   String? active;
   bool failRestoreOnce;
