@@ -56,3 +56,16 @@ depends on a network service.
 - Delta updates, pack authoring UI, new curriculum, release publication,
   signing credentials, and any `VERSION` change.
 
+## Delivery evidence
+
+The bounded lifecycle behaviours are implemented as provider-neutral domain,
+application, and data contracts. Each behaviour has a test-first red commit, a
+paired green implementation, and permanent CI replay of the intended red
+failure. CI run `37872340857` verifies the final behavioural head with canonical
+formatting, fatal static analysis, bundled-content validation, eight Chrome
+contracts, all 450 native tests, 97.11% line coverage, and secret scanning.
+
+CP-005 remains deliberately partial: archive length, SHA-256, and signature
+verification are complete, while publisher trust-root lifecycle operations stay
+assigned to PR #25 as specified above.
+
