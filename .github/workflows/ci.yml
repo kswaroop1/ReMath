@@ -37,11 +37,62 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
+      - name: Verify focused content lifecycle red evidence
+        run: |
+          set -euo pipefail
+          verify_red() {
+            local sha="$1"
+            local file="$2"
+            local expected="$3"
+            local worktree
+            local log
+            worktree="$(mktemp -d)"
+            log="$(mktemp)"
+            git worktree add --detach "$worktree" "$sha"
+            if (
+              cd "$worktree"
+              flutter pub get >/dev/null
+              flutter test -r expanded "$file"
+            ) >"$log" 2>&1; then
+              cat "$log"
+              echo "Expected focused content lifecycle test to fail." >&2
+              exit 1
+            fi
+            cat "$log"
+            grep -F "$expected" "$log"
+            git worktree remove --force "$worktree"
+          }
+          verify_red d806655da5cbf69b2dd3dfec4a19d91c8809ab96 \
+            test/features/learning/data/content_pack_release_validator_test.dart \
+            "CP-004 release validation is not implemented"
+          verify_red b5ef673128d48e7af4c2c820febd9ee5e206bc28 \
+            test/features/learning/domain/content_pack_storage_forecast_test.dart \
+            "CP-010 storage forecast is not implemented"
+          verify_red 8b31697250b144402bc95480ecaec9d4ad1ec2ee \
+            test/features/learning/domain/content_pack_catalogue_test.dart \
+            "CP-011 catalogue states are not implemented"
+          verify_red 9fa292874867eb04db053025df1a196d1dfc954d \
+            test/features/learning/application/content_pack_installer_test.dart \
+            "CP-006 transactional installation is not implemented"
+          verify_red 32758dd3b6fefbd5bd2433f70b239080099de424 \
+            test/features/learning/data/content_pack_archive_verifier_test.dart \
+            "CP-006 archive verification is not implemented"
+          verify_red 250305284e6ceb9a7a4917b5db70becf9893e99d \
+            test/features/learning/domain/content_pack_retention_test.dart \
+            "CP-008 retention controls are not implemented"
+          verify_red ffe48d11008f765a01179d09431b29c5bcfaaf31 \
+            test/features/learning/application/content_pack_remover_test.dart \
+            "CP-012 progress-preserving removal is not implemented"
+          verify_red 18dcc73d9b5883270c274c5802a4acc350217383 \
+            test/features/learning/application/content_pack_rollback_test.dart \
+            "CP-013 runtime rollback is not implemented"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies

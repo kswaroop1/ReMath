@@ -17,7 +17,7 @@ This is the authoritative, numbered product and content backlog for ReMath.
 - Feature IDs are permanent. Retired features remain recorded rather than being
   renumbered.
 
-Last reviewed: 19 September 2026 (PR21 review corrections after PR20).
+Last reviewed: 9 October 2026 (PR24 content-pack lifecycle reconciliation).
 
 ## 1. Product foundations
 
@@ -314,31 +314,38 @@ Last reviewed: 19 September 2026 (PR21 review corrections after PR20).
   deterministic templates, concept cards, hint ladders, prerequisites, goals,
   and licence metadata. Algebra currently uses compiled application contracts;
   moving its starting set into the pack platform remains planned.
-- [ ] **CP-002 — Pack manifest parser.** **Foundation delivered:** schemas v1-v3,
-  stable IDs, semantic pack versions, licences, skills, templates, concept cards,
-  prerequisites, and goals are parsed locally. App compatibility, sizes, pack
-  dependencies, digests, and signatures remain planned.
+- [x] **CP-002 — Pack manifest parser.** Schemas v1-v3 and distribution manifests
+  are parsed locally, including stable identity, compatibility, size, dependency,
+  digest, publisher-key, signature, catalogue, and objective metadata.
 - [ ] **CP-003 — Pack compiler.** Convert human-editable source into validated
   distribution form.
-- [ ] **CP-004 — Pack validator.** **Foundation delivered:** schema range, IDs,
-  versions, licences, required collections, template bounds, graph cycles, and
-  cross-references are rejected before use. Equation, asset, full generator,
-  source/licence provenance, and distribution validation remain planned.
-- [ ] **CP-005 — Signed releases.** Verify publisher signature and SHA-256 before
-  activation.
-- [ ] **CP-006 — Transactional installation.** Activate only after complete
-  validation and retain previous working version.
+- [x] **CP-004 — Pack validator.** Bundled and distribution validation reject
+  unsupported schemas, malformed identity/version/licence metadata, invalid
+  bounds and references, incoherent dependencies, unsafe sizes, and malformed
+  integrity metadata before use. Equation, asset, full-generator, and source
+  provenance checks remain future content-authoring work.
+- [ ] **CP-005 — Signed releases.** **Verification foundation delivered:** archive
+  length, SHA-256, and a publisher signature supplied to a provider-neutral trust
+  boundary are checked before activation. Publisher onboarding, trust-root
+  distribution, rotation, and revocation remain PR #25 work.
+- [x] **CP-006 — Transactional installation.** Complete archives are staged,
+  verified, and atomically activated; failures discard staging and preserve the
+  previous active version, and duplicate installation is idempotent.
 - [ ] **CP-007 — Selective download.** Install only chosen subjects.
-- [ ] **CP-008 — Offline retention controls.** Pin, update, or safely remove packs.
+- [x] **CP-008 — Offline retention controls.** Pin, unpin, explicitly update, and
+  safely remove packs without silently replacing pinned content.
 - [ ] **CP-009 — Delta updates.** Avoid downloading unchanged large assets.
-- [ ] **CP-010 — Storage forecast.** Display download and installed sizes before
-  installation.
-- [ ] **CP-011 — Pack catalogue.** Browse level, prerequisites, objectives, status,
-  and installed version.
-- [ ] **CP-012 — Stable-ID progress retention.** Removing a pack never deletes
-  personal history.
-- [ ] **CP-013 — Pack rollback.** Restore previous version after validation or
-  runtime failure.
+- [x] **CP-010 — Storage forecast.** Compressed, installed, reclaimable, and
+  additional required bytes are calculated before installation.
+- [x] **CP-011 — Pack catalogue.** Offline entries expose prerequisites,
+  objectives, compatibility and failure details, installed version, update
+  availability, and available/installed/pinned/incompatible/failed state.
+- [x] **CP-012 — Stable-ID progress retention.** Removal changes curriculum
+  availability only; personal history is held behind a separate repository
+  boundary and interruption-safe retries do not delete it.
+- [x] **CP-013 — Pack rollback.** A failed first runtime load restores the retained
+  verified version, records a payload-safe local status, and supports safe retry
+  after interrupted restoration.
 - [ ] **CP-014 — Authoring preview.** Render lessons and questions before release.
 - [ ] **CP-015 — Content CI.** **Foundation delivered:** CI parses and validates
   the bundled pack, including schema, identifiers, references, HTTPS link shape,
