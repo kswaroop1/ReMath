@@ -106,13 +106,12 @@ final class _MemoryRollbackStore implements ContentPackRollbackStore {
   _MemoryRollbackStore({
     this.active = '2.0.0',
     this.failRestoreOnce = false,
-    this.previous = '1.0.0',
   });
 
   String? active;
   bool failRestoreOnce;
   final List<String> failureMessages = [];
-  final String previous;
+  final String previous = '1.0.0';
   int restoreCount = 0;
 
   @override
