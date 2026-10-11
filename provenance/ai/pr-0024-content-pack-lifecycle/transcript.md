@@ -166,3 +166,18 @@ lock, canonical formatting, fatal static analysis, bundled-content validation,
 eight Chrome contracts, all 450 native tests, the coverage floor at 97.11%, and
 secret scanning. The feature register and slice are reconciled in the following
 records-only checkpoint before explicit independent review.
+
+## 2026-10-09 — Register reconciliation and records-head verification
+
+Records-only commit `64c5d7f` marks the completed CP-002, CP-004, CP-006,
+CP-008, CP-010, CP-011, CP-012, and CP-013 contracts in the authoritative
+feature register, preserves CP-005 as a deliberately partial verification
+foundation pending PR #25 trust operations, adds the slice delivery evidence,
+and brings this chronological record through the final behavioural corrections.
+
+Records-head CI `37872829581` passes every repository gate: permanent focused
+red replay, committed project structure, dependency-lock verification,
+canonical formatting, fatal static analysis, bundled-content validation, eight
+Chrome contracts, all 450 native tests, 97.11% line coverage, and secret
+scanning. This final records update precedes the explicit independent review
+request; it contains no production or test behaviour change.
