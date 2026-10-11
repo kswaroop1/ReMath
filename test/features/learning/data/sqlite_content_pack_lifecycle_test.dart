@@ -6,7 +6,6 @@ import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/application/content_pack_installer.dart';
 import 'package:remath/src/features/learning/application/content_pack_remover.dart';
-import 'package:remath/src/features/learning/application/content_pack_rollback.dart';
 import 'package:remath/src/features/learning/data/content_pack_archive_verifier.dart';
 import 'package:remath/src/features/learning/data/content_pack_install_guard.dart';
 import 'package:remath/src/features/learning/data/content_pack_install_store.dart';

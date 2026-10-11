@@ -676,7 +676,7 @@ final class SqliteContentPackInstallationBackend
     }
     if (current != null) {
       final previousSealId = current['previous_seal_id'] as String?;
-      _database..execute('DELETE FROM content_pack_active WHERE pack_id = ?', [
+      _database.execute('DELETE FROM content_pack_active WHERE pack_id = ?', [
         packId,
       ]);
       _deleteObject(current['seal_id'] as String);
