@@ -72,6 +72,52 @@ void main() {
       expect(retained.single.hasSameImmutableContentAs(original), isTrue);
     },
   );
+
+  test('atomic removal refuses a pack pinned after the decision', () async {
+    final availability = _MemoryAvailabilityStore(
+      commitOutcome: ContentPackRemovalCommitOutcome.blockedPinned,
+      currentState: const ContentPackRetentionState(
+        installedVersion: '1.0.0',
+        pinnedVersion: '1.0.0',
+      ),
+    );
+    final remover = ContentPackRemover(availabilityStore: availability);
+
+    final transition = await remover.remove(packId, installed);
+
+    expect(transition.outcome, ContentPackRetentionOutcome.blockedPinned);
+    expect(transition.state.pinnedVersion, '1.0.0');
+  });
+
+  test('atomic removal refuses active dependants', () async {
+    final availability = _MemoryAvailabilityStore(
+      commitOutcome: ContentPackRemovalCommitOutcome.blockedDependent,
+      currentState: installed,
+    );
+    final remover = ContentPackRemover(availabilityStore: availability);
+
+    final transition = await remover.remove(packId, installed);
+
+    expect(transition.outcome, ContentPackRetentionOutcome.blockedDependent);
+    expect(transition.state, same(installed));
+  });
+
+  test('atomic removal refuses stale installed state', () async {
+    const newer = ContentPackRetentionState(
+      installedVersion: '2.0.0',
+      pinnedVersion: null,
+    );
+    final availability = _MemoryAvailabilityStore(
+      commitOutcome: ContentPackRemovalCommitOutcome.staleState,
+      currentState: newer,
+    );
+    final remover = ContentPackRemover(availabilityStore: availability);
+
+    final transition = await remover.remove(packId, installed);
+
+    expect(transition.outcome, ContentPackRetentionOutcome.staleState);
+    expect(transition.state, same(newer));
+  });
 }
 
 AttemptEvent _attempt() => AttemptEvent(
@@ -86,14 +132,29 @@ AttemptEvent _attempt() => AttemptEvent(
 );
 
 final class _MemoryAvailabilityStore implements ContentPackAvailabilityStore {
-  _MemoryAvailabilityStore({this.shouldFail = false});
+  _MemoryAvailabilityStore({
+    this.commitOutcome = ContentPackRemovalCommitOutcome.removed,
+    this.currentState = const ContentPackRetentionState.absent(),
+    this.shouldFail = false,
+  });
 
+  final ContentPackRemovalCommitOutcome commitOutcome;
+  final ContentPackRetentionState currentState;
   final List<String> removedPackIds = [];
   final bool shouldFail;
 
   @override
-  Future<void> removeActive(String packId) async {
+  Future<ContentPackRemovalCommit> removeActiveIfAllowed({
+    required ContentPackRetentionState expectedState,
+    required String packId,
+  }) async {
     if (shouldFail) throw StateError('Removal was interrupted.');
-    removedPackIds.add(packId);
+    if (commitOutcome == ContentPackRemovalCommitOutcome.removed) {
+      removedPackIds.add(packId);
+    }
+    return ContentPackRemovalCommit(
+      outcome: commitOutcome,
+      state: currentState,
+    );
   }
 }

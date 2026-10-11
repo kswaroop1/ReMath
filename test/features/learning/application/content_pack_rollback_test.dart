@@ -111,6 +111,21 @@ void main() {
     expect(store.active, '3.0.0');
     expect(store.failureMessages, isEmpty);
   });
+
+  test('successful load only reports ready after atomic confirmation', () async {
+    final store = _MemoryRollbackStore(moveBeforeConfirm: '3.0.0');
+    final coordinator = ContentPackRollbackCoordinator(
+      loader: _ControlledLoader(),
+      store: store,
+    );
+
+    final result = await coordinator.verifyFirstLoad(packId, version);
+
+    expect(result.outcome, ContentPackRuntimeOutcome.alreadyRecovered);
+    expect(result.activeVersion, '3.0.0');
+    expect(store.confirmCount, 1);
+    expect(store.readyVersions, isEmpty);
+  });
 }
 
 final class _ControlledLoader implements ContentPackRuntimeLoader {
@@ -132,19 +147,45 @@ final class _MemoryRollbackStore implements ContentPackRollbackStore {
   _MemoryRollbackStore({
     this.active = '2.0.0',
     this.failRollbackOnce = false,
+    this.moveBeforeConfirm,
     this.moveBeforeRollback,
     this.previous = '1.0.0',
   });
 
   String? active;
   bool failRollbackOnce;
+  final String? moveBeforeConfirm;
   final String? moveBeforeRollback;
   final List<String> failureMessages = [];
   final String? previous;
   int rollbackCount = 0;
+  int confirmCount = 0;
+  final List<String> readyVersions = [];
 
   @override
   Future<String?> activeVersion(String packId) async => active;
+
+  @override
+  Future<ContentPackRuntimeConfirmation> confirmFirstLoad({
+    required String expectedVersion,
+    required String packId,
+  }) async {
+    confirmCount++;
+    if (moveBeforeConfirm != null) {
+      active = moveBeforeConfirm;
+    }
+    if (active != expectedVersion) {
+      return ContentPackRuntimeConfirmation(
+        activeVersion: active,
+        confirmed: false,
+      );
+    }
+    readyVersions.add(expectedVersion);
+    return ContentPackRuntimeConfirmation(
+      activeVersion: active,
+      confirmed: true,
+    );
+  }
 
   @override
   Future<ContentPackRollbackTransition> rollbackFailedActivation({
