@@ -1,0 +1,590 @@
+import 'dart:typed_data';
+
+import 'package:sqlite3/common.dart';
+
+import '../application/content_pack_installer.dart';
+import '../application/content_pack_remover.dart';
+import '../application/content_pack_rollback.dart';
+import '../domain/content_pack_release.dart';
+import '../domain/content_pack_retention.dart';
+import 'content_pack_install_store.dart';
+
+typedef ContentPackIdGenerator = String Function();
+
+/// Durable native content-pack lifecycle storage.
+///
+/// Reservations, sealed bytes, dependency snapshots, active pointers, pin
+/// state, and first-load generation state share one SQLite transaction domain.
+final class SqliteContentPackInstallationBackend
+    implements
+        ContentPackInstallationBackend,
+        ContentPackRollbackStore,
+        ContentPackAvailabilityStore {
+  SqliteContentPackInstallationBackend({
+    required Future<int> Function() availableBytes,
+    Future<void> Function()? beforeCleanupDelete,
+    required CommonDatabase database,
+    required ContentPackIdGenerator idGenerator,
+  }) : _availableBytes = availableBytes,
+       _beforeCleanupDelete = beforeCleanupDelete,
+       _database = database,
+       _idGenerator = idGenerator {
+    _migrate();
+  }
+
+  final Future<int> Function() _availableBytes;
+  final Future<void> Function()? _beforeCleanupDelete;
+  final CommonDatabase _database;
+  final ContentPackIdGenerator _idGenerator;
+
+  void _migrate() {
+    _database
+      ..execute('PRAGMA foreign_keys = ON')
+      ..execute('''
+        CREATE TABLE IF NOT EXISTS content_pack_objects (
+          seal_id TEXT NOT NULL PRIMARY KEY,
+          pack_id TEXT NOT NULL,
+          version TEXT NOT NULL,
+          required_bytes INTEGER NOT NULL CHECK (required_bytes >= 0),
+          content BLOB NOT NULL,
+          length_bytes INTEGER,
+          sha256 TEXT,
+          state TEXT NOT NULL CHECK (
+            state IN ('staging', 'sealed', 'active', 'retained', 'cleanup')
+          )
+        ) STRICT
+      ''')
+      ..execute('''
+        CREATE TABLE IF NOT EXISTS content_pack_active (
+          pack_id TEXT NOT NULL PRIMARY KEY,
+          version TEXT NOT NULL,
+          seal_id TEXT NOT NULL,
+          pinned_version TEXT,
+          previous_version TEXT,
+          previous_seal_id TEXT,
+          previous_pinned_version TEXT,
+          activation_id TEXT NOT NULL,
+          awaiting_first_load INTEGER NOT NULL
+            CHECK (awaiting_first_load IN (0, 1))
+        ) STRICT
+      ''')
+      ..execute('''
+        CREATE TABLE IF NOT EXISTS content_pack_dependencies (
+          pack_id TEXT NOT NULL,
+          version TEXT NOT NULL,
+          dependency_pack_id TEXT NOT NULL,
+          minimum_version TEXT NOT NULL,
+          PRIMARY KEY (pack_id, version, dependency_pack_id)
+        ) STRICT
+      ''')
+      ..execute('''
+        CREATE TABLE IF NOT EXISTS content_pack_failures (
+          failure_id TEXT NOT NULL PRIMARY KEY,
+          pack_id TEXT NOT NULL,
+          message TEXT NOT NULL
+        ) STRICT
+      ''');
+  }
+
+  @override
+  Future<String?> activeVersion(String packId) async {
+    final rows = _database.select(
+      'SELECT version FROM content_pack_active WHERE pack_id = ?',
+      [packId],
+    );
+    return rows.isEmpty ? null : rows.single['version'] as String;
+  }
+
+  @override
+  Future<ContentPackStagingSink> reserve({
+    required String packId,
+    required int requiredBytes,
+    required String version,
+  }) async {
+    final available = await _availableBytes();
+    final sealId = _idGenerator();
+    _transaction(() {
+      final reserved =
+          _database.select('''
+            SELECT COALESCE(SUM(required_bytes), 0) AS total
+            FROM content_pack_objects
+            WHERE state IN ('staging', 'sealed', 'cleanup')
+          ''').single['total']
+              as int;
+      if (requiredBytes > available - reserved) {
+        throw const ContentPackStagingException(
+          'Insufficient capacity after active reservations.',
+        );
+      }
+      _database.execute('''
+        INSERT INTO content_pack_objects (
+          seal_id, pack_id, version, required_bytes, content, state
+        ) VALUES (?, ?, ?, ?, ?, 'staging')
+      ''', [sealId, packId, version, requiredBytes, Uint8List(0)]);
+    });
+    return _SqliteContentPackStagingSink(
+      backend: this,
+      requiredBytes: requiredBytes,
+      sealId: sealId,
+    );
+  }
+
+  void _append(String sealId, List<int> chunk) {
+    _transaction(() {
+      final row = _object(sealId, expectedState: 'staging');
+      final bytes = row['content'] as Uint8List;
+      _database.execute(
+        'UPDATE content_pack_objects SET content = ? WHERE seal_id = ?',
+        [Uint8List.fromList([...bytes, ...chunk]), sealId],
+      );
+    });
+  }
+
+  ContentPackSealedObject _seal(
+    String sealId, {
+    required int lengthBytes,
+    required int reservedBytes,
+    required String sha256,
+  }) => _transaction(() {
+    final row = _object(sealId, expectedState: 'staging');
+    final bytes = row['content'] as Uint8List;
+    if (bytes.length != lengthBytes) {
+      throw const ContentPackStagingException(
+        'The staged length changed before sealing.',
+      );
+    }
+    _database.execute('''
+      UPDATE content_pack_objects
+      SET length_bytes = ?, sha256 = ?, state = 'sealed'
+      WHERE seal_id = ?
+    ''', [lengthBytes, sha256, sealId]);
+    return _SqliteContentPackSealedObject(
+      backend: this,
+      reservedBytes: reservedBytes,
+      sealId: sealId,
+      sha256: sha256,
+    );
+  });
+
+  @override
+  Future<void> activateAtomically({
+    required bool isExplicitVersionChoice,
+    required ContentPackRelease release,
+    required ContentPackSealedObject sealed,
+  }) async {
+    final sqliteSealed = _ownedSealed(sealed);
+    _transaction(() {
+      final object = _object(sqliteSealed.sealId, expectedState: 'sealed');
+      if (object['pack_id'] != release.packId ||
+          object['version'] != release.version ||
+          object['sha256'] != sqliteSealed.sha256) {
+        throw const ContentPackStagingException(
+          'The sealed object no longer matches its verified release.',
+        );
+      }
+      for (final dependency in release.dependencies) {
+        final installed = _activeRow(dependency.packId);
+        if (installed == null ||
+            _compareVersions(
+                  installed['version'] as String,
+                  dependency.minimumVersion,
+                ) <
+                0) {
+          throw ContentPackStagingException(
+            'Dependency ${dependency.packId} changed before activation.',
+          );
+        }
+      }
+
+      final current = _activeRow(release.packId);
+      final transition = const ContentPackRetentionPolicy().update(
+        ContentPackRetentionState(
+          installedVersion: current?['version'] as String?,
+          pinnedVersion: current?['pinned_version'] as String?,
+        ),
+        requestedVersion: release.version,
+        isExplicitVersionChoice: isExplicitVersionChoice,
+      );
+      if (transition.outcome == ContentPackRetentionOutcome.blockedPinned ||
+          transition.outcome == ContentPackRetentionOutcome.blockedDowngrade) {
+        throw ContentPackActivationException(transition.outcome);
+      }
+
+      final activationId = _idGenerator();
+      _database.execute('''
+        INSERT INTO content_pack_active (
+          pack_id, version, seal_id, pinned_version,
+          previous_version, previous_seal_id, previous_pinned_version,
+          activation_id, awaiting_first_load
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
+        ON CONFLICT(pack_id) DO UPDATE SET
+          version = excluded.version,
+          seal_id = excluded.seal_id,
+          pinned_version = excluded.pinned_version,
+          previous_version = excluded.previous_version,
+          previous_seal_id = excluded.previous_seal_id,
+          previous_pinned_version = excluded.previous_pinned_version,
+          activation_id = excluded.activation_id,
+          awaiting_first_load = 1
+      ''', [
+        release.packId,
+        release.version,
+        sqliteSealed.sealId,
+        transition.state.pinnedVersion,
+        current?['version'],
+        current?['seal_id'],
+        current?['pinned_version'],
+        activationId,
+      ]);
+      if (current != null) {
+        _database.execute(
+          "UPDATE content_pack_objects SET state = 'retained' WHERE seal_id = ?",
+          [current['seal_id']],
+        );
+      }
+      _database.execute('''
+        UPDATE content_pack_objects
+        SET state = 'active', required_bytes = 0
+        WHERE seal_id = ?
+      ''', [sqliteSealed.sealId]);
+      _database.execute(
+        'DELETE FROM content_pack_dependencies WHERE pack_id = ? AND version = ?',
+        [release.packId, release.version],
+      );
+      for (final dependency in release.dependencies) {
+        _database.execute('''
+          INSERT INTO content_pack_dependencies (
+            pack_id, version, dependency_pack_id, minimum_version
+          ) VALUES (?, ?, ?, ?)
+        ''', [
+          release.packId,
+          release.version,
+          dependency.packId,
+          dependency.minimumVersion,
+        ]);
+      }
+    });
+  }
+
+  @override
+  Future<void> discard(ContentPackSealedObject sealed) async {
+    final sqliteSealed = _ownedSealed(sealed);
+    _transaction(() {
+      _database.execute(
+        "UPDATE content_pack_objects SET state = 'cleanup' WHERE seal_id = ? "
+        "AND state IN ('staging', 'sealed', 'cleanup')",
+        [sqliteSealed.sealId],
+      );
+    });
+    await _beforeCleanupDelete?.call();
+    _deletePendingCleanup(sealId: sqliteSealed.sealId);
+  }
+
+  @override
+  Future<void> retryPendingDiscards() async {
+    await _beforeCleanupDelete?.call();
+    _deletePendingCleanup();
+  }
+
+  Future<int> pendingCleanupCount() async =>
+      _database.select('''
+        SELECT COUNT(*) AS count FROM content_pack_objects
+        WHERE state = 'cleanup'
+      ''').single['count']
+          as int;
+
+  void _deletePendingCleanup({String? sealId}) {
+    _transaction(() {
+      if (sealId == null) {
+        _database.execute(
+          "DELETE FROM content_pack_objects WHERE state = 'cleanup'",
+        );
+      } else {
+        _database.execute(
+          "DELETE FROM content_pack_objects WHERE seal_id = ? AND state = 'cleanup'",
+          [sealId],
+        );
+      }
+    });
+  }
+
+  Stream<List<int>> _read(String sealId) {
+    final row = _object(sealId);
+    if (row['state'] == 'staging' || row['state'] == 'cleanup') {
+      throw const ContentPackStagingException(
+        'Only immutable staged content can be read.',
+      );
+    }
+    return Stream.value(List<int>.unmodifiable(row['content'] as Uint8List));
+  }
+
+  @override
+  Future<ContentPackRuntimeActivation> activation(String packId) async {
+    final row = _activeRow(packId);
+    if (row == null) {
+      return ContentPackRuntimeActivation(
+        activationId: 'absent:$packId',
+        activeVersion: null,
+        awaitingFirstLoad: false,
+      );
+    }
+    return ContentPackRuntimeActivation(
+      activationId: row['activation_id'] as String,
+      activeVersion: row['version'] as String,
+      awaitingFirstLoad: (row['awaiting_first_load'] as int) == 1,
+    );
+  }
+
+  @override
+  Future<ContentPackRuntimeConfirmation> confirmFirstLoad({
+    required String expectedActivationId,
+    required String packId,
+  }) async => _transaction(() {
+    _database.execute('''
+      UPDATE content_pack_active SET awaiting_first_load = 0
+      WHERE pack_id = ? AND activation_id = ? AND awaiting_first_load = 1
+    ''', [packId, expectedActivationId]);
+    final confirmed = _database.updatedRows == 1;
+    final current = _activeRow(packId);
+    return ContentPackRuntimeConfirmation(
+      activeVersion: current?['version'] as String?,
+      confirmed: confirmed,
+    );
+  });
+
+  @override
+  Future<ContentPackRollbackTransition> rollbackFailedActivation({
+    required String expectedActivationId,
+    required String message,
+    required String packId,
+  }) async => _transaction(() {
+    final current = _activeRow(packId);
+    if (current == null ||
+        current['activation_id'] != expectedActivationId ||
+        current['awaiting_first_load'] != 1) {
+      return ContentPackRollbackTransition(
+        activeVersion: current?['version'] as String?,
+        restored: false,
+      );
+    }
+    final previousVersion = current['previous_version'] as String?;
+    final currentSealId = current['seal_id'] as String;
+    if (previousVersion == null) {
+      _database.execute(
+        'DELETE FROM content_pack_active WHERE pack_id = ?',
+        [packId],
+      );
+    } else {
+      _database.execute('''
+        UPDATE content_pack_active SET
+          version = ?, seal_id = ?, pinned_version = ?,
+          previous_version = NULL, previous_seal_id = NULL,
+          previous_pinned_version = NULL, activation_id = ?,
+          awaiting_first_load = 0
+        WHERE pack_id = ?
+      ''', [
+        previousVersion,
+        current['previous_seal_id'],
+        current['previous_pinned_version'],
+        _idGenerator(),
+        packId,
+      ]);
+      _database.execute(
+        "UPDATE content_pack_objects SET state = 'active' WHERE seal_id = ?",
+        [current['previous_seal_id']],
+      );
+    }
+    _database.execute(
+      'DELETE FROM content_pack_objects WHERE seal_id = ?',
+      [currentSealId],
+    );
+    _database.execute('''
+      INSERT INTO content_pack_failures (failure_id, pack_id, message)
+      VALUES (?, ?, ?)
+    ''', [_idGenerator(), packId, message]);
+    return ContentPackRollbackTransition(
+      activeVersion: previousVersion,
+      restored: true,
+    );
+  });
+
+  Future<void> pinActive(String packId) async {
+    _transaction(() {
+      final current = _activeRow(packId);
+      if (current == null) {
+        throw StateError('Cannot pin an absent content pack.');
+      }
+      _database.execute('''
+        UPDATE content_pack_active SET pinned_version = version
+        WHERE pack_id = ?
+      ''', [packId]);
+    });
+  }
+
+  @override
+  Future<ContentPackRemovalCommit> removeActiveIfAllowed({
+    required ContentPackRetentionState expectedState,
+    required String packId,
+  }) async => _transaction(() {
+    final current = _activeRow(packId);
+    final currentState = ContentPackRetentionState(
+      installedVersion: current?['version'] as String?,
+      pinnedVersion: current?['pinned_version'] as String?,
+    );
+    if (currentState.installedVersion != expectedState.installedVersion ||
+        currentState.pinnedVersion != expectedState.pinnedVersion) {
+      return ContentPackRemovalCommit(
+        outcome: ContentPackRemovalCommitOutcome.staleState,
+        state: currentState,
+      );
+    }
+    if (currentState.pinnedVersion != null) {
+      return ContentPackRemovalCommit(
+        outcome: ContentPackRemovalCommitOutcome.blockedPinned,
+        state: currentState,
+      );
+    }
+    final dependants = _database.select('''
+      SELECT dependencies.pack_id
+      FROM content_pack_dependencies AS dependencies
+      INNER JOIN content_pack_active AS active
+        ON active.pack_id = dependencies.pack_id
+        AND active.version = dependencies.version
+      WHERE dependencies.dependency_pack_id = ?
+      LIMIT 1
+    ''', [packId]);
+    if (dependants.isNotEmpty) {
+      return ContentPackRemovalCommit(
+        outcome: ContentPackRemovalCommitOutcome.blockedDependent,
+        state: currentState,
+      );
+    }
+    if (current != null) {
+      _database
+        ..execute('DELETE FROM content_pack_active WHERE pack_id = ?', [packId])
+        ..execute('DELETE FROM content_pack_objects WHERE seal_id = ?', [
+          current['seal_id'],
+        ]);
+    }
+    return const ContentPackRemovalCommit(
+      outcome: ContentPackRemovalCommitOutcome.removed,
+      state: ContentPackRetentionState.absent(),
+    );
+  });
+
+  Row? _activeRow(String packId) {
+    final rows = _database.select(
+      'SELECT * FROM content_pack_active WHERE pack_id = ?',
+      [packId],
+    );
+    return rows.isEmpty ? null : rows.single;
+  }
+
+  Row _object(String sealId, {String? expectedState}) {
+    final rows = _database.select(
+      'SELECT * FROM content_pack_objects WHERE seal_id = ?',
+      [sealId],
+    );
+    if (rows.isEmpty ||
+        (expectedState != null && rows.single['state'] != expectedState)) {
+      throw const ContentPackStagingException(
+        'The staged object is missing or is in the wrong state.',
+      );
+    }
+    return rows.single;
+  }
+
+  _SqliteContentPackSealedObject _ownedSealed(
+    ContentPackSealedObject sealed,
+  ) {
+    if (sealed is! _SqliteContentPackSealedObject ||
+        !identical(sealed.backend, this)) {
+      throw const ContentPackStagingException(
+        'The sealed object belongs to another backend.',
+      );
+    }
+    return sealed;
+  }
+
+  T _transaction<T>(T Function() operation) {
+    _database.execute('BEGIN IMMEDIATE');
+    try {
+      final result = operation();
+      _database.execute('COMMIT');
+      return result;
+    } catch (_) {
+      _database.execute('ROLLBACK');
+      rethrow;
+    }
+  }
+
+  int _compareVersions(String left, String right) {
+    final leftParts = left.split('.').map(int.parse).toList(growable: false);
+    final rightParts = right.split('.').map(int.parse).toList(growable: false);
+    for (var index = 0; index < leftParts.length; index += 1) {
+      final comparison = leftParts[index].compareTo(rightParts[index]);
+      if (comparison != 0) return comparison;
+    }
+    return 0;
+  }
+}
+
+final class _SqliteContentPackStagingSink
+    implements ContentPackStagingSink {
+  const _SqliteContentPackStagingSink({
+    required this.backend,
+    required this.requiredBytes,
+    required this.sealId,
+  });
+
+  final SqliteContentPackInstallationBackend backend;
+  final int requiredBytes;
+  final String sealId;
+
+  @override
+  Future<void> abort() => backend.discard(
+    _SqliteContentPackSealedObject(
+      backend: backend,
+      reservedBytes: requiredBytes,
+      sealId: sealId,
+      sha256: '',
+    ),
+  );
+
+  @override
+  Future<void> add(List<int> chunk) async => backend._append(sealId, chunk);
+
+  @override
+  Future<ContentPackSealedObject> seal({
+    required int lengthBytes,
+    required String sha256,
+  }) async => backend._seal(
+    sealId,
+    lengthBytes: lengthBytes,
+    reservedBytes: requiredBytes,
+    sha256: sha256,
+  );
+}
+
+final class _SqliteContentPackSealedObject
+    implements ContentPackSealedObject {
+  const _SqliteContentPackSealedObject({
+    required this.backend,
+    required this.reservedBytes,
+    required this.sealId,
+    required this.sha256,
+  });
+
+  final SqliteContentPackInstallationBackend backend;
+
+  @override
+  final int reservedBytes;
+
+  @override
+  final String sealId;
+
+  final String sha256;
+
+  @override
+  Stream<List<int>> openRead() => backend._read(sealId);
+}
