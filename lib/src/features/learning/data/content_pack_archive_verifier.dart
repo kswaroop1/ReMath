@@ -66,7 +66,7 @@ final class ContentPackArchiveVerifier implements ContentPackPayloadVerifier {
     }
     final isTrusted = await signatureVerifier.verify(
       publisherKeyId: release.publisherKeyId,
-      signedPayload: digest.bytes,
+      signedPayload: _signedReleasePayload(release),
       signature: signature,
     );
     if (!isTrusted) {
@@ -74,5 +74,40 @@ final class ContentPackArchiveVerifier implements ContentPackPayloadVerifier {
         'The publisher signature is not trusted.',
       );
     }
+  }
+
+  List<int> _signedReleasePayload(ContentPackRelease release) {
+    final dependencies = [...release.dependencies]
+      ..sort((left, right) {
+        final idComparison = left.packId.compareTo(right.packId);
+        return idComparison != 0
+            ? idComparison
+            : left.minimumVersion.compareTo(right.minimumVersion);
+      });
+    return utf8.encode(
+      jsonEncode({
+        'compressedSizeBytes': release.compressedSizeBytes,
+        'dependencies': [
+          for (final dependency in dependencies)
+            {
+              'minimumVersion': dependency.minimumVersion,
+              'packId': dependency.packId,
+            },
+        ],
+        'description': release.description,
+        'installedSizeBytes': release.installedSizeBytes,
+        'language': release.language,
+        'license': release.license,
+        'manifestVersion': release.manifestVersion,
+        'minimumAppVersion': release.minimumAppVersion,
+        'minimumSchemaVersion': release.minimumSchemaVersion,
+        'objectives': release.objectives,
+        'packId': release.packId,
+        'publisherKeyId': release.publisherKeyId,
+        'sha256': release.sha256,
+        'title': release.title,
+        'version': release.version,
+      }),
+    );
   }
 }
