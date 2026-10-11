@@ -419,9 +419,10 @@ final class SqliteContentPackInstallationBackend
         );
       });
 
-  Future<ContentPackRetentionState> unpinActive(
-    String packId,
-  ) async => _transaction(() {
+  Future<ContentPackRetentionTransition> unpinActive(
+    String packId, {
+    required ContentPackRetentionState expectedState,
+  }) async => _transaction(() {
     final current = _activeRow(packId);
     if (current == null) {
       throw StateError('Cannot unpin an absent content pack.');
@@ -430,10 +431,13 @@ final class SqliteContentPackInstallationBackend
       'UPDATE content_pack_active SET pinned_version = NULL WHERE pack_id = ?',
       [packId],
     );
-    return ContentPackRetentionState(
-      activationId: current['activation_id'] as String,
-      installedVersion: current['version'] as String,
-      pinnedVersion: null,
+    return ContentPackRetentionTransition(
+      outcome: ContentPackRetentionOutcome.changed,
+      state: ContentPackRetentionState(
+        activationId: current['activation_id'] as String,
+        installedVersion: current['version'] as String,
+        pinnedVersion: null,
+      ),
     );
   });
 

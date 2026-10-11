@@ -4,6 +4,7 @@ enum ContentPackRetentionOutcome {
   blockedPinned,
   blockedDowngrade,
   blockedDependent,
+  blockedPendingConfirmation,
   staleState,
 }
 
