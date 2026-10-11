@@ -1,22 +1,35 @@
 enum ContentPackRuntimeOutcome { ready, rolledBack, alreadyRecovered }
 
 abstract interface class ContentPackRollbackStore {
-  Future<String?> activeVersion(String packId);
+  Future<ContentPackRuntimeActivation> activation(String packId);
 
-  /// Atomically confirms [expectedVersion] is still active and marks its first
-  /// runtime load complete. Returns the current pointer when it changed.
+  /// Atomically confirms [expectedActivationId] is still pending and marks its
+  /// first runtime load complete. Returns the current pointer when it changed.
   Future<ContentPackRuntimeConfirmation> confirmFirstLoad({
-    required String expectedVersion,
+    required String expectedActivationId,
     required String packId,
   });
 
-  /// Atomically compares the active version, restores the retained version
-  /// (or deactivates a first installation), and records [message].
+  /// Atomically compares the pending activation, restores the retained version
+  /// (or deactivates a first installation), and records [message]. A confirmed
+  /// activation must never be restored by this operation.
   Future<ContentPackRollbackTransition> rollbackFailedActivation({
-    required String expectedFailedVersion,
+    required String expectedActivationId,
     required String message,
     required String packId,
   });
+}
+
+final class ContentPackRuntimeActivation {
+  const ContentPackRuntimeActivation({
+    required this.activationId,
+    required this.activeVersion,
+    required this.awaitingFirstLoad,
+  });
+
+  final String activationId;
+  final String? activeVersion;
+  final bool awaitingFirstLoad;
 }
 
 final class ContentPackRuntimeConfirmation {
@@ -66,29 +79,19 @@ final class ContentPackRollbackCoordinator {
     String packId,
     String version,
   ) async {
-    final activeVersion = await store.activeVersion(packId);
-    if (activeVersion != version) {
+    final activation = await store.activation(packId);
+    if (activation.activeVersion != version || !activation.awaitingFirstLoad) {
       return ContentPackRuntimeResult(
-        activeVersion: activeVersion,
+        activeVersion: activation.activeVersion,
         outcome: ContentPackRuntimeOutcome.alreadyRecovered,
       );
     }
 
     try {
       await loader.load(packId, version);
-      final confirmation = await store.confirmFirstLoad(
-        expectedVersion: version,
-        packId: packId,
-      );
-      return ContentPackRuntimeResult(
-        activeVersion: confirmation.activeVersion,
-        outcome: confirmation.confirmed
-            ? ContentPackRuntimeOutcome.ready
-            : ContentPackRuntimeOutcome.alreadyRecovered,
-      );
     } on Object {
       final transition = await store.rollbackFailedActivation(
-        expectedFailedVersion: version,
+        expectedActivationId: activation.activationId,
         message:
             'Content pack $packId version $version failed its first load. '
             'Restored prior verified content when available.',
@@ -101,5 +104,16 @@ final class ContentPackRollbackCoordinator {
             : ContentPackRuntimeOutcome.alreadyRecovered,
       );
     }
+
+    final confirmation = await store.confirmFirstLoad(
+      expectedActivationId: activation.activationId,
+      packId: packId,
+    );
+    return ContentPackRuntimeResult(
+      activeVersion: confirmation.activeVersion,
+      outcome: confirmation.confirmed
+          ? ContentPackRuntimeOutcome.ready
+          : ContentPackRuntimeOutcome.alreadyRecovered,
+    );
   }
 }

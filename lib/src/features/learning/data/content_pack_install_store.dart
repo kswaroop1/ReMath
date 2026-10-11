@@ -31,8 +31,12 @@ abstract interface class ContentPackInstallationBackend {
   Future<void> activateAtomically({
     required ContentPackRelease release,
     required ContentPackSealedObject sealed,
+    required bool isExplicitVersionChoice,
   });
 
+  Future<void> retryPendingDiscards();
+
+  /// Persists an idempotent cleanup obligation before attempting deletion.
   Future<void> discard(ContentPackSealedObject sealed);
 }
 
@@ -114,10 +118,18 @@ final class TransactionalContentPackInstallStore
   Future<void> activateStaged(
     ContentPackRelease release,
     ContentPackStagedArchive archive,
+    {required bool isExplicitVersionChoice},
   ) {
     final sealed = _sealedObject(archive);
-    return backend.activateAtomically(release: release, sealed: sealed);
+    return backend.activateAtomically(
+      isExplicitVersionChoice: isExplicitVersionChoice,
+      release: release,
+      sealed: sealed,
+    );
   }
+
+  @override
+  Future<void> retryPendingDiscards() => backend.retryPendingDiscards();
 
   @override
   Future<void> discardStaged(

@@ -80,7 +80,11 @@ void main() {
         ]),
       );
 
-      await store.activateStaged(release, staged);
+      await store.activateStaged(
+        release,
+        staged,
+        isExplicitVersionChoice: false,
+      );
 
       expect(backend.activatedSealId, staged.sealId);
       expect(backend.activatedDependencies, release.dependencies);
@@ -167,6 +171,7 @@ final class _MemoryBackend implements ContentPackInstallationBackend {
 
   @override
   Future<void> activateAtomically({
+    required bool isExplicitVersionChoice,
     required ContentPackRelease release,
     required ContentPackSealedObject sealed,
   }) async {
@@ -178,6 +183,9 @@ final class _MemoryBackend implements ContentPackInstallationBackend {
   Future<void> discard(ContentPackSealedObject sealed) async {
     reservedBytes -= sealed.reservedBytes;
   }
+
+  @override
+  Future<void> retryPendingDiscards() async {}
 
   @override
   Future<ContentPackStagingSink> reserve({
