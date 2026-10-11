@@ -278,3 +278,32 @@ thread before requesting another independent review.
 [r11]: https://github.com/kswaroop1/ReMath/pull/24#discussion_r4240449549
 [r12]: https://github.com/kswaroop1/ReMath/pull/24#discussion_r4240449554
 [r13]: https://github.com/kswaroop1/ReMath/pull/24#discussion_r4240449557
+
+## 2026-10-11 — Test-first review correction stack
+
+The correction stack was created as five separate test-only/implementation
+pairs before the branch reference moved:
+
+- `cb3e8f4` / `3275e6f` streams an archive into bounded staging, verifies the
+  exact staged handle, and serializes same-pack installation. The focused red
+  failures are `Bounded staged installation is not implemented` and `Bounded
+  archive verification is not implemented`.
+- `d2f5b86` / `e3eed40` requires the signature boundary to receive canonical
+  release metadata containing the verified archive digest. The focused red
+  test fails while decoding the old digest-only payload.
+- `e356d7b` / `30fae0f` composes manifest validation, app/schema compatibility,
+  dependency availability, storage capacity, archive integrity, and content
+  validation into the fail-closed activation path. The focused red failure is
+  `Content-pack activation policy is not implemented`.
+- `039edf7` / `5516e4d` replaces separate restore/status calls with one atomic,
+  compare-and-swap rollback transition, including first installs with no prior
+  version. The focused red failure is `Atomic first-load rollback is not
+  implemented`.
+- `26b6d7f` / `0c1e734` rejects implicit semantic-version downgrades while
+  preserving explicit version selection. The focused red assertion requires
+  `ContentPackRetentionOutcome.blockedDowngrade`.
+
+Commit `428519d` corrects the provenance schema, links every exact review
+exchange, records the available exact user and assistant text, and removes the
+unsupported reclaimable-storage claim. The CI evidence update permanently
+replays all five new red heads and the previously omitted CP-002 red head.

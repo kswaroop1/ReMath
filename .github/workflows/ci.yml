@@ -69,6 +69,9 @@ jobs:
             grep -F "$expected" "$log"
             git worktree remove --force "$worktree"
           }
+          verify_red 4ec790524530f1feb868ab60a404769d39f6fe68 \
+            test/features/learning/data/content_pack_release_parser_test.dart \
+            "Content-pack release parsing is not implemented"
           verify_red d806655da5cbf69b2dd3dfec4a19d91c8809ab96 \
             test/features/learning/data/content_pack_release_validator_test.dart \
             "CP-004 release validation is not implemented"
@@ -93,6 +96,24 @@ jobs:
           verify_red 18dcc73d9b5883270c274c5802a4acc350217383 \
             test/features/learning/application/content_pack_rollback_test.dart \
             "CP-013 runtime rollback is not implemented"
+          verify_red cb3e8f4855451b18b1e9a0975f6db1d297423843 \
+            test/features/learning/application/content_pack_installer_test.dart \
+            "Bounded staged installation is not implemented"
+          verify_red cb3e8f4855451b18b1e9a0975f6db1d297423843 \
+            test/features/learning/data/content_pack_archive_verifier_test.dart \
+            "Bounded archive verification is not implemented"
+          verify_red d2f5b864ea4dbca91eee691d4b61faaf4fe2aad7 \
+            test/features/learning/data/content_pack_archive_verifier_test.dart \
+            "FormatException"
+          verify_red e356d7b3cc4259681b3f87fc71482c8699463b75 \
+            test/features/learning/data/content_pack_install_guard_test.dart \
+            "Content-pack activation policy is not implemented"
+          verify_red 039edf7fcbcce42c0cc73572d62a0d93551df8fe \
+            test/features/learning/application/content_pack_rollback_test.dart \
+            "Atomic first-load rollback is not implemented"
+          verify_red 26b6d7f2526e88e561ef32fbd21462b02b03d511 \
+            test/features/learning/domain/content_pack_retention_test.dart \
+            "ContentPackRetentionOutcome.blockedDowngrade"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
