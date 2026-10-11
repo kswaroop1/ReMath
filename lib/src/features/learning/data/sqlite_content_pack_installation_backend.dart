@@ -106,13 +106,22 @@ final class SqliteContentPackInstallationBackend
           SELECT RAISE(ABORT, 'content pack object is sealed');
         END
       ''')
+      ..execute(
+        'DROP TRIGGER IF EXISTS content_pack_chunks_update_staging',
+      )
       ..execute('''
-        CREATE TRIGGER IF NOT EXISTS content_pack_chunks_update_staging
+        CREATE TRIGGER content_pack_chunks_update_staging
         BEFORE UPDATE ON content_pack_object_chunks
-        WHEN (
-          SELECT state FROM content_pack_objects
-          WHERE seal_id = OLD.seal_id
-        ) != 'staging'
+        WHEN OLD.seal_id != NEW.seal_id
+          OR OLD.sequence != NEW.sequence
+          OR (
+            SELECT state FROM content_pack_objects
+            WHERE seal_id = OLD.seal_id
+          ) != 'staging'
+          OR (
+            SELECT state FROM content_pack_objects
+            WHERE seal_id = NEW.seal_id
+          ) != 'staging'
         BEGIN
           SELECT RAISE(ABORT, 'content pack object is sealed');
         END
@@ -264,6 +273,11 @@ final class SqliteContentPackInstallationBackend
       }
       for (final dependency in release.dependencies) {
         final installed = _activeRow(dependency.packId);
+        if (installed != null && installed['awaiting_first_load'] == 1) {
+          throw const ContentPackActivationException(
+            ContentPackRetentionOutcome.blockedPendingConfirmation,
+          );
+        }
         if (installed == null ||
             _compareVersions(
                   installed['version'] as String,
@@ -300,6 +314,13 @@ final class SqliteContentPackInstallationBackend
       }
 
       final current = _activeRow(release.packId);
+      if (current != null &&
+          current['awaiting_first_load'] == 1 &&
+          current['version'] != release.version) {
+        throw const ContentPackActivationException(
+          ContentPackRetentionOutcome.blockedPendingConfirmation,
+        );
+      }
       final transition = const ContentPackRetentionPolicy().update(
         ContentPackRetentionState(
           installedVersion: current?['version'] as String?,
@@ -427,15 +448,29 @@ final class SqliteContentPackInstallationBackend
     if (current == null) {
       throw StateError('Cannot unpin an absent content pack.');
     }
+    final currentState = ContentPackRetentionState(
+      activationId: current['activation_id'] as String,
+      installedVersion: current['version'] as String,
+      pinnedVersion: current['pinned_version'] as String?,
+    );
+    if (currentState.activationId != expectedState.activationId ||
+        currentState.installedVersion != expectedState.installedVersion ||
+        currentState.pinnedVersion != expectedState.pinnedVersion) {
+      return ContentPackRetentionTransition(
+        outcome: ContentPackRetentionOutcome.staleState,
+        state: currentState,
+      );
+    }
     _database.execute(
-      'UPDATE content_pack_active SET pinned_version = NULL WHERE pack_id = ?',
-      [packId],
+      'UPDATE content_pack_active SET pinned_version = NULL '
+      'WHERE pack_id = ? AND activation_id = ?',
+      [packId, expectedState.activationId],
     );
     return ContentPackRetentionTransition(
       outcome: ContentPackRetentionOutcome.changed,
       state: ContentPackRetentionState(
-        activationId: current['activation_id'] as String,
-        installedVersion: current['version'] as String,
+        activationId: currentState.activationId,
+        installedVersion: currentState.installedVersion,
         pinnedVersion: null,
       ),
     );
