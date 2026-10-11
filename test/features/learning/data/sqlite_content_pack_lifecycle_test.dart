@@ -425,10 +425,12 @@ void main() {
 
   test('sqlite rollback restores, deactivates, and exposes failure status',
       () async {
-    final database = sqlite3.openInMemory();
-    addTearDown(database.close);
+    final directory = await Directory.systemTemp.createTemp('remath-rollback-');
+    addTearDown(() => directory.delete(recursive: true));
+    final path = '${directory.path}/lifecycle.sqlite3';
+    var database = sqlite3.open(path);
     var nextId = 0;
-    final backend = SqliteContentPackInstallationBackend(
+    var backend = SqliteContentPackInstallationBackend(
       availableBytes: () async => 1024 * 1024,
       database: database,
       idGenerator: () => 'rollback-${nextId++}',
@@ -458,16 +460,8 @@ void main() {
       message: 'Payload-safe failure.',
       packId: 'org.remath.pack.one',
     );
-    final failure = await backend.latestFailure('org.remath.pack.one');
-
     expect(restored.restored, isTrue);
     expect(restored.activeVersion, '1.0.0');
-    expect(failure?.message, 'Payload-safe failure.');
-    await backend.acknowledgeFailure(
-      failureId: failure!.failureId,
-      packId: failure.packId,
-    );
-    expect(await backend.latestFailure('org.remath.pack.one'), isNull);
 
     final other = await _release(
       '1.0.0',
@@ -487,6 +481,24 @@ void main() {
     expect(deactivated.restored, isTrue);
     expect(deactivated.activeVersion, isNull);
     expect(await backend.activeVersion(other.packId), isNull);
+
+    database.close();
+    database = sqlite3.open(path);
+    addTearDown(database.close);
+    backend = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'reopened-${nextId++}',
+    );
+    final failure = await backend.latestFailure('org.remath.pack.one');
+    expect(await backend.activeVersion('org.remath.pack.one'), '1.0.0');
+    expect(await backend.activeVersion(other.packId), isNull);
+    expect(failure?.message, 'Payload-safe failure.');
+    await backend.acknowledgeFailure(
+      failureId: failure!.failureId,
+      packId: failure.packId,
+    );
+    expect(await backend.latestFailure('org.remath.pack.one'), isNull);
   });
 }
 
