@@ -5,6 +5,13 @@ import 'package:remath/src/features/learning/domain/content_pack_release.dart';
 void main() {
   const validator = ContentPackReleaseValidator();
 
+  test('in-memory JSON verification has a mobile-safe archive ceiling', () {
+    expect(
+      ContentPackReleaseValidator.maximumCompressedSizeBytes,
+      16 * 1024 * 1024,
+    );
+  });
+
   test('validator reports every unsafe release contract together', () {
     const release = ContentPackRelease(
       compressedSizeBytes: 0,

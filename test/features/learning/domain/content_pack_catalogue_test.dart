@@ -18,6 +18,10 @@ void main() {
       classifier.classify(_release('2.0.0'), installedVersion: '1.0.0').status,
       ContentPackCatalogueStatus.updateAvailable,
     );
+    expect(
+      classifier.classify(_release('1.0.0'), installedVersion: '2.0.0').status,
+      ContentPackCatalogueStatus.olderAvailable,
+    );
     final pinned = classifier.classify(
       _release('2.0.0'),
       installedVersion: '1.0.0',

@@ -86,6 +86,31 @@ void main() {
       expect(backend.activatedDependencies, release.dependencies);
     },
   );
+
+  test('staging hashes the same frozen bytes that it writes', () async {
+    final backend = _MemoryBackend(availableBytes: 100);
+    final store = TransactionalContentPackInstallStore(backend: backend);
+    final writeStarted = Completer<void>();
+    final releaseWrite = Completer<void>();
+    final mutableChunk = <int>[1, 2, 3, 4];
+    backend.firstWrite = writeStarted;
+    backend.releaseFirst = releaseWrite;
+
+    final staging = store.stage(
+      _release(),
+      _ArchiveSource([mutableChunk]),
+    );
+    await writeStarted.future;
+    mutableChunk[0] = 9;
+    releaseWrite.complete();
+
+    final staged = await staging;
+    expect(backend.writtenBytes, [1, 2, 3, 4]);
+    expect(
+      staged.sha256,
+      '9f64a747e1b97f131fabb6b447296c9b6f0201e79fb3c5356e6c77e89b6a806a',
+    );
+  });
 }
 
 ContentPackRelease _release({
