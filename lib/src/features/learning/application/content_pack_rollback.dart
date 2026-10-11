@@ -64,7 +64,19 @@ final class ContentPackRollbackCoordinator {
         outcome: ContentPackRuntimeOutcome.ready,
       );
     } on Object {
-      throw UnimplementedError('Atomic first-load rollback is not implemented');
+      final transition = await store.rollbackFailedActivation(
+        expectedFailedVersion: version,
+        message:
+            'Content pack $packId version $version failed its first load. '
+            'Restored prior verified content when available.',
+        packId: packId,
+      );
+      return ContentPackRuntimeResult(
+        activeVersion: transition.activeVersion,
+        outcome: transition.restored
+            ? ContentPackRuntimeOutcome.rolledBack
+            : ContentPackRuntimeOutcome.alreadyRecovered,
+      );
     }
   }
 }
