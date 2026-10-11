@@ -180,17 +180,89 @@ void main() {
 
     expect(events, ['guard']);
   });
+
+  test('installation freezes release metadata before asynchronous work', () async {
+    final dependencies = <ContentPackDependency>[];
+    final objectives = <String>['Collect like terms'];
+    final mutableRelease = ContentPackRelease(
+      compressedSizeBytes: release.compressedSizeBytes,
+      dependencies: dependencies,
+      description: release.description,
+      installedSizeBytes: release.installedSizeBytes,
+      language: release.language,
+      license: release.license,
+      manifestVersion: release.manifestVersion,
+      minimumAppVersion: release.minimumAppVersion,
+      minimumSchemaVersion: release.minimumSchemaVersion,
+      objectives: objectives,
+      packId: release.packId,
+      publisherKeyId: release.publisherKeyId,
+      sha256: release.sha256,
+      signature: release.signature,
+      title: release.title,
+      version: release.version,
+    );
+    final guardEntered = Completer<void>();
+    final releaseGuard = Completer<void>();
+    final events = <String>[];
+    final store = _MemoryInstallStore(activeVersions: {}, events: events);
+    final installer = ContentPackInstaller(
+      guard: _RecordingGuard(
+        events,
+        entered: guardEntered,
+        release: releaseGuard,
+      ),
+      store: store,
+      verifier: ContentPackActivationVerifier(
+        contentVerifier: _RecordingVerifier(events, label: 'content'),
+        integrityVerifier: _RecordingVerifier(events),
+      ),
+    );
+
+    final installing = installer.install(
+      mutableRelease,
+      _ChunkedArchiveSource(const [
+        [1, 2, 3, 4],
+      ]),
+    );
+    await guardEntered.future;
+    dependencies.add(
+      const ContentPackDependency(
+        minimumVersion: '99.0.0',
+        packId: 'org.remath.changed',
+      ),
+    );
+    objectives[0] = 'Changed after installation began';
+    releaseGuard.complete();
+
+    expect(await installing, ContentPackInstallOutcome.activated);
+    expect(store.activatedRelease!.dependencies, isEmpty);
+    expect(store.activatedRelease!.objectives, ['Collect like terms']);
+    expect(
+      () => store.activatedRelease!.objectives[0] = 'mutate',
+      throwsUnsupportedError,
+    );
+  });
 }
 
 final class _RecordingGuard implements ContentPackInstallGuard {
-  _RecordingGuard(this.events, {this.shouldFail = false});
+  _RecordingGuard(
+    this.events, {
+    this.entered,
+    this.release,
+    this.shouldFail = false,
+  });
 
   final List<String> events;
+  final Completer<void>? entered;
+  final Completer<void>? release;
   final bool shouldFail;
 
   @override
   Future<void> validate(ContentPackRelease release) async {
     events.add('guard');
+    entered?.complete();
+    await this.release?.future;
     if (shouldFail) {
       throw StateError('Release compatibility failed.');
     }
@@ -227,6 +299,7 @@ final class _MemoryInstallStore implements ContentPackInstallStore {
   final List<int>? stagedBytes;
   ContentPackRelease? _stagedRelease;
   _MemoryStagedArchive? _stagedArchive;
+  ContentPackRelease? activatedRelease;
 
   bool get hasStagedRelease => _stagedRelease != null;
 
@@ -243,6 +316,7 @@ final class _MemoryInstallStore implements ContentPackInstallStore {
       throw StateError('Only the verified staged release can be activated.');
     }
     _activeVersions[release.packId] = release.version;
+    activatedRelease = release;
     _stagedRelease = null;
     _stagedArchive = null;
   }
