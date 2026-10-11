@@ -150,10 +150,10 @@ jobs:
           verify_red 1f1582efef95f4d8d1a958774d969fc21468e77c \
             test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
             "sqlite_content_pack_installation_backend.dart"
-          verify_red 2e676796e874729ca78ff42f70a4177ec88b7bfd \
+          verify_red eae9124639da341744dac9d0feb354df9ae2bdae \
             test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
             "startup recovers abandoned reservations as cleanup work"
-          verify_red 5753969b7ef93e174093883c4df8c92692924526 \
+          verify_red 4d0e09cce432b5f339db5094d4de5be3b7697c7f \
             test/features/learning/data/content_pack_release_validator_test.dart \
             "version components must fit every lifecycle comparator"
       - name: Verify committed application structure
