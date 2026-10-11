@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/application/content_pack_installer.dart';
 import 'package:remath/src/features/learning/domain/content_pack_release.dart';
@@ -21,85 +23,138 @@ void main() {
     title: 'Algebra foundation',
     version: '2.0.0',
   );
-  const archiveBytes = [1, 2, 3, 4];
 
-  test(
-    'stages and verifies a complete pack before atomic activation',
-    () async {
-      final events = <String>[];
-      final store = _MemoryInstallStore(
-        activeVersions: {release.packId: '1.0.0'},
-        events: events,
-      );
-      final installer = ContentPackInstaller(
-        store: store,
-        verifier: _RecordingVerifier(events),
-      );
+  test('verifies the bounded bytes read back from staging', () async {
+    final events = <String>[];
+    final store = _MemoryInstallStore(
+      activeVersions: {release.packId: '1.0.0'},
+      events: events,
+      stagedBytes: const [9, 8, 7, 6],
+    );
+    final verifier = _RecordingVerifier(events);
+    final installer = ContentPackInstaller(store: store, verifier: verifier);
 
-      final outcome = await installer.install(release, archiveBytes);
+    final outcome = await installer.install(
+      release,
+      _ChunkedArchiveSource(const [
+        [1, 2],
+        [3, 4],
+      ]),
+    );
 
-      expect(outcome, ContentPackInstallOutcome.activated);
-      expect(events, ['stage', 'verify', 'activate']);
-      expect(await store.activeVersion(release.packId), release.version);
-      expect(store.hasStagedRelease, isFalse);
-    },
-  );
+    expect(outcome, ContentPackInstallOutcome.activated);
+    expect(events, ['stage:2', 'verify', 'activate']);
+    expect(verifier.verifiedBytes, [9, 8, 7, 6]);
+    expect(await store.activeVersion(release.packId), release.version);
+    expect(store.hasStagedRelease, isFalse);
+  });
 
-  test(
-    'verification failure discards staging and preserves active pack',
-    () async {
-      final events = <String>[];
-      final store = _MemoryInstallStore(
-        activeVersions: {release.packId: '1.0.0'},
-        events: events,
-      );
-      final installer = ContentPackInstaller(
-        store: store,
-        verifier: _RecordingVerifier(events, shouldFail: true),
-      );
+  test('verification failure discards staging and preserves active pack', () async {
+    final events = <String>[];
+    final store = _MemoryInstallStore(
+      activeVersions: {release.packId: '1.0.0'},
+      events: events,
+    );
+    final installer = ContentPackInstaller(
+      store: store,
+      verifier: _RecordingVerifier(events, shouldFail: true),
+    );
 
-      await expectLater(
-        installer.install(release, archiveBytes),
-        throwsA(isA<StateError>()),
-      );
+    await expectLater(
+      installer.install(
+        release,
+        _ChunkedArchiveSource(const [[1, 2, 3, 4]]),
+      ),
+      throwsA(isA<StateError>()),
+    );
 
-      expect(events, ['stage', 'verify', 'discard']);
-      expect(await store.activeVersion(release.packId), '1.0.0');
-      expect(store.hasStagedRelease, isFalse);
-    },
-  );
+    expect(events, ['stage:1', 'verify', 'discard']);
+    expect(await store.activeVersion(release.packId), '1.0.0');
+    expect(store.hasStagedRelease, isFalse);
+  });
 
-  test(
-    'installing the active version is idempotent and performs no writes',
-    () async {
-      final events = <String>[];
-      final store = _MemoryInstallStore(
-        activeVersions: {release.packId: release.version},
-        events: events,
-      );
-      final installer = ContentPackInstaller(
-        store: store,
-        verifier: _RecordingVerifier(events),
-      );
+  test('installing the active version is idempotent and performs no writes', () async {
+    final events = <String>[];
+    final store = _MemoryInstallStore(
+      activeVersions: {release.packId: release.version},
+      events: events,
+    );
+    final installer = ContentPackInstaller(
+      store: store,
+      verifier: _RecordingVerifier(events),
+    );
 
-      final outcome = await installer.install(release, archiveBytes);
+    final outcome = await installer.install(
+      release,
+      _ChunkedArchiveSource(const [[1, 2, 3, 4]]),
+    );
 
-      expect(outcome, ContentPackInstallOutcome.alreadyActive);
-      expect(events, isEmpty);
-      expect(store.hasStagedRelease, isFalse);
-    },
-  );
+    expect(outcome, ContentPackInstallOutcome.alreadyActive);
+    expect(events, isEmpty);
+    expect(store.hasStagedRelease, isFalse);
+  });
+
+  test('concurrent duplicate installs share one staged operation', () async {
+    final events = <String>[];
+    final verificationStarted = Completer<void>();
+    final finishVerification = Completer<void>();
+    final store = _MemoryInstallStore(activeVersions: {}, events: events);
+    final installer = ContentPackInstaller(
+      store: store,
+      verifier: _RecordingVerifier(
+        events,
+        verificationStarted: verificationStarted,
+        finishVerification: finishVerification,
+      ),
+    );
+
+    final first = installer.install(
+      release,
+      _ChunkedArchiveSource(const [[1, 2, 3, 4]]),
+    );
+    await verificationStarted.future;
+    final duplicate = installer.install(
+      release,
+      _ChunkedArchiveSource(const [[4, 3, 2, 1]]),
+    );
+    finishVerification.complete();
+
+    expect(await first, ContentPackInstallOutcome.activated);
+    expect(await duplicate, ContentPackInstallOutcome.activated);
+    expect(events, ['stage:1', 'verify', 'activate']);
+  });
+}
+
+final class _ChunkedArchiveSource implements ContentPackArchiveSource {
+  const _ChunkedArchiveSource(this.chunks);
+
+  final List<List<int>> chunks;
+
+  @override
+  Stream<List<int>> openRead() => Stream.fromIterable(chunks);
+}
+
+final class _MemoryStagedArchive implements ContentPackStagedArchive {
+  const _MemoryStagedArchive(this.bytes);
+
+  final List<int> bytes;
+
+  @override
+  Stream<List<int>> openRead() => Stream.value(bytes);
 }
 
 final class _MemoryInstallStore implements ContentPackInstallStore {
   _MemoryInstallStore({
     required Map<String, String> activeVersions,
     required this.events,
+    this.stagedBytes,
   }) : _activeVersions = activeVersions;
 
   final Map<String, String> _activeVersions;
   final List<String> events;
+  final List<int>? stagedBytes;
   ContentPackRelease? _stagedRelease;
+  _MemoryStagedArchive? _stagedArchive;
 
   bool get hasStagedRelease => _stagedRelease != null;
 
@@ -107,40 +162,71 @@ final class _MemoryInstallStore implements ContentPackInstallStore {
   Future<String?> activeVersion(String packId) async => _activeVersions[packId];
 
   @override
-  Future<void> activateStaged(ContentPackRelease release) async {
+  Future<void> activateStaged(
+    ContentPackRelease release,
+    ContentPackStagedArchive archive,
+  ) async {
     events.add('activate');
-    if (_stagedRelease != release) {
-      throw StateError('Only a complete staged release can be activated.');
+    if (_stagedRelease != release || _stagedArchive != archive) {
+      throw StateError('Only the verified staged release can be activated.');
     }
     _activeVersions[release.packId] = release.version;
     _stagedRelease = null;
+    _stagedArchive = null;
   }
 
   @override
-  Future<void> discardStaged(ContentPackRelease release) async {
+  Future<void> discardStaged(
+    ContentPackRelease release,
+    ContentPackStagedArchive archive,
+  ) async {
     events.add('discard');
     _stagedRelease = null;
+    _stagedArchive = null;
   }
 
   @override
-  Future<void> stage(ContentPackRelease release, List<int> archiveBytes) async {
-    events.add('stage');
+  Future<ContentPackStagedArchive> stage(
+    ContentPackRelease release,
+    ContentPackArchiveSource archive,
+  ) async {
+    final received = <int>[];
+    var chunkCount = 0;
+    await for (final chunk in archive.openRead()) {
+      chunkCount++;
+      received.addAll(chunk);
+    }
+    events.add('stage:$chunkCount');
     _stagedRelease = release;
+    return _stagedArchive = _MemoryStagedArchive(
+      List.unmodifiable(stagedBytes ?? received),
+    );
   }
 }
 
 final class _RecordingVerifier implements ContentPackPayloadVerifier {
-  _RecordingVerifier(this.events, {this.shouldFail = false});
+  _RecordingVerifier(
+    this.events, {
+    this.shouldFail = false,
+    this.verificationStarted,
+    this.finishVerification,
+  });
 
   final List<String> events;
   final bool shouldFail;
+  final Completer<void>? verificationStarted;
+  final Completer<void>? finishVerification;
+  List<int>? verifiedBytes;
 
   @override
   Future<void> verify(
     ContentPackRelease release,
-    List<int> archiveBytes,
+    ContentPackStagedArchive archive,
   ) async {
     events.add('verify');
+    verifiedBytes = await archive.openRead().expand((chunk) => chunk).toList();
+    verificationStarted?.complete();
+    await finishVerification?.future;
     if (shouldFail) {
       throw StateError('The staged archive failed verification.');
     }

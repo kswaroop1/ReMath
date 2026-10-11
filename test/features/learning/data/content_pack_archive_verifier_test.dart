@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:remath/src/features/learning/application/content_pack_installer.dart';
 import 'package:remath/src/features/learning/data/content_pack_archive_verifier.dart';
 import 'package:remath/src/features/learning/domain/content_pack_release.dart';
 
@@ -43,7 +44,7 @@ void main() {
     final signatures = _RecordingSignatureVerifier();
     final verifier = ContentPackArchiveVerifier(signatureVerifier: signatures);
 
-    await verifier.verify(_release(), archiveBytes);
+    await verifier.verify(_release(), _StagedArchive([archiveBytes]));
 
     expect(signatures.calls, 1);
     expect(signatures.publisherKeyId, 'org.remath.publisher.primary');
@@ -60,7 +61,10 @@ void main() {
       );
 
       await expectLater(
-        verifier.verify(_release(compressedSizeBytes: 5), archiveBytes),
+        verifier.verify(
+          _release(compressedSizeBytes: 5),
+          _StagedArchive([archiveBytes]),
+        ),
         throwsA(_verificationFailure('archive length')),
       );
       expect(signatures.calls, 0);
@@ -77,7 +81,7 @@ void main() {
           sha256:
               '0000000000000000000000000000000000000000000000000000000000000000',
         ),
-        archiveBytes,
+        _StagedArchive([archiveBytes]),
       ),
       throwsA(_verificationFailure('SHA-256')),
     );
@@ -89,11 +93,14 @@ void main() {
     final verifier = ContentPackArchiveVerifier(signatureVerifier: signatures);
 
     await expectLater(
-      verifier.verify(_release(), archiveBytes),
+      verifier.verify(_release(), _StagedArchive([archiveBytes])),
       throwsA(_verificationFailure('publisher signature')),
     );
     await expectLater(
-      verifier.verify(_release(signature: '%%%'), archiveBytes),
+      verifier.verify(
+        _release(signature: '%%%'),
+        _StagedArchive([archiveBytes]),
+      ),
       throwsA(_verificationFailure('publisher signature')),
     );
   });
@@ -152,4 +159,13 @@ final class _RecordingSignatureVerifier
     this.signature = signature;
     return isTrusted;
   }
+}
+
+final class _StagedArchive implements ContentPackStagedArchive {
+  const _StagedArchive(this.chunks);
+
+  final List<List<int>> chunks;
+
+  @override
+  Stream<List<int>> openRead() => Stream.fromIterable(chunks);
 }

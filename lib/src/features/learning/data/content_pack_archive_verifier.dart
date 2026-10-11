@@ -30,41 +30,8 @@ final class ContentPackArchiveVerifier implements ContentPackPayloadVerifier {
   @override
   Future<void> verify(
     ContentPackRelease release,
-    List<int> archiveBytes,
-  ) async {
-    if (archiveBytes.length != release.compressedSizeBytes) {
-      throw const ContentPackVerificationException(
-        'The archive length does not match its manifest.',
-      );
-    }
-
-    final digest = await Sha256().hash(archiveBytes);
-    final actualSha256 = digest.bytes
-        .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
-        .join();
-    if (actualSha256 != release.sha256) {
-      throw const ContentPackVerificationException(
-        'The archive SHA-256 does not match its manifest.',
-      );
-    }
-
-    late final List<int> signature;
-    try {
-      signature = base64Decode(release.signature);
-    } on FormatException {
-      throw const ContentPackVerificationException(
-        'The publisher signature is malformed.',
-      );
-    }
-    final isTrusted = await signatureVerifier.verify(
-      publisherKeyId: release.publisherKeyId,
-      payloadDigest: digest.bytes,
-      signature: signature,
-    );
-    if (!isTrusted) {
-      throw const ContentPackVerificationException(
-        'The publisher signature is not trusted.',
-      );
-    }
-  }
+    ContentPackStagedArchive archive,
+  ) => throw UnimplementedError(
+    'Bounded archive verification is not implemented',
+  );
 }
