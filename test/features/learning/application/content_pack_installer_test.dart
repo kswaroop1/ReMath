@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/application/content_pack_installer.dart';
 import 'package:remath/src/features/learning/domain/content_pack_release.dart';
+import 'package:remath/src/features/learning/domain/content_pack_retention.dart';
 
 void main() {
   const release = ContentPackRelease(
@@ -288,6 +289,85 @@ void main() {
       );
     },
   );
+
+  test('atomic activation enforces downgrade and pin policy', () async {
+    final events = <String>[];
+    final store = _MemoryInstallStore(
+      activeVersions: {release.packId: '3.0.0'},
+      events: events,
+    );
+    final installer = ContentPackInstaller(
+      guard: _RecordingGuard(events),
+      store: store,
+      verifier: _RecordingVerifier(events),
+    );
+    final older = _releaseWithVersion(release, '2.0.0');
+
+    await expectLater(
+      installer.install(older, _ChunkedArchiveSource(const [[1, 2, 3, 4]])),
+      throwsA(isA<ContentPackActivationException>()),
+    );
+    expect(await store.activeVersion(release.packId), '3.0.0');
+
+    final explicit = await installer.install(
+      older,
+      _ChunkedArchiveSource(const [[1, 2, 3, 4]]),
+      isExplicitVersionChoice: true,
+    );
+    expect(explicit, ContentPackInstallOutcome.activated);
+    expect(await store.activeVersion(release.packId), '2.0.0');
+
+    store
+      ..pinnedVersion = '2.0.0'
+      ..pinBeforeActivation = true;
+    await expectLater(
+      installer.install(
+        _releaseWithVersion(release, '4.0.0'),
+        _ChunkedArchiveSource(const [[1, 2, 3, 4]]),
+      ),
+      throwsA(isA<ContentPackActivationException>()),
+    );
+    expect(await store.activeVersion(release.packId), '2.0.0');
+  });
+
+  test('failed discard is retained for retry without hiding the cause', () async {
+    final events = <String>[];
+    final store = _MemoryInstallStore(
+      activeVersions: {},
+      events: events,
+      failDiscardOnce: true,
+    );
+    final failing = ContentPackInstaller(
+      guard: _RecordingGuard(events),
+      store: store,
+      verifier: _RecordingVerifier(events, shouldFail: true),
+    );
+
+    await expectLater(
+      failing.install(release, _ChunkedArchiveSource(const [[1, 2, 3, 4]])),
+      throwsA(isA<StateError>().having(
+        (error) => error.message,
+        'message',
+        contains('verification'),
+      )),
+    );
+    expect(store.pendingDiscard, isTrue);
+
+    final retrying = ContentPackInstaller(
+      guard: _RecordingGuard(events),
+      store: store,
+      verifier: _RecordingVerifier(events),
+    );
+    expect(
+      await retrying.install(
+        release,
+        _ChunkedArchiveSource(const [[1, 2, 3, 4]]),
+      ),
+      ContentPackInstallOutcome.activated,
+    );
+    expect(events, contains('retryDiscard'));
+    expect(store.pendingDiscard, isFalse);
+  });
 }
 
 ContentPackRelease _releaseWithVersion(
@@ -368,12 +448,17 @@ final class _MemoryInstallStore implements ContentPackInstallStore {
   _MemoryInstallStore({
     required Map<String, String> activeVersions,
     required this.events,
+    this.failDiscardOnce = false,
     this.stagedBytes,
   }) : _activeVersions = activeVersions;
 
   final Map<String, String> _activeVersions;
   final List<String> events;
+  bool failDiscardOnce;
   final List<int>? stagedBytes;
+  bool pinBeforeActivation = false;
+  String? pinnedVersion;
+  bool pendingDiscard = false;
   ContentPackRelease? _stagedRelease;
   _MemoryStagedArchive? _stagedArchive;
   ContentPackRelease? activatedRelease;
@@ -387,12 +472,27 @@ final class _MemoryInstallStore implements ContentPackInstallStore {
   Future<void> activateStaged(
     ContentPackRelease release,
     ContentPackStagedArchive archive,
+    {required bool isExplicitVersionChoice},
   ) async {
     events.add('activate');
     if (_stagedRelease != release || _stagedArchive != archive) {
       throw StateError('Only the verified staged release can be activated.');
     }
+    if (pinBeforeActivation) pinnedVersion = _activeVersions[release.packId];
+    final transition = const ContentPackRetentionPolicy().update(
+      ContentPackRetentionState(
+        installedVersion: _activeVersions[release.packId],
+        pinnedVersion: pinnedVersion,
+      ),
+      requestedVersion: release.version,
+      isExplicitVersionChoice: isExplicitVersionChoice,
+    );
+    if (transition.outcome == ContentPackRetentionOutcome.blockedPinned ||
+        transition.outcome == ContentPackRetentionOutcome.blockedDowngrade) {
+      throw ContentPackActivationException(transition.outcome);
+    }
     _activeVersions[release.packId] = release.version;
+    pinnedVersion = transition.state.pinnedVersion;
     activatedRelease = release;
     _stagedRelease = null;
     _stagedArchive = null;
@@ -404,8 +504,23 @@ final class _MemoryInstallStore implements ContentPackInstallStore {
     ContentPackStagedArchive archive,
   ) async {
     events.add('discard');
+    pendingDiscard = true;
+    if (failDiscardOnce) {
+      failDiscardOnce = false;
+      throw StateError('Discard interrupted after obligation persisted.');
+    }
     _stagedRelease = null;
     _stagedArchive = null;
+    pendingDiscard = false;
+  }
+
+  @override
+  Future<void> retryPendingDiscards() async {
+    if (!pendingDiscard) return;
+    events.add('retryDiscard');
+    _stagedRelease = null;
+    _stagedArchive = null;
+    pendingDiscard = false;
   }
 
   @override

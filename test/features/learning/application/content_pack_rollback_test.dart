@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/application/content_pack_rollback.dart';
 
@@ -129,6 +131,76 @@ void main() {
       expect(store.readyVersions, isEmpty);
     },
   );
+
+  test('an interrupted confirmation stays retryable without rollback', () async {
+    final store = _MemoryRollbackStore(failConfirmOnce: true);
+    final coordinator = ContentPackRollbackCoordinator(
+      loader: _ControlledLoader(),
+      store: store,
+    );
+
+    await expectLater(
+      coordinator.verifyFirstLoad(packId, version),
+      throwsStateError,
+    );
+    expect(store.active, version);
+    expect(store.awaitingFirstLoad, isTrue);
+    expect(store.rollbackCount, 0);
+
+    final retried = await coordinator.verifyFirstLoad(packId, version);
+    expect(retried.outcome, ContentPackRuntimeOutcome.ready);
+    expect(store.awaitingFirstLoad, isFalse);
+  });
+
+  test('a failed concurrent load cannot undo a confirmed activation', () async {
+    final store = _MemoryRollbackStore();
+    final failedLoadEntered = Completer<void>();
+    final releaseFailedLoad = Completer<void>();
+    final failing = ContentPackRollbackCoordinator(
+      loader: _GateLoader(
+        entered: failedLoadEntered,
+        release: releaseFailedLoad,
+        shouldFail: true,
+      ),
+      store: store,
+    );
+    final successful = ContentPackRollbackCoordinator(
+      loader: _ControlledLoader(),
+      store: store,
+    );
+
+    final failedResult = failing.verifyFirstLoad(packId, version);
+    await failedLoadEntered.future;
+    final successfulResult = await successful.verifyFirstLoad(packId, version);
+    releaseFailedLoad.complete();
+
+    expect(successfulResult.outcome, ContentPackRuntimeOutcome.ready);
+    expect(
+      (await failedResult).outcome,
+      ContentPackRuntimeOutcome.alreadyRecovered,
+    );
+    expect(store.active, version);
+    expect(store.awaitingFirstLoad, isFalse);
+  });
+}
+
+final class _GateLoader implements ContentPackRuntimeLoader {
+  const _GateLoader({
+    required this.entered,
+    required this.release,
+    required this.shouldFail,
+  });
+
+  final Completer<void> entered;
+  final Completer<void> release;
+  final bool shouldFail;
+
+  @override
+  Future<void> load(String packId, String version) async {
+    entered.complete();
+    await release.future;
+    if (shouldFail) throw StateError('controlled load failure');
+  }
 }
 
 final class _ControlledLoader implements ContentPackRuntimeLoader {
@@ -149,6 +221,7 @@ final class _ControlledLoader implements ContentPackRuntimeLoader {
 final class _MemoryRollbackStore implements ContentPackRollbackStore {
   _MemoryRollbackStore({
     this.active = '2.0.0',
+    this.failConfirmOnce = false,
     this.failRollbackOnce = false,
     this.moveBeforeConfirm,
     this.moveBeforeRollback,
@@ -156,6 +229,9 @@ final class _MemoryRollbackStore implements ContentPackRollbackStore {
   });
 
   String? active;
+  String activationId = 'activation-2';
+  bool awaitingFirstLoad = true;
+  bool failConfirmOnce;
   bool failRollbackOnce;
   final String? moveBeforeConfirm;
   final String? moveBeforeRollback;
@@ -166,24 +242,35 @@ final class _MemoryRollbackStore implements ContentPackRollbackStore {
   final List<String> readyVersions = [];
 
   @override
-  Future<String?> activeVersion(String packId) async => active;
+  Future<ContentPackRuntimeActivation> activation(String packId) async =>
+      ContentPackRuntimeActivation(
+        activationId: activationId,
+        activeVersion: active,
+        awaitingFirstLoad: awaitingFirstLoad,
+      );
 
   @override
   Future<ContentPackRuntimeConfirmation> confirmFirstLoad({
-    required String expectedVersion,
+    required String expectedActivationId,
     required String packId,
   }) async {
     confirmCount++;
+    if (failConfirmOnce) {
+      failConfirmOnce = false;
+      throw StateError('Atomic confirmation was interrupted.');
+    }
     if (moveBeforeConfirm != null) {
       active = moveBeforeConfirm;
+      activationId = 'activation-moved';
     }
-    if (active != expectedVersion) {
+    if (activationId != expectedActivationId || !awaitingFirstLoad) {
       return ContentPackRuntimeConfirmation(
         activeVersion: active,
         confirmed: false,
       );
     }
-    readyVersions.add(expectedVersion);
+    awaitingFirstLoad = false;
+    readyVersions.add(active!);
     return ContentPackRuntimeConfirmation(
       activeVersion: active,
       confirmed: true,
@@ -192,7 +279,7 @@ final class _MemoryRollbackStore implements ContentPackRollbackStore {
 
   @override
   Future<ContentPackRollbackTransition> rollbackFailedActivation({
-    required String expectedFailedVersion,
+    required String expectedActivationId,
     required String message,
     required String packId,
   }) async {
@@ -203,14 +290,17 @@ final class _MemoryRollbackStore implements ContentPackRollbackStore {
     }
     if (moveBeforeRollback != null) {
       active = moveBeforeRollback;
+      activationId = 'activation-moved';
     }
-    if (active != expectedFailedVersion) {
+    if (activationId != expectedActivationId || !awaitingFirstLoad) {
       return ContentPackRollbackTransition(
         activeVersion: active,
         restored: false,
       );
     }
     active = previous;
+    activationId = 'activation-restored';
+    awaitingFirstLoad = false;
     failureMessages.add(message);
     return ContentPackRollbackTransition(activeVersion: active, restored: true);
   }
