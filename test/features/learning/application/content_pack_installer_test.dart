@@ -284,6 +284,16 @@ final class _MemoryStagedArchive implements ContentPackStagedArchive {
   final List<int> bytes;
 
   @override
+  int get lengthBytes => bytes.length;
+
+  @override
+  String get sealId => 'memory-seal';
+
+  @override
+  String get sha256 =>
+      '0000000000000000000000000000000000000000000000000000000000000000';
+
+  @override
   Stream<List<int>> openRead() => Stream.value(bytes);
 }
 

@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:cryptography/cryptography.dart';
-
 import '../application/content_pack_installer.dart';
 import '../domain/content_pack_release.dart';
 
@@ -32,25 +30,13 @@ final class ContentPackArchiveVerifier implements ContentPackPayloadVerifier {
     ContentPackRelease release,
     ContentPackStagedArchive archive,
   ) async {
-    final sink = Sha256().newHashSink();
-    var length = 0;
-    await for (final chunk in archive.openRead()) {
-      length += chunk.length;
-      sink.add(chunk);
-    }
-    sink.close();
-
-    if (length != release.compressedSizeBytes) {
+    if (archive.lengthBytes != release.compressedSizeBytes) {
       throw const ContentPackVerificationException(
         'The archive length does not match its manifest.',
       );
     }
 
-    final digest = await sink.hash();
-    final actualSha256 = digest.bytes
-        .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
-        .join();
-    if (actualSha256 != release.sha256) {
+    if (archive.sha256 != release.sha256) {
       throw const ContentPackVerificationException(
         'The archive SHA-256 does not match its manifest.',
       );

@@ -158,5 +158,20 @@ final class _StagedArchive implements ContentPackStagedArchive {
   final List<List<int>> chunks;
 
   @override
+  int get lengthBytes => chunks.expand((chunk) => chunk).length;
+
+  @override
+  String get sealId => 'sealed-archive';
+
+  @override
+  String get sha256 {
+    final bytes = chunks.expand((chunk) => chunk).toList();
+    if (bytes.length == 4 && bytes.join(',') == '1,2,3,4') {
+      return '9f64a747e1b97f131fabb6b447296c9b6f0201e79fb3c5356e6c77e89b6a806a';
+    }
+    return '';
+  }
+
+  @override
   Stream<List<int>> openRead() => Stream.fromIterable(chunks);
 }

@@ -7,6 +7,14 @@ abstract interface class ContentPackArchiveSource {
 }
 
 abstract interface class ContentPackStagedArchive {
+  int get lengthBytes;
+
+  /// Stable identity of the immutable, sealed staging object.
+  String get sealId;
+
+  /// SHA-256 computed while the source stream was written to staging.
+  String get sha256;
+
   Stream<List<int>> openRead();
 }
 
@@ -18,7 +26,8 @@ abstract interface class ContentPackInstallStore {
     ContentPackArchiveSource archive,
   );
 
-  /// Atomically replaces the active pointer and consumes [archive].
+  /// Atomically revalidates [ContentPackRelease.dependencies], replaces the
+  /// active pointer with this exact sealed [archive], and consumes it.
   Future<void> activateStaged(
     ContentPackRelease release,
     ContentPackStagedArchive archive,
@@ -70,7 +79,7 @@ final class ContentPackInstaller {
 
   final ContentPackInstallGuard guard;
   final ContentPackInstallStore store;
-  final ContentPackActivationVerifier verifier;
+  final ContentPackPayloadVerifier verifier;
   final Map<String, Future<ContentPackInstallOutcome>> _inFlight = {};
   final Map<String, String> _inFlightVersions = {};
 
