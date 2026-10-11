@@ -73,7 +73,7 @@ native tests, 97.14% line coverage, and secret scanning.
 
 ## 2026-10-08 — CP-010 storage forecast
 
-Test-only commit `b5ef673` defines compressed, installed, reclaimable, and
+Test-only commit `b5ef673` defines compressed, installed, and
 additional-required byte calculations, including invalid negative capacity.
 Green commit `75a16f9` implements the immutable forecast policy, and evidence
 commit `e8353fc` permanently replays the intended `CP-010 storage forecast is
@@ -181,3 +181,100 @@ canonical formatting, fatal static analysis, bundled-content validation, eight
 Chrome contracts, all 450 native tests, 97.11% line coverage, and secret
 scanning. This final records update precedes the explicit independent review
 request; it contains no production or test behaviour change.
+
+Records-head CI `38115688317` later repeated the same complete green result at
+commit `dfe5890` before the independent review response arrived.
+
+## 2026-10-11 — Recovered exchanges and independent review
+
+The complete interactive export before durable GitHub recovery was unavailable
+to this resumed run. No hidden instructions or private reasoning are included.
+Routine tool telemetry is summarized above; the material available user,
+assistant, and reviewer exchanges are preserved below. This is an explicit
+record of the unavailable historical exchanges rather than a claim that the
+narrative above is a verbatim transcript.
+
+Available user authorization (verbatim):
+
+> Continue the authorized ReMath infrastructure programme in kswaroop1/ReMath
+> from this chat's latest durable GitHub checkpoint. Recover state from open
+> PRs, AGENTS.md, docs/features.md, docs/roadmap.md, docs/slices, CI, review
+> discussion, and provenance; do not depend on scratch files. Avoid overlapping
+> edits with an active run. First finish draft PR21's bounded engineering
+> baseline: EN-011 committed reviewed platform runners, EN-012 reproducible
+> dependency lock, an EN-019 production-composed critical-journey integration
+> foundation, and stable initial EN-020 performance-budget foundations. The
+> feature-register reconciliation and acceptance contract are published; CI run
+> 34971033181 provides the expected red structure boundary. Generate runners
+> only through permitted GitHub CI because local Flutter execution is blocked.
+> Follow repository strict test-first separate red/green commits, full CI,
+> chronological AI provenance, and explicit independent review. Publish durable
+> checkpoints and address CI/review failures. Then proceed through the accepted
+> infrastructure sequence in separate reviewable PRs: portable backup/recovery,
+> content-pack lifecycle, and operational security, keeping scope bounded and
+> reconciling the register as capabilities complete. The user handles merges.
+> Do not merge, release, change VERSION, add signing credentials, delegate to
+> subagents, or expand into unprioritized content. Respect usage limits,
+> retry-after times, approvals, and tool restrictions; never bypass a denial.
+> Report substantive progress, review-ready PRs, or blockers needing user
+> action. When the accepted infrastructure sequence is complete with passing CI
+> and reviewable PRs, report completion and disable this automation.
+
+Available user question (verbatim):
+
+> Is the PR now ready to be merged?
+
+Material assistant response (verbatim):
+
+> PR #24 is not merge-ready yet. The behavioral and records-head CI are green,
+> but the required explicit independent review is still outstanding.
+
+The independent Codex review then created 13 unresolved inline findings. Its
+material conclusions, preserved without relabelling their severity, were:
+
+1. P1: activation did not compose release validation, compatibility,
+   dependencies, capacity, integrity, and content validation
+   ([exact review][r1]).
+2. P1: verification read caller-owned bytes instead of the exact staged bytes
+   ([exact review][r2]).
+3. P1: publisher signatures authenticated only the archive digest, not canonical
+   release metadata ([exact review][r3]).
+4. P2: rollback status could be lost if persistence failed after restoration
+   ([exact review][r4]).
+5. P1: the CP-002 test-only commit was missing from permanent red replay
+   ([exact review][r5]).
+6. P1: documentation claimed reclaimable storage that was not implemented
+   ([exact review][r6]).
+7. P1: rollback could not represent a first installation with no prior version
+   ([exact review][r7]).
+8. P2: concurrent duplicate installation could stage and activate twice
+   ([exact review][r8]).
+9. P1: provenance metadata did not conform to the repository schema
+   ([exact review][r9]).
+10. P1: provenance omitted material exact available exchanges
+    ([exact review][r10]).
+11. P1: installation required a complete in-memory `List<int>` archive
+    ([exact review][r11]).
+12. P2: automatic update policy permitted implicit downgrades
+    ([exact review][r12]).
+13. P1: rollback could overwrite a newer activation without compare-and-swap
+    ([exact review][r13]).
+
+The assistant initially described this as "12 substantive items" in a progress
+update. That count was incorrect; the durable review contains 13 threads, as
+enumerated above. The following test-first correction stack addresses every
+thread before requesting another independent review.
+
+[r1]: https://github.com/kswaroop1/ReMath/pull/24#discussion_r4240449508
+[r2]: https://github.com/kswaroop1/ReMath/pull/24#discussion_r4240449514
+[r3]: https://github.com/kswaroop1/ReMath/pull/24#discussion_r4240449517
+[r4]: https://github.com/kswaroop1/ReMath/pull/24#discussion_r4240449521
+[r5]: https://github.com/kswaroop1/ReMath/pull/24#discussion_r4240449524
+[r6]: https://github.com/kswaroop1/ReMath/pull/24#discussion_r4240449530
+[r7]: https://github.com/kswaroop1/ReMath/pull/24#discussion_r4240449536
+[r8]: https://github.com/kswaroop1/ReMath/pull/24#discussion_r4240449539
+[r9]: https://github.com/kswaroop1/ReMath/pull/24#discussion_r4240449545
+[r10]: https://github.com/kswaroop1/ReMath/pull/24#discussion_r4240449547
+[r11]: https://github.com/kswaroop1/ReMath/pull/24#discussion_r4240449549
+[r12]: https://github.com/kswaroop1/ReMath/pull/24#discussion_r4240449554
+[r13]: https://github.com/kswaroop1/ReMath/pull/24#discussion_r4240449557

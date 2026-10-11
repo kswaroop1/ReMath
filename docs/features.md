@@ -335,8 +335,8 @@ Last reviewed: 9 October 2026 (PR24 content-pack lifecycle reconciliation).
 - [x] **CP-008 — Offline retention controls.** Pin, unpin, explicitly update, and
   safely remove packs without silently replacing pinned content.
 - [ ] **CP-009 — Delta updates.** Avoid downloading unchanged large assets.
-- [x] **CP-010 — Storage forecast.** Compressed, installed, reclaimable, and
-  additional required bytes are calculated before installation.
+- [x] **CP-010 — Storage forecast.** Compressed, installed, and additional
+  required bytes are calculated before installation.
 - [x] **CP-011 — Pack catalogue.** Offline entries expose prerequisites,
   objectives, compatibility and failure details, installed version, update
   availability, and available/installed/pinned/incompatible/failed state.

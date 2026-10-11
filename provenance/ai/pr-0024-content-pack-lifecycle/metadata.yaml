@@ -1,14 +1,34 @@
+schema_version: 1
 pull_request: 24
 title: Add content-pack lifecycle
 human_owner: kswaroop1
-assistant: OpenAI Codex
+agents:
+  - product: OpenAI Codex
+    model: GPT-5.6 Sol
+started_at: 2026-10-08T00:00:00Z
+finalized_at: null
 scope:
-  - content-pack distribution manifests
-  - offline catalogue and storage forecast
-  - transactional install, retention, and rollback
-  - tests and documentation
-excluded:
-  - network catalogues and OAuth
-  - signing credentials and publisher trust operations
-  - releases and VERSION changes
+  - documentation
+  - code
+  - tests
+redactions:
+  - category: unavailable_historical_exchanges
+    reason: The complete interactive export before durable GitHub recovery was unavailable.
+ci_runs:
+  - 37799001302
+  - 37799444308
+  - 37800073565
+  - 37800365348
+  - 37808072288
+  - 37816912618
+  - 37831858412
+  - 37840720210
+  - 37847622945
+  - 37866329398
+  - 37869966133
+  - 37871589333
+  - 37871978999
+  - 37872340857
+  - 37872829581
+  - 38115688317
 
