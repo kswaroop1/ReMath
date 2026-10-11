@@ -1,14 +1,19 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/application/content_pack_installer.dart';
+import 'package:remath/src/features/learning/application/content_pack_remover.dart';
+import 'package:remath/src/features/learning/application/content_pack_rollback.dart';
 import 'package:remath/src/features/learning/data/content_pack_archive_verifier.dart';
 import 'package:remath/src/features/learning/data/content_pack_install_guard.dart';
 import 'package:remath/src/features/learning/data/content_pack_install_store.dart';
 import 'package:remath/src/features/learning/data/content_pack_lifecycle.dart';
 import 'package:remath/src/features/learning/data/sqlite_content_pack_installation_backend.dart';
 import 'package:remath/src/features/learning/domain/content_pack_release.dart';
+import 'package:remath/src/features/learning/domain/content_pack_retention.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
@@ -127,6 +132,362 @@ void main() {
     await store.retryPendingDiscards();
     expect(await backend.pendingCleanupCount(), 0);
   });
+
+  test('startup recovers abandoned reservations as cleanup work', () async {
+    final directory = await Directory.systemTemp.createTemp('remath-pack-');
+    addTearDown(() => directory.delete(recursive: true));
+    final path = '${directory.path}/lifecycle.sqlite3';
+    var database = sqlite3.open(path);
+    var nextId = 0;
+    final interrupted = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'orphan-${nextId++}',
+    );
+    final reservation = await interrupted.reserve(
+      packId: 'org.remath.pack.one',
+      requiredBytes: 64,
+      version: '1.0.0',
+    );
+    await reservation.add(const [1, 2, 3]);
+    await reservation.seal(lengthBytes: 3, sha256: 'sealed-digest');
+    database.close();
+
+    database = sqlite3.open(path);
+    addTearDown(database.close);
+    final recovered = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'recovered-${nextId++}',
+    );
+
+    expect(await recovered.pendingCleanupCount(), 1);
+    await recovered.retryPendingDiscards();
+    expect(await recovered.pendingCleanupCount(), 0);
+  });
+
+  test('staging appends chunks once and sealed bytes are immutable', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final backend = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'chunked',
+    );
+    final reservation = await backend.reserve(
+      packId: 'org.remath.pack.one',
+      requiredBytes: 64,
+      version: '1.0.0',
+    );
+    await reservation.add(const [1, 2]);
+    await reservation.add(const [3]);
+    await reservation.add(const [4, 5]);
+    final sealed = await reservation.seal(
+      lengthBytes: 5,
+      sha256: 'sealed-digest',
+    );
+
+    expect(
+      database.select(
+        'SELECT COUNT(*) AS count FROM content_pack_object_chunks',
+      ).single['count'],
+      3,
+    );
+    expect(
+      database.select(
+        'SELECT length(content) AS length FROM content_pack_objects',
+      ).single['length'],
+      0,
+    );
+    expect(
+      () => database.execute(
+        'UPDATE content_pack_object_chunks SET content = ? WHERE seal_id = ?',
+        [Uint8List.fromList(const [9]), sealed.sealId],
+      ),
+      throwsA(isA<SqliteException>()),
+    );
+    expect(
+      await sealed.openRead().expand((chunk) => chunk).toList(),
+      const [1, 2, 3, 4, 5],
+    );
+  });
+
+  test('activation rejects a downgrade required by an active dependant',
+      () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    var nextId = 0;
+    final backend = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'dependency-${nextId++}',
+    );
+    final installer = composeContentPackInstaller(
+      backend: backend,
+      environment: _Environment(backend),
+      signatureVerifier: const _TrustedSignatureVerifier(),
+    );
+    final dependency = await _release(
+      '2.0.0',
+      packId: 'org.remath.pack.dependency',
+    );
+    await installer.install(
+      dependency,
+      _Source(utf8.encode(_pack('2.0.0',
+          packId: 'org.remath.pack.dependency'))),
+    );
+    final dependant = await _release(
+      '1.0.0',
+      packId: 'org.remath.pack.dependant',
+      dependencies: const [
+        ContentPackDependency(
+          packId: 'org.remath.pack.dependency',
+          minimumVersion: '2.0.0',
+        ),
+      ],
+    );
+    await installer.install(
+      dependant,
+      _Source(utf8.encode(_pack('1.0.0',
+          packId: 'org.remath.pack.dependant'))),
+    );
+    final downgrade = await _release(
+      '1.0.0',
+      packId: 'org.remath.pack.dependency',
+    );
+
+    await expectLater(
+      installer.install(
+        downgrade,
+        _Source(utf8.encode(_pack('1.0.0',
+            packId: 'org.remath.pack.dependency'))),
+        isExplicitVersionChoice: true,
+      ),
+      throwsA(
+        isA<ContentPackActivationException>().having(
+          (error) => error.outcome,
+          'outcome',
+          ContentPackRetentionOutcome.blockedDependent,
+        ),
+      ),
+    );
+    expect(await backend.activeVersion(dependency.packId), '2.0.0');
+  });
+
+  test('durable unpin permits a later safe removal', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    var nextId = 0;
+    final backend = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'unpin-${nextId++}',
+    );
+    final installer = composeContentPackInstaller(
+      backend: backend,
+      environment: _Environment(backend),
+      signatureVerifier: const _TrustedSignatureVerifier(),
+    );
+    final release = await _release('1.0.0');
+    await installer.install(release, _Source(utf8.encode(_pack('1.0.0'))));
+    await backend.pinActive(release.packId);
+
+    final unpinned = await backend.unpinActive(release.packId);
+    final removed = await backend.removeActiveIfAllowed(
+      expectedState: unpinned,
+      packId: release.packId,
+    );
+
+    expect(unpinned.pinnedVersion, isNull);
+    expect(removed.outcome, ContentPackRemovalCommitOutcome.removed);
+    expect(await backend.activeVersion(release.packId), isNull);
+  });
+
+  test('confirmation retires the previous rollback object', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    var nextId = 0;
+    final backend = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'confirm-${nextId++}',
+    );
+    final installer = composeContentPackInstaller(
+      backend: backend,
+      environment: _Environment(backend),
+      signatureVerifier: const _TrustedSignatureVerifier(),
+    );
+    await installer.install(
+      await _release('1.0.0'),
+      _Source(utf8.encode(_pack('1.0.0'))),
+    );
+    final first = await backend.activation('org.remath.pack.one');
+    await backend.confirmFirstLoad(
+      expectedActivationId: first.activationId,
+      packId: 'org.remath.pack.one',
+    );
+    await installer.install(
+      await _release('2.0.0'),
+      _Source(utf8.encode(_pack('2.0.0'))),
+    );
+    final second = await backend.activation('org.remath.pack.one');
+
+    await backend.confirmFirstLoad(
+      expectedActivationId: second.activationId,
+      packId: 'org.remath.pack.one',
+    );
+
+    expect(
+      database.select(
+        "SELECT COUNT(*) AS count FROM content_pack_objects WHERE state = 'retained'",
+      ).single['count'],
+      0,
+    );
+    final active = database.select(
+      'SELECT previous_seal_id FROM content_pack_active',
+    ).single;
+    expect(active['previous_seal_id'], isNull);
+  });
+
+  test('duplicate sealed activation is an atomic no-op', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    var nextId = 0;
+    final backend = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'duplicate-${nextId++}',
+    );
+    final store = TransactionalContentPackInstallStore(backend: backend);
+    final release = await _release('1.0.0');
+    final first = await store.stage(
+      release,
+      _Source(utf8.encode(_pack('1.0.0'))),
+    );
+    final duplicate = await store.stage(
+      release,
+      _Source(utf8.encode(_pack('1.0.0'))),
+    );
+    await store.activateStaged(
+      release,
+      first,
+      isExplicitVersionChoice: false,
+    );
+    final before = await backend.activation(release.packId);
+
+    await store.activateStaged(
+      release,
+      duplicate,
+      isExplicitVersionChoice: false,
+    );
+    final after = await backend.activation(release.packId);
+
+    expect(after.activationId, before.activationId);
+    expect(
+      database.select(
+        'SELECT COUNT(*) AS count FROM content_pack_objects',
+      ).single['count'],
+      1,
+    );
+  });
+
+  test('removal rejects an ABA replacement at the same version', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    var nextId = 0;
+    final backend = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'aba-${nextId++}',
+    );
+    final installer = composeContentPackInstaller(
+      backend: backend,
+      environment: _Environment(backend),
+      signatureVerifier: const _TrustedSignatureVerifier(),
+    );
+    final release = await _release('1.0.0');
+    await installer.install(release, _Source(utf8.encode(_pack('1.0.0'))));
+    final stale = await backend.retentionState(release.packId);
+    await backend.removeActiveIfAllowed(
+      expectedState: stale,
+      packId: release.packId,
+    );
+    await installer.install(release, _Source(utf8.encode(_pack('1.0.0'))));
+
+    final result = await backend.removeActiveIfAllowed(
+      expectedState: stale,
+      packId: release.packId,
+    );
+
+    expect(result.outcome, ContentPackRemovalCommitOutcome.staleState);
+    expect(await backend.activeVersion(release.packId), '1.0.0');
+  });
+
+  test('sqlite rollback restores, deactivates, and exposes failure status',
+      () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    var nextId = 0;
+    final backend = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'rollback-${nextId++}',
+    );
+    final installer = composeContentPackInstaller(
+      backend: backend,
+      environment: _Environment(backend),
+      signatureVerifier: const _TrustedSignatureVerifier(),
+    );
+    await installer.install(
+      await _release('1.0.0'),
+      _Source(utf8.encode(_pack('1.0.0'))),
+    );
+    final first = await backend.activation('org.remath.pack.one');
+    await backend.confirmFirstLoad(
+      expectedActivationId: first.activationId,
+      packId: 'org.remath.pack.one',
+    );
+    await installer.install(
+      await _release('2.0.0'),
+      _Source(utf8.encode(_pack('2.0.0'))),
+    );
+    final update = await backend.activation('org.remath.pack.one');
+
+    final restored = await backend.rollbackFailedActivation(
+      expectedActivationId: update.activationId,
+      message: 'Payload-safe failure.',
+      packId: 'org.remath.pack.one',
+    );
+    final failure = await backend.latestFailure('org.remath.pack.one');
+
+    expect(restored.restored, isTrue);
+    expect(restored.activeVersion, '1.0.0');
+    expect(failure?.message, 'Payload-safe failure.');
+    await backend.acknowledgeFailure(
+      failureId: failure!.failureId,
+      packId: failure.packId,
+    );
+    expect(await backend.latestFailure('org.remath.pack.one'), isNull);
+
+    final other = await _release(
+      '1.0.0',
+      packId: 'org.remath.pack.other',
+    );
+    await installer.install(
+      other,
+      _Source(utf8.encode(_pack('1.0.0',
+          packId: 'org.remath.pack.other'))),
+    );
+    final pending = await backend.activation(other.packId);
+    final deactivated = await backend.rollbackFailedActivation(
+      expectedActivationId: pending.activationId,
+      message: 'First install failed.',
+      packId: other.packId,
+    );
+    expect(deactivated.restored, isTrue);
+    expect(deactivated.activeVersion, isNull);
+    expect(await backend.activeVersion(other.packId), isNull);
+  });
 }
 
 final class _Environment implements ContentPackInstallEnvironment {
@@ -168,12 +529,16 @@ final class _Source implements ContentPackArchiveSource {
   Stream<List<int>> openRead() => Stream.value(bytes);
 }
 
-Future<ContentPackRelease> _release(String version) async {
-  final bytes = utf8.encode(_pack(version));
+Future<ContentPackRelease> _release(
+  String version, {
+  List<ContentPackDependency> dependencies = const [],
+  String packId = 'org.remath.pack.one',
+}) async {
+  final bytes = utf8.encode(_pack(version, packId: packId));
   final digest = await Sha256().hash(bytes);
   return ContentPackRelease(
     compressedSizeBytes: bytes.length,
-    dependencies: const [],
+    dependencies: dependencies,
     description: 'Original pack.',
     installedSizeBytes: bytes.length,
     language: 'en-GB',
@@ -182,7 +547,7 @@ Future<ContentPackRelease> _release(String version) async {
     minimumAppVersion: '0.1.0',
     minimumSchemaVersion: 1,
     objectives: const ['Learn safely'],
-    packId: 'org.remath.pack.one',
+    packId: packId,
     publisherKeyId: 'org.remath.publisher.primary',
     sha256: digest.bytes
         .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
@@ -193,11 +558,14 @@ Future<ContentPackRelease> _release(String version) async {
   );
 }
 
-String _pack(String version) =>
+String _pack(
+  String version, {
+  String packId = 'org.remath.pack.one',
+}) =>
     '''
 {
   "schemaVersion": 1,
-  "id": "org.remath.pack.one",
+  "id": "$packId",
   "version": "$version",
   "title": "Pack",
   "license": "CC-BY-SA-4.0",

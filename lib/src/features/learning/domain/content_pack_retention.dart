@@ -9,14 +9,18 @@ enum ContentPackRetentionOutcome {
 
 final class ContentPackRetentionState {
   const ContentPackRetentionState({
+    this.activationId,
     required this.installedVersion,
     required this.pinnedVersion,
   });
 
   const ContentPackRetentionState.absent()
-    : installedVersion = null,
+    : activationId = null,
+      installedVersion = null,
       pinnedVersion = null;
 
+  /// Compare-and-swap token for the durable active pointer, when available.
+  final String? activationId;
   final String? installedVersion;
   final String? pinnedVersion;
 }
@@ -48,6 +52,7 @@ final class ContentPackRetentionPolicy {
     return ContentPackRetentionTransition(
       outcome: ContentPackRetentionOutcome.changed,
       state: ContentPackRetentionState(
+        activationId: state.activationId,
         installedVersion: installedVersion,
         pinnedVersion: installedVersion,
       ),
@@ -64,6 +69,7 @@ final class ContentPackRetentionPolicy {
     return ContentPackRetentionTransition(
       outcome: ContentPackRetentionOutcome.changed,
       state: ContentPackRetentionState(
+        activationId: state.activationId,
         installedVersion: state.installedVersion,
         pinnedVersion: null,
       ),
@@ -107,6 +113,7 @@ final class ContentPackRetentionPolicy {
     return ContentPackRetentionTransition(
       outcome: ContentPackRetentionOutcome.changed,
       state: ContentPackRetentionState(
+        activationId: null,
         installedVersion: requestedVersion,
         pinnedVersion: pinnedVersion == null ? null : requestedVersion,
       ),

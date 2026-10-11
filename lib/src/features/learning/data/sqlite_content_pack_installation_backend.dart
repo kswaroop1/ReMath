@@ -19,6 +19,7 @@ final class SqliteContentPackInstallationBackend
     implements
         ContentPackInstallationBackend,
         ContentPackRollbackStore,
+        ContentPackFailureStatusStore,
         ContentPackAvailabilityStore {
   SqliteContentPackInstallationBackend({
     required Future<int> Function() availableBytes,
@@ -310,6 +311,26 @@ final class SqliteContentPackInstallationBackend
         WHERE state = 'cleanup'
       ''').single['count']
           as int;
+
+  Future<ContentPackRetentionState> retentionState(String packId) async =>
+      throw UnimplementedError(
+        'Durable retention snapshots are not implemented.',
+      );
+
+  Future<ContentPackRetentionState> unpinActive(String packId) async =>
+      throw UnimplementedError('Durable unpin is not implemented.');
+
+  @override
+  Future<ContentPackFailureStatus?> latestFailure(String packId) async =>
+      throw UnimplementedError('Failure status queries are not implemented.');
+
+  @override
+  Future<void> acknowledgeFailure({
+    required String failureId,
+    required String packId,
+  }) async => throw UnimplementedError(
+    'Failure status acknowledgement is not implemented.',
+  );
 
   void _deletePendingCleanup({String? sealId}) {
     _transaction(() {

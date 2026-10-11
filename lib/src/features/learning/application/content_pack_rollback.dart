@@ -20,6 +20,27 @@ abstract interface class ContentPackRollbackStore {
   });
 }
 
+final class ContentPackFailureStatus {
+  const ContentPackFailureStatus({
+    required this.failureId,
+    required this.message,
+    required this.packId,
+  });
+
+  final String failureId;
+  final String message;
+  final String packId;
+}
+
+abstract interface class ContentPackFailureStatusStore {
+  Future<ContentPackFailureStatus?> latestFailure(String packId);
+
+  Future<void> acknowledgeFailure({
+    required String failureId,
+    required String packId,
+  });
+}
+
 final class ContentPackRuntimeActivation {
   const ContentPackRuntimeActivation({
     required this.activationId,
