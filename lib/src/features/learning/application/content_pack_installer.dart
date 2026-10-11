@@ -37,11 +37,38 @@ abstract interface class ContentPackPayloadVerifier {
   );
 }
 
-final class ContentPackInstaller {
-  ContentPackInstaller({required this.store, required this.verifier});
+final class ContentPackActivationVerifier implements ContentPackPayloadVerifier {
+  const ContentPackActivationVerifier({
+    required this.contentVerifier,
+    required this.integrityVerifier,
+  });
 
+  final ContentPackPayloadVerifier contentVerifier;
+  final ContentPackPayloadVerifier integrityVerifier;
+
+  @override
+  Future<void> verify(
+    ContentPackRelease release,
+    ContentPackStagedArchive archive,
+  ) => throw UnimplementedError(
+    'Complete staged activation verification is not implemented',
+  );
+}
+
+abstract interface class ContentPackInstallGuard {
+  Future<void> validate(ContentPackRelease release);
+}
+
+final class ContentPackInstaller {
+  ContentPackInstaller({
+    required this.guard,
+    required this.store,
+    required this.verifier,
+  });
+
+  final ContentPackInstallGuard guard;
   final ContentPackInstallStore store;
-  final ContentPackPayloadVerifier verifier;
+  final ContentPackActivationVerifier verifier;
   final Map<String, Future<ContentPackInstallOutcome>> _inFlight = {};
   final Map<String, String> _inFlightVersions = {};
 
@@ -80,6 +107,7 @@ final class ContentPackInstaller {
       return ContentPackInstallOutcome.alreadyActive;
     }
 
+    // The green implementation composes compatibility before staging.
     final staged = await store.stage(release, archive);
     try {
       await verifier.verify(release, staged);

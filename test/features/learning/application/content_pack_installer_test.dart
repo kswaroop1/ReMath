@@ -31,8 +31,15 @@ void main() {
       events: events,
       stagedBytes: const [9, 8, 7, 6],
     );
-    final verifier = _RecordingVerifier(events);
-    final installer = ContentPackInstaller(store: store, verifier: verifier);
+    final integrityVerifier = _RecordingVerifier(events);
+    final installer = ContentPackInstaller(
+      guard: _RecordingGuard(events),
+      store: store,
+      verifier: ContentPackActivationVerifier(
+        contentVerifier: _RecordingVerifier(events, label: 'content'),
+        integrityVerifier: integrityVerifier,
+      ),
+    );
 
     final outcome = await installer.install(
       release,
@@ -43,8 +50,8 @@ void main() {
     );
 
     expect(outcome, ContentPackInstallOutcome.activated);
-    expect(events, ['stage:2', 'verify', 'activate']);
-    expect(verifier.verifiedBytes, [9, 8, 7, 6]);
+    expect(events, ['guard', 'stage:2', 'verify', 'content', 'activate']);
+    expect(integrityVerifier.verifiedBytes, [9, 8, 7, 6]);
     expect(await store.activeVersion(release.packId), release.version);
     expect(store.hasStagedRelease, isFalse);
   });
@@ -56,8 +63,12 @@ void main() {
       events: events,
     );
     final installer = ContentPackInstaller(
+      guard: _RecordingGuard(events),
       store: store,
-      verifier: _RecordingVerifier(events, shouldFail: true),
+      verifier: ContentPackActivationVerifier(
+        contentVerifier: _RecordingVerifier(events, label: 'content'),
+        integrityVerifier: _RecordingVerifier(events, shouldFail: true),
+      ),
     );
 
     await expectLater(
@@ -68,7 +79,7 @@ void main() {
       throwsA(isA<StateError>()),
     );
 
-    expect(events, ['stage:1', 'verify', 'discard']);
+    expect(events, ['guard', 'stage:1', 'verify', 'discard']);
     expect(await store.activeVersion(release.packId), '1.0.0');
     expect(store.hasStagedRelease, isFalse);
   });
@@ -80,8 +91,12 @@ void main() {
       events: events,
     );
     final installer = ContentPackInstaller(
+      guard: _RecordingGuard(events),
       store: store,
-      verifier: _RecordingVerifier(events),
+      verifier: ContentPackActivationVerifier(
+        contentVerifier: _RecordingVerifier(events, label: 'content'),
+        integrityVerifier: _RecordingVerifier(events),
+      ),
     );
 
     final outcome = await installer.install(
@@ -100,11 +115,15 @@ void main() {
     final finishVerification = Completer<void>();
     final store = _MemoryInstallStore(activeVersions: {}, events: events);
     final installer = ContentPackInstaller(
+      guard: _RecordingGuard(events),
       store: store,
-      verifier: _RecordingVerifier(
-        events,
-        verificationStarted: verificationStarted,
-        finishVerification: finishVerification,
+      verifier: ContentPackActivationVerifier(
+        contentVerifier: _RecordingVerifier(events, label: 'content'),
+        integrityVerifier: _RecordingVerifier(
+          events,
+          verificationStarted: verificationStarted,
+          finishVerification: finishVerification,
+        ),
       ),
     );
 
@@ -121,8 +140,45 @@ void main() {
 
     expect(await first, ContentPackInstallOutcome.activated);
     expect(await duplicate, ContentPackInstallOutcome.activated);
-    expect(events, ['stage:1', 'verify', 'activate']);
+    expect(events, ['guard', 'stage:1', 'verify', 'content', 'activate']);
   });
+
+  test('unsafe release compatibility fails before staging', () async {
+    final events = <String>[];
+    final installer = ContentPackInstaller(
+      guard: _RecordingGuard(events, shouldFail: true),
+      store: _MemoryInstallStore(activeVersions: {}, events: events),
+      verifier: ContentPackActivationVerifier(
+        contentVerifier: _RecordingVerifier(events, label: 'content'),
+        integrityVerifier: _RecordingVerifier(events),
+      ),
+    );
+
+    await expectLater(
+      installer.install(
+        release,
+        _ChunkedArchiveSource(const [[1, 2, 3, 4]]),
+      ),
+      throwsA(isA<StateError>()),
+    );
+
+    expect(events, ['guard']);
+  });
+}
+
+final class _RecordingGuard implements ContentPackInstallGuard {
+  _RecordingGuard(this.events, {this.shouldFail = false});
+
+  final List<String> events;
+  final bool shouldFail;
+
+  @override
+  Future<void> validate(ContentPackRelease release) async {
+    events.add('guard');
+    if (shouldFail) {
+      throw StateError('Release compatibility failed.');
+    }
+  }
 }
 
 final class _ChunkedArchiveSource implements ContentPackArchiveSource {
@@ -207,12 +263,14 @@ final class _MemoryInstallStore implements ContentPackInstallStore {
 final class _RecordingVerifier implements ContentPackPayloadVerifier {
   _RecordingVerifier(
     this.events, {
+    this.label = 'verify',
     this.shouldFail = false,
     this.verificationStarted,
     this.finishVerification,
   });
 
   final List<String> events;
+  final String label;
   final bool shouldFail;
   final Completer<void>? verificationStarted;
   final Completer<void>? finishVerification;
@@ -223,7 +281,7 @@ final class _RecordingVerifier implements ContentPackPayloadVerifier {
     ContentPackRelease release,
     ContentPackStagedArchive archive,
   ) async {
-    events.add('verify');
+    events.add(label);
     verifiedBytes = await archive.openRead().expand((chunk) => chunk).toList();
     verificationStarted?.complete();
     await finishVerification?.future;
