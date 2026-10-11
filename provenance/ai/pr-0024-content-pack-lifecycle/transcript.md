@@ -444,3 +444,58 @@ reflects the concrete SQLite lifecycle backend added by the final review
 correction; its restart, retention, confirmation/rollback, and cleanup-retry
 paths have focused behavioural coverage and the repository remains 5.74 points
 above its enforced floor.
+
+Records-head CI `38158768384` then passed every gate at `f7d96bee`, including
+the same 482-test suite and 95.74% line coverage, before the next independent
+review.
+
+## 2026-10-11 — Fourth independent review and restart-safe storage corrections
+
+The fourth independent review created twelve additional inline findings. It
+required restart recovery for orphaned staging reservations, reverse-dependency
+validation on downgrade, a durable unpin transition, retirement of the retained
+object after confirmation, store-level duplicate-activation idempotence, the
+latest CI provenance, immutability of sealed SQLite content, an activation token
+in removal compare-and-swap, incremental staging writes, bounded semantic
+version components, a readable and acknowledgeable failure-status lifecycle,
+and concrete rollback restore/first-install/reopen coverage.
+
+The exact review exchanges are preserved in GitHub as discussions
+[`4242517566`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4242517566),
+[`4242517567`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4242517567),
+[`4242517571`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4242517571),
+[`4242517576`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4242517576),
+[`4242517581`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4242517581),
+[`4242517587`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4242517587),
+[`4242517592`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4242517592),
+[`4242517596`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4242517596),
+[`4242517600`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4242517600),
+[`4242517602`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4242517602),
+[`4242517605`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4242517605),
+and [`4242517608`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4242517608).
+
+Two strict test-only/implementation pairs address the findings:
+
+- published red `eae91246` / green `b1400062` requires and implements startup
+  cleanup recovery, chunk-row staging without quadratic BLOB rewrites, sealed
+  chunk immutability, active-dependant checks, durable unpin and failure status,
+  confirmation cleanup, activation-token removal CAS, atomic unchanged
+  activation, and the concrete rollback scenarios;
+- published red `4d0e09cc` / green `e4c75a46` rejects semantic-version
+  components outside the integer range used by lifecycle comparators.
+
+CI `38181013225` compiled and passed all 491 tests but correctly rejected the
+first replay configuration because it named local-only red SHAs. Commit
+`1520b928` switches permanent replay to the published red SHAs. CI
+`38181480231` then passed the replay and all 491 tests, identifying only two
+canonical Dart formatting differences. Diagnostic CI `38181933311` printed the
+exact formatter output while again passing all 491 tests. Commit `6e4874f6`
+applies that output and restores the ordinary non-mutating format gate.
+
+CI `38182384722` passed permanent red replay, dependency lock, canonical format,
+and all 491 tests, then reported one style lint and one unused test import.
+Commit `e0b75caf` makes only those two analysis corrections. Authoritative CI
+`38183128040` passes every gate at that corrected head: permanent red evidence,
+committed structure, dependency lock, canonical formatting, fatal analysis,
+bundled-content validation, eight Chrome contracts, all 491 native tests,
+96.77% line coverage, and secret scanning.
