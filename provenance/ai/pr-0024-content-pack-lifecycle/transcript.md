@@ -314,3 +314,8 @@ It reports only seven Dart 3.13 canonical-formatting differences. Because no
 local Flutter/Dart runtime is available, the existing format step is changed
 temporarily to print the exact formatter patch; the ordinary non-mutating gate
 will be restored in the immediate correction commit.
+
+Diagnostic CI `38119670199` printed the exact seven-file Dart 3.13 formatter
+patch while again passing permanent red replay, all 462 native tests, coverage,
+and secret scanning. The immediate correction applies that output byte-for-byte
+and restores the ordinary non-mutating format gate.

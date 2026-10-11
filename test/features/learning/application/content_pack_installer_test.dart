@@ -56,58 +56,68 @@ void main() {
     expect(store.hasStagedRelease, isFalse);
   });
 
-  test('verification failure discards staging and preserves active pack', () async {
-    final events = <String>[];
-    final store = _MemoryInstallStore(
-      activeVersions: {release.packId: '1.0.0'},
-      events: events,
-    );
-    final installer = ContentPackInstaller(
-      guard: _RecordingGuard(events),
-      store: store,
-      verifier: ContentPackActivationVerifier(
-        contentVerifier: _RecordingVerifier(events, label: 'content'),
-        integrityVerifier: _RecordingVerifier(events, shouldFail: true),
-      ),
-    );
+  test(
+    'verification failure discards staging and preserves active pack',
+    () async {
+      final events = <String>[];
+      final store = _MemoryInstallStore(
+        activeVersions: {release.packId: '1.0.0'},
+        events: events,
+      );
+      final installer = ContentPackInstaller(
+        guard: _RecordingGuard(events),
+        store: store,
+        verifier: ContentPackActivationVerifier(
+          contentVerifier: _RecordingVerifier(events, label: 'content'),
+          integrityVerifier: _RecordingVerifier(events, shouldFail: true),
+        ),
+      );
 
-    await expectLater(
-      installer.install(
+      await expectLater(
+        installer.install(
+          release,
+          _ChunkedArchiveSource(const [
+            [1, 2, 3, 4],
+          ]),
+        ),
+        throwsA(isA<StateError>()),
+      );
+
+      expect(events, ['guard', 'stage:1', 'verify', 'discard']);
+      expect(await store.activeVersion(release.packId), '1.0.0');
+      expect(store.hasStagedRelease, isFalse);
+    },
+  );
+
+  test(
+    'installing the active version is idempotent and performs no writes',
+    () async {
+      final events = <String>[];
+      final store = _MemoryInstallStore(
+        activeVersions: {release.packId: release.version},
+        events: events,
+      );
+      final installer = ContentPackInstaller(
+        guard: _RecordingGuard(events),
+        store: store,
+        verifier: ContentPackActivationVerifier(
+          contentVerifier: _RecordingVerifier(events, label: 'content'),
+          integrityVerifier: _RecordingVerifier(events),
+        ),
+      );
+
+      final outcome = await installer.install(
         release,
-        _ChunkedArchiveSource(const [[1, 2, 3, 4]]),
-      ),
-      throwsA(isA<StateError>()),
-    );
+        _ChunkedArchiveSource(const [
+          [1, 2, 3, 4],
+        ]),
+      );
 
-    expect(events, ['guard', 'stage:1', 'verify', 'discard']);
-    expect(await store.activeVersion(release.packId), '1.0.0');
-    expect(store.hasStagedRelease, isFalse);
-  });
-
-  test('installing the active version is idempotent and performs no writes', () async {
-    final events = <String>[];
-    final store = _MemoryInstallStore(
-      activeVersions: {release.packId: release.version},
-      events: events,
-    );
-    final installer = ContentPackInstaller(
-      guard: _RecordingGuard(events),
-      store: store,
-      verifier: ContentPackActivationVerifier(
-        contentVerifier: _RecordingVerifier(events, label: 'content'),
-        integrityVerifier: _RecordingVerifier(events),
-      ),
-    );
-
-    final outcome = await installer.install(
-      release,
-      _ChunkedArchiveSource(const [[1, 2, 3, 4]]),
-    );
-
-    expect(outcome, ContentPackInstallOutcome.alreadyActive);
-    expect(events, isEmpty);
-    expect(store.hasStagedRelease, isFalse);
-  });
+      expect(outcome, ContentPackInstallOutcome.alreadyActive);
+      expect(events, isEmpty);
+      expect(store.hasStagedRelease, isFalse);
+    },
+  );
 
   test('concurrent duplicate installs share one staged operation', () async {
     final events = <String>[];
@@ -129,12 +139,16 @@ void main() {
 
     final first = installer.install(
       release,
-      _ChunkedArchiveSource(const [[1, 2, 3, 4]]),
+      _ChunkedArchiveSource(const [
+        [1, 2, 3, 4],
+      ]),
     );
     await verificationStarted.future;
     final duplicate = installer.install(
       release,
-      _ChunkedArchiveSource(const [[4, 3, 2, 1]]),
+      _ChunkedArchiveSource(const [
+        [4, 3, 2, 1],
+      ]),
     );
     finishVerification.complete();
 
@@ -157,7 +171,9 @@ void main() {
     await expectLater(
       installer.install(
         release,
-        _ChunkedArchiveSource(const [[1, 2, 3, 4]]),
+        _ChunkedArchiveSource(const [
+          [1, 2, 3, 4],
+        ]),
       ),
       throwsA(isA<StateError>()),
     );

@@ -146,7 +146,11 @@ final class ContentPackRetentionPolicy {
     final parts = version.split('.');
     final parsed = parts.map(int.tryParse).toList(growable: false);
     if (parts.length != 3 || parsed.any((part) => part == null)) {
-      throw ArgumentError.value(version, 'version', 'Expected semantic version.');
+      throw ArgumentError.value(
+        version,
+        'version',
+        'Expected semantic version.',
+      );
     }
     return parsed.cast<int>();
   }

@@ -56,22 +56,23 @@ void main() {
     expect(signatures.signature, [1, 2, 3]);
   });
 
-  test('signature binds install-decision metadata to the archive digest', () async {
-    final original = _RecordingSignatureVerifier();
-    final changed = _RecordingSignatureVerifier();
+  test(
+    'signature binds install-decision metadata to the archive digest',
+    () async {
+      final original = _RecordingSignatureVerifier();
+      final changed = _RecordingSignatureVerifier();
 
-    await ContentPackArchiveVerifier(
-      signatureVerifier: original,
-    ).verify(_release(), _StagedArchive([archiveBytes]));
-    await ContentPackArchiveVerifier(
-      signatureVerifier: changed,
-    ).verify(
-      _release(title: 'Tampered title', version: '9.9.9'),
-      _StagedArchive([archiveBytes]),
-    );
+      await ContentPackArchiveVerifier(
+        signatureVerifier: original,
+      ).verify(_release(), _StagedArchive([archiveBytes]));
+      await ContentPackArchiveVerifier(signatureVerifier: changed).verify(
+        _release(title: 'Tampered title', version: '9.9.9'),
+        _StagedArchive([archiveBytes]),
+      );
 
-    expect(changed.signedPayload, isNot(original.signedPayload));
-  });
+      expect(changed.signedPayload, isNot(original.signedPayload));
+    },
+  );
 
   test(
     'rejects payload length mismatch before signature verification',

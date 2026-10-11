@@ -168,9 +168,6 @@ final class _MemoryRollbackStore implements ContentPackRollbackStore {
     }
     active = previous;
     failureMessages.add(message);
-    return ContentPackRollbackTransition(
-      activeVersion: active,
-      restored: true,
-    );
+    return ContentPackRollbackTransition(activeVersion: active, restored: true);
   }
 }

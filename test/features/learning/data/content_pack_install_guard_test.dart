@@ -108,8 +108,7 @@ ContentPackRelease _release({
   objectives: const ['Collect like terms'],
   packId: 'org.remath.algebra.foundation',
   publisherKeyId: 'org.remath.publisher.primary',
-  sha256:
-      '9f64a747e1b97f131fabb6b447296c9b6f0201e79fb3c5356e6c77e89b6a806a',
+  sha256: '9f64a747e1b97f131fabb6b447296c9b6f0201e79fb3c5356e6c77e89b6a806a',
   signature: signature,
   title: 'Algebra foundation',
   version: '2.0.0',

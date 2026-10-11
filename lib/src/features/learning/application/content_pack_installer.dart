@@ -37,7 +37,8 @@ abstract interface class ContentPackPayloadVerifier {
   );
 }
 
-final class ContentPackActivationVerifier implements ContentPackPayloadVerifier {
+final class ContentPackActivationVerifier
+    implements ContentPackPayloadVerifier {
   const ContentPackActivationVerifier({
     required this.contentVerifier,
     required this.integrityVerifier,
@@ -82,10 +83,9 @@ final class ContentPackInstaller {
       if (_inFlightVersions[release.packId] == release.version) {
         return existing;
       }
-      return existing.then<void>(
-        (_) {},
-        onError: (_) {},
-      ).then((_) => install(release, archive));
+      return existing
+          .then<void>((_) {}, onError: (_) {})
+          .then((_) => install(release, archive));
     }
 
     late final Future<ContentPackInstallOutcome> tracked;

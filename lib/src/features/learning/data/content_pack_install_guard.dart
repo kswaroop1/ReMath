@@ -22,7 +22,8 @@ final class ContentPackInstallException implements Exception {
   String toString() => issues.join(' ');
 }
 
-final class ValidatedContentPackInstallGuard implements ContentPackInstallGuard {
+final class ValidatedContentPackInstallGuard
+    implements ContentPackInstallGuard {
   const ValidatedContentPackInstallGuard({
     required this.environment,
     this.releaseValidator = const ContentPackReleaseValidator(),
@@ -34,7 +35,10 @@ final class ValidatedContentPackInstallGuard implements ContentPackInstallGuard 
   @override
   Future<void> validate(ContentPackRelease release) async {
     final issues = [...releaseValidator.validate(release)];
-    if (_compareVersions(release.minimumAppVersion, environment.currentAppVersion) >
+    if (_compareVersions(
+          release.minimumAppVersion,
+          environment.currentAppVersion,
+        ) >
         0) {
       issues.add(
         'Content pack requires app version ${release.minimumAppVersion}; '
@@ -96,7 +100,9 @@ final class ValidatedContentPackInstallGuard implements ContentPackInstallGuard 
     final parts = version.split('.');
     final parsed = parts.map(int.tryParse).toList(growable: false);
     if (parts.length != 3 || parsed.any((part) => part == null)) {
-      throw StateError('Install environment version is not semantic: $version.');
+      throw StateError(
+        'Install environment version is not semantic: $version.',
+      );
     }
     return parsed.cast<int>();
   }
