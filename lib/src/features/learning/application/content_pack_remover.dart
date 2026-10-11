@@ -1,7 +1,29 @@
 import '../domain/content_pack_retention.dart';
 
 abstract interface class ContentPackAvailabilityStore {
-  Future<void> removeActive(String packId);
+  /// Atomically compares [expectedState], checks pins and active dependants,
+  /// and removes the pack only when all three conditions still permit it.
+  Future<ContentPackRemovalCommit> removeActiveIfAllowed({
+    required ContentPackRetentionState expectedState,
+    required String packId,
+  });
+}
+
+enum ContentPackRemovalCommitOutcome {
+  removed,
+  staleState,
+  blockedPinned,
+  blockedDependent,
+}
+
+final class ContentPackRemovalCommit {
+  const ContentPackRemovalCommit({
+    required this.outcome,
+    required this.state,
+  });
+
+  final ContentPackRemovalCommitOutcome outcome;
+  final ContentPackRetentionState state;
 }
 
 final class ContentPackRemover {
@@ -19,7 +41,28 @@ final class ContentPackRemover {
   ) async {
     final transition = retentionPolicy.remove(state);
     if (transition.outcome == ContentPackRetentionOutcome.changed) {
-      await availabilityStore.removeActive(packId);
+      final commit = await availabilityStore.removeActiveIfAllowed(
+        expectedState: state,
+        packId: packId,
+      );
+      return switch (commit.outcome) {
+        ContentPackRemovalCommitOutcome.removed => transition,
+        ContentPackRemovalCommitOutcome.staleState =>
+          ContentPackRetentionTransition(
+            outcome: ContentPackRetentionOutcome.staleState,
+            state: commit.state,
+          ),
+        ContentPackRemovalCommitOutcome.blockedPinned =>
+          ContentPackRetentionTransition(
+            outcome: ContentPackRetentionOutcome.blockedPinned,
+            state: commit.state,
+          ),
+        ContentPackRemovalCommitOutcome.blockedDependent =>
+          ContentPackRetentionTransition(
+            outcome: ContentPackRetentionOutcome.blockedDependent,
+            state: commit.state,
+          ),
+      };
     }
     return transition;
   }

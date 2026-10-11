@@ -3,6 +3,13 @@ enum ContentPackRuntimeOutcome { ready, rolledBack, alreadyRecovered }
 abstract interface class ContentPackRollbackStore {
   Future<String?> activeVersion(String packId);
 
+  /// Atomically confirms [expectedVersion] is still active and marks its first
+  /// runtime load complete. Returns the current pointer when it changed.
+  Future<ContentPackRuntimeConfirmation> confirmFirstLoad({
+    required String expectedVersion,
+    required String packId,
+  });
+
   /// Atomically compares the active version, restores the retained version
   /// (or deactivates a first installation), and records [message].
   Future<ContentPackRollbackTransition> rollbackFailedActivation({
@@ -10,6 +17,16 @@ abstract interface class ContentPackRollbackStore {
     required String message,
     required String packId,
   });
+}
+
+final class ContentPackRuntimeConfirmation {
+  const ContentPackRuntimeConfirmation({
+    required this.activeVersion,
+    required this.confirmed,
+  });
+
+  final String? activeVersion;
+  final bool confirmed;
 }
 
 abstract interface class ContentPackRuntimeLoader {
@@ -59,9 +76,15 @@ final class ContentPackRollbackCoordinator {
 
     try {
       await loader.load(packId, version);
+      final confirmation = await store.confirmFirstLoad(
+        expectedVersion: version,
+        packId: packId,
+      );
       return ContentPackRuntimeResult(
-        activeVersion: version,
-        outcome: ContentPackRuntimeOutcome.ready,
+        activeVersion: confirmation.activeVersion,
+        outcome: confirmation.confirmed
+            ? ContentPackRuntimeOutcome.ready
+            : ContentPackRuntimeOutcome.alreadyRecovered,
       );
     } on Object {
       final transition = await store.rollbackFailedActivation(

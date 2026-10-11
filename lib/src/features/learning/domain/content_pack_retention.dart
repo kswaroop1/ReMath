@@ -3,6 +3,8 @@ enum ContentPackRetentionOutcome {
   unchanged,
   blockedPinned,
   blockedDowngrade,
+  blockedDependent,
+  staleState,
 }
 
 final class ContentPackRetentionState {
