@@ -132,6 +132,24 @@ jobs:
           verify_red a06350f5764ae6d5501393747ed765812760c5ba \
             test/features/learning/application/content_pack_rollback_test.dart \
             "confirmFirstLoad"
+          verify_red 610a425d8bc4c8b44eaeccdc0c5903f99f828c75 \
+            test/features/learning/data/content_pack_install_store_test.dart \
+            "staging hashes the same frozen bytes"
+          verify_red 610a425d8bc4c8b44eaeccdc0c5903f99f828c75 \
+            test/features/learning/data/content_pack_payload_verifier_test.dart \
+            "maximumSchemaVersion"
+          verify_red 610a425d8bc4c8b44eaeccdc0c5903f99f828c75 \
+            test/features/learning/domain/content_pack_catalogue_test.dart \
+            "olderAvailable"
+          verify_red a17fda9ad4202816fc8821e0928f611553bcbb2e \
+            test/features/learning/application/content_pack_installer_test.dart \
+            "isExplicitVersionChoice"
+          verify_red a17fda9ad4202816fc8821e0928f611553bcbb2e \
+            test/features/learning/application/content_pack_rollback_test.dart \
+            "ContentPackRuntimeActivation"
+          verify_red 1f1582efef95f4d8d1a958774d969fc21468e77c \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "sqlite_content_pack_installation_backend.dart"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
