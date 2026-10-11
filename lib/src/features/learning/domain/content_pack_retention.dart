@@ -1,4 +1,9 @@
-enum ContentPackRetentionOutcome { changed, unchanged, blockedPinned }
+enum ContentPackRetentionOutcome {
+  changed,
+  unchanged,
+  blockedPinned,
+  blockedDowngrade,
+}
 
 final class ContentPackRetentionState {
   const ContentPackRetentionState({

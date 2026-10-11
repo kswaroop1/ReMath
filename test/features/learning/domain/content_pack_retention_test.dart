@@ -79,6 +79,25 @@ void main() {
     );
   });
 
+  test('automatic downgrade is blocked unless that version is explicit', () {
+    const installed = ContentPackRetentionState(
+      installedVersion: '2.0.0',
+      pinnedVersion: null,
+    );
+
+    final blocked = policy.update(installed, requestedVersion: '1.9.9');
+    expect(blocked.outcome, ContentPackRetentionOutcome.blockedDowngrade);
+    expect(blocked.state.installedVersion, '2.0.0');
+
+    final explicit = policy.update(
+      installed,
+      requestedVersion: '1.9.9',
+      isExplicitVersionChoice: true,
+    );
+    expect(explicit.outcome, ContentPackRetentionOutcome.changed);
+    expect(explicit.state.installedVersion, '1.9.9');
+  });
+
   test('removal requires unpinning and duplicate removal is harmless', () {
     const pinned = ContentPackRetentionState(
       installedVersion: '1.0.0',
