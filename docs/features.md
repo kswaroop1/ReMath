@@ -330,8 +330,9 @@ Last reviewed: 11 October 2026 (PR24 content-pack lifecycle reconciliation).
   distribution, rotation, and revocation remain PR #25 work.
 - [x] **CP-006 — Transactional installation.** Complete archives are bounded,
   content-addressed, sealed, verified, and atomically activated after dependency
-  revalidation; failures discard staging and preserve the previous active
-  version, while duplicate and concurrent installation remain safe.
+  revalidation through the production-composed SQLite lifecycle backend;
+  failures preserve the previous active version and retain failed cleanup for
+  retry, while duplicate and concurrent installation remain safe.
 - [ ] **CP-007 — Selective download.** Install only chosen subjects.
 - [x] **CP-008 — Offline retention controls.** Pin, unpin, explicitly update, and
   safely remove packs without silently replacing pinned content or removing an

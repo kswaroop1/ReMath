@@ -40,6 +40,9 @@ depends on a network service.
 - Installation, update, removal, pinning, and rollback are idempotent and survive
   interruption. The active version is either the previous verified version or
   the complete new verified version, never a partially installed pack.
+- Native production composition persists staged/sealed objects, reservations,
+  active and retained versions, dependency edges, cleanup obligations, and
+  first-load generations in SQLite so those guarantees span process restarts.
 - A pinned pack is not automatically updated or removed. Explicit unpinning or a
   specific version choice is required before replacement.
 - Removing or rolling back a pack changes curriculum availability only. Stable
@@ -65,13 +68,14 @@ depends on a network service.
 The bounded lifecycle behaviours are implemented as provider-neutral domain,
 application, and data contracts. Each behaviour has a test-first red commit, a
 paired green implementation, and permanent CI replay of the intended red
-failure. Authoritative CI run `38138260415` verifies the final behavioural head
+failure. Authoritative CI run `38158210689` verifies the final behavioural head
 with canonical formatting, fatal static analysis, bundled-content validation,
-eight Chrome contracts, all 472 native tests, 96.77% line coverage, and secret
-scanning. The measured coverage remains 6.77 percentage points above the 90%
-repository floor after adding the production-composed payload verifier,
-content-addressed sealed staging, atomic activation/removal/first-load
-transitions, and their concurrency tests.
+eight Chrome contracts, all 482 native tests, 95.74% line coverage, and secret
+scanning. The measured coverage remains 5.74 percentage points above the 90%
+repository floor after adding the production-composed payload verifier, the
+16 MiB compressed-payload boundary, durable SQLite staging, atomic
+activation/removal/first-load transitions, cleanup recovery, and their
+concurrency tests.
 
 CP-005 remains deliberately partial: archive length, SHA-256, and signature
 verification are complete, while publisher trust-root lifecycle operations stay

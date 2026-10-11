@@ -387,3 +387,60 @@ from the earlier 97.11% is 0.34 percentage points and results from adding the
 production lifecycle boundaries above; the focused characterization tests both
 raised the corrected head from 96.89% and exercise the new composition and
 concurrency paths directly.
+
+## 2026-10-11 — Third independent review and durable lifecycle composition
+
+The next requested independent review created ten additional inline findings.
+It required hashing the exact immutable chunk written to staging, enforcing the
+payload's declared schema maximum, avoiding an unsafe 512 MiB in-memory payload
+bound, keeping confirmation failures outside rollback handling, recording
+records-head CI provenance, preventing stale rollback after concurrent
+confirmation, applying retention policy inside activation, providing a
+production-composed durable backend, retaining failed discard work for retry,
+and distinguishing an older available catalogue release from an installed one.
+
+The exact review exchanges are preserved in GitHub as discussions
+[`4241576169`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241576169),
+[`4241576173`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241576173),
+[`4241576175`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241576175),
+[`4241576182`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241576182),
+[`4241576186`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241576186),
+[`4241576190`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241576190),
+[`4241576194`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241576194),
+[`4241576195`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241576195),
+[`4241576196`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241576196),
+and [`4241576201`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241576201).
+
+Three strict test-only/implementation pairs address the findings:
+
+- `610a425d` / `8dd68b65` freezes each streamed chunk before both write and
+  hash, validates the actual payload schema ceiling, lowers the safe compressed
+  archive limit to 16 MiB, and introduces an honest older-available catalogue
+  state.
+- `a17fda9a` / `33cee448` separates confirmation from rollback, adds
+  generation-checked confirmation and rollback, makes retention/version choice
+  part of atomic activation, and durably retries failed staging cleanup without
+  hiding the original error.
+- `1f1582ef` / `7b42ad42` requires and implements production composition
+  through `SqliteContentPackInstallationBackend`, including durable staging,
+  reservations, sealed objects, dependency edges, active/retained versions,
+  cleanup obligations, generation-checked first-load recovery, and
+  dependent-aware removal.
+
+Commit `dab7390d` permanently replays all three new red heads. CI
+`38156344921` exposed a named-parameter syntax error, corrected in
+`609afd7b`. Replacement CI `38156934959` then passed all 482 behavioural
+tests and every reached gate, leaving only canonical Dart formatting.
+Diagnostic CI `38157526239` printed the exact eight-file formatter patch while
+again passing all 482 tests. Commit `4efda70c` applies that patch exactly and
+restores the ordinary non-mutating formatting gate.
+
+Authoritative behavioural-head CI `38158210689` passes every gate at
+`4efda70c`: all permanent red evidence, committed project structure, the
+dependency lock, canonical formatting, fatal analysis, bundled-content
+validation, eight Chrome contracts, all 482 native tests, the 90% coverage floor
+at 95.74%, and secret scanning. The 1.03 percentage-point change from 96.77%
+reflects the concrete SQLite lifecycle backend added by the final review
+correction; its restart, retention, confirmation/rollback, and cleanup-retry
+paths have focused behavioural coverage and the repository remains 5.74 points
+above its enforced floor.
