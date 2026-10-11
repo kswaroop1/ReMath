@@ -18,33 +18,44 @@ void main() {
     expect(result.outcome, ContentPackRuntimeOutcome.ready);
     expect(result.activeVersion, version);
     expect(loader.loadCount, 1);
-    expect(store.restoreCount, 0);
+    expect(store.rollbackCount, 0);
     expect(store.failureMessages, isEmpty);
   });
 
-  test(
-    'a first-load failure restores the prior verified version safely',
-    () async {
-      final store = _MemoryRollbackStore();
-      final loader = _ControlledLoader(shouldFail: true);
-      final coordinator = ContentPackRollbackCoordinator(
-        loader: loader,
-        store: store,
-      );
+  test('a failed first load atomically restores and records status', () async {
+    final store = _MemoryRollbackStore();
+    final loader = _ControlledLoader(shouldFail: true);
+    final coordinator = ContentPackRollbackCoordinator(
+      loader: loader,
+      store: store,
+    );
 
-      final result = await coordinator.verifyFirstLoad(packId, version);
+    final result = await coordinator.verifyFirstLoad(packId, version);
 
-      expect(result.outcome, ContentPackRuntimeOutcome.rolledBack);
-      expect(result.activeVersion, '1.0.0');
-      expect(store.active, '1.0.0');
-      expect(store.restoreCount, 1);
-      expect(store.failureMessages, hasLength(1));
-      expect(store.failureMessages.single, contains(packId));
-      expect(store.failureMessages.single, contains(version));
-      expect(store.failureMessages.single, contains('1.0.0'));
-      expect(store.failureMessages.single, isNot(contains('payload-secret')));
-    },
-  );
+    expect(result.outcome, ContentPackRuntimeOutcome.rolledBack);
+    expect(result.activeVersion, '1.0.0');
+    expect(store.active, '1.0.0');
+    expect(store.rollbackCount, 1);
+    expect(store.failureMessages, hasLength(1));
+    expect(store.failureMessages.single, contains(packId));
+    expect(store.failureMessages.single, contains(version));
+    expect(store.failureMessages.single, isNot(contains('payload-secret')));
+  });
+
+  test('a failed first installation rolls back to no active pack', () async {
+    final store = _MemoryRollbackStore(previous: null);
+    final coordinator = ContentPackRollbackCoordinator(
+      loader: _ControlledLoader(shouldFail: true),
+      store: store,
+    );
+
+    final result = await coordinator.verifyFirstLoad(packId, version);
+
+    expect(result.outcome, ContentPackRuntimeOutcome.rolledBack);
+    expect(result.activeVersion, isNull);
+    expect(store.active, isNull);
+    expect(store.failureMessages, hasLength(1));
+  });
 
   test('rechecking an already recovered pack performs no writes', () async {
     final store = _MemoryRollbackStore(active: '1.0.0');
@@ -59,12 +70,12 @@ void main() {
     expect(result.outcome, ContentPackRuntimeOutcome.alreadyRecovered);
     expect(result.activeVersion, '1.0.0');
     expect(loader.loadCount, 0);
-    expect(store.restoreCount, 0);
+    expect(store.rollbackCount, 0);
     expect(store.failureMessages, isEmpty);
   });
 
-  test('an interrupted rollback can be retried safely', () async {
-    final store = _MemoryRollbackStore(failRestoreOnce: true);
+  test('an interrupted atomic rollback can be retried safely', () async {
+    final store = _MemoryRollbackStore(failRollbackOnce: true);
     final loader = _ControlledLoader(shouldFail: true);
     final coordinator = ContentPackRollbackCoordinator(
       loader: loader,
@@ -82,8 +93,23 @@ void main() {
 
     expect(retried.outcome, ContentPackRuntimeOutcome.rolledBack);
     expect(retried.activeVersion, '1.0.0');
-    expect(store.restoreCount, 2);
+    expect(store.rollbackCount, 2);
     expect(store.failureMessages, hasLength(1));
+  });
+
+  test('a newer activation is never overwritten by stale rollback', () async {
+    final store = _MemoryRollbackStore(moveBeforeRollback: '3.0.0');
+    final coordinator = ContentPackRollbackCoordinator(
+      loader: _ControlledLoader(shouldFail: true),
+      store: store,
+    );
+
+    final result = await coordinator.verifyFirstLoad(packId, version);
+
+    expect(result.outcome, ContentPackRuntimeOutcome.alreadyRecovered);
+    expect(result.activeVersion, '3.0.0');
+    expect(store.active, '3.0.0');
+    expect(store.failureMessages, isEmpty);
   });
 }
 
@@ -103,32 +129,48 @@ final class _ControlledLoader implements ContentPackRuntimeLoader {
 }
 
 final class _MemoryRollbackStore implements ContentPackRollbackStore {
-  _MemoryRollbackStore({this.active = '2.0.0', this.failRestoreOnce = false});
+  _MemoryRollbackStore({
+    this.active = '2.0.0',
+    this.failRollbackOnce = false,
+    this.moveBeforeRollback,
+    this.previous = '1.0.0',
+  });
 
   String? active;
-  bool failRestoreOnce;
+  bool failRollbackOnce;
+  final String? moveBeforeRollback;
   final List<String> failureMessages = [];
-  final String previous = '1.0.0';
-  int restoreCount = 0;
+  final String? previous;
+  int rollbackCount = 0;
 
   @override
   Future<String?> activeVersion(String packId) async => active;
 
   @override
-  Future<void> recordFailure(String packId, String message) async {
-    failureMessages.add(message);
-  }
-
-  @override
-  Future<void> restorePrevious(String packId) async {
-    restoreCount++;
-    if (failRestoreOnce) {
-      failRestoreOnce = false;
-      throw StateError('Rollback was interrupted.');
+  Future<ContentPackRollbackTransition> rollbackFailedActivation({
+    required String expectedFailedVersion,
+    required String message,
+    required String packId,
+  }) async {
+    rollbackCount++;
+    if (failRollbackOnce) {
+      failRollbackOnce = false;
+      throw StateError('Atomic rollback was interrupted.');
+    }
+    if (moveBeforeRollback != null) {
+      active = moveBeforeRollback;
+    }
+    if (active != expectedFailedVersion) {
+      return ContentPackRollbackTransition(
+        activeVersion: active,
+        restored: false,
+      );
     }
     active = previous;
+    failureMessages.add(message);
+    return ContentPackRollbackTransition(
+      activeVersion: active,
+      restored: true,
+    );
   }
-
-  @override
-  Future<String> retainedPreviousVersion(String packId) async => previous;
 }

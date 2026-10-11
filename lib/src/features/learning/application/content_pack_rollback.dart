@@ -3,11 +3,13 @@ enum ContentPackRuntimeOutcome { ready, rolledBack, alreadyRecovered }
 abstract interface class ContentPackRollbackStore {
   Future<String?> activeVersion(String packId);
 
-  Future<String> retainedPreviousVersion(String packId);
-
-  Future<void> restorePrevious(String packId);
-
-  Future<void> recordFailure(String packId, String message);
+  /// Atomically compares the active version, restores the retained version
+  /// (or deactivates a first installation), and records [message].
+  Future<ContentPackRollbackTransition> rollbackFailedActivation({
+    required String expectedFailedVersion,
+    required String message,
+    required String packId,
+  });
 }
 
 abstract interface class ContentPackRuntimeLoader {
@@ -22,6 +24,16 @@ final class ContentPackRuntimeResult {
 
   final String? activeVersion;
   final ContentPackRuntimeOutcome outcome;
+}
+
+final class ContentPackRollbackTransition {
+  const ContentPackRollbackTransition({
+    required this.activeVersion,
+    required this.restored,
+  });
+
+  final String? activeVersion;
+  final bool restored;
 }
 
 final class ContentPackRollbackCoordinator {
@@ -52,17 +64,7 @@ final class ContentPackRollbackCoordinator {
         outcome: ContentPackRuntimeOutcome.ready,
       );
     } on Object {
-      final previousVersion = await store.retainedPreviousVersion(packId);
-      await store.restorePrevious(packId);
-      await store.recordFailure(
-        packId,
-        'Content pack $packId version $version failed its first load. '
-        'Restored verified version $previousVersion.',
-      );
-      return ContentPackRuntimeResult(
-        activeVersion: previousVersion,
-        outcome: ContentPackRuntimeOutcome.rolledBack,
-      );
+      throw UnimplementedError('Atomic first-load rollback is not implemented');
     }
   }
 }
