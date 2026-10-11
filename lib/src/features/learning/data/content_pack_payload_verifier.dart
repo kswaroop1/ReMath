@@ -19,10 +19,12 @@ final class ContentPackPayloadException implements Exception {
 final class ParsedContentPackPayloadVerifier
     implements ContentPackPayloadVerifier {
   const ParsedContentPackPayloadVerifier({
+    this.maximumSchemaVersion = 3,
     this.parser = const ContentPackParser(),
     this.validator = const ContentPackValidator(),
   });
 
+  final int maximumSchemaVersion;
   final ContentPackParser parser;
   final ContentPackValidator validator;
 
@@ -62,6 +64,12 @@ final class ParsedContentPackPayloadVerifier
     if (pack.schemaVersion < release.minimumSchemaVersion) {
       issues.add('The staged content schema is older than its release.');
     }
+    if (pack.schemaVersion > maximumSchemaVersion) {
+      issues.add(
+        'The staged content schema is newer than this app supports: '
+        '${pack.schemaVersion} > $maximumSchemaVersion.',
+      );
+    }
     if (issues.isNotEmpty) {
       throw ContentPackPayloadException(List.unmodifiable(issues));
     }
@@ -72,8 +80,12 @@ final class ParsedContentPackPayloadVerifier
 /// exact sealed bytes are parsed and checked as curriculum.
 final class ProductionContentPackVerifier
     implements ContentPackPayloadVerifier {
-  const ProductionContentPackVerifier({required this.signatureVerifier});
+  const ProductionContentPackVerifier({
+    required this.maximumSchemaVersion,
+    required this.signatureVerifier,
+  });
 
+  final int maximumSchemaVersion;
   final ContentPackSignatureVerifier signatureVerifier;
 
   @override
@@ -84,6 +96,8 @@ final class ProductionContentPackVerifier
     await ContentPackArchiveVerifier(
       signatureVerifier: signatureVerifier,
     ).verify(release, archive);
-    await const ParsedContentPackPayloadVerifier().verify(release, archive);
+    await ParsedContentPackPayloadVerifier(
+      maximumSchemaVersion: maximumSchemaVersion,
+    ).verify(release, archive);
   }
 }

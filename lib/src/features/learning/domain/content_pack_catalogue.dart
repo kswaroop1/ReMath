@@ -4,6 +4,7 @@ enum ContentPackCatalogueStatus {
   available,
   installed,
   updateAvailable,
+  olderAvailable,
   pinned,
   incompatible,
   failed,
@@ -45,6 +46,9 @@ final class ContentPackCatalogueClassifier {
     final updateAvailable =
         installedVersion != null &&
         _compareVersions(release.version, installedVersion) > 0;
+    final olderAvailable =
+        installedVersion != null &&
+        _compareVersions(release.version, installedVersion) < 0;
     final status = switch ((
       failureReason,
       isCompatible,
@@ -52,13 +56,15 @@ final class ContentPackCatalogueClassifier {
       installedVersion,
       isPinned,
       updateAvailable,
+      olderAvailable,
     )) {
-      (String _, _, _, _, _, _) => ContentPackCatalogueStatus.failed,
-      (_, false, _, _, _, _) ||
-      (_, _, true, _, _, _) => ContentPackCatalogueStatus.incompatible,
-      (_, _, _, null, _, _) => ContentPackCatalogueStatus.available,
-      (_, _, _, _, true, _) => ContentPackCatalogueStatus.pinned,
-      (_, _, _, _, _, true) => ContentPackCatalogueStatus.updateAvailable,
+      (String _, _, _, _, _, _, _) => ContentPackCatalogueStatus.failed,
+      (_, false, _, _, _, _, _) ||
+      (_, _, true, _, _, _, _) => ContentPackCatalogueStatus.incompatible,
+      (_, _, _, null, _, _, _) => ContentPackCatalogueStatus.available,
+      (_, _, _, _, true, _, false) => ContentPackCatalogueStatus.pinned,
+      (_, _, _, _, _, true, _) => ContentPackCatalogueStatus.updateAvailable,
+      (_, _, _, _, _, _, true) => ContentPackCatalogueStatus.olderAvailable,
       _ => ContentPackCatalogueStatus.installed,
     };
     return ContentPackCatalogueEntry(

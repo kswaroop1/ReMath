@@ -5,7 +5,9 @@ import '../domain/content_pack_release.dart';
 final class ContentPackReleaseValidator {
   const ContentPackReleaseValidator();
 
-  static const maximumCompressedSizeBytes = 512 * 1024 * 1024;
+  /// Payload verification currently materializes one JSON document. Keep this
+  /// ceiling small enough for supported mobile and browser runtimes.
+  static const maximumCompressedSizeBytes = 16 * 1024 * 1024;
   static const maximumInstalledSizeBytes = 2 * 1024 * 1024 * 1024;
   static const _allowedLicenses = {'CC-BY-SA-4.0', 'CC-BY-4.0', 'GPL-3.0-only'};
   static final _idPattern = RegExp(r'^[a-z][a-z0-9]*(\.[a-z][a-z0-9-]*)+$');

@@ -90,6 +90,7 @@ void main() {
     () async {
       final signatures = _TrustedSignatureVerifier();
       final verifier = ProductionContentPackVerifier(
+        maximumSchemaVersion: 3,
         signatureVerifier: signatures,
       );
 
