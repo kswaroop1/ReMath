@@ -325,3 +325,11 @@ red evidence, 462-test behavioural suite, coverage, and secret scan. Fatal
 analysis identifies one obsolete digest fixture and two dynamic JSON accesses
 in the new signature test. The immediate analysis-only correction removes the
 unused fixture and casts the decoded canonical manifest to its map shape.
+
+Authoritative correction-head CI `38120249829` passes every gate: the original
+and review-correction red commits replay with their expected failures, project
+structure and dependency lock are unchanged, Dart formatting is canonical,
+fatal analysis reports no issues, bundled content validates, all browser
+contracts and 462 native tests pass, line coverage is 96.89%, and secret
+scanning passes. This records-only checkpoint precedes replies to all 13 review
+threads and the required final independent re-review.
