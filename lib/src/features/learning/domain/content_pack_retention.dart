@@ -93,6 +93,15 @@ final class ContentPackRetentionPolicy {
         state: state,
       );
     }
+    final installedVersion = state.installedVersion;
+    if (!isExplicitVersionChoice &&
+        installedVersion != null &&
+        _compareVersions(requestedVersion, installedVersion) < 0) {
+      return ContentPackRetentionTransition(
+        outcome: ContentPackRetentionOutcome.blockedDowngrade,
+        state: state,
+      );
+    }
     return ContentPackRetentionTransition(
       outcome: ContentPackRetentionOutcome.changed,
       state: ContentPackRetentionState(
@@ -119,5 +128,26 @@ final class ContentPackRetentionPolicy {
       outcome: ContentPackRetentionOutcome.changed,
       state: ContentPackRetentionState.absent(),
     );
+  }
+
+  int _compareVersions(String left, String right) {
+    final leftParts = _versionParts(left);
+    final rightParts = _versionParts(right);
+    for (var index = 0; index < leftParts.length; index += 1) {
+      final comparison = leftParts[index].compareTo(rightParts[index]);
+      if (comparison != 0) {
+        return comparison;
+      }
+    }
+    return 0;
+  }
+
+  List<int> _versionParts(String version) {
+    final parts = version.split('.');
+    final parsed = parts.map(int.tryParse).toList(growable: false);
+    if (parts.length != 3 || parsed.any((part) => part == null)) {
+      throw ArgumentError.value(version, 'version', 'Expected semantic version.');
+    }
+    return parsed.cast<int>();
   }
 }
