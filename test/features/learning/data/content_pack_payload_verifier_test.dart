@@ -64,19 +64,22 @@ void main() {
     );
   });
 
-  test('production verifier composes authenticity and content checks', () async {
-    final signatures = _TrustedSignatureVerifier();
-    final verifier = ProductionContentPackVerifier(
-      signatureVerifier: signatures,
-    );
+  test(
+    'production verifier composes authenticity and content checks',
+    () async {
+      final signatures = _TrustedSignatureVerifier();
+      final verifier = ProductionContentPackVerifier(
+        signatureVerifier: signatures,
+      );
 
-    await verifier.verify(
-      _release(),
-      _StagedArchive(utf8.encode(_validPack)),
-    );
+      await verifier.verify(
+        _release(),
+        _StagedArchive(utf8.encode(_validPack)),
+      );
 
-    expect(signatures.calls, 1);
-  });
+      expect(signatures.calls, 1);
+    },
+  );
 }
 
 const _validPack = '''

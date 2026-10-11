@@ -6,77 +6,86 @@ import 'package:remath/src/features/learning/data/content_pack_install_store.dar
 import 'package:remath/src/features/learning/domain/content_pack_release.dart';
 
 void main() {
-  test('staging rejects an oversized stream before persisting overflow', () async {
-    final backend = _MemoryBackend(availableBytes: 100);
-    final store = TransactionalContentPackInstallStore(backend: backend);
+  test(
+    'staging rejects an oversized stream before persisting overflow',
+    () async {
+      final backend = _MemoryBackend(availableBytes: 100);
+      final store = TransactionalContentPackInstallStore(backend: backend);
 
-    await expectLater(
-      store.stage(
-        _release(compressedSizeBytes: 4),
+      await expectLater(
+        store.stage(
+          _release(compressedSizeBytes: 4),
+          _ArchiveSource(const [
+            [1, 2, 3],
+            [4, 5],
+          ]),
+        ),
+        throwsA(isA<ContentPackStagingException>()),
+      );
+
+      expect(backend.writtenBytes, [1, 2, 3]);
+      expect(backend.abortCount, 1);
+      expect(backend.reservedBytes, 0);
+    },
+  );
+
+  test(
+    'capacity is reserved before bytes from concurrent packs are accepted',
+    () async {
+      final backend = _MemoryBackend(availableBytes: 35);
+      final store = TransactionalContentPackInstallStore(backend: backend);
+      final firstWrite = Completer<void>();
+      final releaseFirst = Completer<void>();
+      backend.firstWrite = firstWrite;
+      backend.releaseFirst = releaseFirst;
+
+      final first = store.stage(
+        _release(packId: 'org.remath.pack.one'),
         _ArchiveSource(const [
-          [1, 2, 3],
-          [4, 5],
+          [1, 2, 3, 4],
         ]),
-      ),
-      throwsA(isA<ContentPackStagingException>()),
-    );
+      );
+      await firstWrite.future;
+      await expectLater(
+        store.stage(
+          _release(packId: 'org.remath.pack.two'),
+          _ArchiveSource(const [
+            [5, 6, 7, 8],
+          ]),
+        ),
+        throwsA(isA<ContentPackStagingException>()),
+      );
+      releaseFirst.complete();
+      final staged = await first;
 
-    expect(backend.writtenBytes, [1, 2, 3]);
-    expect(backend.abortCount, 1);
-    expect(backend.reservedBytes, 0);
-  });
+      expect(staged.lengthBytes, 4);
+      expect(staged.sha256, isNotEmpty);
+      expect(staged.sealId, isNotEmpty);
+      expect(backend.maximumReservedBytes, 20);
+      await store.discardStaged(_release(), staged);
+      expect(backend.reservedBytes, 0);
+    },
+  );
 
-  test('capacity is reserved before bytes from concurrent packs are accepted', () async {
-    final backend = _MemoryBackend(availableBytes: 35);
-    final store = TransactionalContentPackInstallStore(backend: backend);
-    final firstWrite = Completer<void>();
-    final releaseFirst = Completer<void>();
-    backend.firstWrite = firstWrite;
-    backend.releaseFirst = releaseFirst;
-
-    final first = store.stage(
-      _release(packId: 'org.remath.pack.one'),
-      _ArchiveSource(const [
-        [1, 2, 3, 4],
-      ]),
-    );
-    await firstWrite.future;
-    await expectLater(
-      store.stage(
-        _release(packId: 'org.remath.pack.two'),
+  test(
+    'activation commits the exact sealed object and release atomically',
+    () async {
+      final backend = _MemoryBackend(availableBytes: 100);
+      final store = TransactionalContentPackInstallStore(backend: backend);
+      final release = _release();
+      final staged = await store.stage(
+        release,
         _ArchiveSource(const [
-          [5, 6, 7, 8],
+          [1, 2, 3, 4],
         ]),
-      ),
-      throwsA(isA<ContentPackStagingException>()),
-    );
-    releaseFirst.complete();
-    final staged = await first;
+      );
 
-    expect(staged.lengthBytes, 4);
-    expect(staged.sha256, isNotEmpty);
-    expect(staged.sealId, isNotEmpty);
-    expect(backend.maximumReservedBytes, 20);
-    await store.discardStaged(_release(), staged);
-    expect(backend.reservedBytes, 0);
-  });
+      await store.activateStaged(release, staged);
 
-  test('activation commits the exact sealed object and release atomically', () async {
-    final backend = _MemoryBackend(availableBytes: 100);
-    final store = TransactionalContentPackInstallStore(backend: backend);
-    final release = _release();
-    final staged = await store.stage(
-      release,
-      _ArchiveSource(const [
-        [1, 2, 3, 4],
-      ]),
-    );
-
-    await store.activateStaged(release, staged);
-
-    expect(backend.activatedSealId, staged.sealId);
-    expect(backend.activatedDependencies, release.dependencies);
-  });
+      expect(backend.activatedSealId, staged.sealId);
+      expect(backend.activatedDependencies, release.dependencies);
+    },
+  );
 }
 
 ContentPackRelease _release({
@@ -152,7 +161,9 @@ final class _MemoryBackend implements ContentPackInstallationBackend {
     required String version,
   }) async {
     if (requiredBytes > availableBytes - reservedBytes) {
-      throw const ContentPackStagingException('Insufficient reserved capacity.');
+      throw const ContentPackStagingException(
+        'Insufficient reserved capacity.',
+      );
     }
     reservedBytes += requiredBytes;
     maximumReservedBytes = reservedBytes > maximumReservedBytes

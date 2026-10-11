@@ -89,54 +89,57 @@ void main() {
     );
   });
 
-  test('reports malformed semantic versions with all validation issues', () async {
-    final guard = ValidatedContentPackInstallGuard(
-      environment: const _Environment(
-        available: 20,
-        currentApp: '1.2.0',
-        installed: {'org.remath.numbers.foundation': 'broken'},
-        maximumSchema: 3,
-      ),
-    );
-
-    await expectLater(
-      guard.validate(
-        _release(
-          dependencies: const [
-            ContentPackDependency(
-              minimumVersion: 'also-broken',
-              packId: 'org.remath.numbers.foundation',
-            ),
-          ],
-          minimumAppVersion: 'not-a-version',
-          signature: 'not base64!',
+  test(
+    'reports malformed semantic versions with all validation issues',
+    () async {
+      final guard = ValidatedContentPackInstallGuard(
+        environment: const _Environment(
+          available: 20,
+          currentApp: '1.2.0',
+          installed: {'org.remath.numbers.foundation': 'broken'},
+          maximumSchema: 3,
         ),
-      ),
-      throwsA(
-        isA<ContentPackInstallException>()
-            .having(
-              (error) => error.issues,
-              'issues',
-              contains(contains('signature')),
-            )
-            .having(
-              (error) => error.issues,
-              'issues',
-              contains(contains('minimum app version')),
-            )
-            .having(
-              (error) => error.issues,
-              'issues',
-              contains(contains('dependency version')),
-            )
-            .having(
-              (error) => error.issues,
-              'issues',
-              contains(contains('installed version')),
-            ),
-      ),
-    );
-  });
+      );
+
+      await expectLater(
+        guard.validate(
+          _release(
+            dependencies: const [
+              ContentPackDependency(
+                minimumVersion: 'also-broken',
+                packId: 'org.remath.numbers.foundation',
+              ),
+            ],
+            minimumAppVersion: 'not-a-version',
+            signature: 'not base64!',
+          ),
+        ),
+        throwsA(
+          isA<ContentPackInstallException>()
+              .having(
+                (error) => error.issues,
+                'issues',
+                contains(contains('signature')),
+              )
+              .having(
+                (error) => error.issues,
+                'issues',
+                contains(contains('minimum app version')),
+              )
+              .having(
+                (error) => error.issues,
+                'issues',
+                contains(contains('dependency version')),
+              )
+              .having(
+                (error) => error.issues,
+                'issues',
+                contains(contains('installed version')),
+              ),
+        ),
+      );
+    },
+  );
 }
 
 ContentPackRelease _release({

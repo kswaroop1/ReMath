@@ -17,10 +17,7 @@ enum ContentPackRemovalCommitOutcome {
 }
 
 final class ContentPackRemovalCommit {
-  const ContentPackRemovalCommit({
-    required this.outcome,
-    required this.state,
-  });
+  const ContentPackRemovalCommit({required this.outcome, required this.state});
 
   final ContentPackRemovalCommitOutcome outcome;
   final ContentPackRetentionState state;

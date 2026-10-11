@@ -157,44 +157,47 @@ void main() {
     expect(events, ['guard', 'stage:1', 'verify', 'content', 'activate']);
   });
 
-  test('concurrent versions serialize before activating the newer one', () async {
-    final events = <String>[];
-    final verificationStarted = Completer<void>();
-    final finishVerification = Completer<void>();
-    final store = _MemoryInstallStore(activeVersions: {}, events: events);
-    final installer = ContentPackInstaller(
-      guard: _RecordingGuard(events),
-      store: store,
-      verifier: ContentPackActivationVerifier(
-        contentVerifier: _RecordingVerifier(events, label: 'content'),
-        integrityVerifier: _RecordingVerifier(
-          events,
-          verificationStarted: verificationStarted,
-          finishVerification: finishVerification,
+  test(
+    'concurrent versions serialize before activating the newer one',
+    () async {
+      final events = <String>[];
+      final verificationStarted = Completer<void>();
+      final finishVerification = Completer<void>();
+      final store = _MemoryInstallStore(activeVersions: {}, events: events);
+      final installer = ContentPackInstaller(
+        guard: _RecordingGuard(events),
+        store: store,
+        verifier: ContentPackActivationVerifier(
+          contentVerifier: _RecordingVerifier(events, label: 'content'),
+          integrityVerifier: _RecordingVerifier(
+            events,
+            verificationStarted: verificationStarted,
+            finishVerification: finishVerification,
+          ),
         ),
-      ),
-    );
+      );
 
-    final first = installer.install(
-      release,
-      _ChunkedArchiveSource(const [
-        [1, 2, 3, 4],
-      ]),
-    );
-    await verificationStarted.future;
-    final newer = installer.install(
-      _releaseWithVersion(release, '3.0.0'),
-      _ChunkedArchiveSource(const [
-        [4, 3, 2, 1],
-      ]),
-    );
-    finishVerification.complete();
+      final first = installer.install(
+        release,
+        _ChunkedArchiveSource(const [
+          [1, 2, 3, 4],
+        ]),
+      );
+      await verificationStarted.future;
+      final newer = installer.install(
+        _releaseWithVersion(release, '3.0.0'),
+        _ChunkedArchiveSource(const [
+          [4, 3, 2, 1],
+        ]),
+      );
+      finishVerification.complete();
 
-    expect(await first, ContentPackInstallOutcome.activated);
-    expect(await newer, ContentPackInstallOutcome.activated);
-    expect(await store.activeVersion(release.packId), '3.0.0');
-    expect(events.where((event) => event == 'activate'), hasLength(2));
-  });
+      expect(await first, ContentPackInstallOutcome.activated);
+      expect(await newer, ContentPackInstallOutcome.activated);
+      expect(await store.activeVersion(release.packId), '3.0.0');
+      expect(events.where((event) => event == 'activate'), hasLength(2));
+    },
+  );
 
   test('unsafe release compatibility fails before staging', () async {
     final events = <String>[];
@@ -220,68 +223,71 @@ void main() {
     expect(events, ['guard']);
   });
 
-  test('installation freezes release metadata before asynchronous work', () async {
-    final dependencies = <ContentPackDependency>[];
-    final objectives = <String>['Collect like terms'];
-    final mutableRelease = ContentPackRelease(
-      compressedSizeBytes: release.compressedSizeBytes,
-      dependencies: dependencies,
-      description: release.description,
-      installedSizeBytes: release.installedSizeBytes,
-      language: release.language,
-      license: release.license,
-      manifestVersion: release.manifestVersion,
-      minimumAppVersion: release.minimumAppVersion,
-      minimumSchemaVersion: release.minimumSchemaVersion,
-      objectives: objectives,
-      packId: release.packId,
-      publisherKeyId: release.publisherKeyId,
-      sha256: release.sha256,
-      signature: release.signature,
-      title: release.title,
-      version: release.version,
-    );
-    final guardEntered = Completer<void>();
-    final releaseGuard = Completer<void>();
-    final events = <String>[];
-    final store = _MemoryInstallStore(activeVersions: {}, events: events);
-    final installer = ContentPackInstaller(
-      guard: _RecordingGuard(
-        events,
-        entered: guardEntered,
-        release: releaseGuard,
-      ),
-      store: store,
-      verifier: ContentPackActivationVerifier(
-        contentVerifier: _RecordingVerifier(events, label: 'content'),
-        integrityVerifier: _RecordingVerifier(events),
-      ),
-    );
+  test(
+    'installation freezes release metadata before asynchronous work',
+    () async {
+      final dependencies = <ContentPackDependency>[];
+      final objectives = <String>['Collect like terms'];
+      final mutableRelease = ContentPackRelease(
+        compressedSizeBytes: release.compressedSizeBytes,
+        dependencies: dependencies,
+        description: release.description,
+        installedSizeBytes: release.installedSizeBytes,
+        language: release.language,
+        license: release.license,
+        manifestVersion: release.manifestVersion,
+        minimumAppVersion: release.minimumAppVersion,
+        minimumSchemaVersion: release.minimumSchemaVersion,
+        objectives: objectives,
+        packId: release.packId,
+        publisherKeyId: release.publisherKeyId,
+        sha256: release.sha256,
+        signature: release.signature,
+        title: release.title,
+        version: release.version,
+      );
+      final guardEntered = Completer<void>();
+      final releaseGuard = Completer<void>();
+      final events = <String>[];
+      final store = _MemoryInstallStore(activeVersions: {}, events: events);
+      final installer = ContentPackInstaller(
+        guard: _RecordingGuard(
+          events,
+          entered: guardEntered,
+          release: releaseGuard,
+        ),
+        store: store,
+        verifier: ContentPackActivationVerifier(
+          contentVerifier: _RecordingVerifier(events, label: 'content'),
+          integrityVerifier: _RecordingVerifier(events),
+        ),
+      );
 
-    final installing = installer.install(
-      mutableRelease,
-      _ChunkedArchiveSource(const [
-        [1, 2, 3, 4],
-      ]),
-    );
-    await guardEntered.future;
-    dependencies.add(
-      const ContentPackDependency(
-        minimumVersion: '99.0.0',
-        packId: 'org.remath.changed',
-      ),
-    );
-    objectives[0] = 'Changed after installation began';
-    releaseGuard.complete();
+      final installing = installer.install(
+        mutableRelease,
+        _ChunkedArchiveSource(const [
+          [1, 2, 3, 4],
+        ]),
+      );
+      await guardEntered.future;
+      dependencies.add(
+        const ContentPackDependency(
+          minimumVersion: '99.0.0',
+          packId: 'org.remath.changed',
+        ),
+      );
+      objectives[0] = 'Changed after installation began';
+      releaseGuard.complete();
 
-    expect(await installing, ContentPackInstallOutcome.activated);
-    expect(store.activatedRelease!.dependencies, isEmpty);
-    expect(store.activatedRelease!.objectives, ['Collect like terms']);
-    expect(
-      () => store.activatedRelease!.objectives[0] = 'mutate',
-      throwsUnsupportedError,
-    );
-  });
+      expect(await installing, ContentPackInstallOutcome.activated);
+      expect(store.activatedRelease!.dependencies, isEmpty);
+      expect(store.activatedRelease!.objectives, ['Collect like terms']);
+      expect(
+        () => store.activatedRelease!.objectives[0] = 'mutate',
+        throwsUnsupportedError,
+      );
+    },
+  );
 }
 
 ContentPackRelease _releaseWithVersion(

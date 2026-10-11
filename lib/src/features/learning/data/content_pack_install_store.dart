@@ -71,8 +71,7 @@ final class TransactionalContentPackInstallStore
   ) async {
     final reservation = await backend.reserve(
       packId: release.packId,
-      requiredBytes:
-          release.compressedSizeBytes + release.installedSizeBytes,
+      requiredBytes: release.compressedSizeBytes + release.installedSizeBytes,
       version: release.version,
     );
     final hashSink = Sha256().newHashSink();

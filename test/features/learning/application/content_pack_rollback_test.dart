@@ -112,20 +112,23 @@ void main() {
     expect(store.failureMessages, isEmpty);
   });
 
-  test('successful load only reports ready after atomic confirmation', () async {
-    final store = _MemoryRollbackStore(moveBeforeConfirm: '3.0.0');
-    final coordinator = ContentPackRollbackCoordinator(
-      loader: _ControlledLoader(),
-      store: store,
-    );
+  test(
+    'successful load only reports ready after atomic confirmation',
+    () async {
+      final store = _MemoryRollbackStore(moveBeforeConfirm: '3.0.0');
+      final coordinator = ContentPackRollbackCoordinator(
+        loader: _ControlledLoader(),
+        store: store,
+      );
 
-    final result = await coordinator.verifyFirstLoad(packId, version);
+      final result = await coordinator.verifyFirstLoad(packId, version);
 
-    expect(result.outcome, ContentPackRuntimeOutcome.alreadyRecovered);
-    expect(result.activeVersion, '3.0.0');
-    expect(store.confirmCount, 1);
-    expect(store.readyVersions, isEmpty);
-  });
+      expect(result.outcome, ContentPackRuntimeOutcome.alreadyRecovered);
+      expect(result.activeVersion, '3.0.0');
+      expect(store.confirmCount, 1);
+      expect(store.readyVersions, isEmpty);
+    },
+  );
 }
 
 final class _ControlledLoader implements ContentPackRuntimeLoader {
