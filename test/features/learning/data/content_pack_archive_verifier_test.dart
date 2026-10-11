@@ -7,41 +7,6 @@ import 'package:remath/src/features/learning/domain/content_pack_release.dart';
 
 void main() {
   const archiveBytes = [1, 2, 3, 4];
-  const digest = [
-    159,
-    100,
-    167,
-    71,
-    225,
-    185,
-    127,
-    19,
-    31,
-    171,
-    182,
-    180,
-    71,
-    41,
-    108,
-    155,
-    111,
-    2,
-    1,
-    231,
-    159,
-    179,
-    197,
-    53,
-    110,
-    108,
-    119,
-    232,
-    155,
-    106,
-    128,
-    106,
-  ];
-
   test('verifies length, digest, and publisher signature', () async {
     final signatures = _RecordingSignatureVerifier();
     final verifier = ContentPackArchiveVerifier(signatureVerifier: signatures);
@@ -50,7 +15,9 @@ void main() {
 
     expect(signatures.calls, 1);
     expect(signatures.publisherKeyId, 'org.remath.publisher.primary');
-    final signedRelease = jsonDecode(utf8.decode(signatures.signedPayload!));
+    final signedRelease =
+        jsonDecode(utf8.decode(signatures.signedPayload!))
+            as Map<String, Object?>;
     expect(signedRelease['sha256'], _release().sha256);
     expect(signedRelease['version'], _release().version);
     expect(signatures.signature, [1, 2, 3]);

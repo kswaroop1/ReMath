@@ -319,3 +319,9 @@ Diagnostic CI `38119670199` printed the exact seven-file Dart 3.13 formatter
 patch while again passing permanent red replay, all 462 native tests, coverage,
 and secret scanning. The immediate correction applies that output byte-for-byte
 and restores the ordinary non-mutating format gate.
+
+Replacement CI `38119974163` accepts canonical formatting and again passes the
+red evidence, 462-test behavioural suite, coverage, and secret scan. Fatal
+analysis identifies one obsolete digest fixture and two dynamic JSON accesses
+in the new signature test. The immediate analysis-only correction removes the
+unused fixture and casts the decoded canonical manifest to its map shape.
