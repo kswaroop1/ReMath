@@ -57,6 +57,8 @@ void main() {
     expect(staged.sha256, isNotEmpty);
     expect(staged.sealId, isNotEmpty);
     expect(backend.maximumReservedBytes, 20);
+    await store.discardStaged(_release(), staged);
+    expect(backend.reservedBytes, 0);
   });
 
   test('activation commits the exact sealed object and release atomically', () async {

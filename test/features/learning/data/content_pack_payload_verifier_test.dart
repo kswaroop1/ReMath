@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/application/content_pack_installer.dart';
+import 'package:remath/src/features/learning/data/content_pack_archive_verifier.dart';
 import 'package:remath/src/features/learning/data/content_pack_payload_verifier.dart';
 import 'package:remath/src/features/learning/domain/content_pack_release.dart';
 
@@ -41,6 +42,41 @@ void main() {
       ),
     );
   });
+
+  test('reports every release mismatch in staged curriculum', () async {
+    await expectLater(
+      const ParsedContentPackPayloadVerifier().verify(
+        _release(
+          license: 'CC-BY-4.0',
+          minimumSchemaVersion: 2,
+          packId: 'org.remath.pack.changed',
+          version: '9.0.0',
+        ),
+        _StagedArchive(utf8.encode(_validPack)),
+      ),
+      throwsA(
+        isA<ContentPackPayloadException>().having(
+          (error) => error.issues,
+          'issues',
+          hasLength(4),
+        ),
+      ),
+    );
+  });
+
+  test('production verifier composes authenticity and content checks', () async {
+    final signatures = _TrustedSignatureVerifier();
+    final verifier = ProductionContentPackVerifier(
+      signatureVerifier: signatures,
+    );
+
+    await verifier.verify(
+      _release(),
+      _StagedArchive(utf8.encode(_validPack)),
+    );
+
+    expect(signatures.calls, 1);
+  });
 }
 
 const _validPack = '''
@@ -63,24 +99,43 @@ const _validPack = '''
 }
 ''';
 
-ContentPackRelease _release({String version = '2.0.0'}) => ContentPackRelease(
+ContentPackRelease _release({
+  String license = 'CC-BY-SA-4.0',
+  int minimumSchemaVersion = 1,
+  String packId = 'org.remath.pack.one',
+  String version = '2.0.0',
+}) => ContentPackRelease(
   compressedSizeBytes: utf8.encode(_validPack).length,
   dependencies: const [],
   description: 'Original pack.',
   installedSizeBytes: utf8.encode(_validPack).length,
   language: 'en-GB',
-  license: 'CC-BY-SA-4.0',
+  license: license,
   manifestVersion: 1,
   minimumAppVersion: '0.1.0',
-  minimumSchemaVersion: 1,
+  minimumSchemaVersion: minimumSchemaVersion,
   objectives: const ['Learn safely'],
-  packId: 'org.remath.pack.one',
+  packId: packId,
   publisherKeyId: 'org.remath.publisher.primary',
   sha256: '0000000000000000000000000000000000000000000000000000000000000000',
   signature: 'AQID',
   title: 'Pack',
   version: version,
 );
+
+final class _TrustedSignatureVerifier implements ContentPackSignatureVerifier {
+  int calls = 0;
+
+  @override
+  Future<bool> verify({
+    required String publisherKeyId,
+    required List<int> signedPayload,
+    required List<int> signature,
+  }) async {
+    calls++;
+    return true;
+  }
+}
 
 final class _StagedArchive implements ContentPackStagedArchive {
   _StagedArchive(this.bytes);

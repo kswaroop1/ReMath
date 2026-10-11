@@ -157,6 +157,45 @@ void main() {
     expect(events, ['guard', 'stage:1', 'verify', 'content', 'activate']);
   });
 
+  test('concurrent versions serialize before activating the newer one', () async {
+    final events = <String>[];
+    final verificationStarted = Completer<void>();
+    final finishVerification = Completer<void>();
+    final store = _MemoryInstallStore(activeVersions: {}, events: events);
+    final installer = ContentPackInstaller(
+      guard: _RecordingGuard(events),
+      store: store,
+      verifier: ContentPackActivationVerifier(
+        contentVerifier: _RecordingVerifier(events, label: 'content'),
+        integrityVerifier: _RecordingVerifier(
+          events,
+          verificationStarted: verificationStarted,
+          finishVerification: finishVerification,
+        ),
+      ),
+    );
+
+    final first = installer.install(
+      release,
+      _ChunkedArchiveSource(const [
+        [1, 2, 3, 4],
+      ]),
+    );
+    await verificationStarted.future;
+    final newer = installer.install(
+      _releaseWithVersion(release, '3.0.0'),
+      _ChunkedArchiveSource(const [
+        [4, 3, 2, 1],
+      ]),
+    );
+    finishVerification.complete();
+
+    expect(await first, ContentPackInstallOutcome.activated);
+    expect(await newer, ContentPackInstallOutcome.activated);
+    expect(await store.activeVersion(release.packId), '3.0.0');
+    expect(events.where((event) => event == 'activate'), hasLength(2));
+  });
+
   test('unsafe release compatibility fails before staging', () async {
     final events = <String>[];
     final installer = ContentPackInstaller(
@@ -244,6 +283,28 @@ void main() {
     );
   });
 }
+
+ContentPackRelease _releaseWithVersion(
+  ContentPackRelease release,
+  String version,
+) => ContentPackRelease(
+  compressedSizeBytes: release.compressedSizeBytes,
+  dependencies: release.dependencies,
+  description: release.description,
+  installedSizeBytes: release.installedSizeBytes,
+  language: release.language,
+  license: release.license,
+  manifestVersion: release.manifestVersion,
+  minimumAppVersion: release.minimumAppVersion,
+  minimumSchemaVersion: release.minimumSchemaVersion,
+  objectives: release.objectives,
+  packId: release.packId,
+  publisherKeyId: release.publisherKeyId,
+  sha256: release.sha256,
+  signature: release.signature,
+  title: release.title,
+  version: version,
+);
 
 final class _RecordingGuard implements ContentPackInstallGuard {
   _RecordingGuard(
@@ -383,7 +444,9 @@ final class _RecordingVerifier implements ContentPackPayloadVerifier {
   ) async {
     events.add(label);
     verifiedBytes = await archive.openRead().expand((chunk) => chunk).toList();
-    verificationStarted?.complete();
+    if (verificationStarted case final started? when !started.isCompleted) {
+      started.complete();
+    }
     await finishVerification?.future;
     if (shouldFail) {
       throw StateError('The staged archive failed verification.');
