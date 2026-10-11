@@ -307,3 +307,10 @@ Commit `428519d` corrects the provenance schema, links every exact review
 exchange, records the available exact user and assistant text, and removes the
 unsupported reclaimable-storage claim. The CI evidence update permanently
 replays all five new red heads and the previously omitted CP-002 red head.
+
+Full CI `38119345720` proves the expanded permanent red replay, committed
+structure, dependency lock, all 462 native tests, coverage, and secret scanning.
+It reports only seven Dart 3.13 canonical-formatting differences. Because no
+local Flutter/Dart runtime is available, the existing format step is changed
+temporarily to print the exact formatter patch; the ordinary non-mutating gate
+will be restored in the immediate correction commit.
