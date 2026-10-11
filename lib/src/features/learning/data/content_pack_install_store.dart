@@ -117,8 +117,9 @@ final class TransactionalContentPackInstallStore
   @override
   Future<void> activateStaged(
     ContentPackRelease release,
-    ContentPackStagedArchive archive,
-    {required bool isExplicitVersionChoice},
+    ContentPackStagedArchive archive, {
+    required bool isExplicitVersionChoice,
+  }
   ) {
     final sealed = _sealedObject(archive);
     return backend.activateAtomically(

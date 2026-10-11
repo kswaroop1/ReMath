@@ -471,8 +471,9 @@ final class _MemoryInstallStore implements ContentPackInstallStore {
   @override
   Future<void> activateStaged(
     ContentPackRelease release,
-    ContentPackStagedArchive archive,
-    {required bool isExplicitVersionChoice},
+    ContentPackStagedArchive archive, {
+    required bool isExplicitVersionChoice,
+  }
   ) async {
     events.add('activate');
     if (_stagedRelease != release || _stagedArchive != archive) {

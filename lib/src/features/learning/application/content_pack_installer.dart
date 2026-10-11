@@ -40,8 +40,9 @@ abstract interface class ContentPackInstallStore {
   /// active pointer with this exact sealed [archive], and consumes it.
   Future<void> activateStaged(
     ContentPackRelease release,
-    ContentPackStagedArchive archive,
-    {required bool isExplicitVersionChoice},
+    ContentPackStagedArchive archive, {
+    required bool isExplicitVersionChoice,
+  }
   );
 
   /// Retries cleanup obligations durably retained by [discardStaged].
