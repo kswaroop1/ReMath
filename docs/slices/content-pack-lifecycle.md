@@ -14,9 +14,12 @@ depends on a network service.
   incomplete, or dependency-incoherent distribution manifests before payload
   activation.
 - **CP-006 — Transactional installation:** stage, verify, and activate a complete
-  pack atomically; a failed install leaves the active version unchanged.
+  sealed pack atomically, with capacity reserved across concurrent installs and
+  dependency state revalidated at activation; a failed install leaves the
+  active version unchanged.
 - **CP-008 — Offline retention controls:** support explicit pin, update, and safe
-  removal decisions without silently changing pinned content.
+  removal decisions without silently changing pinned content or removing packs
+  required by active dependants.
 - **CP-010 — Storage forecast:** expose compressed, installed, and additional
   required bytes before installation.
 - **CP-011 — Pack catalogue:** expose available, installed, update-available,
@@ -24,7 +27,8 @@ depends on a network service.
 - **CP-012 — Stable-ID progress retention:** removing or rolling back curriculum
   never deletes personal attempt or progress events.
 - **CP-013 — Pack rollback:** retain the previous verified version and restore it
-  when activation or the first runtime load fails.
+  when activation or the first runtime load fails, while an atomic first-load
+  confirmation prevents an older load from overwriting a newer activation.
 
 ## Learner and operator acceptance criteria
 
@@ -61,9 +65,13 @@ depends on a network service.
 The bounded lifecycle behaviours are implemented as provider-neutral domain,
 application, and data contracts. Each behaviour has a test-first red commit, a
 paired green implementation, and permanent CI replay of the intended red
-failure. CI run `37872340857` verifies the final behavioural head with canonical
-formatting, fatal static analysis, bundled-content validation, eight Chrome
-contracts, all 450 native tests, 97.11% line coverage, and secret scanning.
+failure. Authoritative CI run `38138260415` verifies the final behavioural head
+with canonical formatting, fatal static analysis, bundled-content validation,
+eight Chrome contracts, all 472 native tests, 96.77% line coverage, and secret
+scanning. The measured coverage remains 6.77 percentage points above the 90%
+repository floor after adding the production-composed payload verifier,
+content-addressed sealed staging, atomic activation/removal/first-load
+transitions, and their concurrency tests.
 
 CP-005 remains deliberately partial: archive length, SHA-256, and signature
 verification are complete, while publisher trust-root lifecycle operations stay

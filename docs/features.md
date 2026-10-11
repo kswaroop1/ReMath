@@ -17,7 +17,7 @@ This is the authoritative, numbered product and content backlog for ReMath.
 - Feature IDs are permanent. Retired features remain recorded rather than being
   renumbered.
 
-Last reviewed: 9 October 2026 (PR24 content-pack lifecycle reconciliation).
+Last reviewed: 11 October 2026 (PR24 content-pack lifecycle reconciliation).
 
 ## 1. Product foundations
 
@@ -328,12 +328,14 @@ Last reviewed: 9 October 2026 (PR24 content-pack lifecycle reconciliation).
   length, SHA-256, and a publisher signature supplied to a provider-neutral trust
   boundary are checked before activation. Publisher onboarding, trust-root
   distribution, rotation, and revocation remain PR #25 work.
-- [x] **CP-006 — Transactional installation.** Complete archives are staged,
-  verified, and atomically activated; failures discard staging and preserve the
-  previous active version, and duplicate installation is idempotent.
+- [x] **CP-006 — Transactional installation.** Complete archives are bounded,
+  content-addressed, sealed, verified, and atomically activated after dependency
+  revalidation; failures discard staging and preserve the previous active
+  version, while duplicate and concurrent installation remain safe.
 - [ ] **CP-007 — Selective download.** Install only chosen subjects.
 - [x] **CP-008 — Offline retention controls.** Pin, unpin, explicitly update, and
-  safely remove packs without silently replacing pinned content.
+  safely remove packs without silently replacing pinned content or removing an
+  active dependency.
 - [ ] **CP-009 — Delta updates.** Avoid downloading unchanged large assets.
 - [x] **CP-010 — Storage forecast.** Compressed, installed, and additional
   required bytes are calculated before installation.
@@ -343,9 +345,9 @@ Last reviewed: 9 October 2026 (PR24 content-pack lifecycle reconciliation).
 - [x] **CP-012 — Stable-ID progress retention.** Removal changes curriculum
   availability only; personal history is held behind a separate repository
   boundary and interruption-safe retries do not delete it.
-- [x] **CP-013 — Pack rollback.** A failed first runtime load restores the retained
-  verified version, records a payload-safe local status, and supports safe retry
-  after interrupted restoration.
+- [x] **CP-013 — Pack rollback.** A failed first runtime load atomically restores
+  the retained verified version, records a payload-safe local status, and cannot
+  overwrite a newer activation; successful first load is confirmed atomically.
 - [ ] **CP-014 — Authoring preview.** Render lessons and questions before release.
 - [ ] **CP-015 — Content CI.** **Foundation delivered:** CI parses and validates
   the bundled pack, including schema, identifiers, references, HTTPS link shape,

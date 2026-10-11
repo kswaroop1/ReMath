@@ -333,3 +333,57 @@ fatal analysis reports no issues, bundled content validates, all browser
 contracts and 462 native tests pass, line coverage is 96.89%, and secret
 scanning passes. This records-only checkpoint precedes replies to all 13 review
 threads and the required final independent re-review.
+
+## 2026-10-11 — Second independent review and atomic-boundary corrections
+
+The requested independent re-review created 11 additional unresolved inline
+findings. In review order, it required a concrete production-composed staged
+content validator, bounded writes during staging, frozen dependency metadata,
+dependency revalidation at atomic activation, compare-and-swap removal for
+pinned state, install-domain reporting for malformed versions, atomic first-load
+confirmation, dependent-aware removal, immutable staged handles, capacity
+reservation across different packs, and an explicit account of the coverage
+change from 97.11% to 96.89%.
+
+The exact review exchanges are preserved in GitHub as discussions
+[`4241323443`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241323443),
+[`4241323447`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241323447),
+[`4241323450`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241323450),
+[`4241323455`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241323455),
+[`4241323459`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241323459),
+[`4241323462`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241323462),
+[`4241323469`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241323469),
+[`4241323473`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241323473),
+[`4241323482`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241323482),
+[`4241323485`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241323485),
+and [`4241323490`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4241323490).
+
+The following strict test-first stack addresses those findings:
+
+- `76cea583` / `eda53594` requires and implements immutable release snapshots,
+  install-domain aggregation of malformed semantic versions, and explicit
+  sealed-handle metadata.
+- `dfe98074` / `cdd8c80d` requires and implements bounded transactional staging,
+  cross-pack capacity reservation, streaming length/digest calculation, sealed
+  content-addressed objects, and activation-time dependency and seal checks.
+- `a06350f` / `cf308a75` requires and implements production composition of
+  archive authenticity with parsed payload validation, atomic pinned/dependent
+  removal, and atomic successful-first-load confirmation.
+- `2da86a95` adds characterization coverage for production verifier composition,
+  payload mismatches, discarded staging, and serialized different-version
+  installs without changing production behaviour.
+
+CI `38137219834` proved the 469-test behavioural correction while identifying
+only canonical formatting differences. Diagnostic CI `38137693284` printed the
+exact formatter output and passed all 472 tests plus every non-format gate.
+Commit `ca9c8aef` applies that output and restores the canonical non-mutating
+format check.
+
+Authoritative CI `38138260415` passes every gate at commit `ca9c8aef`: permanent
+red evidence, committed project structure, dependency lock, canonical format,
+fatal analysis, bundled-content validation, eight Chrome contracts, all 472
+native tests, the 90% coverage floor at 96.77%, and secret scanning. The decline
+from the earlier 97.11% is 0.34 percentage points and results from adding the
+production lifecycle boundaries above; the focused characterization tests both
+raised the corrected head from 96.89% and exercise the new composition and
+concurrency paths directly.
