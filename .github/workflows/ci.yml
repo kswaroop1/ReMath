@@ -114,6 +114,24 @@ jobs:
           verify_red 26b6d7f2526e88e561ef32fbd21462b02b03d511 \
             test/features/learning/domain/content_pack_retention_test.dart \
             "ContentPackRetentionOutcome.blockedDowngrade"
+          verify_red 76cea583c74dd58416d609dc648315788bd7b796 \
+            test/features/learning/application/content_pack_installer_test.dart \
+            "installation freezes release metadata"
+          verify_red 76cea583c74dd58416d609dc648315788bd7b796 \
+            test/features/learning/data/content_pack_install_guard_test.dart \
+            "ContentPackInstallException"
+          verify_red dfe98074d7143fab5268f39c2c8363ce0dfd5a5c \
+            test/features/learning/data/content_pack_install_store_test.dart \
+            "content_pack_install_store.dart"
+          verify_red dfe98074d7143fab5268f39c2c8363ce0dfd5a5c \
+            test/features/learning/data/content_pack_payload_verifier_test.dart \
+            "content_pack_payload_verifier.dart"
+          verify_red a06350f5764ae6d5501393747ed765812760c5ba \
+            test/features/learning/application/content_pack_remover_test.dart \
+            "ContentPackRemovalCommitOutcome"
+          verify_red a06350f5764ae6d5501393747ed765812760c5ba \
+            test/features/learning/application/content_pack_rollback_test.dart \
+            "confirmFirstLoad"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
@@ -122,7 +140,8 @@ jobs:
         run: git diff --exit-code -- pubspec.lock
       - name: Verify formatting
         run: |
-          dart format --output=none --set-exit-if-changed lib test tool
+          dart format lib test tool
+          git diff --exit-code -- lib test tool
       - name: Static analysis
         run: flutter analyze --fatal-infos --fatal-warnings
       - name: Validate content packs
