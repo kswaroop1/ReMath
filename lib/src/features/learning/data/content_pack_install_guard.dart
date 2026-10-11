@@ -35,11 +35,17 @@ final class ValidatedContentPackInstallGuard
   @override
   Future<void> validate(ContentPackRelease release) async {
     final issues = [...releaseValidator.validate(release)];
-    if (_compareVersions(
-          release.minimumAppVersion,
-          environment.currentAppVersion,
-        ) >
-        0) {
+    final minimumAppVersion = _versionParts(release.minimumAppVersion);
+    final currentAppVersion = _versionParts(environment.currentAppVersion);
+    if (currentAppVersion == null) {
+      issues.add(
+        'The installed version must use semantic versioning: '
+        '${environment.currentAppVersion}.',
+      );
+    }
+    if (minimumAppVersion != null &&
+        currentAppVersion != null &&
+        _compareVersionParts(minimumAppVersion, currentAppVersion) > 0) {
       issues.add(
         'Content pack requires app version ${release.minimumAppVersion}; '
         'current app version is ${environment.currentAppVersion}.',
@@ -56,7 +62,19 @@ final class ValidatedContentPackInstallGuard
       final installed = await environment.installedVersion(dependency.packId);
       if (installed == null) {
         issues.add('Missing required content pack ${dependency.packId}.');
-      } else if (_compareVersions(installed, dependency.minimumVersion) < 0) {
+        continue;
+      }
+      final installedVersion = _versionParts(installed);
+      if (installedVersion == null) {
+        issues.add(
+          'The installed version for ${dependency.packId} must use semantic '
+          'versioning: $installed.',
+        );
+      }
+      final minimumVersion = _versionParts(dependency.minimumVersion);
+      if (installedVersion != null &&
+          minimumVersion != null &&
+          _compareVersionParts(installedVersion, minimumVersion) < 0) {
         issues.add(
           'Content pack ${dependency.packId} version '
           '${dependency.minimumVersion} or later is required; '
@@ -84,9 +102,7 @@ final class ValidatedContentPackInstallGuard
     }
   }
 
-  int _compareVersions(String left, String right) {
-    final leftParts = _versionParts(left);
-    final rightParts = _versionParts(right);
+  int _compareVersionParts(List<int> leftParts, List<int> rightParts) {
     for (var index = 0; index < leftParts.length; index += 1) {
       final comparison = leftParts[index].compareTo(rightParts[index]);
       if (comparison != 0) {
@@ -96,13 +112,11 @@ final class ValidatedContentPackInstallGuard
     return 0;
   }
 
-  List<int> _versionParts(String version) {
+  List<int>? _versionParts(String version) {
     final parts = version.split('.');
     final parsed = parts.map(int.tryParse).toList(growable: false);
     if (parts.length != 3 || parsed.any((part) => part == null)) {
-      throw StateError(
-        'Install environment version is not semantic: $version.',
-      );
+      return null;
     }
     return parsed.cast<int>();
   }

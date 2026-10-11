@@ -28,6 +28,26 @@ final class ContentPackRelease {
     required this.version,
   });
 
+  factory ContentPackRelease.snapshot(ContentPackRelease release) =>
+      ContentPackRelease(
+        compressedSizeBytes: release.compressedSizeBytes,
+        dependencies: List.unmodifiable(release.dependencies),
+        description: release.description,
+        installedSizeBytes: release.installedSizeBytes,
+        language: release.language,
+        license: release.license,
+        manifestVersion: release.manifestVersion,
+        minimumAppVersion: release.minimumAppVersion,
+        minimumSchemaVersion: release.minimumSchemaVersion,
+        objectives: List.unmodifiable(release.objectives),
+        packId: release.packId,
+        publisherKeyId: release.publisherKeyId,
+        sha256: release.sha256,
+        signature: release.signature,
+        title: release.title,
+        version: release.version,
+      );
+
   final int compressedSizeBytes;
   final List<ContentPackDependency> dependencies;
   final String description;

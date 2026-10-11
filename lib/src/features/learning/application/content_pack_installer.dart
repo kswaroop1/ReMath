@@ -78,25 +78,26 @@ final class ContentPackInstaller {
     ContentPackRelease release,
     ContentPackArchiveSource archive,
   ) {
-    final existing = _inFlight[release.packId];
+    final frozenRelease = ContentPackRelease.snapshot(release);
+    final existing = _inFlight[frozenRelease.packId];
     if (existing != null) {
-      if (_inFlightVersions[release.packId] == release.version) {
+      if (_inFlightVersions[frozenRelease.packId] == frozenRelease.version) {
         return existing;
       }
       return existing
           .then<void>((_) {}, onError: (_) {})
-          .then((_) => install(release, archive));
+          .then((_) => install(frozenRelease, archive));
     }
 
     late final Future<ContentPackInstallOutcome> tracked;
-    tracked = _install(release, archive).whenComplete(() {
-      if (identical(_inFlight[release.packId], tracked)) {
-        _inFlight.remove(release.packId);
-        _inFlightVersions.remove(release.packId);
+    tracked = _install(frozenRelease, archive).whenComplete(() {
+      if (identical(_inFlight[frozenRelease.packId], tracked)) {
+        _inFlight.remove(frozenRelease.packId);
+        _inFlightVersions.remove(frozenRelease.packId);
       }
     });
-    _inFlight[release.packId] = tracked;
-    _inFlightVersions[release.packId] = release.version;
+    _inFlight[frozenRelease.packId] = tracked;
+    _inFlightVersions[frozenRelease.packId] = frozenRelease.version;
     return tracked;
   }
 
