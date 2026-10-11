@@ -188,91 +188,102 @@ void main() {
     );
 
     expect(
-      database.select(
-        'SELECT COUNT(*) AS count FROM content_pack_object_chunks',
-      ).single['count'],
+      database
+          .select('SELECT COUNT(*) AS count FROM content_pack_object_chunks')
+          .single['count'],
       3,
     );
     expect(
-      database.select(
-        'SELECT length(content) AS length FROM content_pack_objects',
-      ).single['length'],
+      database
+          .select('SELECT length(content) AS length FROM content_pack_objects')
+          .single['length'],
       0,
     );
     expect(
       () => database.execute(
         'UPDATE content_pack_object_chunks SET content = ? WHERE seal_id = ?',
-        [Uint8List.fromList(const [9]), sealed.sealId],
+        [
+          Uint8List.fromList(const [9]),
+          sealed.sealId,
+        ],
       ),
       throwsA(isA<SqliteException>()),
     );
-    expect(
-      await sealed.openRead().expand((chunk) => chunk).toList(),
-      const [1, 2, 3, 4, 5],
-    );
+    expect(await sealed.openRead().expand((chunk) => chunk).toList(), const [
+      1,
+      2,
+      3,
+      4,
+      5,
+    ]);
   });
 
-  test('activation rejects a downgrade required by an active dependant',
-      () async {
-    final database = sqlite3.openInMemory();
-    addTearDown(database.close);
-    var nextId = 0;
-    final backend = SqliteContentPackInstallationBackend(
-      availableBytes: () async => 1024 * 1024,
-      database: database,
-      idGenerator: () => 'dependency-${nextId++}',
-    );
-    final installer = composeContentPackInstaller(
-      backend: backend,
-      environment: _Environment(backend),
-      signatureVerifier: const _TrustedSignatureVerifier(),
-    );
-    final dependency = await _release(
-      '2.0.0',
-      packId: 'org.remath.pack.dependency',
-    );
-    await installer.install(
-      dependency,
-      _Source(utf8.encode(_pack('2.0.0',
-          packId: 'org.remath.pack.dependency'))),
-    );
-    final dependant = await _release(
-      '1.0.0',
-      packId: 'org.remath.pack.dependant',
-      dependencies: const [
-        ContentPackDependency(
-          packId: 'org.remath.pack.dependency',
-          minimumVersion: '2.0.0',
+  test(
+    'activation rejects a downgrade required by an active dependant',
+    () async {
+      final database = sqlite3.openInMemory();
+      addTearDown(database.close);
+      var nextId = 0;
+      final backend = SqliteContentPackInstallationBackend(
+        availableBytes: () async => 1024 * 1024,
+        database: database,
+        idGenerator: () => 'dependency-${nextId++}',
+      );
+      final installer = composeContentPackInstaller(
+        backend: backend,
+        environment: _Environment(backend),
+        signatureVerifier: const _TrustedSignatureVerifier(),
+      );
+      final dependency = await _release(
+        '2.0.0',
+        packId: 'org.remath.pack.dependency',
+      );
+      await installer.install(
+        dependency,
+        _Source(
+          utf8.encode(_pack('2.0.0', packId: 'org.remath.pack.dependency')),
         ),
-      ],
-    );
-    await installer.install(
-      dependant,
-      _Source(utf8.encode(_pack('1.0.0',
-          packId: 'org.remath.pack.dependant'))),
-    );
-    final downgrade = await _release(
-      '1.0.0',
-      packId: 'org.remath.pack.dependency',
-    );
+      );
+      final dependant = await _release(
+        '1.0.0',
+        packId: 'org.remath.pack.dependant',
+        dependencies: const [
+          ContentPackDependency(
+            packId: 'org.remath.pack.dependency',
+            minimumVersion: '2.0.0',
+          ),
+        ],
+      );
+      await installer.install(
+        dependant,
+        _Source(
+          utf8.encode(_pack('1.0.0', packId: 'org.remath.pack.dependant')),
+        ),
+      );
+      final downgrade = await _release(
+        '1.0.0',
+        packId: 'org.remath.pack.dependency',
+      );
 
-    await expectLater(
-      installer.install(
-        downgrade,
-        _Source(utf8.encode(_pack('1.0.0',
-            packId: 'org.remath.pack.dependency'))),
-        isExplicitVersionChoice: true,
-      ),
-      throwsA(
-        isA<ContentPackActivationException>().having(
-          (error) => error.outcome,
-          'outcome',
-          ContentPackRetentionOutcome.blockedDependent,
+      await expectLater(
+        installer.install(
+          downgrade,
+          _Source(
+            utf8.encode(_pack('1.0.0', packId: 'org.remath.pack.dependency')),
+          ),
+          isExplicitVersionChoice: true,
         ),
-      ),
-    );
-    expect(await backend.activeVersion(dependency.packId), '2.0.0');
-  });
+        throwsA(
+          isA<ContentPackActivationException>().having(
+            (error) => error.outcome,
+            'outcome',
+            ContentPackRetentionOutcome.blockedDependent,
+          ),
+        ),
+      );
+      expect(await backend.activeVersion(dependency.packId), '2.0.0');
+    },
+  );
 
   test('durable unpin permits a later safe removal', () async {
     final database = sqlite3.openInMemory();
@@ -338,14 +349,16 @@ void main() {
     );
 
     expect(
-      database.select(
-        "SELECT COUNT(*) AS count FROM content_pack_objects WHERE state = 'retained'",
-      ).single['count'],
+      database
+          .select(
+            "SELECT COUNT(*) AS count FROM content_pack_objects WHERE state = 'retained'",
+          )
+          .single['count'],
       0,
     );
-    final active = database.select(
-      'SELECT previous_seal_id FROM content_pack_active',
-    ).single;
+    final active = database
+        .select('SELECT previous_seal_id FROM content_pack_active')
+        .single;
     expect(active['previous_seal_id'], isNull);
   });
 
@@ -368,11 +381,7 @@ void main() {
       release,
       _Source(utf8.encode(_pack('1.0.0'))),
     );
-    await store.activateStaged(
-      release,
-      first,
-      isExplicitVersionChoice: false,
-    );
+    await store.activateStaged(release, first, isExplicitVersionChoice: false);
     final before = await backend.activation(release.packId);
 
     await store.activateStaged(
@@ -384,9 +393,9 @@ void main() {
 
     expect(after.activationId, before.activationId);
     expect(
-      database.select(
-        'SELECT COUNT(*) AS count FROM content_pack_objects',
-      ).single['count'],
+      database
+          .select('SELECT COUNT(*) AS count FROM content_pack_objects')
+          .single['count'],
       1,
     );
   });
@@ -423,83 +432,83 @@ void main() {
     expect(await backend.activeVersion(release.packId), '1.0.0');
   });
 
-  test('sqlite rollback restores, deactivates, and exposes failure status',
-      () async {
-    final directory = await Directory.systemTemp.createTemp('remath-rollback-');
-    addTearDown(() => directory.delete(recursive: true));
-    final path = '${directory.path}/lifecycle.sqlite3';
-    var database = sqlite3.open(path);
-    var nextId = 0;
-    var backend = SqliteContentPackInstallationBackend(
-      availableBytes: () async => 1024 * 1024,
-      database: database,
-      idGenerator: () => 'rollback-${nextId++}',
-    );
-    final installer = composeContentPackInstaller(
-      backend: backend,
-      environment: _Environment(backend),
-      signatureVerifier: const _TrustedSignatureVerifier(),
-    );
-    await installer.install(
-      await _release('1.0.0'),
-      _Source(utf8.encode(_pack('1.0.0'))),
-    );
-    final first = await backend.activation('org.remath.pack.one');
-    await backend.confirmFirstLoad(
-      expectedActivationId: first.activationId,
-      packId: 'org.remath.pack.one',
-    );
-    await installer.install(
-      await _release('2.0.0'),
-      _Source(utf8.encode(_pack('2.0.0'))),
-    );
-    final update = await backend.activation('org.remath.pack.one');
+  test(
+    'sqlite rollback restores, deactivates, and exposes failure status',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'remath-rollback-',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final path = '${directory.path}/lifecycle.sqlite3';
+      var database = sqlite3.open(path);
+      var nextId = 0;
+      var backend = SqliteContentPackInstallationBackend(
+        availableBytes: () async => 1024 * 1024,
+        database: database,
+        idGenerator: () => 'rollback-${nextId++}',
+      );
+      final installer = composeContentPackInstaller(
+        backend: backend,
+        environment: _Environment(backend),
+        signatureVerifier: const _TrustedSignatureVerifier(),
+      );
+      await installer.install(
+        await _release('1.0.0'),
+        _Source(utf8.encode(_pack('1.0.0'))),
+      );
+      final first = await backend.activation('org.remath.pack.one');
+      await backend.confirmFirstLoad(
+        expectedActivationId: first.activationId,
+        packId: 'org.remath.pack.one',
+      );
+      await installer.install(
+        await _release('2.0.0'),
+        _Source(utf8.encode(_pack('2.0.0'))),
+      );
+      final update = await backend.activation('org.remath.pack.one');
 
-    final restored = await backend.rollbackFailedActivation(
-      expectedActivationId: update.activationId,
-      message: 'Payload-safe failure.',
-      packId: 'org.remath.pack.one',
-    );
-    expect(restored.restored, isTrue);
-    expect(restored.activeVersion, '1.0.0');
+      final restored = await backend.rollbackFailedActivation(
+        expectedActivationId: update.activationId,
+        message: 'Payload-safe failure.',
+        packId: 'org.remath.pack.one',
+      );
+      expect(restored.restored, isTrue);
+      expect(restored.activeVersion, '1.0.0');
 
-    final other = await _release(
-      '1.0.0',
-      packId: 'org.remath.pack.other',
-    );
-    await installer.install(
-      other,
-      _Source(utf8.encode(_pack('1.0.0',
-          packId: 'org.remath.pack.other'))),
-    );
-    final pending = await backend.activation(other.packId);
-    final deactivated = await backend.rollbackFailedActivation(
-      expectedActivationId: pending.activationId,
-      message: 'First install failed.',
-      packId: other.packId,
-    );
-    expect(deactivated.restored, isTrue);
-    expect(deactivated.activeVersion, isNull);
-    expect(await backend.activeVersion(other.packId), isNull);
+      final other = await _release('1.0.0', packId: 'org.remath.pack.other');
+      await installer.install(
+        other,
+        _Source(utf8.encode(_pack('1.0.0', packId: 'org.remath.pack.other'))),
+      );
+      final pending = await backend.activation(other.packId);
+      final deactivated = await backend.rollbackFailedActivation(
+        expectedActivationId: pending.activationId,
+        message: 'First install failed.',
+        packId: other.packId,
+      );
+      expect(deactivated.restored, isTrue);
+      expect(deactivated.activeVersion, isNull);
+      expect(await backend.activeVersion(other.packId), isNull);
 
-    database.close();
-    database = sqlite3.open(path);
-    addTearDown(database.close);
-    backend = SqliteContentPackInstallationBackend(
-      availableBytes: () async => 1024 * 1024,
-      database: database,
-      idGenerator: () => 'reopened-${nextId++}',
-    );
-    final failure = await backend.latestFailure('org.remath.pack.one');
-    expect(await backend.activeVersion('org.remath.pack.one'), '1.0.0');
-    expect(await backend.activeVersion(other.packId), isNull);
-    expect(failure?.message, 'Payload-safe failure.');
-    await backend.acknowledgeFailure(
-      failureId: failure!.failureId,
-      packId: failure.packId,
-    );
-    expect(await backend.latestFailure('org.remath.pack.one'), isNull);
-  });
+      database.close();
+      database = sqlite3.open(path);
+      addTearDown(database.close);
+      backend = SqliteContentPackInstallationBackend(
+        availableBytes: () async => 1024 * 1024,
+        database: database,
+        idGenerator: () => 'reopened-${nextId++}',
+      );
+      final failure = await backend.latestFailure('org.remath.pack.one');
+      expect(await backend.activeVersion('org.remath.pack.one'), '1.0.0');
+      expect(await backend.activeVersion(other.packId), isNull);
+      expect(failure?.message, 'Payload-safe failure.');
+      await backend.acknowledgeFailure(
+        failureId: failure!.failureId,
+        packId: failure.packId,
+      );
+      expect(await backend.latestFailure('org.remath.pack.one'), isNull);
+    },
+  );
 }
 
 final class _Environment implements ContentPackInstallEnvironment {
@@ -570,10 +579,7 @@ Future<ContentPackRelease> _release(
   );
 }
 
-String _pack(
-  String version, {
-  String packId = 'org.remath.pack.one',
-}) =>
+String _pack(String version, {String packId = 'org.remath.pack.one'}) =>
     '''
 {
   "schemaVersion": 1,
