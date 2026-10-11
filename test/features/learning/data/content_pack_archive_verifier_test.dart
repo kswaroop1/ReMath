@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/application/content_pack_installer.dart';
 import 'package:remath/src/features/learning/data/content_pack_archive_verifier.dart';
@@ -48,8 +50,27 @@ void main() {
 
     expect(signatures.calls, 1);
     expect(signatures.publisherKeyId, 'org.remath.publisher.primary');
-    expect(signatures.payloadDigest, digest);
+    final signedRelease = jsonDecode(utf8.decode(signatures.signedPayload!));
+    expect(signedRelease['sha256'], _release().sha256);
+    expect(signedRelease['version'], _release().version);
     expect(signatures.signature, [1, 2, 3]);
+  });
+
+  test('signature binds install-decision metadata to the archive digest', () async {
+    final original = _RecordingSignatureVerifier();
+    final changed = _RecordingSignatureVerifier();
+
+    await ContentPackArchiveVerifier(
+      signatureVerifier: original,
+    ).verify(_release(), _StagedArchive([archiveBytes]));
+    await ContentPackArchiveVerifier(
+      signatureVerifier: changed,
+    ).verify(
+      _release(title: 'Tampered title', version: '9.9.9'),
+      _StagedArchive([archiveBytes]),
+    );
+
+    expect(changed.signedPayload, isNot(original.signedPayload));
   });
 
   test(
@@ -118,6 +139,8 @@ ContentPackRelease _release({
   String sha256 =
       '9f64a747e1b97f131fabb6b447296c9b6f0201e79fb3c5356e6c77e89b6a806a',
   String signature = 'AQID',
+  String title = 'Algebra foundation',
+  String version = '2.0.0',
 }) => ContentPackRelease(
   compressedSizeBytes: compressedSizeBytes,
   dependencies: const [],
@@ -133,8 +156,8 @@ ContentPackRelease _release({
   publisherKeyId: 'org.remath.publisher.primary',
   sha256: sha256,
   signature: signature,
-  title: 'Algebra foundation',
-  version: '2.0.0',
+  title: title,
+  version: version,
 );
 
 final class _RecordingSignatureVerifier
@@ -144,18 +167,18 @@ final class _RecordingSignatureVerifier
   final bool isTrusted;
   int calls = 0;
   String? publisherKeyId;
-  List<int>? payloadDigest;
+  List<int>? signedPayload;
   List<int>? signature;
 
   @override
   Future<bool> verify({
     required String publisherKeyId,
-    required List<int> payloadDigest,
+    required List<int> signedPayload,
     required List<int> signature,
   }) async {
     calls += 1;
     this.publisherKeyId = publisherKeyId;
-    this.payloadDigest = payloadDigest;
+    this.signedPayload = signedPayload;
     this.signature = signature;
     return isTrusted;
   }

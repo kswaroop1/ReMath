@@ -8,7 +8,7 @@ import '../domain/content_pack_release.dart';
 abstract interface class ContentPackSignatureVerifier {
   Future<bool> verify({
     required String publisherKeyId,
-    required List<int> payloadDigest,
+    required List<int> signedPayload,
     required List<int> signature,
   });
 }
@@ -66,7 +66,7 @@ final class ContentPackArchiveVerifier implements ContentPackPayloadVerifier {
     }
     final isTrusted = await signatureVerifier.verify(
       publisherKeyId: release.publisherKeyId,
-      payloadDigest: digest.bytes,
+      signedPayload: digest.bytes,
       signature: signature,
     );
     if (!isTrusted) {
