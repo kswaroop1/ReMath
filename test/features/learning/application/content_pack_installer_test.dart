@@ -304,14 +304,21 @@ void main() {
     final older = _releaseWithVersion(release, '2.0.0');
 
     await expectLater(
-      installer.install(older, _ChunkedArchiveSource(const [[1, 2, 3, 4]])),
+      installer.install(
+        older,
+        _ChunkedArchiveSource(const [
+          [1, 2, 3, 4],
+        ]),
+      ),
       throwsA(isA<ContentPackActivationException>()),
     );
     expect(await store.activeVersion(release.packId), '3.0.0');
 
     final explicit = await installer.install(
       older,
-      _ChunkedArchiveSource(const [[1, 2, 3, 4]]),
+      _ChunkedArchiveSource(const [
+        [1, 2, 3, 4],
+      ]),
       isExplicitVersionChoice: true,
     );
     expect(explicit, ContentPackInstallOutcome.activated);
@@ -323,51 +330,65 @@ void main() {
     await expectLater(
       installer.install(
         _releaseWithVersion(release, '4.0.0'),
-        _ChunkedArchiveSource(const [[1, 2, 3, 4]]),
+        _ChunkedArchiveSource(const [
+          [1, 2, 3, 4],
+        ]),
       ),
       throwsA(isA<ContentPackActivationException>()),
     );
     expect(await store.activeVersion(release.packId), '2.0.0');
   });
 
-  test('failed discard is retained for retry without hiding the cause', () async {
-    final events = <String>[];
-    final store = _MemoryInstallStore(
-      activeVersions: {},
-      events: events,
-      failDiscardOnce: true,
-    );
-    final failing = ContentPackInstaller(
-      guard: _RecordingGuard(events),
-      store: store,
-      verifier: _RecordingVerifier(events, shouldFail: true),
-    );
+  test(
+    'failed discard is retained for retry without hiding the cause',
+    () async {
+      final events = <String>[];
+      final store = _MemoryInstallStore(
+        activeVersions: {},
+        events: events,
+        failDiscardOnce: true,
+      );
+      final failing = ContentPackInstaller(
+        guard: _RecordingGuard(events),
+        store: store,
+        verifier: _RecordingVerifier(events, shouldFail: true),
+      );
 
-    await expectLater(
-      failing.install(release, _ChunkedArchiveSource(const [[1, 2, 3, 4]])),
-      throwsA(isA<StateError>().having(
-        (error) => error.message,
-        'message',
-        contains('verification'),
-      )),
-    );
-    expect(store.pendingDiscard, isTrue);
+      await expectLater(
+        failing.install(
+          release,
+          _ChunkedArchiveSource(const [
+            [1, 2, 3, 4],
+          ]),
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (error) => error.message,
+            'message',
+            contains('verification'),
+          ),
+        ),
+      );
+      expect(store.pendingDiscard, isTrue);
 
-    final retrying = ContentPackInstaller(
-      guard: _RecordingGuard(events),
-      store: store,
-      verifier: _RecordingVerifier(events),
-    );
-    expect(
-      await retrying.install(
-        release,
-        _ChunkedArchiveSource(const [[1, 2, 3, 4]]),
-      ),
-      ContentPackInstallOutcome.activated,
-    );
-    expect(events, contains('retryDiscard'));
-    expect(store.pendingDiscard, isFalse);
-  });
+      final retrying = ContentPackInstaller(
+        guard: _RecordingGuard(events),
+        store: store,
+        verifier: _RecordingVerifier(events),
+      );
+      expect(
+        await retrying.install(
+          release,
+          _ChunkedArchiveSource(const [
+            [1, 2, 3, 4],
+          ]),
+        ),
+        ContentPackInstallOutcome.activated,
+      );
+      expect(events, contains('retryDiscard'));
+      expect(store.pendingDiscard, isFalse);
+    },
+  );
 }
 
 ContentPackRelease _releaseWithVersion(
@@ -473,8 +494,7 @@ final class _MemoryInstallStore implements ContentPackInstallStore {
     ContentPackRelease release,
     ContentPackStagedArchive archive, {
     required bool isExplicitVersionChoice,
-  }
-  ) async {
+  }) async {
     events.add('activate');
     if (_stagedRelease != release || _stagedArchive != archive) {
       throw StateError('Only the verified staged release can be activated.');

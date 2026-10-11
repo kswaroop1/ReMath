@@ -132,25 +132,28 @@ void main() {
     },
   );
 
-  test('an interrupted confirmation stays retryable without rollback', () async {
-    final store = _MemoryRollbackStore(failConfirmOnce: true);
-    final coordinator = ContentPackRollbackCoordinator(
-      loader: _ControlledLoader(),
-      store: store,
-    );
+  test(
+    'an interrupted confirmation stays retryable without rollback',
+    () async {
+      final store = _MemoryRollbackStore(failConfirmOnce: true);
+      final coordinator = ContentPackRollbackCoordinator(
+        loader: _ControlledLoader(),
+        store: store,
+      );
 
-    await expectLater(
-      coordinator.verifyFirstLoad(packId, version),
-      throwsStateError,
-    );
-    expect(store.active, version);
-    expect(store.awaitingFirstLoad, isTrue);
-    expect(store.rollbackCount, 0);
+      await expectLater(
+        coordinator.verifyFirstLoad(packId, version),
+        throwsStateError,
+      );
+      expect(store.active, version);
+      expect(store.awaitingFirstLoad, isTrue);
+      expect(store.rollbackCount, 0);
 
-    final retried = await coordinator.verifyFirstLoad(packId, version);
-    expect(retried.outcome, ContentPackRuntimeOutcome.ready);
-    expect(store.awaitingFirstLoad, isFalse);
-  });
+      final retried = await coordinator.verifyFirstLoad(packId, version);
+      expect(retried.outcome, ContentPackRuntimeOutcome.ready);
+      expect(store.awaitingFirstLoad, isFalse);
+    },
+  );
 
   test('a failed concurrent load cannot undo a confirmed activation', () async {
     final store = _MemoryRollbackStore();

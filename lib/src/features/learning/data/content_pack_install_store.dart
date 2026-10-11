@@ -119,8 +119,7 @@ final class TransactionalContentPackInstallStore
     ContentPackRelease release,
     ContentPackStagedArchive archive, {
     required bool isExplicitVersionChoice,
-  }
-  ) {
+  }) {
     final sealed = _sealedObject(archive);
     return backend.activateAtomically(
       isExplicitVersionChoice: isExplicitVersionChoice,

@@ -12,84 +12,93 @@ import 'package:remath/src/features/learning/domain/content_pack_release.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
-  test('production composition installs and atomically enforces retention', () async {
-    final database = sqlite3.openInMemory();
-    addTearDown(database.close);
-    var nextId = 0;
-    final backend = SqliteContentPackInstallationBackend(
-      availableBytes: () async => 1024 * 1024,
-      database: database,
-      idGenerator: () => 'lifecycle-${nextId++}',
-    );
-    final installer = composeContentPackInstaller(
-      backend: backend,
-      environment: _Environment(backend),
-      signatureVerifier: const _TrustedSignatureVerifier(),
-    );
-    final versionTwo = await _release('2.0.0');
+  test(
+    'production composition installs and atomically enforces retention',
+    () async {
+      final database = sqlite3.openInMemory();
+      addTearDown(database.close);
+      var nextId = 0;
+      final backend = SqliteContentPackInstallationBackend(
+        availableBytes: () async => 1024 * 1024,
+        database: database,
+        idGenerator: () => 'lifecycle-${nextId++}',
+      );
+      final installer = composeContentPackInstaller(
+        backend: backend,
+        environment: _Environment(backend),
+        signatureVerifier: const _TrustedSignatureVerifier(),
+      );
+      final versionTwo = await _release('2.0.0');
 
-    expect(
-      await installer.install(versionTwo, _Source(utf8.encode(_pack('2.0.0')))),
-      ContentPackInstallOutcome.activated,
-    );
-    expect(await backend.activeVersion(versionTwo.packId), '2.0.0');
+      expect(
+        await installer.install(
+          versionTwo,
+          _Source(utf8.encode(_pack('2.0.0'))),
+        ),
+        ContentPackInstallOutcome.activated,
+      );
+      expect(await backend.activeVersion(versionTwo.packId), '2.0.0');
 
-    final versionOne = await _release('1.0.0');
-    await expectLater(
-      installer.install(versionOne, _Source(utf8.encode(_pack('1.0.0')))),
-      throwsA(isA<ContentPackActivationException>()),
-    );
-    expect(await backend.activeVersion(versionTwo.packId), '2.0.0');
+      final versionOne = await _release('1.0.0');
+      await expectLater(
+        installer.install(versionOne, _Source(utf8.encode(_pack('1.0.0')))),
+        throwsA(isA<ContentPackActivationException>()),
+      );
+      expect(await backend.activeVersion(versionTwo.packId), '2.0.0');
 
-    expect(
-      await installer.install(
-        versionOne,
-        _Source(utf8.encode(_pack('1.0.0'))),
-        isExplicitVersionChoice: true,
-      ),
-      ContentPackInstallOutcome.activated,
-    );
-    await backend.pinActive(versionTwo.packId);
-    final versionThree = await _release('3.0.0');
-    await expectLater(
-      installer.install(versionThree, _Source(utf8.encode(_pack('3.0.0')))),
-      throwsA(isA<ContentPackActivationException>()),
-    );
-    expect(await backend.activeVersion(versionTwo.packId), '1.0.0');
-  });
+      expect(
+        await installer.install(
+          versionOne,
+          _Source(utf8.encode(_pack('1.0.0'))),
+          isExplicitVersionChoice: true,
+        ),
+        ContentPackInstallOutcome.activated,
+      );
+      await backend.pinActive(versionTwo.packId);
+      final versionThree = await _release('3.0.0');
+      await expectLater(
+        installer.install(versionThree, _Source(utf8.encode(_pack('3.0.0')))),
+        throwsA(isA<ContentPackActivationException>()),
+      );
+      expect(await backend.activeVersion(versionTwo.packId), '1.0.0');
+    },
+  );
 
-  test('confirmed sqlite activation cannot be rolled back by a stale load', () async {
-    final database = sqlite3.openInMemory();
-    addTearDown(database.close);
-    var nextId = 0;
-    final backend = SqliteContentPackInstallationBackend(
-      availableBytes: () async => 1024 * 1024,
-      database: database,
-      idGenerator: () => 'activation-${nextId++}',
-    );
-    final installer = composeContentPackInstaller(
-      backend: backend,
-      environment: _Environment(backend),
-      signatureVerifier: const _TrustedSignatureVerifier(),
-    );
-    final release = await _release('2.0.0');
-    await installer.install(release, _Source(utf8.encode(_pack('2.0.0'))));
-    final pending = await backend.activation(release.packId);
+  test(
+    'confirmed sqlite activation cannot be rolled back by a stale load',
+    () async {
+      final database = sqlite3.openInMemory();
+      addTearDown(database.close);
+      var nextId = 0;
+      final backend = SqliteContentPackInstallationBackend(
+        availableBytes: () async => 1024 * 1024,
+        database: database,
+        idGenerator: () => 'activation-${nextId++}',
+      );
+      final installer = composeContentPackInstaller(
+        backend: backend,
+        environment: _Environment(backend),
+        signatureVerifier: const _TrustedSignatureVerifier(),
+      );
+      final release = await _release('2.0.0');
+      await installer.install(release, _Source(utf8.encode(_pack('2.0.0'))));
+      final pending = await backend.activation(release.packId);
 
-    final confirmed = await backend.confirmFirstLoad(
-      expectedActivationId: pending.activationId,
-      packId: release.packId,
-    );
-    final staleRollback = await backend.rollbackFailedActivation(
-      expectedActivationId: pending.activationId,
-      message: 'stale failure',
-      packId: release.packId,
-    );
+      final confirmed = await backend.confirmFirstLoad(
+        expectedActivationId: pending.activationId,
+        packId: release.packId,
+      );
+      final staleRollback = await backend.rollbackFailedActivation(
+        expectedActivationId: pending.activationId,
+        message: 'stale failure',
+        packId: release.packId,
+      );
 
-    expect(confirmed.confirmed, isTrue);
-    expect(staleRollback.restored, isFalse);
-    expect(await backend.activeVersion(release.packId), '2.0.0');
-  });
+      expect(confirmed.confirmed, isTrue);
+      expect(staleRollback.restored, isFalse);
+      expect(await backend.activeVersion(release.packId), '2.0.0');
+    },
+  );
 
   test('sqlite discard persists cleanup for retry before deletion', () async {
     final database = sqlite3.openInMemory();
@@ -184,7 +193,8 @@ Future<ContentPackRelease> _release(String version) async {
   );
 }
 
-String _pack(String version) => '''
+String _pack(String version) =>
+    '''
 {
   "schemaVersion": 1,
   "id": "org.remath.pack.one",

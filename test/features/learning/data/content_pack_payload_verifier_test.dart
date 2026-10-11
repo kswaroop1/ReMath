@@ -64,26 +64,29 @@ void main() {
     );
   });
 
-  test('rejects a payload schema newer than the running app supports', () async {
-    final verifier = ParsedContentPackPayloadVerifier(
-      maximumSchemaVersion: 1,
-    );
-    final newerSchema = _validPack.replaceFirst(
-      '"schemaVersion": 1',
-      '"schemaVersion": 2',
-    );
+  test(
+    'rejects a payload schema newer than the running app supports',
+    () async {
+      final verifier = ParsedContentPackPayloadVerifier(
+        maximumSchemaVersion: 1,
+      );
+      final newerSchema = _validPack.replaceFirst(
+        '"schemaVersion": 1',
+        '"schemaVersion": 2',
+      );
 
-    await expectLater(
-      verifier.verify(_release(), _StagedArchive(utf8.encode(newerSchema))),
-      throwsA(
-        isA<ContentPackPayloadException>().having(
-          (error) => error.issues,
-          'issues',
-          contains(contains('newer than this app supports')),
+      await expectLater(
+        verifier.verify(_release(), _StagedArchive(utf8.encode(newerSchema))),
+        throwsA(
+          isA<ContentPackPayloadException>().having(
+            (error) => error.issues,
+            'issues',
+            contains(contains('newer than this app supports')),
+          ),
         ),
-      ),
-    );
-  });
+      );
+    },
+  );
 
   test(
     'production verifier composes authenticity and content checks',

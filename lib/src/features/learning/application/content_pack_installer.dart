@@ -42,8 +42,7 @@ abstract interface class ContentPackInstallStore {
     ContentPackRelease release,
     ContentPackStagedArchive archive, {
     required bool isExplicitVersionChoice,
-  }
-  );
+  });
 
   /// Retries cleanup obligations durably retained by [discardStaged].
   Future<void> retryPendingDiscards();
@@ -126,17 +125,18 @@ final class ContentPackInstaller {
     }
 
     late final Future<ContentPackInstallOutcome> tracked;
-    tracked = _install(
-      frozenRelease,
-      archive,
-      isExplicitVersionChoice: isExplicitVersionChoice,
-    ).whenComplete(() {
-      if (identical(_inFlight[frozenRelease.packId], tracked)) {
-        _inFlight.remove(frozenRelease.packId);
-        _inFlightVersions.remove(frozenRelease.packId);
-        _inFlightExplicitChoices.remove(frozenRelease.packId);
-      }
-    });
+    tracked =
+        _install(
+          frozenRelease,
+          archive,
+          isExplicitVersionChoice: isExplicitVersionChoice,
+        ).whenComplete(() {
+          if (identical(_inFlight[frozenRelease.packId], tracked)) {
+            _inFlight.remove(frozenRelease.packId);
+            _inFlightVersions.remove(frozenRelease.packId);
+            _inFlightExplicitChoices.remove(frozenRelease.packId);
+          }
+        });
     _inFlight[frozenRelease.packId] = tracked;
     _inFlightVersions[frozenRelease.packId] = frozenRelease.version;
     _inFlightExplicitChoices[frozenRelease.packId] = isExplicitVersionChoice;

@@ -100,10 +100,7 @@ void main() {
     backend.firstWrite = writeStarted;
     backend.releaseFirst = releaseWrite;
 
-    final staging = store.stage(
-      _release(),
-      _ArchiveSource([mutableChunk]),
-    );
+    final staging = store.stage(_release(), _ArchiveSource([mutableChunk]));
     await writeStarted.future;
     mutableChunk[0] = 9;
     releaseWrite.complete();

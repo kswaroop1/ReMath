@@ -116,11 +116,14 @@ final class SqliteContentPackInstallationBackend
           'Insufficient capacity after active reservations.',
         );
       }
-      _database.execute('''
+      _database.execute(
+        '''
         INSERT INTO content_pack_objects (
           seal_id, pack_id, version, required_bytes, content, state
         ) VALUES (?, ?, ?, ?, ?, 'staging')
-      ''', [sealId, packId, version, requiredBytes, Uint8List(0)]);
+      ''',
+        [sealId, packId, version, requiredBytes, Uint8List(0)],
+      );
     });
     return _SqliteContentPackStagingSink(
       backend: this,
@@ -135,7 +138,10 @@ final class SqliteContentPackInstallationBackend
       final bytes = row['content'] as Uint8List;
       _database.execute(
         'UPDATE content_pack_objects SET content = ? WHERE seal_id = ?',
-        [Uint8List.fromList([...bytes, ...chunk]), sealId],
+        [
+          Uint8List.fromList([...bytes, ...chunk]),
+          sealId,
+        ],
       );
     });
   }
@@ -153,11 +159,14 @@ final class SqliteContentPackInstallationBackend
         'The staged length changed before sealing.',
       );
     }
-    _database.execute('''
+    _database.execute(
+      '''
       UPDATE content_pack_objects
       SET length_bytes = ?, sha256 = ?, state = 'sealed'
       WHERE seal_id = ?
-    ''', [lengthBytes, sha256, sealId]);
+    ''',
+      [lengthBytes, sha256, sealId],
+    );
     return _SqliteContentPackSealedObject(
       backend: this,
       reservedBytes: reservedBytes,
@@ -211,7 +220,8 @@ final class SqliteContentPackInstallationBackend
       }
 
       final activationId = _idGenerator();
-      _database.execute('''
+      _database.execute(
+        '''
         INSERT INTO content_pack_active (
           pack_id, version, seal_id, pinned_version,
           previous_version, previous_seal_id, previous_pinned_version,
@@ -226,42 +236,50 @@ final class SqliteContentPackInstallationBackend
           previous_pinned_version = excluded.previous_pinned_version,
           activation_id = excluded.activation_id,
           awaiting_first_load = 1
-      ''', [
-        release.packId,
-        release.version,
-        sqliteSealed.sealId,
-        transition.state.pinnedVersion,
-        current?['version'],
-        current?['seal_id'],
-        current?['pinned_version'],
-        activationId,
-      ]);
+      ''',
+        [
+          release.packId,
+          release.version,
+          sqliteSealed.sealId,
+          transition.state.pinnedVersion,
+          current?['version'],
+          current?['seal_id'],
+          current?['pinned_version'],
+          activationId,
+        ],
+      );
       if (current != null) {
         _database.execute(
           "UPDATE content_pack_objects SET state = 'retained' WHERE seal_id = ?",
           [current['seal_id']],
         );
       }
-      _database.execute('''
+      _database.execute(
+        '''
         UPDATE content_pack_objects
         SET state = 'active', required_bytes = 0
         WHERE seal_id = ?
-      ''', [sqliteSealed.sealId]);
+      ''',
+        [sqliteSealed.sealId],
+      );
       _database.execute(
         'DELETE FROM content_pack_dependencies WHERE pack_id = ? AND version = ?',
         [release.packId, release.version],
       );
       for (final dependency in release.dependencies) {
-        _database.execute('''
+        _database.execute(
+          '''
           INSERT INTO content_pack_dependencies (
             pack_id, version, dependency_pack_id, minimum_version
           ) VALUES (?, ?, ?, ?)
-        ''', [
-          release.packId,
-          release.version,
-          dependency.packId,
-          dependency.minimumVersion,
-        ]);
+        ''',
+          [
+            release.packId,
+            release.version,
+            dependency.packId,
+            dependency.minimumVersion,
+          ],
+        );
       }
     });
   }
@@ -340,10 +358,13 @@ final class SqliteContentPackInstallationBackend
     required String expectedActivationId,
     required String packId,
   }) async => _transaction(() {
-    _database.execute('''
+    _database.execute(
+      '''
       UPDATE content_pack_active SET awaiting_first_load = 0
       WHERE pack_id = ? AND activation_id = ? AND awaiting_first_load = 1
-    ''', [packId, expectedActivationId]);
+    ''',
+      [packId, expectedActivationId],
+    );
     final confirmed = _database.updatedRows == 1;
     final current = _activeRow(packId);
     return ContentPackRuntimeConfirmation(
@@ -370,38 +391,42 @@ final class SqliteContentPackInstallationBackend
     final previousVersion = current['previous_version'] as String?;
     final currentSealId = current['seal_id'] as String;
     if (previousVersion == null) {
-      _database.execute(
-        'DELETE FROM content_pack_active WHERE pack_id = ?',
-        [packId],
-      );
+      _database.execute('DELETE FROM content_pack_active WHERE pack_id = ?', [
+        packId,
+      ]);
     } else {
-      _database.execute('''
+      _database.execute(
+        '''
         UPDATE content_pack_active SET
           version = ?, seal_id = ?, pinned_version = ?,
           previous_version = NULL, previous_seal_id = NULL,
           previous_pinned_version = NULL, activation_id = ?,
           awaiting_first_load = 0
         WHERE pack_id = ?
-      ''', [
-        previousVersion,
-        current['previous_seal_id'],
-        current['previous_pinned_version'],
-        _idGenerator(),
-        packId,
-      ]);
+      ''',
+        [
+          previousVersion,
+          current['previous_seal_id'],
+          current['previous_pinned_version'],
+          _idGenerator(),
+          packId,
+        ],
+      );
       _database.execute(
         "UPDATE content_pack_objects SET state = 'active' WHERE seal_id = ?",
         [current['previous_seal_id']],
       );
     }
+    _database.execute('DELETE FROM content_pack_objects WHERE seal_id = ?', [
+      currentSealId,
+    ]);
     _database.execute(
-      'DELETE FROM content_pack_objects WHERE seal_id = ?',
-      [currentSealId],
-    );
-    _database.execute('''
+      '''
       INSERT INTO content_pack_failures (failure_id, pack_id, message)
       VALUES (?, ?, ?)
-    ''', [_idGenerator(), packId, message]);
+    ''',
+      [_idGenerator(), packId, message],
+    );
     return ContentPackRollbackTransition(
       activeVersion: previousVersion,
       restored: true,
@@ -414,10 +439,13 @@ final class SqliteContentPackInstallationBackend
       if (current == null) {
         throw StateError('Cannot pin an absent content pack.');
       }
-      _database.execute('''
+      _database.execute(
+        '''
         UPDATE content_pack_active SET pinned_version = version
         WHERE pack_id = ?
-      ''', [packId]);
+      ''',
+        [packId],
+      );
     });
   }
 
@@ -444,7 +472,8 @@ final class SqliteContentPackInstallationBackend
         state: currentState,
       );
     }
-    final dependants = _database.select('''
+    final dependants = _database.select(
+      '''
       SELECT dependencies.pack_id
       FROM content_pack_dependencies AS dependencies
       INNER JOIN content_pack_active AS active
@@ -452,7 +481,9 @@ final class SqliteContentPackInstallationBackend
         AND active.version = dependencies.version
       WHERE dependencies.dependency_pack_id = ?
       LIMIT 1
-    ''', [packId]);
+    ''',
+      [packId],
+    );
     if (dependants.isNotEmpty) {
       return ContentPackRemovalCommit(
         outcome: ContentPackRemovalCommitOutcome.blockedDependent,
@@ -494,9 +525,7 @@ final class SqliteContentPackInstallationBackend
     return rows.single;
   }
 
-  _SqliteContentPackSealedObject _ownedSealed(
-    ContentPackSealedObject sealed,
-  ) {
+  _SqliteContentPackSealedObject _ownedSealed(ContentPackSealedObject sealed) {
     if (sealed is! _SqliteContentPackSealedObject ||
         !identical(sealed.backend, this)) {
       throw const ContentPackStagingException(
@@ -529,8 +558,7 @@ final class SqliteContentPackInstallationBackend
   }
 }
 
-final class _SqliteContentPackStagingSink
-    implements ContentPackStagingSink {
+final class _SqliteContentPackStagingSink implements ContentPackStagingSink {
   const _SqliteContentPackStagingSink({
     required this.backend,
     required this.requiredBytes,
@@ -566,8 +594,7 @@ final class _SqliteContentPackStagingSink
   );
 }
 
-final class _SqliteContentPackSealedObject
-    implements ContentPackSealedObject {
+final class _SqliteContentPackSealedObject implements ContentPackSealedObject {
   const _SqliteContentPackSealedObject({
     required this.backend,
     required this.reservedBytes,
