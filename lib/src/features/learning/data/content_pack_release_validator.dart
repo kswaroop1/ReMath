@@ -27,12 +27,12 @@ final class ContentPackReleaseValidator {
         'Pack id is not a stable dotted identifier: ${release.packId}.',
       );
     }
-    if (!_versionPattern.hasMatch(release.version)) {
+    if (!_isComparableVersion(release.version)) {
       issues.add(
         'Pack version must use semantic versioning: ${release.version}.',
       );
     }
-    if (!_versionPattern.hasMatch(release.minimumAppVersion)) {
+    if (!_isComparableVersion(release.minimumAppVersion)) {
       issues.add(
         'The minimum app version must use semantic versioning: '
         '${release.minimumAppVersion}.',
@@ -83,7 +83,7 @@ final class ContentPackReleaseValidator {
       if (!_idPattern.hasMatch(dependency.packId)) {
         issues.add('Invalid dependency id: ${dependency.packId}.');
       }
-      if (!_versionPattern.hasMatch(dependency.minimumVersion)) {
+      if (!_isComparableVersion(dependency.minimumVersion)) {
         issues.add(
           'The dependency version for ${dependency.packId} must use '
           'semantic versioning: ${dependency.minimumVersion}.',
@@ -115,4 +115,8 @@ final class ContentPackReleaseValidator {
       return false;
     }
   }
+
+  bool _isComparableVersion(String value) =>
+      _versionPattern.hasMatch(value) &&
+      value.split('.').every((component) => int.tryParse(component) != null);
 }
