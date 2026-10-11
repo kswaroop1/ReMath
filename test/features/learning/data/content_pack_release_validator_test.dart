@@ -88,4 +88,37 @@ void main() {
 
     expect(validator.validate(release), isEmpty);
   });
+
+  test('version components must fit every lifecycle comparator', () {
+    const oversized = ContentPackRelease(
+      compressedSizeBytes: 2048,
+      dependencies: [
+        ContentPackDependency(
+          minimumVersion: '999999999999999999999999999999.0.0',
+          packId: 'org.remath.arithmetic.foundation',
+        ),
+      ],
+      description: 'Original algebra lessons and practice.',
+      installedSizeBytes: 8192,
+      language: 'en-GB',
+      license: 'CC-BY-SA-4.0',
+      manifestVersion: 1,
+      minimumAppVersion: '999999999999999999999999999999.0.0',
+      minimumSchemaVersion: 3,
+      objectives: ['Collect like terms'],
+      packId: 'org.remath.algebra.foundation',
+      publisherKeyId: 'org.remath.publisher.primary',
+      sha256:
+          'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      signature: 'c2lnbmF0dXJl',
+      title: 'Algebra foundation',
+      version: '999999999999999999999999999999.0.0',
+    );
+
+    final issues = validator.validate(oversized);
+
+    expect(issues, contains(contains('Pack version')));
+    expect(issues, contains(contains('minimum app version')));
+    expect(issues, contains(contains('dependency version')));
+  });
 }
