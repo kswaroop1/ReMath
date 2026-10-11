@@ -156,6 +156,9 @@ jobs:
           verify_red 4d0e09cce432b5f339db5094d4de5be3b7697c7f \
             test/features/learning/data/content_pack_release_validator_test.dart \
             "version components must fit every lifecycle comparator"
+          verify_red 808950160f2caf2722fb03bae9f954f834231bdd \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "sealed objects reject chunks moved from live staging"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
