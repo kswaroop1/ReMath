@@ -68,18 +68,22 @@ depends on a network service.
 The bounded lifecycle behaviours are implemented as provider-neutral domain,
 application, and data contracts. Each behaviour has a test-first red commit, a
 paired green implementation, and permanent CI replay of the intended red
-failure. Authoritative CI run `38201036215` verifies the final behavioural head
-with canonical formatting, fatal static analysis, bundled-content validation,
-eight Chrome contracts, all 495 native tests, 96.78% line coverage, and secret
-scanning. The measured coverage remains 6.78 percentage points above the 90%
-repository floor after adding the production-composed payload verifier, the
-16 MiB compressed-payload boundary, incremental immutable SQLite staging,
-restart recovery, confirmed rollback checkpoints, dependency-confirmation and
-reverse-dependency validation, atomic activation/removal/first-load/unpin
-transitions, durable failure-status and cleanup recovery, and their concurrency
-tests.
+failure. Authoritative CI run `38231363663` verifies the final sixth-review
+behavioural head with canonical formatting, fatal static analysis,
+bundled-content validation, eight Chrome contracts, all 501 native tests,
+96.64% line coverage, and secret scanning. The measured coverage remains 6.64
+percentage points above the 90% repository floor.
+
+The sixth-review corrections make sealed parent state immutable, preserve
+truthful atomic duplicate outcomes, bind pinning to observed activation state,
+compose the SQLite lifecycle at native startup, preserve primary staging
+failures, distinguish live reservations from abandoned restart state, and
+reject active dependency cycles. Their seven focused red heads are permanently
+replayed by CI. The historical fifth-review evidence finding remains explicit:
+four genuinely test-first behaviours were batched into one published red/green
+pair rather than separate pairs, and published history has not been rewritten
+or misrepresented.
 
 CP-005 remains deliberately partial: archive length, SHA-256, and signature
 verification are complete, while publisher trust-root lifecycle operations stay
 assigned to PR #25 as specified above.
-

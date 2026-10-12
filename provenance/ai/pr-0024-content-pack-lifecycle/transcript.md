@@ -582,3 +582,20 @@ were genuinely test-first, but they were batched into one red and one green
 commit. This record does not misrepresent that history or manufacture a later
 failure; the thread remains open pending a safe, non-destructive evidence
 resolution.
+
+
+CI `38228141616` passed every permanent red replay, the committed structure
+and dependency-lock checks, and all 501 tests, then exposed one canonical
+formatting difference in the new production-composition test. Replacement CI
+`38229342676` reproduced that single formatting difference while again
+passing all 501 tests. Diagnostic CI `38230215934` printed the exact formatter
+patch after the complete red replay and again passed all 501 tests.
+
+Commits `422d238c` and `60ec9753` restore the non-mutating formatting gate
+and apply the CI-rendered patch exactly; the transient CI for the first of those
+commits, `38231324928`, was cancelled by the repository concurrency policy
+when the complete correction head arrived. Authoritative behavioural-head CI
+`38231363663` passes every gate at `60ec9753`: permanent red evidence,
+committed project structure, dependency lock, canonical formatting, fatal
+analysis, bundled-content validation, eight Chrome contracts, all 501 native
+tests, 96.64% line coverage, and secret scanning.
