@@ -258,115 +258,121 @@ void main() {
       ),
       throwsA(isA<SqliteException>()),
     );
-    expect(await sealed.openRead().expand((chunk) => chunk).toList(), const [1]);
+    expect(await sealed.openRead().expand((chunk) => chunk).toList(), const [
+      1,
+    ]);
   });
 
-  test('a newer update waits for the current first load to be confirmed', () async {
-    final database = sqlite3.openInMemory();
-    addTearDown(database.close);
-    var nextId = 0;
-    final backend = SqliteContentPackInstallationBackend(
-      availableBytes: () async => 1024 * 1024,
-      database: database,
-      idGenerator: () => 'checkpoint-${nextId++}',
-    );
-    final installer = composeContentPackInstaller(
-      backend: backend,
-      environment: _Environment(backend),
-      signatureVerifier: const _TrustedSignatureVerifier(),
-    );
-    await installer.install(
-      await _release('1.0.0'),
-      _Source(utf8.encode(_pack('1.0.0'))),
-    );
-    final first = await backend.activation('org.remath.pack.one');
-    await backend.confirmFirstLoad(
-      expectedActivationId: first.activationId,
-      packId: 'org.remath.pack.one',
-    );
-    await installer.install(
-      await _release('2.0.0'),
-      _Source(utf8.encode(_pack('2.0.0'))),
-    );
-    final second = await backend.activation('org.remath.pack.one');
+  test(
+    'a newer update waits for the current first load to be confirmed',
+    () async {
+      final database = sqlite3.openInMemory();
+      addTearDown(database.close);
+      var nextId = 0;
+      final backend = SqliteContentPackInstallationBackend(
+        availableBytes: () async => 1024 * 1024,
+        database: database,
+        idGenerator: () => 'checkpoint-${nextId++}',
+      );
+      final installer = composeContentPackInstaller(
+        backend: backend,
+        environment: _Environment(backend),
+        signatureVerifier: const _TrustedSignatureVerifier(),
+      );
+      await installer.install(
+        await _release('1.0.0'),
+        _Source(utf8.encode(_pack('1.0.0'))),
+      );
+      final first = await backend.activation('org.remath.pack.one');
+      await backend.confirmFirstLoad(
+        expectedActivationId: first.activationId,
+        packId: 'org.remath.pack.one',
+      );
+      await installer.install(
+        await _release('2.0.0'),
+        _Source(utf8.encode(_pack('2.0.0'))),
+      );
+      final second = await backend.activation('org.remath.pack.one');
 
-    await expectLater(
-      installer.install(
-        await _release('3.0.0'),
-        _Source(utf8.encode(_pack('3.0.0'))),
-      ),
-      throwsA(
-        isA<ContentPackActivationException>().having(
-          (error) => error.outcome,
-          'outcome',
-          ContentPackRetentionOutcome.blockedPendingConfirmation,
+      await expectLater(
+        installer.install(
+          await _release('3.0.0'),
+          _Source(utf8.encode(_pack('3.0.0'))),
         ),
-      ),
-    );
-    final rollback = await backend.rollbackFailedActivation(
-      expectedActivationId: second.activationId,
-      message: 'Version 2 failed.',
-      packId: 'org.remath.pack.one',
-    );
-    expect(rollback.activeVersion, '1.0.0');
-  });
+        throwsA(
+          isA<ContentPackActivationException>().having(
+            (error) => error.outcome,
+            'outcome',
+            ContentPackRetentionOutcome.blockedPendingConfirmation,
+          ),
+        ),
+      );
+      final rollback = await backend.rollbackFailedActivation(
+        expectedActivationId: second.activationId,
+        message: 'Version 2 failed.',
+        packId: 'org.remath.pack.one',
+      );
+      expect(rollback.activeVersion, '1.0.0');
+    },
+  );
 
-  test('a dependant cannot activate against an unconfirmed dependency', () async {
-    final database = sqlite3.openInMemory();
-    addTearDown(database.close);
-    var nextId = 0;
-    final backend = SqliteContentPackInstallationBackend(
-      availableBytes: () async => 1024 * 1024,
-      database: database,
-      idGenerator: () => 'pending-dependency-${nextId++}',
-    );
-    final installer = composeContentPackInstaller(
-      backend: backend,
-      environment: _Environment(backend),
-      signatureVerifier: const _TrustedSignatureVerifier(),
-    );
-    final dependency = await _release(
-      '1.0.0',
-      packId: 'org.remath.pack.dependency',
-    );
-    await installer.install(
-      dependency,
-      _Source(
-        utf8.encode(_pack('1.0.0', packId: dependency.packId)),
-      ),
-    );
-    final dependant = await _release(
-      '1.0.0',
-      packId: 'org.remath.pack.dependant',
-      dependencies: const [
-        ContentPackDependency(
-          packId: 'org.remath.pack.dependency',
-          minimumVersion: '1.0.0',
-        ),
-      ],
-    );
+  test(
+    'a dependant cannot activate against an unconfirmed dependency',
+    () async {
+      final database = sqlite3.openInMemory();
+      addTearDown(database.close);
+      var nextId = 0;
+      final backend = SqliteContentPackInstallationBackend(
+        availableBytes: () async => 1024 * 1024,
+        database: database,
+        idGenerator: () => 'pending-dependency-${nextId++}',
+      );
+      final installer = composeContentPackInstaller(
+        backend: backend,
+        environment: _Environment(backend),
+        signatureVerifier: const _TrustedSignatureVerifier(),
+      );
+      final dependency = await _release(
+        '1.0.0',
+        packId: 'org.remath.pack.dependency',
+      );
+      await installer.install(
+        dependency,
+        _Source(utf8.encode(_pack('1.0.0', packId: dependency.packId))),
+      );
+      final dependant = await _release(
+        '1.0.0',
+        packId: 'org.remath.pack.dependant',
+        dependencies: const [
+          ContentPackDependency(
+            packId: 'org.remath.pack.dependency',
+            minimumVersion: '1.0.0',
+          ),
+        ],
+      );
 
-    await expectLater(
-      installer.install(
-        dependant,
-        _Source(utf8.encode(_pack('1.0.0', packId: dependant.packId))),
-      ),
-      throwsA(
-        isA<ContentPackActivationException>().having(
-          (error) => error.outcome,
-          'outcome',
-          ContentPackRetentionOutcome.blockedPendingConfirmation,
+      await expectLater(
+        installer.install(
+          dependant,
+          _Source(utf8.encode(_pack('1.0.0', packId: dependant.packId))),
         ),
-      ),
-    );
-    final pending = await backend.activation(dependency.packId);
-    await backend.rollbackFailedActivation(
-      expectedActivationId: pending.activationId,
-      message: 'Dependency failed.',
-      packId: dependency.packId,
-    );
-    expect(await backend.activeVersion(dependant.packId), isNull);
-  });
+        throwsA(
+          isA<ContentPackActivationException>().having(
+            (error) => error.outcome,
+            'outcome',
+            ContentPackRetentionOutcome.blockedPendingConfirmation,
+          ),
+        ),
+      );
+      final pending = await backend.activation(dependency.packId);
+      await backend.rollbackFailedActivation(
+        expectedActivationId: pending.activationId,
+        message: 'Dependency failed.',
+        packId: dependency.packId,
+      );
+      expect(await backend.activeVersion(dependant.packId), isNull);
+    },
+  );
 
   test(
     'activation rejects a downgrade required by an active dependant',
@@ -493,10 +499,7 @@ void main() {
       signatureVerifier: const _TrustedSignatureVerifier(),
     );
     final firstRelease = await _release('1.0.0');
-    await installer.install(
-      firstRelease,
-      _Source(utf8.encode(_pack('1.0.0'))),
-    );
+    await installer.install(firstRelease, _Source(utf8.encode(_pack('1.0.0'))));
     final firstActivation = await backend.activation(firstRelease.packId);
     await backend.confirmFirstLoad(
       expectedActivationId: firstActivation.activationId,

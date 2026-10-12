@@ -106,9 +106,7 @@ final class SqliteContentPackInstallationBackend
           SELECT RAISE(ABORT, 'content pack object is sealed');
         END
       ''')
-      ..execute(
-        'DROP TRIGGER IF EXISTS content_pack_chunks_update_staging',
-      )
+      ..execute('DROP TRIGGER IF EXISTS content_pack_chunks_update_staging')
       ..execute('''
         CREATE TRIGGER content_pack_chunks_update_staging
         BEFORE UPDATE ON content_pack_object_chunks
