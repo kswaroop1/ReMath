@@ -178,6 +178,41 @@ void main() {
     expect(await recovered.pendingCleanupCount(), 0);
   });
 
+  test('startup does not reclaim another live backend reservation', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    var nextId = 0;
+    final first = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'live-${nextId++}',
+    );
+    final reservation = await first.reserve(
+      packId: 'org.remath.pack.one',
+      requiredBytes: 64,
+      version: '1.0.0',
+    );
+    await reservation.add(const [1, 2]);
+
+    final second = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'live-${nextId++}',
+    );
+    await reservation.add(const [3]);
+    final sealed = await reservation.seal(
+      lengthBytes: 3,
+      sha256: 'live-digest',
+    );
+
+    expect(await second.pendingCleanupCount(), 0);
+    expect(await sealed.openRead().expand((chunk) => chunk).toList(), const [
+      1,
+      2,
+      3,
+    ]);
+  });
+
   test('staging appends chunks once and sealed bytes are immutable', () async {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
