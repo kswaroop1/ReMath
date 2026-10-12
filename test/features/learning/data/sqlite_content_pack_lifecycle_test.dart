@@ -42,6 +42,11 @@ void main() {
         ContentPackInstallOutcome.activated,
       );
       expect(await backend.activeVersion(versionTwo.packId), '2.0.0');
+      final versionTwoActivation = await backend.activation(versionTwo.packId);
+      await backend.confirmFirstLoad(
+        expectedActivationId: versionTwoActivation.activationId,
+        packId: versionTwo.packId,
+      );
 
       final versionOne = await _release('1.0.0');
       await expectLater(
@@ -57,6 +62,11 @@ void main() {
           isExplicitVersionChoice: true,
         ),
         ContentPackInstallOutcome.activated,
+      );
+      final versionOneActivation = await backend.activation(versionOne.packId);
+      await backend.confirmFirstLoad(
+        expectedActivationId: versionOneActivation.activationId,
+        packId: versionOne.packId,
       );
       await backend.pinActive(versionTwo.packId);
       final versionThree = await _release('3.0.0');
@@ -384,6 +394,11 @@ void main() {
           utf8.encode(_pack('2.0.0', packId: 'org.remath.pack.dependency')),
         ),
       );
+      final dependencyActivation = await backend.activation(dependency.packId);
+      await backend.confirmFirstLoad(
+        expectedActivationId: dependencyActivation.activationId,
+        packId: dependency.packId,
+      );
       final dependant = await _release(
         '1.0.0',
         packId: 'org.remath.pack.dependant',
@@ -399,6 +414,11 @@ void main() {
         _Source(
           utf8.encode(_pack('1.0.0', packId: 'org.remath.pack.dependant')),
         ),
+      );
+      final dependantActivation = await backend.activation(dependant.packId);
+      await backend.confirmFirstLoad(
+        expectedActivationId: dependantActivation.activationId,
+        packId: dependant.packId,
       );
       final downgrade = await _release(
         '1.0.0',
