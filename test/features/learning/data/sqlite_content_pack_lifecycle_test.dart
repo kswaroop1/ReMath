@@ -655,6 +655,70 @@ void main() {
     );
   });
 
+  test('activation rejects a cycle in active pack dependencies', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    var nextId = 0;
+    final backend = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'cycle-${nextId++}',
+    );
+    final installer = composeContentPackInstaller(
+      backend: backend,
+      environment: _Environment(backend),
+      signatureVerifier: const _TrustedSignatureVerifier(),
+    );
+    const packA = 'org.remath.pack.a';
+    const packB = 'org.remath.pack.b';
+    final firstA = await _release('1.0.0', packId: packA);
+    await installer.install(
+      firstA,
+      _Source(utf8.encode(_pack('1.0.0', packId: packA))),
+    );
+    await backend.confirmFirstLoad(
+      expectedActivationId: (await backend.activation(packA)).activationId,
+      packId: packA,
+    );
+    final releaseB = await _release(
+      '1.0.0',
+      packId: packB,
+      dependencies: const [
+        ContentPackDependency(minimumVersion: '1.0.0', packId: packA),
+      ],
+    );
+    await installer.install(
+      releaseB,
+      _Source(utf8.encode(_pack('1.0.0', packId: packB))),
+    );
+    await backend.confirmFirstLoad(
+      expectedActivationId: (await backend.activation(packB)).activationId,
+      packId: packB,
+    );
+    final cyclicA = await _release(
+      '2.0.0',
+      packId: packA,
+      dependencies: const [
+        ContentPackDependency(minimumVersion: '1.0.0', packId: packB),
+      ],
+    );
+
+    await expectLater(
+      installer.install(
+        cyclicA,
+        _Source(utf8.encode(_pack('2.0.0', packId: packA))),
+      ),
+      throwsA(
+        isA<ContentPackStagingException>().having(
+          (error) => error.message,
+          'message',
+          contains('dependency cycle'),
+        ),
+      ),
+    );
+    expect(await backend.activeVersion(packA), '1.0.0');
+  });
+
   test('removal rejects an ABA replacement at the same version', () async {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
