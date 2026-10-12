@@ -68,7 +68,10 @@ void main() {
         expectedActivationId: versionOneActivation.activationId,
         packId: versionOne.packId,
       );
-      await backend.pinActive(versionTwo.packId);
+      await backend.pinActive(
+        versionTwo.packId,
+        expectedState: await backend.retentionState(versionTwo.packId),
+      );
       final versionThree = await _release('3.0.0');
       await expectLater(
         installer.install(versionThree, _Source(utf8.encode(_pack('3.0.0')))),
@@ -467,7 +470,10 @@ void main() {
     );
     final release = await _release('1.0.0');
     await installer.install(release, _Source(utf8.encode(_pack('1.0.0'))));
-    await backend.pinActive(release.packId);
+    await backend.pinActive(
+      release.packId,
+      expectedState: await backend.retentionState(release.packId),
+    );
 
     final pinned = await backend.retentionState(release.packId);
     final unpinned = await backend.unpinActive(
@@ -505,7 +511,10 @@ void main() {
       expectedActivationId: firstActivation.activationId,
       packId: firstRelease.packId,
     );
-    await backend.pinActive(firstRelease.packId);
+    await backend.pinActive(
+      firstRelease.packId,
+      expectedState: await backend.retentionState(firstRelease.packId),
+    );
     final stale = await backend.retentionState(firstRelease.packId);
     await installer.install(
       await _release('2.0.0'),

@@ -652,21 +652,49 @@ final class SqliteContentPackInstallationBackend
     );
   });
 
-  Future<void> pinActive(String packId) async {
-    _transaction(() {
-      final current = _activeRow(packId);
-      if (current == null) {
-        throw StateError('Cannot pin an absent content pack.');
-      }
-      _database.execute(
-        '''
-        UPDATE content_pack_active SET pinned_version = version
-        WHERE pack_id = ?
-      ''',
-        [packId],
+  Future<ContentPackRetentionTransition> pinActive(
+    String packId, {
+    required ContentPackRetentionState expectedState,
+  }) async => _transaction(() {
+    final current = _activeRow(packId);
+    if (current == null) {
+      throw StateError('Cannot pin an absent content pack.');
+    }
+    final currentState = ContentPackRetentionState(
+      activationId: current['activation_id'] as String,
+      installedVersion: current['version'] as String,
+      pinnedVersion: current['pinned_version'] as String?,
+    );
+    if (currentState.activationId != expectedState.activationId ||
+        currentState.installedVersion != expectedState.installedVersion ||
+        currentState.pinnedVersion != expectedState.pinnedVersion) {
+      return ContentPackRetentionTransition(
+        outcome: ContentPackRetentionOutcome.staleState,
+        state: currentState,
       );
-    });
-  }
+    }
+    if (currentState.pinnedVersion == currentState.installedVersion) {
+      return ContentPackRetentionTransition(
+        outcome: ContentPackRetentionOutcome.unchanged,
+        state: currentState,
+      );
+    }
+    _database.execute(
+      '''
+        UPDATE content_pack_active SET pinned_version = version
+        WHERE pack_id = ? AND activation_id = ?
+      ''',
+      [packId, expectedState.activationId],
+    );
+    return ContentPackRetentionTransition(
+      outcome: ContentPackRetentionOutcome.changed,
+      state: ContentPackRetentionState(
+        activationId: currentState.activationId,
+        installedVersion: currentState.installedVersion,
+        pinnedVersion: currentState.installedVersion,
+      ),
+    );
+  });
 
   @override
   Future<ContentPackRemovalCommit> removeActiveIfAllowed({
