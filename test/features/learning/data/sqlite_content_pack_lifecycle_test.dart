@@ -638,13 +638,14 @@ void main() {
     await store.activateStaged(release, first, isExplicitVersionChoice: false);
     final before = await backend.activation(release.packId);
 
-    await store.activateStaged(
+    final outcome = await store.activateStaged(
       release,
       duplicate,
       isExplicitVersionChoice: false,
     );
     final after = await backend.activation(release.packId);
 
+    expect(outcome, ContentPackInstallOutcome.alreadyActive);
     expect(after.activationId, before.activationId);
     expect(
       database
