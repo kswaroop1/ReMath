@@ -29,14 +29,24 @@ final class SqliteContentPackInstallationBackend
   }) : _availableBytes = availableBytes,
        _beforeCleanupDelete = beforeCleanupDelete,
        _database = database,
-       _idGenerator = idGenerator {
+       _idGenerator = idGenerator,
+       _ownerId = _ownerFor(database) {
     _migrate();
   }
+
+  static final Expando<String> _owners = Expando<String>(
+    'content-pack-database-owner',
+  );
+  static int _nextOwnerId = 0;
+
+  static String _ownerFor(CommonDatabase database) =>
+      _owners[database] ??= 'content-pack-owner-${_nextOwnerId++}';
 
   final Future<int> Function() _availableBytes;
   final Future<void> Function()? _beforeCleanupDelete;
   final CommonDatabase _database;
   final ContentPackIdGenerator _idGenerator;
+  final String _ownerId;
 
   void _migrate() {
     _database
@@ -50,6 +60,7 @@ final class SqliteContentPackInstallationBackend
           content BLOB NOT NULL,
           length_bytes INTEGER,
           sha256 TEXT,
+          owner_id TEXT,
           state TEXT NOT NULL CHECK (
             state IN ('staging', 'sealed', 'active', 'retained', 'cleanup')
           )
@@ -148,12 +159,25 @@ final class SqliteContentPackInstallationBackend
         BEGIN
           SELECT RAISE(ABORT, 'content pack object is retained');
         END
-      ''')
-      ..execute('''
-        UPDATE content_pack_objects
-        SET state = 'cleanup'
-        WHERE state IN ('staging', 'sealed')
       ''');
+    final objectColumns = _database
+        .select('PRAGMA table_info(content_pack_objects)')
+        .map((row) => row['name'])
+        .toSet();
+    if (!objectColumns.contains('owner_id')) {
+      _database.execute(
+        'ALTER TABLE content_pack_objects ADD COLUMN owner_id TEXT',
+      );
+    }
+    _database.execute(
+      '''
+      UPDATE content_pack_objects
+      SET state = 'cleanup'
+      WHERE state IN ('staging', 'sealed')
+        AND (owner_id IS NULL OR owner_id != ?)
+    ''',
+      [_ownerId],
+    );
   }
 
   @override
@@ -189,10 +213,10 @@ final class SqliteContentPackInstallationBackend
       _database.execute(
         '''
         INSERT INTO content_pack_objects (
-          seal_id, pack_id, version, required_bytes, content, state
-        ) VALUES (?, ?, ?, ?, ?, 'staging')
+          seal_id, pack_id, version, required_bytes, content, owner_id, state
+        ) VALUES (?, ?, ?, ?, ?, ?, 'staging')
       ''',
-        [sealId, packId, version, requiredBytes, Uint8List(0)],
+        [sealId, packId, version, requiredBytes, Uint8List(0), _ownerId],
       );
     });
     return _SqliteContentPackStagingSink(
