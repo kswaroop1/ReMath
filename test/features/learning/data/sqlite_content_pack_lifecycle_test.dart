@@ -522,6 +522,43 @@ void main() {
     expect(result.state.pinnedVersion, '2.0.0');
   });
 
+  test('stale pin cannot pin a newer activation', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    var nextId = 0;
+    final backend = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'pin-cas-${nextId++}',
+    );
+    final installer = composeContentPackInstaller(
+      backend: backend,
+      environment: _Environment(backend),
+      signatureVerifier: const _TrustedSignatureVerifier(),
+    );
+    final firstRelease = await _release('1.0.0');
+    await installer.install(firstRelease, _Source(utf8.encode(_pack('1.0.0'))));
+    final firstActivation = await backend.activation(firstRelease.packId);
+    await backend.confirmFirstLoad(
+      expectedActivationId: firstActivation.activationId,
+      packId: firstRelease.packId,
+    );
+    final stale = await backend.retentionState(firstRelease.packId);
+    await installer.install(
+      await _release('2.0.0'),
+      _Source(utf8.encode(_pack('2.0.0'))),
+    );
+
+    final result = await backend.pinActive(
+      firstRelease.packId,
+      expectedState: stale,
+    );
+
+    expect(result.outcome, ContentPackRetentionOutcome.staleState);
+    expect(result.state.installedVersion, '2.0.0');
+    expect(result.state.pinnedVersion, isNull);
+  });
+
   test('confirmation retires the previous rollback object', () async {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
