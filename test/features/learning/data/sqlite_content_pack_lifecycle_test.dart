@@ -266,6 +266,39 @@ void main() {
     ]);
   });
 
+  test('sealed parent cannot be reopened for chunk mutation', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final backend = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'immutable-parent',
+    );
+    final reservation = await backend.reserve(
+      packId: 'org.remath.pack.one',
+      requiredBytes: 64,
+      version: '1.0.0',
+    );
+    await reservation.add(const [1, 2, 3]);
+    final sealed = await reservation.seal(
+      lengthBytes: 3,
+      sha256: 'sealed-digest',
+    );
+
+    expect(
+      () => database.execute(
+        "UPDATE content_pack_objects SET state = 'staging' WHERE seal_id = ?",
+        [sealed.sealId],
+      ),
+      throwsA(isA<SqliteException>()),
+    );
+    expect(await sealed.openRead().expand((chunk) => chunk).toList(), const [
+      1,
+      2,
+      3,
+    ]);
+  });
+
   test(
     'a newer update waits for the current first load to be confirmed',
     () async {
