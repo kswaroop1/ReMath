@@ -286,6 +286,28 @@ final class SqliteContentPackInstallationBackend
             'Dependency ${dependency.packId} changed before activation.',
           );
         }
+        final closesCycle = _database.select(
+          '''
+          WITH RECURSIVE reachable(pack_id) AS (
+            SELECT ?
+            UNION
+            SELECT dependencies.dependency_pack_id
+            FROM content_pack_dependencies AS dependencies
+            INNER JOIN content_pack_active AS active
+              ON active.pack_id = dependencies.pack_id
+              AND active.version = dependencies.version
+            INNER JOIN reachable
+              ON dependencies.pack_id = reachable.pack_id
+          )
+          SELECT 1 FROM reachable WHERE pack_id = ? LIMIT 1
+        ''',
+          [dependency.packId, release.packId],
+        );
+        if (closesCycle.isNotEmpty) {
+          throw ContentPackStagingException(
+            'Activating ${release.packId} would create a dependency cycle.',
+          );
+        }
       }
       final activeDependants = _database.select(
         '''
