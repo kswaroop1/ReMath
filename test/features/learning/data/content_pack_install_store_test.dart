@@ -29,6 +29,31 @@ void main() {
     },
   );
 
+  test('staging preserves its failure when abort also fails', () async {
+    final backend = _MemoryBackend(availableBytes: 100)
+      ..abortFailure = StateError('abort interrupted');
+    final store = TransactionalContentPackInstallStore(backend: backend);
+
+    await expectLater(
+      store.stage(
+        _release(compressedSizeBytes: 4),
+        _ArchiveSource(const [
+          [1, 2, 3],
+          [4, 5],
+        ]),
+      ),
+      throwsA(
+        isA<ContentPackStagingException>().having(
+          (error) => error.message,
+          'message',
+          contains('exceeds its declared 4 byte limit'),
+        ),
+      ),
+    );
+
+    expect(backend.abortCount, 1);
+  });
+
   test(
     'capacity is reserved before bytes from concurrent packs are accepted',
     () async {
@@ -155,6 +180,7 @@ final class _MemoryBackend implements ContentPackInstallationBackend {
 
   int availableBytes;
   int abortCount = 0;
+  Object? abortFailure;
   List<ContentPackDependency>? activatedDependencies;
   String? activatedSealId;
   Completer<void>? firstWrite;
@@ -214,6 +240,10 @@ final class _MemorySink implements ContentPackStagingSink {
   Future<void> abort() async {
     backend.abortCount++;
     backend.reservedBytes -= reservedBytes;
+    final failure = backend.abortFailure;
+    if (failure != null) {
+      throw failure;
+    }
   }
 
   @override
