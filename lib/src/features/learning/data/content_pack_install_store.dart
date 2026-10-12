@@ -108,9 +108,15 @@ final class TransactionalContentPackInstallStore
         sealed: sealed,
         sha256: sha256,
       );
-    } on Object {
-      await reservation.abort();
-      rethrow;
+    } on Object catch (error, stackTrace) {
+      try {
+        await reservation.abort();
+      } on Object {
+        // The backend persists cleanup before attempting physical removal. Keep
+        // the staging failure actionable even when that best-effort abort is
+        // itself interrupted.
+      }
+      Error.throwWithStackTrace(error, stackTrace);
     }
   }
 
