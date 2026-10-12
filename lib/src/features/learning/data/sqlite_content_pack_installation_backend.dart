@@ -95,6 +95,20 @@ final class SqliteContentPackInstallationBackend
             ON DELETE CASCADE
         ) STRICT
       ''')
+      ..execute('DROP TRIGGER IF EXISTS content_pack_objects_state_guard')
+      ..execute('''
+        CREATE TRIGGER content_pack_objects_state_guard
+        BEFORE UPDATE OF state ON content_pack_objects
+        WHEN OLD.state != NEW.state AND NOT (
+          (OLD.state = 'staging' AND NEW.state IN ('sealed', 'cleanup'))
+          OR (OLD.state = 'sealed' AND NEW.state IN ('active', 'cleanup'))
+          OR (OLD.state = 'active' AND NEW.state IN ('retained', 'cleanup'))
+          OR (OLD.state = 'retained' AND NEW.state IN ('active', 'cleanup'))
+        )
+        BEGIN
+          SELECT RAISE(ABORT, 'invalid content pack object state transition');
+        END
+      ''')
       ..execute('''
         CREATE TRIGGER IF NOT EXISTS content_pack_chunks_insert_staging
         BEFORE INSERT ON content_pack_object_chunks
