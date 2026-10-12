@@ -159,6 +159,27 @@ jobs:
           verify_red 808950160f2caf2722fb03bae9f954f834231bdd \
             test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
             "sealed objects reject chunks moved from live staging"
+          verify_red d98451a00d7f707eaaa1eb6803aa3d343ac3ab5d \
+            test/features/learning/data/content_pack_install_store_test.dart \
+            "abort interrupted"
+          verify_red 283c80b7ab7174b680b51c3627ecd3d132017499 \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "expectedState"
+          verify_red bb221cc3bc4ebc109b0aebd8f2bdfb8a9d2ad67f \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "void"
+          verify_red 60d9acb8808bd0ad41772325647287c701c229f0 \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "activation rejects a cycle in active pack dependencies"
+          verify_red 72b7ad81673bce109cd699854d6f9b92eaed9aec \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "sealed parent cannot be reopened for chunk mutation"
+          verify_red fd11094dbae85e88fa910f2e25713e13100cfedf \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "The staged object is missing or is in the wrong state."
+          verify_red 4fefec7d8504c2b130087004685c869da8239544 \
+            test/features/learning/data/content_pack_lifecycle_composition_test.dart \
+            "composeSqliteContentPackLifecycle"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
