@@ -599,3 +599,8 @@ when the complete correction head arrived. Authoritative behavioural-head CI
 committed project structure, dependency lock, canonical formatting, fatal
 analysis, bundled-content validation, eight Chrome contracts, all 501 native
 tests, 96.64% line coverage, and secret scanning.
+
+
+Records-head CI `38232871946` passes the same complete gate set at
+`3f62644a`, including permanent red replay, all 501 native tests, 96.64% line
+coverage, and secret scanning.
