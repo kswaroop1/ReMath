@@ -551,3 +551,34 @@ secret scanning.
 
 Records-head CI `38201607005` passes the same complete gate set at
 `bfa26e14`, including all 495 tests and 96.78% line coverage.
+
+## 2026-10-12 — Sixth independent review and bounded correction stack
+
+The sixth independent review returned eight findings: immutable sealed-parent
+state, truthful atomic duplicate outcomes, pin compare-and-swap, native startup
+composition, primary staging-error preservation, live-backend reservation
+ownership, separate fifth-round red/green evidence, and active dependency-cycle
+rejection. The exact review exchanges remain in GitHub discussions
+`4244643882`, `4244643884`, `4244643885`, `4244643886`, `4244643887`,
+`4244643891`, `4244643894`, and `4244643900`.
+
+Seven new behaviours were corrected in separate published test-first pairs:
+
+- `d98451a0` / `9a6a5432` preserves the actionable staging failure when abort
+  cleanup is also interrupted;
+- `283c80b7` / `ec9a3312` binds pinning to the observed activation generation;
+- `bb221cc3` / `aa5a89e1` reports an atomic duplicate no-op as `alreadyActive`;
+- `60d9acb8` / `8054d36a` rejects cycles in the active dependency graph;
+- `72b7ad81` / `b0d7640d` guards sealed/active/retained parent-state transitions;
+- `fd11094d` / `1b9f74b1` distinguishes live same-connection reservations from
+  abandoned reservations recovered after a database reopen; and
+- `4fefec7d` / `70021e66` constructs the SQLite lifecycle and installer at native
+  application startup, retries durable cleanup, and keeps publisher trust
+  unconfigured until the explicitly separate operational-security work.
+
+Commit `8e7eb7a7` permanently replays all seven focused red heads. The remaining
+review item concerns the already-published fifth-round history: its four tests
+were genuinely test-first, but they were batched into one red and one green
+commit. This record does not misrepresent that history or manufacture a later
+failure; the thread remains open pending a safe, non-destructive evidence
+resolution.
