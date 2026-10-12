@@ -499,3 +499,52 @@ Commit `e0b75caf` makes only those two analysis corrections. Authoritative CI
 committed structure, dependency lock, canonical formatting, fatal analysis,
 bundled-content validation, eight Chrome contracts, all 491 native tests,
 96.77% line coverage, and secret scanning.
+
+Records-head CI `38183847436` then passed every gate at `c0247247`, including
+the same 491-test suite and 96.77% line coverage, before the next independent
+review.
+
+## 2026-10-12 — Fifth independent review and confirmed-checkpoint corrections
+
+The fifth independent review created six additional inline findings. It
+required preserving only a confirmed version as the rollback target, preventing
+dependants from activating against an unconfirmed dependency, recording the
+latest records-head CI, rejecting chunk-row moves into sealed objects, binding
+unpinning to the observed activation with compare-and-swap semantics, and
+correcting the provenance description of the prior close/reopen coverage.
+
+The exact review exchanges are preserved in GitHub as discussions
+[`4243712804`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4243712804),
+[`4243712806`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4243712806),
+[`4243712808`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4243712808),
+[`4243712811`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4243712811),
+[`4243712815`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4243712815),
+and [`4243712819`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4243712819).
+
+Published red `80895016` / green `772df15e` requires and implements all four
+new behavioural boundaries: a newer same-pack update waits for the current
+first load to be confirmed, a dependant waits for dependency confirmation,
+sealed objects reject chunks moved from live staging, and stale unpin cannot
+clear a newer activation's pin. Commit `583f4583` permanently replays the new
+red evidence.
+
+The file-backed close/reopen assertions introduced during the fourth-review
+green correction are characterization of persistence behaviour that the same
+green backend already supported. They are not claimed as a separate strict
+red/green pair; the durable red evidence for the four newly identified fifth-
+review gaps is the published `80895016` commit above.
+
+CI `38185049554` passed the permanent red replay but exposed two existing
+integration scenarios that had not yet confirmed prerequisite activations, as
+well as two canonical formatting differences. Published commit `5e16723c`
+updates those scenarios to perform the required first-load confirmations.
+Diagnostic CI `38200347740` then passed the permanent red replay and all 495
+tests while printing the exact canonical two-file formatter patch. Published
+commit `f9399a69` applies that output and restores the ordinary non-mutating
+format gate.
+
+Authoritative behavioural-head CI `38201036215` passes every gate at
+`f9399a69`: permanent red evidence, committed project structure, dependency
+lock, canonical formatting, fatal analysis, bundled-content validation, eight
+Chrome contracts, all 495 native tests, the 90% coverage floor at 96.78%, and
+secret scanning.

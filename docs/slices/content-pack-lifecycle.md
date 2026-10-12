@@ -68,15 +68,16 @@ depends on a network service.
 The bounded lifecycle behaviours are implemented as provider-neutral domain,
 application, and data contracts. Each behaviour has a test-first red commit, a
 paired green implementation, and permanent CI replay of the intended red
-failure. Authoritative CI run `38183128040` verifies the final behavioural head
+failure. Authoritative CI run `38201036215` verifies the final behavioural head
 with canonical formatting, fatal static analysis, bundled-content validation,
-eight Chrome contracts, all 491 native tests, 96.77% line coverage, and secret
-scanning. The measured coverage remains 6.77 percentage points above the 90%
+eight Chrome contracts, all 495 native tests, 96.78% line coverage, and secret
+scanning. The measured coverage remains 6.78 percentage points above the 90%
 repository floor after adding the production-composed payload verifier, the
 16 MiB compressed-payload boundary, incremental immutable SQLite staging,
-restart recovery, reverse-dependency validation, atomic activation/removal/
-first-load transitions, durable unpin and failure-status lifecycles, cleanup
-recovery, and their concurrency tests.
+restart recovery, confirmed rollback checkpoints, dependency-confirmation and
+reverse-dependency validation, atomic activation/removal/first-load/unpin
+transitions, durable failure-status and cleanup recovery, and their concurrency
+tests.
 
 CP-005 remains deliberately partial: archive length, SHA-256, and signature
 verification are complete, while publisher trust-root lifecycle operations stay
