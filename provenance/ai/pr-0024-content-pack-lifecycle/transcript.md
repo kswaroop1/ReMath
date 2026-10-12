@@ -548,3 +548,6 @@ Authoritative behavioural-head CI `38201036215` passes every gate at
 lock, canonical formatting, fatal analysis, bundled-content validation, eight
 Chrome contracts, all 495 native tests, the 90% coverage floor at 96.78%, and
 secret scanning.
+
+Records-head CI `38201607005` passes the same complete gate set at
+`bfa26e14`, including all 495 tests and 96.78% line coverage.
