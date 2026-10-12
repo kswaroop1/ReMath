@@ -490,7 +490,7 @@ final class _MemoryInstallStore implements ContentPackInstallStore {
   Future<String?> activeVersion(String packId) async => _activeVersions[packId];
 
   @override
-  Future<void> activateStaged(
+  Future<ContentPackInstallOutcome> activateStaged(
     ContentPackRelease release,
     ContentPackStagedArchive archive, {
     required bool isExplicitVersionChoice,
@@ -517,6 +517,9 @@ final class _MemoryInstallStore implements ContentPackInstallStore {
     activatedRelease = release;
     _stagedRelease = null;
     _stagedArchive = null;
+    return transition.outcome == ContentPackRetentionOutcome.unchanged
+        ? ContentPackInstallOutcome.alreadyActive
+        : ContentPackInstallOutcome.activated;
   }
 
   @override

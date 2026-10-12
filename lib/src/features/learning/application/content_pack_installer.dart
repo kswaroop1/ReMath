@@ -38,7 +38,7 @@ abstract interface class ContentPackInstallStore {
 
   /// Atomically revalidates [ContentPackRelease.dependencies], replaces the
   /// active pointer with this exact sealed [archive], and consumes it.
-  Future<void> activateStaged(
+  Future<ContentPackInstallOutcome> activateStaged(
     ContentPackRelease release,
     ContentPackStagedArchive archive, {
     required bool isExplicitVersionChoice,
@@ -157,12 +157,12 @@ final class ContentPackInstaller {
     final staged = await store.stage(release, archive);
     try {
       await verifier.verify(release, staged);
-      await store.activateStaged(
+      final outcome = await store.activateStaged(
         release,
         staged,
         isExplicitVersionChoice: isExplicitVersionChoice,
       );
-      return ContentPackInstallOutcome.activated;
+      return outcome;
     } catch (error, stackTrace) {
       try {
         await store.discardStaged(release, staged);

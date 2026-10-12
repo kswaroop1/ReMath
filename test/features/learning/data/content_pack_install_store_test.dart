@@ -193,13 +193,14 @@ final class _MemoryBackend implements ContentPackInstallationBackend {
   Future<String?> activeVersion(String packId) async => null;
 
   @override
-  Future<void> activateAtomically({
+  Future<ContentPackInstallOutcome> activateAtomically({
     required bool isExplicitVersionChoice,
     required ContentPackRelease release,
     required ContentPackSealedObject sealed,
   }) async {
     activatedSealId = sealed.sealId;
     activatedDependencies = release.dependencies;
+    return ContentPackInstallOutcome.activated;
   }
 
   @override

@@ -28,7 +28,7 @@ abstract interface class ContentPackInstallationBackend {
   /// In one transaction, confirms every dependency in [release] is still at
   /// its minimum version, confirms [sealed] is unchanged, and moves the active
   /// pointer. No pointer may move when either comparison fails.
-  Future<void> activateAtomically({
+  Future<ContentPackInstallOutcome> activateAtomically({
     required ContentPackRelease release,
     required ContentPackSealedObject sealed,
     required bool isExplicitVersionChoice,
@@ -121,7 +121,7 @@ final class TransactionalContentPackInstallStore
   }
 
   @override
-  Future<void> activateStaged(
+  Future<ContentPackInstallOutcome> activateStaged(
     ContentPackRelease release,
     ContentPackStagedArchive archive, {
     required bool isExplicitVersionChoice,

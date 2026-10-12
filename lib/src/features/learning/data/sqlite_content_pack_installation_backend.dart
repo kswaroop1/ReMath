@@ -254,13 +254,13 @@ final class SqliteContentPackInstallationBackend
   });
 
   @override
-  Future<void> activateAtomically({
+  Future<ContentPackInstallOutcome> activateAtomically({
     required bool isExplicitVersionChoice,
     required ContentPackRelease release,
     required ContentPackSealedObject sealed,
   }) async {
     final sqliteSealed = _ownedSealed(sealed);
-    _transaction(() {
+    return _transaction(() {
       final object = _object(sqliteSealed.sealId, expectedState: 'sealed');
       if (object['pack_id'] != release.packId ||
           object['version'] != release.version ||
@@ -333,7 +333,7 @@ final class SqliteContentPackInstallationBackend
       }
       if (transition.outcome == ContentPackRetentionOutcome.unchanged) {
         _deleteObject(sqliteSealed.sealId);
-        return;
+        return ContentPackInstallOutcome.alreadyActive;
       }
 
       final activationId = _idGenerator();
@@ -398,6 +398,7 @@ final class SqliteContentPackInstallationBackend
           ],
         );
       }
+      return ContentPackInstallOutcome.activated;
     });
   }
 
