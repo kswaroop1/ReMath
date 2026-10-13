@@ -868,6 +868,71 @@ void main() {
     expect(active['previous_seal_id'], isNull);
   });
 
+  test('retired pack versions do not retain dependency snapshots', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    var nextId = 0;
+    final backend = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'dependency-cleanup-${nextId++}',
+    );
+    final installer = composeContentPackInstaller(
+      backend: backend,
+      environment: _Environment(backend),
+      signatureVerifier: const _TrustedSignatureVerifier(),
+    );
+    const dependencyPackId = 'org.remath.pack.foundation';
+    final dependency = await _release('1.0.0', packId: dependencyPackId);
+    await installer.install(
+      dependency,
+      _Source(utf8.encode(_pack('1.0.0', packId: dependencyPackId))),
+    );
+    await backend.confirmFirstLoad(
+      expectedActivationId:
+          (await backend.activation(dependencyPackId)).activationId,
+      packId: dependencyPackId,
+    );
+    const dependencies = [
+      ContentPackDependency(
+        minimumVersion: '1.0.0',
+        packId: dependencyPackId,
+      ),
+    ];
+
+    for (final version in const ['1.0.0', '2.0.0']) {
+      final release = await _release(version, dependencies: dependencies);
+      await installer.install(release, _Source(utf8.encode(_pack(version))));
+      await backend.confirmFirstLoad(
+        expectedActivationId:
+            (await backend.activation(release.packId)).activationId,
+        packId: release.packId,
+      );
+    }
+    final failed = await _release('3.0.0', dependencies: dependencies);
+    await installer.install(failed, _Source(utf8.encode(_pack('3.0.0'))));
+    await backend.rollbackFailedActivation(
+      expectedActivationId:
+          (await backend.activation(failed.packId)).activationId,
+      message: 'Version 3 failed.',
+      packId: failed.packId,
+    );
+    await backend.removeActiveIfAllowed(
+      expectedState: await backend.retentionState(failed.packId),
+      packId: failed.packId,
+    );
+
+    expect(
+      database
+          .select(
+            'SELECT version FROM content_pack_dependencies WHERE pack_id = ?',
+            [failed.packId],
+          )
+          .map((row) => row['version']),
+      isEmpty,
+    );
+  });
+
   test('duplicate sealed activation is an atomic no-op', () async {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
