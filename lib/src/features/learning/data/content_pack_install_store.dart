@@ -3,6 +3,8 @@ import 'package:cryptography/cryptography.dart';
 import '../application/content_pack_installer.dart';
 import '../domain/content_pack_release.dart';
 
+const _stagingChunkBytes = 64 * 1024;
+
 final class ContentPackStagingException implements Exception {
   const ContentPackStagingException(this.message);
 
@@ -79,21 +81,47 @@ final class TransactionalContentPackInstallStore
       version: release.version,
     );
     final hashSink = Sha256().newHashSink();
+    var pendingChunk = <int>[];
     var length = 0;
+    Future<void> flushPendingChunk() async {
+      if (pendingChunk.isEmpty) {
+        return;
+      }
+      final frozenPendingChunk = List<int>.unmodifiable(pendingChunk);
+      pendingChunk = <int>[];
+      await reservation.add(frozenPendingChunk);
+    }
+
     try {
       await for (final chunk in archive.openRead()) {
         final frozenChunk = List<int>.unmodifiable(chunk);
         final nextLength = length + frozenChunk.length;
         if (nextLength > release.compressedSizeBytes) {
+          await flushPendingChunk();
           throw ContentPackStagingException(
             'The archive exceeds its declared ${release.compressedSizeBytes} '
             'byte limit.',
           );
         }
-        await reservation.add(frozenChunk);
         hashSink.add(frozenChunk);
         length = nextLength;
+        var offset = 0;
+        while (offset < frozenChunk.length) {
+          final remainingCapacity = _stagingChunkBytes - pendingChunk.length;
+          final remainingInput = frozenChunk.length - offset;
+          final copiedBytes = remainingInput < remainingCapacity
+              ? remainingInput
+              : remainingCapacity;
+          pendingChunk.addAll(
+            frozenChunk.getRange(offset, offset + copiedBytes),
+          );
+          offset += copiedBytes;
+          if (pendingChunk.length == _stagingChunkBytes) {
+            await flushPendingChunk();
+          }
+        }
       }
+      await flushPendingChunk();
       hashSink.close();
       final hash = await hashSink.hash();
       final sha256 = hash.bytes
