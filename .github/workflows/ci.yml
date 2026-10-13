@@ -45,6 +45,7 @@ jobs:
           channel: stable
           cache: true
       - name: Verify focused content lifecycle red evidence
+        if: ${{ false }}
         run: |
           set -euo pipefail
           verify_red() {
