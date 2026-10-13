@@ -7,9 +7,13 @@ import 'package:remath/src/features/learning/data/open_progress_repository.dart'
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final contentPack = await AssetContentPackRepository().loadFoundationPack();
+  final foundationPack = await AssetContentPackRepository()
+      .loadFoundationPack();
   final contentPackLifecycle = await openContentPackLifecycle();
   await contentPackLifecycle?.backend.retryPendingDiscards();
+  final contentPack =
+      await contentPackLifecycle?.loadStartupPack(foundationPack) ??
+      foundationPack;
   final repository = await openProgressRepository();
   runApp(
     ReMathApp(

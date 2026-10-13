@@ -180,6 +180,37 @@ final class SqliteContentPackInstallationBackend
     return rows.isEmpty ? null : rows.single['version'] as String;
   }
 
+  Future<String?> startupPackId() async {
+    final rows = _database.select('''
+      SELECT pack_id
+      FROM content_pack_active
+      ORDER BY rowid DESC
+      LIMIT 1
+    ''');
+    return rows.isEmpty ? null : rows.single['pack_id'] as String;
+  }
+
+  Stream<List<int>> activeArchive(String packId, String version) {
+    final rows = _database.select(
+      '''
+      SELECT objects.seal_id
+      FROM content_pack_active AS active
+      INNER JOIN content_pack_objects AS objects
+        ON objects.seal_id = active.seal_id
+      WHERE active.pack_id = ?
+        AND active.version = ?
+        AND objects.state = 'active'
+    ''',
+      [packId, version],
+    );
+    if (rows.isEmpty) {
+      throw const ContentPackStagingException(
+        'The active content pack archive is unavailable.',
+      );
+    }
+    return _read(rows.single['seal_id'] as String);
+  }
+
   @override
   Future<ContentPackStagingSink> reserve({
     required String packId,

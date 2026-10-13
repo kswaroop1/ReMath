@@ -1,10 +1,16 @@
+import 'dart:convert';
+
 import 'package:sqlite3/common.dart';
 
 import '../application/content_pack_installer.dart';
+import '../application/content_pack_rollback.dart';
+import '../domain/content_pack.dart';
 import 'content_pack_archive_verifier.dart';
 import 'content_pack_install_guard.dart';
 import 'content_pack_install_store.dart';
+import 'content_pack_parser.dart';
 import 'content_pack_payload_verifier.dart';
+import 'content_pack_validator.dart';
 import 'sqlite_content_pack_installation_backend.dart';
 
 final class ContentPackLifecycle {
@@ -12,6 +18,28 @@ final class ContentPackLifecycle {
 
   final SqliteContentPackInstallationBackend backend;
   final ContentPackInstaller installer;
+
+  Future<ContentPack> loadStartupPack(ContentPack fallback) async {
+    final packId = await backend.startupPackId();
+    if (packId == null) return fallback;
+
+    final activation = await backend.activation(packId);
+    final version = activation.activeVersion;
+    if (version == null) return fallback;
+
+    final loader = _SqliteContentPackRuntimeLoader(backend);
+    final result = await ContentPackRollbackCoordinator(
+      loader: loader,
+      store: backend,
+    ).verifyFirstLoad(packId, version);
+    final activeVersion = result.activeVersion;
+    if (activeVersion == null) return fallback;
+    if (loader.loadedPack case final loaded?
+        when loaded.id == packId && loaded.version == activeVersion) {
+      return loaded;
+    }
+    return loader.loadPack(packId, activeVersion);
+  }
 }
 
 ContentPackLifecycle composeSqliteContentPackLifecycle({
@@ -83,4 +111,32 @@ final class _SqliteContentPackInstallEnvironment
   @override
   Future<String?> installedVersion(String packId) =>
       backend.activeVersion(packId);
+}
+
+final class _SqliteContentPackRuntimeLoader
+    implements ContentPackRuntimeLoader {
+  _SqliteContentPackRuntimeLoader(this.backend);
+
+  final SqliteContentPackInstallationBackend backend;
+  ContentPack? loadedPack;
+
+  @override
+  Future<void> load(String packId, String version) async {
+    loadedPack = await loadPack(packId, version);
+  }
+
+  Future<ContentPack> loadPack(String packId, String version) async {
+    final bytes = await backend
+        .activeArchive(packId, version)
+        .expand((chunk) => chunk)
+        .toList(growable: false);
+    final pack = const ContentPackParser().parse(utf8.decode(bytes));
+    const ContentPackValidator().validateOrThrow(pack);
+    if (pack.id != packId || pack.version != version) {
+      throw const FormatException(
+        'The active content pack does not match its durable pointer.',
+      );
+    }
+    return pack;
+  }
 }
