@@ -213,6 +213,42 @@ void main() {
     ]);
   });
 
+  test('active pack storage remains charged against the durable budget', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    var nextId = 0;
+    final backend = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 100,
+      database: database,
+      idGenerator: () => 'capacity-${nextId++}',
+    );
+    final release = await _release('1.0.0');
+    final reservation = await backend.reserve(
+      packId: release.packId,
+      requiredBytes: 60,
+      version: release.version,
+    );
+    await reservation.add(const [1]);
+    final sealed = await reservation.seal(
+      lengthBytes: 1,
+      sha256: release.sha256,
+    );
+    await backend.activateAtomically(
+      isExplicitVersionChoice: false,
+      release: release,
+      sealed: sealed,
+    );
+
+    await expectLater(
+      backend.reserve(
+        packId: 'org.remath.pack.two',
+        requiredBytes: 41,
+        version: '1.0.0',
+      ),
+      throwsA(isA<ContentPackStagingException>()),
+    );
+  });
+
   test('staging appends chunks once and sealed bytes are immutable', () async {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
