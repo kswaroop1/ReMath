@@ -15,7 +15,9 @@ final class ContentPackReleaseValidator {
     r'^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$',
   );
   static final _sha256Pattern = RegExp(r'^[0-9a-f]{64}$');
-  static final _versionPattern = RegExp(r'^\d+\.\d+\.\d+$');
+  static final _versionPattern = RegExp(
+    r'^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$',
+  );
 
   List<String> validate(ContentPackRelease release) {
     final issues = <String>[];
