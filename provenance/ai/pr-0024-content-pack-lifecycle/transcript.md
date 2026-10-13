@@ -665,3 +665,59 @@ contracts, all 508 native tests, 96.64% line coverage, and secret scanning.
 
 Records-head CI `38354642239` passes the same complete gate set at `6d207f09`,
 including all 508 native tests, 96.64% line coverage, and secret scanning.
+
+Final seventh-round records CI `38355601882` repeats that complete green result
+at `3e00f8ef` before the next independent review.
+
+## 2026-10-13 — Eighth independent review and complete startup recovery
+
+The eighth independent review returned six findings: staging chunks remained
+deletable before sealing; the chronological CI metadata omitted the latest
+records-head run; startup recovered only the newest pending pack; a concurrent
+activation change could bypass generation-checked recovery; lifecycle setup or
+storage failure could prevent the bundled fallback from starting; and a
+repeated durable unpin incorrectly reported a new mutation. The exact review
+exchanges remain in GitHub discussions
+[`4255475541`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4255475541),
+[`4255475552`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4255475552),
+[`4255475562`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4255475562),
+[`4255475568`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4255475568),
+[`4255475574`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4255475574),
+and [`4255475587`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4255475587).
+
+Five separate published test-only/implementation pairs correct the behavioural
+findings:
+
+- `eea556ea` / `cf886ef1` permits chunk deletion only after the parent enters
+  cleanup;
+- `27cb6c6a` / `c7db20e7` reports a matching repeated unpin as unchanged;
+- `73369efa` / `519f8c2d` recovers every pending first-load pack before choosing
+  the newest display candidate;
+- `6137b3da` / `f6bd111f` re-runs the rollback coordinator when a concurrent
+  activation changes the observed generation; and
+- `ef2dbb8b` / `300a94a4` closes partially opened lifecycle storage and selects
+  the bundled foundation pack when optional lifecycle setup, cleanup, or load
+  fails.
+
+Commit `98c7d44d` permanently replays all five new red heads. CI
+`38389106699` passed that red replay and secret scanning, then exposed a single
+canonical-formatting difference and one inaccurate storage-failure test
+fixture. The fixture had corrupted active content and therefore exercised the
+correct CP-013 rollback path instead of a storage failure. Commit `c3733cf4`
+closes the database before cleanup to exercise the intended failure, verifies
+the lifecycle close callback, and applies the canonical format. CI
+`38390614297` then passed permanent red replay and secret scanning but exposed
+that the fixture file's final verifier class had been truncated during API
+publication; 509 tests passed and that file could not compile. Commit
+`4a9dc065` restores the complete fixture without changing its asserted
+behaviour. CI `38392218194` then passed permanent red replay, all 514 native
+tests, and secret scanning, leaving only one canonical formatter change in that
+fixture. Diagnostic CI `38393661435` printed the exact two-expression layout
+while again passing all 514 tests. Commit `82e94d35` applies that output and
+restores the ordinary non-mutating format gate.
+
+Authoritative behavioural-head CI `38394841931` passes every gate at
+`82e94d35`: permanent red evidence, committed project structure, dependency
+lock, canonical formatting, fatal analysis, bundled-content validation, eight
+Chrome contracts, all 514 native tests, 96.64% line coverage, and secret
+scanning.
