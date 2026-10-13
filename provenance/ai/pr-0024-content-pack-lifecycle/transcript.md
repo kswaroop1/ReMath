@@ -721,3 +721,43 @@ Authoritative behavioural-head CI `38394841931` passes every gate at
 lock, canonical formatting, fatal analysis, bundled-content validation, eight
 Chrome contracts, all 514 native tests, 96.64% line coverage, and secret
 scanning.
+
+Records-head CI `38433263955` passes the same complete gate set at `a96d3e66`,
+including all 514 native tests, 96.64% line coverage, and secret scanning.
+
+## 2026-10-13 — Ninth independent review and bounded persistence cleanup
+
+The ninth independent review returned three findings: this provenance metadata
+omitted records-head CI `38433263955`; empty or tiny source chunks could create
+unbounded SQLite row overhead; and dependency snapshots survived after their
+pack version was confirmed away, rolled back, or removed. The exact review
+exchanges remain in GitHub discussions
+[`4261685332`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4261685332),
+[`4261685342`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4261685342),
+and [`4261685354`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4261685354).
+
+Two separate published test-only/implementation pairs correct the behavioural
+findings:
+
+- `f5f0d95f` / `c290e79d` coalesces non-empty staging bytes into bounded
+  64-KiB persisted chunks while preserving the original byte stream for length
+  and digest verification; and
+- `014588f2` / `0611a8d0` removes dependency snapshots atomically when a
+  previous version is confirmed away, a failed activation is rolled back, or
+  an active/retained version is removed.
+
+Commit `d90d6ce9` permanently replays both ninth-round red heads. CI
+`38437248942` passed permanent red replay, committed structure, dependency-lock
+verification, all 516 native tests, and secret scanning, then exposed canonical
+formatting changes in the two new Dart files. The first formatter-diagnostic run
+`38439221828` was cancelled by the repository concurrency policy. Isolated
+diagnostic CI `38439337579` printed the exact formatter patch while all 516
+native tests and secret scanning remained green. Commit `13f9f12e` restores the
+ordinary non-mutating formatting and red-replay gates and applies that output
+exactly.
+
+Authoritative ninth-round behavioural CI `38439854503` verifies the complete
+gate set at `13f9f12e`: permanent red replay, committed project structure,
+dependency lock, canonical formatting, fatal analysis, bundled-content
+validation, eight Chrome contracts, all 516 native tests, 96.64% line coverage,
+and secret scanning.

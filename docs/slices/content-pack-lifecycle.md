@@ -68,10 +68,10 @@ depends on a network service.
 The bounded lifecycle behaviours are implemented as provider-neutral domain,
 application, and data contracts. Focused red/green evidence and permanent replay
 cover the behavioural gaps, with the historical evidence limitations below
-recorded explicitly rather than rewritten. Authoritative CI run `38394841931`
-verifies the final eighth-review behavioural head with permanent red replay,
+recorded explicitly rather than rewritten. Authoritative CI run `38439854503`
+verifies the final ninth-review behavioural head with permanent red replay,
 canonical formatting, fatal static analysis, bundled-content validation, eight
-Chrome contracts, all 514 native tests, 96.64% line coverage, and secret
+Chrome contracts, all 516 native tests, 96.64% line coverage, and secret
 scanning. The measured coverage remains 6.64 percentage points above the 90%
 repository floor.
 
@@ -96,6 +96,12 @@ activation, retry generation-checked recovery after concurrent activation, and
 close failed optional lifecycle storage before starting with the bundled
 foundation pack. All five behavioural corrections have separate published red
 and green commits and permanent red replay.
+
+The ninth-review corrections coalesce empty and tiny source chunks into bounded
+64-KiB staging rows and atomically retire dependency snapshots with the pack
+versions they describe. Both corrections have separate published red and green
+commits and permanent red replay; the omitted eighth-round records-head CI is
+also restored to the chronological provenance metadata.
 
 CP-005 remains deliberately partial: archive length, SHA-256, and signature
 verification are complete, while publisher trust-root lifecycle operations stay
