@@ -121,4 +121,37 @@ void main() {
     expect(issues, contains(contains('minimum app version')));
     expect(issues, contains(contains('dependency version')));
   });
+
+  test('semantic versions reject noncanonical leading zeros', () {
+    const release = ContentPackRelease(
+      compressedSizeBytes: 2048,
+      dependencies: [
+        ContentPackDependency(
+          minimumVersion: '1.02.0',
+          packId: 'org.remath.arithmetic.foundation',
+        ),
+      ],
+      description: 'Original algebra lessons and practice.',
+      installedSizeBytes: 8192,
+      language: 'en-GB',
+      license: 'CC-BY-SA-4.0',
+      manifestVersion: 1,
+      minimumAppVersion: '0.01.0',
+      minimumSchemaVersion: 3,
+      objectives: ['Collect like terms'],
+      packId: 'org.remath.algebra.foundation',
+      publisherKeyId: 'org.remath.publisher.primary',
+      sha256:
+          'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      signature: 'c2lnbmF0dXJl',
+      title: 'Algebra foundation',
+      version: '01.0.0',
+    );
+
+    final issues = validator.validate(release);
+
+    expect(issues, contains(contains('Pack version')));
+    expect(issues, contains(contains('minimum app version')));
+    expect(issues, contains(contains('dependency version')));
+  });
 }
