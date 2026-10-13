@@ -133,6 +133,26 @@ void main() {
   );
 
   test(
+    'startup recovery verifies a concurrent activation before using it',
+    () async {
+      final store = _MemoryRollbackStore(moveBeforeConfirm: '3.0.0');
+      final loader = _ControlledLoader();
+      final coordinator = ContentPackRollbackCoordinator(
+        loader: loader,
+        store: store,
+      );
+
+      final result = await coordinator.recoverPendingFirstLoad(packId);
+
+      expect(result.outcome, ContentPackRuntimeOutcome.ready);
+      expect(result.activeVersion, '3.0.0');
+      expect(loader.loadedVersions, ['2.0.0', '3.0.0']);
+      expect(store.readyVersions, ['3.0.0']);
+      expect(store.awaitingFirstLoad, isFalse);
+    },
+  );
+
+  test(
     'an interrupted confirmation stays retryable without rollback',
     () async {
       final store = _MemoryRollbackStore(failConfirmOnce: true);
@@ -210,11 +230,13 @@ final class _ControlledLoader implements ContentPackRuntimeLoader {
   _ControlledLoader({this.shouldFail = false});
 
   int loadCount = 0;
+  final List<String> loadedVersions = [];
   final bool shouldFail;
 
   @override
   Future<void> load(String packId, String version) async {
     loadCount++;
+    loadedVersions.add(version);
     if (shouldFail) {
       throw StateError('payload-secret must not enter local status');
     }
