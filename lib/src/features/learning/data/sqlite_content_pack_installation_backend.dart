@@ -542,6 +542,12 @@ final class SqliteContentPackInstallationBackend
         state: currentState,
       );
     }
+    if (currentState.pinnedVersion == null) {
+      return ContentPackRetentionTransition(
+        outcome: ContentPackRetentionOutcome.unchanged,
+        state: currentState,
+      );
+    }
     _database.execute(
       'UPDATE content_pack_active SET pinned_version = NULL '
       'WHERE pack_id = ? AND activation_id = ?',
