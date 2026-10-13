@@ -414,6 +414,36 @@ void main() {
     },
   );
 
+  test('staging parent cannot be deleted before cleanup is recorded', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final backend = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'parent-delete-protected',
+    );
+    final reservation = await backend.reserve(
+      packId: 'org.remath.pack.one',
+      requiredBytes: 64,
+      version: '1.0.0',
+    );
+    await reservation.add(const [1, 2, 3]);
+
+    expect(
+      () => database.execute('DELETE FROM content_pack_objects'),
+      throwsA(isA<SqliteException>()),
+    );
+    final sealed = await reservation.seal(
+      lengthBytes: 3,
+      sha256: 'original-digest',
+    );
+    expect(await sealed.openRead().expand((chunk) => chunk).toList(), const [
+      1,
+      2,
+      3,
+    ]);
+  });
+
   test('sealed objects reject chunks moved from live staging', () async {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
