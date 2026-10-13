@@ -798,6 +798,71 @@ void main() {
     expect(await backend.activeVersion(release.packId), isNull);
   });
 
+  test('removal preserves dependencies needed by pending rollback', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    var nextId = 0;
+    final backend = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'rollback-dependency-${nextId++}',
+    );
+    final installer = composeContentPackInstaller(
+      backend: backend,
+      environment: _Environment(backend),
+      signatureVerifier: const _TrustedSignatureVerifier(),
+    );
+    const dependencyPackId = 'org.remath.pack.dependency';
+    const dependantPackId = 'org.remath.pack.dependant';
+    final dependency = await _release('1.0.0', packId: dependencyPackId);
+    await installer.install(
+      dependency,
+      _Source(utf8.encode(_pack('1.0.0', packId: dependencyPackId))),
+    );
+    await backend.confirmFirstLoad(
+      expectedActivationId: (await backend.activation(
+        dependencyPackId,
+      )).activationId,
+      packId: dependencyPackId,
+    );
+    final dependantV1 = await _release(
+      '1.0.0',
+      packId: dependantPackId,
+      dependencies: const [
+        ContentPackDependency(
+          minimumVersion: '1.0.0',
+          packId: dependencyPackId,
+        ),
+      ],
+    );
+    await installer.install(
+      dependantV1,
+      _Source(utf8.encode(_pack('1.0.0', packId: dependantPackId))),
+    );
+    await backend.confirmFirstLoad(
+      expectedActivationId: (await backend.activation(
+        dependantPackId,
+      )).activationId,
+      packId: dependantPackId,
+    );
+    final dependantV2 = await _release('2.0.0', packId: dependantPackId);
+    await installer.install(
+      dependantV2,
+      _Source(utf8.encode(_pack('2.0.0', packId: dependantPackId))),
+    );
+
+    final removed = await backend.removeActiveIfAllowed(
+      expectedState: await backend.retentionState(dependencyPackId),
+      packId: dependencyPackId,
+    );
+
+    expect(
+      removed.outcome,
+      ContentPackRemovalCommitOutcome.blockedDependent,
+    );
+    expect(await backend.activeVersion(dependencyPackId), '1.0.0');
+  });
+
   test('repeating a durable unpin reports an unchanged state', () async {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
