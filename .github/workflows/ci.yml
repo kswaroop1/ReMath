@@ -213,6 +213,12 @@ jobs:
           verify_red ef2dbb8b80b791dcfb65efffd6a44b51271f0709 \
             test/features/learning/data/content_pack_lifecycle_composition_test.dart \
             "closeDatabase"
+          verify_red f5f0d95fb809a3e6f1013a6d731fce4a2e2e1268 \
+            test/features/learning/data/content_pack_install_store_test.dart \
+            "staging bounds persisted rows for empty and tiny chunks"
+          verify_red 014588f23c467f69138d3c8f15a57f65b0b5ddde \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "retired pack versions do not retain dependency snapshots"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
