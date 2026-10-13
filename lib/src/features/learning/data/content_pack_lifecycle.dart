@@ -26,11 +26,7 @@ final class ContentPackLifecycle {
       store: backend,
     );
     for (final pendingPackId in await backend.pendingFirstLoadPackIds()) {
-      final pending = await backend.activation(pendingPackId);
-      final pendingVersion = pending.activeVersion;
-      if (pendingVersion != null) {
-        await coordinator.verifyFirstLoad(pendingPackId, pendingVersion);
-      }
+      await coordinator.recoverPendingFirstLoad(pendingPackId);
     }
 
     final packId = await backend.startupPackId();
@@ -40,7 +36,7 @@ final class ContentPackLifecycle {
     final version = activation.activeVersion;
     if (version == null) return fallback;
 
-    final result = await coordinator.verifyFirstLoad(packId, version);
+    final result = await coordinator.recoverPendingFirstLoad(packId);
     final activeVersion = result.activeVersion;
     if (activeVersion == null) return fallback;
     if (loader.loadedPack case final loaded?

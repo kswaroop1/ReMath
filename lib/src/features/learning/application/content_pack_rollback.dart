@@ -96,6 +96,24 @@ final class ContentPackRollbackCoordinator {
   final ContentPackRuntimeLoader loader;
   final ContentPackRollbackStore store;
 
+  Future<ContentPackRuntimeResult> recoverPendingFirstLoad(
+    String packId,
+  ) async {
+    while (true) {
+      final activation = await store.activation(packId);
+      final version = activation.activeVersion;
+      if (version == null || !activation.awaitingFirstLoad) {
+        return ContentPackRuntimeResult(
+          activeVersion: version,
+          outcome: ContentPackRuntimeOutcome.alreadyRecovered,
+        );
+      }
+      final result = await verifyFirstLoad(packId, version);
+      final current = await store.activation(packId);
+      if (!current.awaitingFirstLoad) return result;
+    }
+  }
+
   Future<ContentPackRuntimeResult> verifyFirstLoad(
     String packId,
     String version,
