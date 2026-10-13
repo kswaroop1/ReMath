@@ -258,3 +258,12 @@ final class _Source implements ContentPackArchiveSource {
 }
 
 final class _TrustedSignatureVerifier implements ContentPackSignatureVerifier {
+  const _TrustedSignatureVerifier();
+
+  @override
+  Future<bool> verify({
+    required String publisherKeyId,
+    required List<int> signedPayload,
+    required List<int> signature,
+  }) async => true;
+}
