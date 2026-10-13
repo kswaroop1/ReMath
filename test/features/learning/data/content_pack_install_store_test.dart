@@ -137,6 +137,28 @@ void main() {
       '9f64a747e1b97f131fabb6b447296c9b6f0201e79fb3c5356e6c77e89b6a806a',
     );
   });
+
+  test('staging bounds persisted rows for empty and tiny chunks', () async {
+    final backend = _MemoryBackend(availableBytes: 100);
+    final store = TransactionalContentPackInstallStore(backend: backend);
+
+    final staged = await store.stage(
+      _release(),
+      _ArchiveSource(const [
+        [],
+        [1],
+        [],
+        [2],
+        [3],
+        [4],
+        [],
+      ]),
+    );
+
+    expect(staged.lengthBytes, 4);
+    expect(backend.writtenBytes, [1, 2, 3, 4]);
+    expect(backend.addCount, 1);
+  });
 }
 
 ContentPackRelease _release({
@@ -179,6 +201,7 @@ final class _MemoryBackend implements ContentPackInstallationBackend {
   _MemoryBackend({required this.availableBytes});
 
   int availableBytes;
+  int addCount = 0;
   int abortCount = 0;
   Object? abortFailure;
   List<ContentPackDependency>? activatedDependencies;
@@ -249,6 +272,7 @@ final class _MemorySink implements ContentPackStagingSink {
 
   @override
   Future<void> add(List<int> chunk) async {
+    backend.addCount++;
     bytes.addAll(chunk);
     backend.writtenBytes.addAll(chunk);
     backend.firstWrite?.complete();
