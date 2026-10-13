@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/application/content_pack_installer.dart';
@@ -28,6 +29,22 @@ void main() {
       expect(backend.reservedBytes, 0);
     },
   );
+
+  test('staging rejects an oversized chunk before copying it', () async {
+    final backend = _MemoryBackend(availableBytes: 100);
+    final store = TransactionalContentPackInstallStore(backend: backend);
+
+    await expectLater(
+      store.stage(
+        _release(compressedSizeBytes: 4),
+        _ArchiveSource([_LengthOnlyOversizedChunk(5)]),
+      ),
+      throwsA(isA<ContentPackStagingException>()),
+    );
+
+    expect(backend.writtenBytes, isEmpty);
+    expect(backend.abortCount, 1);
+  });
 
   test('staging preserves its failure when abort also fails', () async {
     final backend = _MemoryBackend(availableBytes: 100)
@@ -195,6 +212,19 @@ final class _ArchiveSource implements ContentPackArchiveSource {
 
   @override
   Stream<List<int>> openRead() => Stream.fromIterable(chunks);
+}
+
+final class _LengthOnlyOversizedChunk extends ListBase<int> {
+  _LengthOnlyOversizedChunk(this.length);
+
+  @override
+  int length;
+
+  @override
+  int operator [](int index) => throw StateError('oversized chunk was copied');
+
+  @override
+  void operator []=(int index, int value) => throw UnsupportedError('fixed');
 }
 
 final class _MemoryBackend implements ContentPackInstallationBackend {
