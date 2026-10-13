@@ -219,6 +219,18 @@ jobs:
           verify_red 014588f23c467f69138d3c8f15a57f65b0b5ddde \
             test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
             "retired pack versions do not retain dependency snapshots"
+          verify_red bd6e8bba36ebc18e2954f5edeee09af87160d5f5 \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "staging parent cannot be deleted before cleanup is recorded"
+          verify_red 14910f8422c0408798053db1b1e05b4fadaaeb07 \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "clock"
+          verify_red 55614fca3b42bbbb5a87291a9f2b60f5c5f13256 \
+            test/features/learning/data/content_pack_install_store_test.dart \
+            "oversized chunk was copied"
+          verify_red 5f92690dc2ba7f359e4c181bdf96217dfea10504 \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "removal preserves dependencies needed by pending rollback"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
