@@ -572,9 +572,12 @@ Seven new behaviours were corrected in separate published test-first pairs:
 - `72b7ad81` / `b0d7640d` guards sealed/active/retained parent-state transitions;
 - `fd11094d` / `1b9f74b1` distinguishes live same-connection reservations from
   abandoned reservations recovered after a database reopen; and
-- `4fefec7d` / `70021e66` constructs the SQLite lifecycle and installer at native
-  application startup, retries durable cleanup, and keeps publisher trust
-  unconfigured until the explicitly separate operational-security work.
+- `4fefec7d` / `70021e66` requires and implements the SQLite lifecycle composer
+  and installer. Its focused red proves the composer boundary only. The native
+  `main.dart` opener and cleanup-retry calls first appeared in the same green
+  commit without their own preceding focused test; this record does not classify
+  that startup wiring as test-first. Publisher trust remains unconfigured until
+  the explicitly separate operational-security work.
 
 Commit `8e7eb7a7` permanently replays all seven focused red heads. The remaining
 review item concerns the already-published fifth-round history: its four tests
@@ -604,3 +607,58 @@ tests, 96.64% line coverage, and secret scanning.
 Records-head CI `38232871946` passes the same complete gate set at
 `3f62644a`, including permanent red replay, all 501 native tests, 96.64% line
 coverage, and secret scanning.
+
+## 2026-10-13 — Seventh independent review and durable startup corrections
+
+The seventh independent review returned seven findings: staging chunks could
+be mutated before sealing; the native-startup provenance claim above was too
+broad; active and retained objects were omitted from capacity accounting;
+reservation owner identity could repeat after a real process restart; no
+production runtime loader consumed and confirmed or rolled back the durable
+active pack; semantic versions admitted leading-zero components; and native
+release builds did not inject their calculated application version. The exact
+review exchanges remain in GitHub discussions
+[`4249410207`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4249410207),
+[`4249410214`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4249410214),
+[`4249410221`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4249410221),
+[`4249410226`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4249410226),
+[`4249410231`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4249410231),
+[`4249410237`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4249410237),
+and [`4249410244`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4249410244).
+
+Six separate published test-only/implementation pairs correct the behavioural
+findings:
+
+- `e1934bb9` / `59c4d552` makes every staging chunk append-only before its
+  digest becomes trusted;
+- `7e58adc3` / `f015c975` keeps active and retained pack bytes charged against
+  the durable storage budget;
+- `3b7f0197` / `4d915aaf` generates a process-unique reservation owner and
+  verifies orphan recovery with distinct close/reopen process identities;
+- `94ab2d22` / `f05e3d95` rejects leading-zero semantic-version components;
+- `ccbc77aa` / `2fc2e25d` injects the calculated release version into every
+  native build and reads it through `String.fromEnvironment`; and
+- `06a94519` / `9db03e8e` loads the durable active archive before `runApp`,
+  validates it, confirms a successful pending first load, and routes failures
+  through the existing atomic rollback coordinator before selecting restored
+  content or the bundled foundation fallback.
+
+Commit `ff36304e` adds all six published red heads to permanent CI replay, and
+`386cd734` corrects the replay references after GitHub assigned the published
+commit identities. This seventh-round record also narrows the earlier
+`4fefec7d` claim explicitly instead of manufacturing retrospective red
+evidence. The separate fifth-review batching limitation remains recorded and
+unchanged.
+
+CI `38351656477` passed permanent red replay, structure, dependency-lock, and
+secret checks, then exposed one incompatible stream-list argument, one
+formatting-sensitive release assertion, and two canonical formatting changes.
+Commit `a0cb7d63` corrects the compile and assertion issues. Diagnostic CI
+`38352647593` then passed all 508 tests and printed the remaining one-file Dart
+formatter patch; commits `764d202b` and `9e79635e` restore the non-mutating gate
+and apply that patch exactly.
+
+Authoritative behavioural-head CI `38353740932` passes every gate at
+`9e79635e`: permanent red replay, committed project structure, dependency lock,
+canonical formatting, fatal analysis, bundled-content validation, eight Chrome
+contracts, all 508 native tests, 96.64% line coverage, and secret scanning.

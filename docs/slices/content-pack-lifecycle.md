@@ -66,23 +66,28 @@ depends on a network service.
 ## Delivery evidence
 
 The bounded lifecycle behaviours are implemented as provider-neutral domain,
-application, and data contracts. Each behaviour has a test-first red commit, a
-paired green implementation, and permanent CI replay of the intended red
-failure. Authoritative CI run `38231363663` verifies the final sixth-review
-behavioural head with canonical formatting, fatal static analysis,
-bundled-content validation, eight Chrome contracts, all 501 native tests,
-96.64% line coverage, and secret scanning. The measured coverage remains 6.64
-percentage points above the 90% repository floor.
+application, and data contracts. Focused red/green evidence and permanent replay
+cover the behavioural gaps, with the historical evidence limitations below
+recorded explicitly rather than rewritten. Authoritative CI run `38353740932`
+verifies the final seventh-review behavioural head with canonical formatting,
+fatal static analysis, bundled-content validation, eight Chrome contracts, all
+508 native tests, 96.64% line coverage, and secret scanning. The measured
+coverage remains 6.64 percentage points above the 90% repository floor.
 
 The sixth-review corrections make sealed parent state immutable, preserve
 truthful atomic duplicate outcomes, bind pinning to observed activation state,
-compose the SQLite lifecycle at native startup, preserve primary staging
-failures, distinguish live reservations from abandoned restart state, and
-reject active dependency cycles. Their seven focused red heads are permanently
-replayed by CI. The historical fifth-review evidence finding remains explicit:
-four genuinely test-first behaviours were batched into one published red/green
-pair rather than separate pairs, and published history has not been rewritten
-or misrepresented.
+provide the SQLite lifecycle composer, preserve primary staging failures,
+distinguish live reservations from abandoned restart state, and reject active
+dependency cycles. The sixth-round composer red did not assert the native
+`main.dart` startup wiring added by its green, so that wiring is not claimed as
+test-first. The seventh-review corrections add append-only staging, durable
+capacity accounting, process-unique reservation ownership, canonical semantic
+versions, release-derived app compatibility, and a production startup loader
+that confirms or rolls back durable active content before `runApp`; all six new
+red heads are permanently replayed by CI. The historical fifth-review evidence
+finding also remains explicit: four genuinely test-first behaviours were
+batched into one published red/green pair rather than separate pairs. Published
+history has not been rewritten or misrepresented.
 
 CP-005 remains deliberately partial: archive length, SHA-256, and signature
 verification are complete, while publisher trust-root lifecycle operations stay
