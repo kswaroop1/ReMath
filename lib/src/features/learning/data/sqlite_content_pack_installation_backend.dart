@@ -135,18 +135,8 @@ final class SqliteContentPackInstallationBackend
       ..execute('''
         CREATE TRIGGER content_pack_chunks_update_staging
         BEFORE UPDATE ON content_pack_object_chunks
-        WHEN OLD.seal_id != NEW.seal_id
-          OR OLD.sequence != NEW.sequence
-          OR (
-            SELECT state FROM content_pack_objects
-            WHERE seal_id = OLD.seal_id
-          ) != 'staging'
-          OR (
-            SELECT state FROM content_pack_objects
-            WHERE seal_id = NEW.seal_id
-          ) != 'staging'
         BEGIN
-          SELECT RAISE(ABORT, 'content pack object is sealed');
+          SELECT RAISE(ABORT, 'content pack chunks are append-only');
         END
       ''')
       ..execute('''
