@@ -876,7 +876,13 @@ final class SqliteContentPackInstallationBackend
       FROM content_pack_dependencies AS dependencies
       INNER JOIN content_pack_active AS active
         ON active.pack_id = dependencies.pack_id
-        AND active.version = dependencies.version
+        AND (
+          active.version = dependencies.version
+          OR (
+            active.awaiting_first_load = 1
+            AND active.previous_version = dependencies.version
+          )
+        )
       WHERE dependencies.dependency_pack_id = ?
       LIMIT 1
     ''',
