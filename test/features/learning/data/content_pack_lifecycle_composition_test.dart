@@ -128,13 +128,15 @@ void main() {
 
     expect(loaded.id, 'org.remath.secondary');
     expect(
-      (await lifecycle.backend.activation('org.remath.composed'))
-          .awaitingFirstLoad,
+      (await lifecycle.backend.activation(
+        'org.remath.composed',
+      )).awaitingFirstLoad,
       isFalse,
     );
     expect(
-      (await lifecycle.backend.activation('org.remath.secondary'))
-          .awaitingFirstLoad,
+      (await lifecycle.backend.activation(
+        'org.remath.secondary',
+      )).awaitingFirstLoad,
       isFalse,
     );
   });
