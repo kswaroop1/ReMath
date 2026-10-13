@@ -20,6 +20,19 @@ final class ContentPackLifecycle {
   final ContentPackInstaller installer;
 
   Future<ContentPack> loadStartupPack(ContentPack fallback) async {
+    final loader = _SqliteContentPackRuntimeLoader(backend);
+    final coordinator = ContentPackRollbackCoordinator(
+      loader: loader,
+      store: backend,
+    );
+    for (final pendingPackId in await backend.pendingFirstLoadPackIds()) {
+      final pending = await backend.activation(pendingPackId);
+      final pendingVersion = pending.activeVersion;
+      if (pendingVersion != null) {
+        await coordinator.verifyFirstLoad(pendingPackId, pendingVersion);
+      }
+    }
+
     final packId = await backend.startupPackId();
     if (packId == null) return fallback;
 
@@ -27,11 +40,7 @@ final class ContentPackLifecycle {
     final version = activation.activeVersion;
     if (version == null) return fallback;
 
-    final loader = _SqliteContentPackRuntimeLoader(backend);
-    final result = await ContentPackRollbackCoordinator(
-      loader: loader,
-      store: backend,
-    ).verifyFirstLoad(packId, version);
+    final result = await coordinator.verifyFirstLoad(packId, version);
     final activeVersion = result.activeVersion;
     if (activeVersion == null) return fallback;
     if (loader.loadedPack case final loaded?

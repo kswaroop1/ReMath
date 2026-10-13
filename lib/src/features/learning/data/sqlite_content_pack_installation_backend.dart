@@ -191,6 +191,16 @@ final class SqliteContentPackInstallationBackend
     return rows.isEmpty ? null : rows.single['pack_id'] as String;
   }
 
+  Future<List<String>> pendingFirstLoadPackIds() async => _database
+      .select('''
+        SELECT pack_id
+        FROM content_pack_active
+        WHERE awaiting_first_load = 1
+        ORDER BY rowid
+      ''')
+      .map((row) => row['pack_id'] as String)
+      .toList(growable: false);
+
   Stream<List<int>> activeArchive(String packId, String version) {
     final rows = _database.select(
       '''
