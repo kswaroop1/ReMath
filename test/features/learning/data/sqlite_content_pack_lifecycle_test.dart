@@ -178,6 +178,45 @@ void main() {
     expect(await recovered.pendingCleanupCount(), 0);
   });
 
+  test('restart ownership uses a process-unique identity', () async {
+    final directory = await Directory.systemTemp.createTemp(
+      'remath-pack-owner-',
+    );
+    addTearDown(() => directory.delete(recursive: true));
+    final path = '${directory.path}/lifecycle.sqlite3';
+    var database = sqlite3.open(path);
+    var nextId = 0;
+    final interrupted = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'process-a-object-${nextId++}',
+      ownerIdGenerator: () => 'process-a-owner',
+    );
+    await interrupted.reserve(
+      packId: 'org.remath.pack.one',
+      requiredBytes: 64,
+      version: '1.0.0',
+    );
+    expect(
+      database.select('SELECT owner_id FROM content_pack_objects').single[
+        'owner_id'
+      ],
+      'process-a-owner',
+    );
+    database.close();
+
+    database = sqlite3.open(path);
+    addTearDown(database.close);
+    final recovered = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'process-b-object-${nextId++}',
+      ownerIdGenerator: () => 'process-b-owner',
+    );
+
+    expect(await recovered.pendingCleanupCount(), 1);
+  });
+
   test('startup does not reclaim another live backend reservation', () async {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
