@@ -20,12 +20,14 @@ ContentPackLifecycle composeSqliteContentPackLifecycle({
   required CommonDatabase database,
   required ContentPackIdGenerator idGenerator,
   int maximumSchemaVersion = 3,
+  ContentPackIdGenerator? ownerIdGenerator,
   required ContentPackSignatureVerifier signatureVerifier,
 }) {
   final backend = SqliteContentPackInstallationBackend(
     availableBytes: availableBytes,
     database: database,
     idGenerator: idGenerator,
+    ownerIdGenerator: ownerIdGenerator,
   );
   final environment = _SqliteContentPackInstallEnvironment(
     availableBytes: availableBytes,

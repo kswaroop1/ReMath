@@ -26,21 +26,22 @@ final class SqliteContentPackInstallationBackend
     Future<void> Function()? beforeCleanupDelete,
     required CommonDatabase database,
     required ContentPackIdGenerator idGenerator,
+    ContentPackIdGenerator? ownerIdGenerator,
   }) : _availableBytes = availableBytes,
        _beforeCleanupDelete = beforeCleanupDelete,
        _database = database,
        _idGenerator = idGenerator,
-       _ownerId = _ownerFor(database) {
+       _ownerId = _ownerFor(database, ownerIdGenerator ?? idGenerator) {
     _migrate();
   }
 
   static final Expando<String> _owners = Expando<String>(
     'content-pack-database-owner',
   );
-  static int _nextOwnerId = 0;
-
-  static String _ownerFor(CommonDatabase database) =>
-      _owners[database] ??= 'content-pack-owner-${_nextOwnerId++}';
+  static String _ownerFor(
+    CommonDatabase database,
+    ContentPackIdGenerator ownerIdGenerator,
+  ) => _owners[database] ??= ownerIdGenerator();
 
   final Future<int> Function() _availableBytes;
   final Future<void> Function()? _beforeCleanupDelete;
