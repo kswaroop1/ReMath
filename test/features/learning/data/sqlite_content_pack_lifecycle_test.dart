@@ -889,31 +889,31 @@ void main() {
       _Source(utf8.encode(_pack('1.0.0', packId: dependencyPackId))),
     );
     await backend.confirmFirstLoad(
-      expectedActivationId:
-          (await backend.activation(dependencyPackId)).activationId,
+      expectedActivationId: (await backend.activation(
+        dependencyPackId,
+      )).activationId,
       packId: dependencyPackId,
     );
     const dependencies = [
-      ContentPackDependency(
-        minimumVersion: '1.0.0',
-        packId: dependencyPackId,
-      ),
+      ContentPackDependency(minimumVersion: '1.0.0', packId: dependencyPackId),
     ];
 
     for (final version in const ['1.0.0', '2.0.0']) {
       final release = await _release(version, dependencies: dependencies);
       await installer.install(release, _Source(utf8.encode(_pack(version))));
       await backend.confirmFirstLoad(
-        expectedActivationId:
-            (await backend.activation(release.packId)).activationId,
+        expectedActivationId: (await backend.activation(
+          release.packId,
+        )).activationId,
         packId: release.packId,
       );
     }
     final failed = await _release('3.0.0', dependencies: dependencies);
     await installer.install(failed, _Source(utf8.encode(_pack('3.0.0'))));
     await backend.rollbackFailedActivation(
-      expectedActivationId:
-          (await backend.activation(failed.packId)).activationId,
+      expectedActivationId: (await backend.activation(
+        failed.packId,
+      )).activationId,
       message: 'Version 3 failed.',
       packId: failed.packId,
     );

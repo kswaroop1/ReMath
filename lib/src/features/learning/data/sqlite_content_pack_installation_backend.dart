@@ -671,10 +671,7 @@ final class SqliteContentPackInstallationBackend
         current['activation_id'] == expectedActivationId &&
         current['awaiting_first_load'] == 1;
     if (confirmed) {
-      _deleteDependencySnapshot(
-        packId,
-        current['previous_version'] as String?,
-      );
+      _deleteDependencySnapshot(packId, current['previous_version'] as String?);
       final previousSealId = current['previous_seal_id'] as String?;
       if (previousSealId != null) {
         _deleteObject(previousSealId);
@@ -845,10 +842,7 @@ final class SqliteContentPackInstallationBackend
     }
     if (current != null) {
       _deleteDependencySnapshot(packId, current['version'] as String);
-      _deleteDependencySnapshot(
-        packId,
-        current['previous_version'] as String?,
-      );
+      _deleteDependencySnapshot(packId, current['previous_version'] as String?);
       final previousSealId = current['previous_seal_id'] as String?;
       _database.execute('DELETE FROM content_pack_active WHERE pack_id = ?', [
         packId,
