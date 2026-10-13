@@ -98,6 +98,70 @@ void main() {
       isFalse,
     );
   });
+
+  test('startup recovers every pending pack before selecting one', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    var nextId = 0;
+    final lifecycle = composeSqliteContentPackLifecycle(
+      availableBytes: () async => 1024 * 1024,
+      currentAppVersion: '0.1.0',
+      database: database,
+      idGenerator: () => 'multi-startup-${nextId++}',
+      signatureVerifier: const _TrustedSignatureVerifier(),
+    );
+    final firstBytes = utf8.encode(_pack);
+    final secondBytes = utf8.encode(_secondPack);
+    await lifecycle.installer.install(
+      await _releaseFor('org.remath.composed', firstBytes),
+      _Source(firstBytes),
+    );
+    await lifecycle.installer.install(
+      await _releaseFor('org.remath.secondary', secondBytes),
+      _Source(secondBytes),
+    );
+    final fallback = const ContentPackParser().parse(
+      _pack.replaceFirst('org.remath.composed', 'org.remath.fallback'),
+    );
+
+    final loaded = await lifecycle.loadStartupPack(fallback);
+
+    expect(loaded.id, 'org.remath.secondary');
+    expect(
+      (await lifecycle.backend.activation('org.remath.composed'))
+          .awaitingFirstLoad,
+      isFalse,
+    );
+    expect(
+      (await lifecycle.backend.activation('org.remath.secondary'))
+          .awaitingFirstLoad,
+      isFalse,
+    );
+  });
+}
+
+Future<ContentPackRelease> _releaseFor(String packId, List<int> bytes) async {
+  final digest = await Sha256().hash(bytes);
+  return ContentPackRelease(
+    compressedSizeBytes: bytes.length,
+    dependencies: const [],
+    description: 'Production-composed pack.',
+    installedSizeBytes: bytes.length,
+    language: 'en-GB',
+    license: 'CC-BY-SA-4.0',
+    manifestVersion: 1,
+    minimumAppVersion: '0.1.0',
+    minimumSchemaVersion: 1,
+    objectives: const ['Compose safely'],
+    packId: packId,
+    publisherKeyId: 'org.remath.publisher.primary',
+    sha256: digest.bytes
+        .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
+        .join(),
+    signature: 'AQID',
+    title: 'Composed',
+    version: '1.0.0',
+  );
 }
 
 const _pack = '''
@@ -106,6 +170,26 @@ const _pack = '''
   "id": "org.remath.composed",
   "version": "1.0.0",
   "title": "Composed",
+  "license": "CC-BY-SA-4.0",
+  "skills": [{"id":"arithmetic.addition","title":"Addition"}],
+  "templates": [{
+    "id":"arithmetic.addition.template",
+    "version":1,
+    "skillId":"arithmetic.addition",
+    "operation":"addition",
+    "minimumOperand":0,
+    "maximumOperand":10,
+    "fluentTargetSeconds":10
+  }]
+}
+''';
+
+const _secondPack = '''
+{
+  "schemaVersion": 1,
+  "id": "org.remath.secondary",
+  "version": "1.0.0",
+  "title": "Secondary",
   "license": "CC-BY-SA-4.0",
   "skills": [{"id":"arithmetic.addition","title":"Addition"}],
   "templates": [{
