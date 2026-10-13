@@ -94,15 +94,16 @@ final class TransactionalContentPackInstallStore
 
     try {
       await for (final chunk in archive.openRead()) {
-        final frozenChunk = List<int>.unmodifiable(chunk);
-        final nextLength = length + frozenChunk.length;
-        if (nextLength > release.compressedSizeBytes) {
+        final remainingBytes = release.compressedSizeBytes - length;
+        if (chunk.length > remainingBytes) {
           await flushPendingChunk();
           throw ContentPackStagingException(
             'The archive exceeds its declared ${release.compressedSizeBytes} '
             'byte limit.',
           );
         }
+        final frozenChunk = List<int>.unmodifiable(chunk);
+        final nextLength = length + frozenChunk.length;
         hashSink.add(frozenChunk);
         length = nextLength;
         var offset = 0;
