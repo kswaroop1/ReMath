@@ -707,6 +707,41 @@ void main() {
     expect(await backend.activeVersion(release.packId), isNull);
   });
 
+  test('repeating a durable unpin reports an unchanged state', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    var nextId = 0;
+    final backend = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'repeat-unpin-${nextId++}',
+    );
+    final installer = composeContentPackInstaller(
+      backend: backend,
+      environment: _Environment(backend),
+      signatureVerifier: const _TrustedSignatureVerifier(),
+    );
+    final release = await _release('1.0.0');
+    await installer.install(release, _Source(utf8.encode(_pack('1.0.0'))));
+    await backend.pinActive(
+      release.packId,
+      expectedState: await backend.retentionState(release.packId),
+    );
+    final first = await backend.unpinActive(
+      release.packId,
+      expectedState: await backend.retentionState(release.packId),
+    );
+
+    final repeated = await backend.unpinActive(
+      release.packId,
+      expectedState: first.state,
+    );
+
+    expect(first.outcome, ContentPackRetentionOutcome.changed);
+    expect(repeated.outcome, ContentPackRetentionOutcome.unchanged);
+    expect(repeated.state.pinnedVersion, isNull);
+  });
+
   test('stale unpin cannot clear a newer activation pin', () async {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
