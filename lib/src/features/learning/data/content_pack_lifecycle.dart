@@ -129,7 +129,7 @@ final class _SqliteContentPackRuntimeLoader
     final bytes = await backend
         .activeArchive(packId, version)
         .expand((chunk) => chunk)
-        .toList(growable: false);
+        .toList();
     final pack = const ContentPackParser().parse(utf8.decode(bytes));
     const ContentPackValidator().validateOrThrow(pack);
     if (pack.id != packId || pack.version != version) {

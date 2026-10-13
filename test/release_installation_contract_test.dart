@@ -27,7 +27,7 @@ void main() {
     expect(versionDefines.length, 5);
     expect(
       nativeComposition,
-      contains("String.fromEnvironment('APP_VERSION'"),
+      contains(RegExp(r"String\.fromEnvironment\(\s*'APP_VERSION'")),
     );
     expect(nativeComposition, isNot(contains("currentAppVersion: '0.1.0'")));
   });
