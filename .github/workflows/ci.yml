@@ -226,7 +226,14 @@ jobs:
       - name: Verify dependency lock is unchanged
         run: git diff --exit-code -- pubspec.lock
       - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed lib test tool
+        run: |
+          dart format \
+            lib/src/features/learning/data/sqlite_content_pack_installation_backend.dart \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart
+          git diff -- \
+            lib/src/features/learning/data/sqlite_content_pack_installation_backend.dart \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart
+          exit 1
       - name: Static analysis
         run: flutter analyze --fatal-infos --fatal-warnings
       - name: Validate content packs
