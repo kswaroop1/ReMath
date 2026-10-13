@@ -662,3 +662,6 @@ Authoritative behavioural-head CI `38353740932` passes every gate at
 `9e79635e`: permanent red replay, committed project structure, dependency lock,
 canonical formatting, fatal analysis, bundled-content validation, eight Chrome
 contracts, all 508 native tests, 96.64% line coverage, and secret scanning.
+
+Records-head CI `38354642239` passes the same complete gate set at `6d207f09`,
+including all 508 native tests, 96.64% line coverage, and secret scanning.
