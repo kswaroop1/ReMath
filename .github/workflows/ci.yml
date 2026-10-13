@@ -180,6 +180,24 @@ jobs:
           verify_red 4fefec7d8504c2b130087004685c869da8239544 \
             test/features/learning/data/content_pack_lifecycle_composition_test.dart \
             "composeSqliteContentPackLifecycle"
+          verify_red c5f30c0520fd38f877ccc2527a3fef00ea311778 \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "staging chunks are append-only before their digest is trusted"
+          verify_red d6ad737643c7e3388de7ad999cf3b68c56fc2aa6 \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "active pack storage remains charged against the durable budget"
+          verify_red 68d7a0df06e978283917c1dabce3f25b2bf14af1 \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "ownerIdGenerator"
+          verify_red 703516a0d2aff54dd2d9f58c9e3639de8572c559 \
+            test/features/learning/data/content_pack_release_validator_test.dart \
+            "semantic versions reject noncanonical leading zeros"
+          verify_red 7383cbaf868cbadee4fb764b4b30511e8e6c58ad \
+            test/release_installation_contract_test.dart \
+            "every released native app receives its calculated semantic version"
+          verify_red 96ad77e23228b9ba7e9ec5f2cf13faf68cea7ad0 \
+            test/features/learning/data/content_pack_lifecycle_composition_test.dart \
+            "loadStartupPack"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
