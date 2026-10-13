@@ -140,13 +140,14 @@ final class SqliteContentPackInstallationBackend
           SELECT RAISE(ABORT, 'content pack chunks are append-only');
         END
       ''')
+      ..execute('DROP TRIGGER IF EXISTS content_pack_chunks_delete_cleanup')
       ..execute('''
-        CREATE TRIGGER IF NOT EXISTS content_pack_chunks_delete_cleanup
+        CREATE TRIGGER content_pack_chunks_delete_cleanup
         BEFORE DELETE ON content_pack_object_chunks
         WHEN (
           SELECT state FROM content_pack_objects
           WHERE seal_id = OLD.seal_id
-        ) NOT IN ('staging', 'cleanup')
+        ) != 'cleanup'
         BEGIN
           SELECT RAISE(ABORT, 'content pack object is retained');
         END
