@@ -198,9 +198,9 @@ void main() {
       version: '1.0.0',
     );
     expect(
-      database.select('SELECT owner_id FROM content_pack_objects').single[
-        'owner_id'
-      ],
+      database
+          .select('SELECT owner_id FROM content_pack_objects')
+          .single['owner_id'],
       'process-a-owner',
     );
     database.close();
@@ -252,41 +252,44 @@ void main() {
     ]);
   });
 
-  test('active pack storage remains charged against the durable budget', () async {
-    final database = sqlite3.openInMemory();
-    addTearDown(database.close);
-    var nextId = 0;
-    final backend = SqliteContentPackInstallationBackend(
-      availableBytes: () async => 100,
-      database: database,
-      idGenerator: () => 'capacity-${nextId++}',
-    );
-    final release = await _release('1.0.0');
-    final reservation = await backend.reserve(
-      packId: release.packId,
-      requiredBytes: 60,
-      version: release.version,
-    );
-    await reservation.add(const [1]);
-    final sealed = await reservation.seal(
-      lengthBytes: 1,
-      sha256: release.sha256,
-    );
-    await backend.activateAtomically(
-      isExplicitVersionChoice: false,
-      release: release,
-      sealed: sealed,
-    );
+  test(
+    'active pack storage remains charged against the durable budget',
+    () async {
+      final database = sqlite3.openInMemory();
+      addTearDown(database.close);
+      var nextId = 0;
+      final backend = SqliteContentPackInstallationBackend(
+        availableBytes: () async => 100,
+        database: database,
+        idGenerator: () => 'capacity-${nextId++}',
+      );
+      final release = await _release('1.0.0');
+      final reservation = await backend.reserve(
+        packId: release.packId,
+        requiredBytes: 60,
+        version: release.version,
+      );
+      await reservation.add(const [1]);
+      final sealed = await reservation.seal(
+        lengthBytes: 1,
+        sha256: release.sha256,
+      );
+      await backend.activateAtomically(
+        isExplicitVersionChoice: false,
+        release: release,
+        sealed: sealed,
+      );
 
-    await expectLater(
-      backend.reserve(
-        packId: 'org.remath.pack.two',
-        requiredBytes: 41,
-        version: '1.0.0',
-      ),
-      throwsA(isA<ContentPackStagingException>()),
-    );
-  });
+      await expectLater(
+        backend.reserve(
+          packId: 'org.remath.pack.two',
+          requiredBytes: 41,
+          version: '1.0.0',
+        ),
+        throwsA(isA<ContentPackStagingException>()),
+      );
+    },
+  );
 
   test('staging appends chunks once and sealed bytes are immutable', () async {
     final database = sqlite3.openInMemory();
@@ -340,38 +343,43 @@ void main() {
     ]);
   });
 
-  test('staging chunks are append-only before their digest is trusted', () async {
-    final database = sqlite3.openInMemory();
-    addTearDown(database.close);
-    final backend = SqliteContentPackInstallationBackend(
-      availableBytes: () async => 1024 * 1024,
-      database: database,
-      idGenerator: () => 'append-only',
-    );
-    final reservation = await backend.reserve(
-      packId: 'org.remath.pack.one',
-      requiredBytes: 64,
-      version: '1.0.0',
-    );
-    await reservation.add(const [1, 2, 3]);
+  test(
+    'staging chunks are append-only before their digest is trusted',
+    () async {
+      final database = sqlite3.openInMemory();
+      addTearDown(database.close);
+      final backend = SqliteContentPackInstallationBackend(
+        availableBytes: () async => 1024 * 1024,
+        database: database,
+        idGenerator: () => 'append-only',
+      );
+      final reservation = await backend.reserve(
+        packId: 'org.remath.pack.one',
+        requiredBytes: 64,
+        version: '1.0.0',
+      );
+      await reservation.add(const [1, 2, 3]);
 
-    expect(
-      () => database.execute(
-        'UPDATE content_pack_object_chunks SET content = ?',
-        [Uint8List.fromList(const [9, 9, 9])],
-      ),
-      throwsA(isA<SqliteException>()),
-    );
-    final sealed = await reservation.seal(
-      lengthBytes: 3,
-      sha256: 'original-digest',
-    );
-    expect(await sealed.openRead().expand((chunk) => chunk).toList(), const [
-      1,
-      2,
-      3,
-    ]);
-  });
+      expect(
+        () => database.execute(
+          'UPDATE content_pack_object_chunks SET content = ?',
+          [
+            Uint8List.fromList(const [9, 9, 9]),
+          ],
+        ),
+        throwsA(isA<SqliteException>()),
+      );
+      final sealed = await reservation.seal(
+        lengthBytes: 3,
+        sha256: 'original-digest',
+      );
+      expect(await sealed.openRead().expand((chunk) => chunk).toList(), const [
+        1,
+        2,
+        3,
+      ]);
+    },
+  );
 
   test('sealed objects reject chunks moved from live staging', () async {
     final database = sqlite3.openInMemory();
