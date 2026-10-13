@@ -180,22 +180,22 @@ jobs:
           verify_red 4fefec7d8504c2b130087004685c869da8239544 \
             test/features/learning/data/content_pack_lifecycle_composition_test.dart \
             "composeSqliteContentPackLifecycle"
-          verify_red c5f30c0520fd38f877ccc2527a3fef00ea311778 \
+          verify_red e1934bb91c898d7f7a0dd7a455bb1723566888dc \
             test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
             "staging chunks are append-only before their digest is trusted"
-          verify_red d6ad737643c7e3388de7ad999cf3b68c56fc2aa6 \
+          verify_red 7e58adc3d26aff54c093ccb6c544f0246d840cf3 \
             test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
             "active pack storage remains charged against the durable budget"
-          verify_red 68d7a0df06e978283917c1dabce3f25b2bf14af1 \
+          verify_red 3b7f0197fe3065e2f4804440588e676fad2d7714 \
             test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
             "ownerIdGenerator"
-          verify_red 703516a0d2aff54dd2d9f58c9e3639de8572c559 \
+          verify_red 94ab2d2211986131112ef1c6e668b6249f07f5d9 \
             test/features/learning/data/content_pack_release_validator_test.dart \
             "semantic versions reject noncanonical leading zeros"
-          verify_red 7383cbaf868cbadee4fb764b4b30511e8e6c58ad \
+          verify_red ccbc77aa23e3691a53028a7c1977bdb1b937a219 \
             test/release_installation_contract_test.dart \
             "every released native app receives its calculated semantic version"
-          verify_red 96ad77e23228b9ba7e9ec5f2cf13faf68cea7ad0 \
+          verify_red 06a9451921f17546a0bcd7fbf5cb01958beb596c \
             test/features/learning/data/content_pack_lifecycle_composition_test.dart \
             "loadStartupPack"
       - name: Verify committed application structure
