@@ -138,6 +138,59 @@ void main() {
       isFalse,
     );
   });
+
+  test('startup uses bundled content when lifecycle opening fails', () async {
+    final fallback = const ContentPackParser().parse(
+      _pack.replaceFirst('org.remath.composed', 'org.remath.fallback'),
+    );
+
+    final startup = await loadContentPackForStartup(
+      fallback: fallback,
+      openLifecycle: () async => throw StateError('storage unavailable'),
+    );
+
+    expect(startup.pack, same(fallback));
+    expect(startup.lifecycle, isNull);
+  });
+
+  test('startup closes failed lifecycle storage and uses bundled content', () async {
+    final database = sqlite3.openInMemory();
+    var nextId = 0;
+    final lifecycle = composeSqliteContentPackLifecycle(
+      availableBytes: () async => 1024 * 1024,
+      closeDatabase: database.close,
+      currentAppVersion: '0.1.0',
+      database: database,
+      idGenerator: () => 'failed-startup-${nextId++}',
+      signatureVerifier: const _TrustedSignatureVerifier(),
+    );
+    final bytes = utf8.encode(_pack);
+    await lifecycle.installer.install(
+      await _releaseFor('org.remath.composed', bytes),
+      _Source(bytes),
+    );
+    database
+      ..execute('DROP TRIGGER content_pack_chunks_update_staging')
+      ..execute(
+        'UPDATE content_pack_object_chunks SET content = ?',
+        [utf8.encode('not valid content')],
+      );
+    final fallback = const ContentPackParser().parse(
+      _pack.replaceFirst('org.remath.composed', 'org.remath.fallback'),
+    );
+
+    final startup = await loadContentPackForStartup(
+      fallback: fallback,
+      openLifecycle: () async => lifecycle,
+    );
+
+    expect(startup.pack, same(fallback));
+    expect(startup.lifecycle, isNull);
+    expect(
+      () => database.select('SELECT 1'),
+      throwsA(isA<SqliteException>()),
+    );
+  });
 }
 
 Future<ContentPackRelease> _releaseFor(String packId, List<int> bytes) async {
