@@ -192,7 +192,6 @@ final class SqliteContentPackInstallationBackend
           _database.select('''
             SELECT COALESCE(SUM(required_bytes), 0) AS total
             FROM content_pack_objects
-            WHERE state IN ('staging', 'sealed', 'cleanup')
           ''').single['total']
               as int;
       if (requiredBytes > available - reserved) {
@@ -424,7 +423,7 @@ final class SqliteContentPackInstallationBackend
       _database.execute(
         '''
         UPDATE content_pack_objects
-        SET state = 'active', required_bytes = 0
+        SET state = 'active'
         WHERE seal_id = ?
       ''',
         [sqliteSealed.sealId],
