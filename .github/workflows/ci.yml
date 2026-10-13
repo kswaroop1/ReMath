@@ -198,6 +198,21 @@ jobs:
           verify_red 06a9451921f17546a0bcd7fbf5cb01958beb596c \
             test/features/learning/data/content_pack_lifecycle_composition_test.dart \
             "loadStartupPack"
+          verify_red eea556ea80d37fb74e7bc10eb3d5fcfa12f785c5 \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "staging chunks cannot be deleted before their digest is trusted"
+          verify_red 27cb6c6a3382724e2043dbc95d14fc3bc00d4d4d \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "repeating a durable unpin reports an unchanged state"
+          verify_red 73369efa1b727fde59420f0d9d8d7631e6d14611 \
+            test/features/learning/data/content_pack_lifecycle_composition_test.dart \
+            "startup recovers every pending pack before selecting one"
+          verify_red 6137b3da721a10fcc60a17586ecdaa7c598e6645 \
+            test/features/learning/application/content_pack_rollback_test.dart \
+            "recoverPendingFirstLoad"
+          verify_red ef2dbb8b80b791dcfb65efffd6a44b51271f0709 \
+            test/features/learning/data/content_pack_lifecycle_composition_test.dart \
+            "closeDatabase"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
