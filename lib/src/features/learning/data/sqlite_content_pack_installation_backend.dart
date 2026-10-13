@@ -151,6 +151,15 @@ final class SqliteContentPackInstallationBackend
         BEGIN
           SELECT RAISE(ABORT, 'content pack object is retained');
         END
+      ''')
+      ..execute('DROP TRIGGER IF EXISTS content_pack_objects_delete_cleanup')
+      ..execute('''
+        CREATE TRIGGER content_pack_objects_delete_cleanup
+        BEFORE DELETE ON content_pack_objects
+        WHEN OLD.state != 'cleanup'
+        BEGIN
+          SELECT RAISE(ABORT, 'content pack object is retained');
+        END
       ''');
     final objectColumns = _database
         .select('PRAGMA table_info(content_pack_objects)')
