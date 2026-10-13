@@ -8,6 +8,10 @@ import 'content_pack_archive_verifier.dart';
 import 'content_pack_lifecycle.dart';
 
 const _contentPackStorageBudgetBytes = 512 * 1024 * 1024;
+const _currentAppVersion = String.fromEnvironment(
+  'APP_VERSION',
+  defaultValue: '0.1.0',
+);
 
 Future<ContentPackLifecycle?> openContentPackLifecycle() async {
   final directory = await getApplicationSupportDirectory();
@@ -18,7 +22,7 @@ Future<ContentPackLifecycle?> openContentPackLifecycle() async {
   final random = Random.secure();
   return composeSqliteContentPackLifecycle(
     availableBytes: () async => _contentPackStorageBudgetBytes,
-    currentAppVersion: '0.1.0',
+    currentAppVersion: _currentAppVersion,
     database: database,
     idGenerator: () => List.generate(
       16,
