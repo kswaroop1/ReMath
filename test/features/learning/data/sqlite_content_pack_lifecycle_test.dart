@@ -151,10 +151,13 @@ void main() {
     final path = '${directory.path}/lifecycle.sqlite3';
     var database = sqlite3.open(path);
     var nextId = 0;
+    var now = DateTime.utc(2026, 10, 13);
     final interrupted = SqliteContentPackInstallationBackend(
       availableBytes: () async => 1024 * 1024,
+      clock: () => now,
       database: database,
       idGenerator: () => 'orphan-${nextId++}',
+      leaseDuration: const Duration(minutes: 5),
     );
     final reservation = await interrupted.reserve(
       packId: 'org.remath.pack.one',
@@ -165,12 +168,15 @@ void main() {
     await reservation.seal(lengthBytes: 3, sha256: 'sealed-digest');
     database.close();
 
+    now = now.add(const Duration(minutes: 6));
     database = sqlite3.open(path);
     addTearDown(database.close);
     final recovered = SqliteContentPackInstallationBackend(
       availableBytes: () async => 1024 * 1024,
+      clock: () => now,
       database: database,
       idGenerator: () => 'recovered-${nextId++}',
+      leaseDuration: const Duration(minutes: 5),
     );
 
     expect(await recovered.pendingCleanupCount(), 1);
@@ -186,10 +192,13 @@ void main() {
     final path = '${directory.path}/lifecycle.sqlite3';
     var database = sqlite3.open(path);
     var nextId = 0;
+    var now = DateTime.utc(2026, 10, 13);
     final interrupted = SqliteContentPackInstallationBackend(
       availableBytes: () async => 1024 * 1024,
+      clock: () => now,
       database: database,
       idGenerator: () => 'process-a-object-${nextId++}',
+      leaseDuration: const Duration(minutes: 5),
       ownerIdGenerator: () => 'process-a-owner',
     );
     await interrupted.reserve(
@@ -205,12 +214,15 @@ void main() {
     );
     database.close();
 
+    now = now.add(const Duration(minutes: 6));
     database = sqlite3.open(path);
     addTearDown(database.close);
     final recovered = SqliteContentPackInstallationBackend(
       availableBytes: () async => 1024 * 1024,
+      clock: () => now,
       database: database,
       idGenerator: () => 'process-b-object-${nextId++}',
+      leaseDuration: const Duration(minutes: 5),
       ownerIdGenerator: () => 'process-b-owner',
     );
 
@@ -237,6 +249,55 @@ void main() {
       availableBytes: () async => 1024 * 1024,
       database: database,
       idGenerator: () => 'live-${nextId++}',
+    );
+    await reservation.add(const [3]);
+    final sealed = await reservation.seal(
+      lengthBytes: 3,
+      sha256: 'live-digest',
+    );
+
+    expect(await second.pendingCleanupCount(), 0);
+    expect(await sealed.openRead().expand((chunk) => chunk).toList(), const [
+      1,
+      2,
+      3,
+    ]);
+  });
+
+  test('separate live connections do not reclaim each other', () async {
+    final directory = await Directory.systemTemp.createTemp(
+      'remath-pack-live-connections-',
+    );
+    addTearDown(() => directory.delete(recursive: true));
+    final path = '${directory.path}/lifecycle.sqlite3';
+    final firstDatabase = sqlite3.open(path);
+    addTearDown(firstDatabase.close);
+    var nextId = 0;
+    final now = DateTime.utc(2026, 10, 13);
+    final first = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      clock: () => now,
+      database: firstDatabase,
+      idGenerator: () => 'first-${nextId++}',
+      leaseDuration: const Duration(minutes: 5),
+      ownerIdGenerator: () => 'first-owner',
+    );
+    final reservation = await first.reserve(
+      packId: 'org.remath.pack.one',
+      requiredBytes: 64,
+      version: '1.0.0',
+    );
+    await reservation.add(const [1, 2]);
+
+    final secondDatabase = sqlite3.open(path);
+    addTearDown(secondDatabase.close);
+    final second = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      clock: () => now,
+      database: secondDatabase,
+      idGenerator: () => 'second-${nextId++}',
+      leaseDuration: const Duration(minutes: 5),
+      ownerIdGenerator: () => 'second-owner',
     );
     await reservation.add(const [3]);
     final sealed = await reservation.seal(
