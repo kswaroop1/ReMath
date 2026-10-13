@@ -19,21 +19,27 @@ Future<ContentPackLifecycle?> openContentPackLifecycle() async {
   final database = sqlite3.open(
     '${directory.path}${Platform.pathSeparator}remath-content.sqlite',
   );
-  final random = Random.secure();
-  return composeSqliteContentPackLifecycle(
-    availableBytes: () async => _contentPackStorageBudgetBytes,
-    currentAppVersion: _currentAppVersion,
-    database: database,
-    idGenerator: () => List.generate(
-      16,
-      (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
-    ).join(),
-    ownerIdGenerator: () => List.generate(
-      16,
-      (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
-    ).join(),
-    signatureVerifier: const _UnconfiguredSignatureVerifier(),
-  );
+  try {
+    final random = Random.secure();
+    return composeSqliteContentPackLifecycle(
+      availableBytes: () async => _contentPackStorageBudgetBytes,
+      closeDatabase: database.close,
+      currentAppVersion: _currentAppVersion,
+      database: database,
+      idGenerator: () => List.generate(
+        16,
+        (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
+      ).join(),
+      ownerIdGenerator: () => List.generate(
+        16,
+        (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
+      ).join(),
+      signatureVerifier: const _UnconfiguredSignatureVerifier(),
+    );
+  } on Object {
+    database.close();
+    rethrow;
+  }
 }
 
 final class _UnconfiguredSignatureVerifier

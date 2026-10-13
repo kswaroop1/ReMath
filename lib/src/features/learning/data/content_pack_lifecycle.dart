@@ -14,10 +14,17 @@ import 'content_pack_validator.dart';
 import 'sqlite_content_pack_installation_backend.dart';
 
 final class ContentPackLifecycle {
-  const ContentPackLifecycle({required this.backend, required this.installer});
+  const ContentPackLifecycle({
+    required this.backend,
+    void Function()? closeDatabase,
+    required this.installer,
+  }) : _closeDatabase = closeDatabase;
 
   final SqliteContentPackInstallationBackend backend;
+  final void Function()? _closeDatabase;
   final ContentPackInstaller installer;
+
+  void close() => _closeDatabase?.call();
 
   Future<ContentPack> loadStartupPack(ContentPack fallback) async {
     final loader = _SqliteContentPackRuntimeLoader(backend);
@@ -47,8 +54,34 @@ final class ContentPackLifecycle {
   }
 }
 
+final class ContentPackStartup {
+  const ContentPackStartup({required this.lifecycle, required this.pack});
+
+  final ContentPackLifecycle? lifecycle;
+  final ContentPack pack;
+}
+
+Future<ContentPackStartup> loadContentPackForStartup({
+  required ContentPack fallback,
+  required Future<ContentPackLifecycle?> Function() openLifecycle,
+}) async {
+  ContentPackLifecycle? lifecycle;
+  try {
+    lifecycle = await openLifecycle();
+    await lifecycle?.backend.retryPendingDiscards();
+    return ContentPackStartup(
+      lifecycle: lifecycle,
+      pack: await lifecycle?.loadStartupPack(fallback) ?? fallback,
+    );
+  } on Object {
+    lifecycle?.close();
+    return ContentPackStartup(lifecycle: null, pack: fallback);
+  }
+}
+
 ContentPackLifecycle composeSqliteContentPackLifecycle({
   required Future<int> Function() availableBytes,
+  void Function()? closeDatabase,
   required String currentAppVersion,
   required CommonDatabase database,
   required ContentPackIdGenerator idGenerator,
@@ -70,6 +103,7 @@ ContentPackLifecycle composeSqliteContentPackLifecycle({
   );
   return ContentPackLifecycle(
     backend: backend,
+    closeDatabase: closeDatabase,
     installer: composeContentPackInstaller(
       backend: backend,
       environment: environment,

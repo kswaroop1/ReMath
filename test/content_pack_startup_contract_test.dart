@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('application startup resolves durable content before runApp', () {
     final source = File('lib/main.dart').readAsStringSync();
-    final loadIndex = source.indexOf('loadStartupPack');
+    final loadIndex = source.indexOf('loadContentPackForStartup');
     final runIndex = source.indexOf('runApp(');
 
     expect(loadIndex, greaterThanOrEqualTo(0));
