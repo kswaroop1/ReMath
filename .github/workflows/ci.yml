@@ -44,11 +44,6 @@ jobs:
         with:
           channel: stable
           cache: true
-      - name: Print tenth-review formatter patch
-        run: |
-          dart format lib test tool
-          git diff -- test/features/learning/data/sqlite_content_pack_lifecycle_test.dart
-          exit 1
       - name: Verify focused content lifecycle red evidence
         run: |
           set -euo pipefail
