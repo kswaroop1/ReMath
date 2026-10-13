@@ -10,6 +10,7 @@ import '../domain/content_pack_retention.dart';
 import 'content_pack_install_store.dart';
 
 typedef ContentPackIdGenerator = String Function();
+typedef ContentPackClock = DateTime Function();
 
 /// Durable native content-pack lifecycle storage.
 ///
@@ -26,11 +27,15 @@ final class SqliteContentPackInstallationBackend
     Future<void> Function()? beforeCleanupDelete,
     required CommonDatabase database,
     required ContentPackIdGenerator idGenerator,
+    ContentPackClock? clock,
+    Duration leaseDuration = const Duration(minutes: 30),
     ContentPackIdGenerator? ownerIdGenerator,
   }) : _availableBytes = availableBytes,
        _beforeCleanupDelete = beforeCleanupDelete,
+       _clock = clock ?? DateTime.now,
        _database = database,
        _idGenerator = idGenerator,
+       _leaseDuration = leaseDuration,
        _ownerId = _ownerFor(database, ownerIdGenerator ?? idGenerator) {
     _migrate();
   }
@@ -45,8 +50,10 @@ final class SqliteContentPackInstallationBackend
 
   final Future<int> Function() _availableBytes;
   final Future<void> Function()? _beforeCleanupDelete;
+  final ContentPackClock _clock;
   final CommonDatabase _database;
   final ContentPackIdGenerator _idGenerator;
+  final Duration _leaseDuration;
   final String _ownerId;
 
   void _migrate() {
@@ -95,6 +102,12 @@ final class SqliteContentPackInstallationBackend
           failure_id TEXT NOT NULL PRIMARY KEY,
           pack_id TEXT NOT NULL,
           message TEXT NOT NULL
+        ) STRICT
+      ''')
+      ..execute('''
+        CREATE TABLE IF NOT EXISTS content_pack_owner_leases (
+          owner_id TEXT NOT NULL PRIMARY KEY,
+          expires_at_ms INTEGER NOT NULL
         ) STRICT
       ''')
       ..execute('''
@@ -170,14 +183,40 @@ final class SqliteContentPackInstallationBackend
         'ALTER TABLE content_pack_objects ADD COLUMN owner_id TEXT',
       );
     }
+    _renewLease();
+    final nowMs = _clock().millisecondsSinceEpoch;
     _database.execute(
       '''
       UPDATE content_pack_objects
       SET state = 'cleanup'
       WHERE state IN ('staging', 'sealed')
-        AND (owner_id IS NULL OR owner_id != ?)
+        AND (
+          owner_id IS NULL
+          OR NOT EXISTS (
+            SELECT 1
+            FROM content_pack_owner_leases AS leases
+            WHERE leases.owner_id = content_pack_objects.owner_id
+              AND leases.expires_at_ms > ?
+          )
+        )
     ''',
-      [_ownerId],
+      [nowMs],
+    );
+    _database.execute(
+      'DELETE FROM content_pack_owner_leases WHERE expires_at_ms <= ?',
+      [nowMs],
+    );
+  }
+
+  void _renewLease() {
+    final expiresAt = _clock().add(_leaseDuration).millisecondsSinceEpoch;
+    _database.execute(
+      '''
+      INSERT INTO content_pack_owner_leases (owner_id, expires_at_ms)
+      VALUES (?, ?)
+      ON CONFLICT(owner_id) DO UPDATE SET expires_at_ms = excluded.expires_at_ms
+    ''',
+      [_ownerId, expiresAt],
     );
   }
 
@@ -919,6 +958,7 @@ final class SqliteContentPackInstallationBackend
   T _transaction<T>(T Function() operation) {
     _database.execute('BEGIN IMMEDIATE');
     try {
+      _renewLease();
       final result = operation();
       _database.execute('COMMIT');
       return result;
