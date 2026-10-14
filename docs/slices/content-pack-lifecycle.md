@@ -68,11 +68,11 @@ depends on a network service.
 The bounded lifecycle behaviours are implemented as provider-neutral domain,
 application, and data contracts. Focused red/green evidence and permanent replay
 cover the behavioural gaps, with the historical evidence limitations below
-recorded explicitly rather than rewritten. Authoritative CI run `38439854503`
-verifies the final ninth-review behavioural head with permanent red replay,
+recorded explicitly rather than rewritten. Authoritative CI run `38508993254`
+verifies the final tenth-review behavioural head with permanent red replay,
 canonical formatting, fatal static analysis, bundled-content validation, eight
-Chrome contracts, all 516 native tests, 96.64% line coverage, and secret
-scanning. The measured coverage remains 6.64 percentage points above the 90%
+Chrome contracts, all 520 native tests, 96.66% line coverage, and secret
+scanning. The measured coverage remains 6.66 percentage points above the 90%
 repository floor.
 
 The sixth-review corrections make sealed parent state immutable, preserve
@@ -102,6 +102,14 @@ The ninth-review corrections coalesce empty and tiny source chunks into bounded
 versions they describe. Both corrections have separate published red and green
 commits and permanent red replay; the omitted eighth-round records-head CI is
 also restored to the chronological provenance metadata.
+
+The tenth-review corrections guard staging parents from cascade deletion,
+lease reservation ownership across separate live SQLite connections, reject an
+oversized source chunk before copying it, and preserve dependencies required by
+a previous version while a newer activation awaits its first load. All four
+behavioural corrections have separate published red and green commits and
+permanent red replay; the omitted ninth-round records-head CI is restored to
+the chronological provenance metadata.
 
 CP-005 remains deliberately partial: archive length, SHA-256, and signature
 verification are complete, while publisher trust-root lifecycle operations stay

@@ -761,3 +761,53 @@ gate set at `13f9f12e`: permanent red replay, committed project structure,
 dependency lock, canonical formatting, fatal analysis, bundled-content
 validation, eight Chrome contracts, all 516 native tests, 96.64% line coverage,
 and secret scanning.
+
+Records-head CI `38474583674` passes the same complete gate set at `1a5c3854`,
+including all 516 native tests, 96.64% line coverage, and secret scanning.
+
+## 2026-10-14 — Tenth independent review and cross-connection safety
+
+The tenth independent review returned five findings: cascade deletion of a
+staging parent could bypass child immutability; separate live SQLite
+connections could reclaim one another's reservations; this record omitted
+records-head CI `38474583674`; an oversized source chunk was copied before its
+limit check; and removal ignored dependencies required by the retained previous
+version while a newer activation awaited its first load. The exact review
+exchanges remain in GitHub discussions
+[`4264738338`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4264738338),
+[`4264738342`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4264738342),
+[`4264738348`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4264738348),
+[`4264738357`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4264738357),
+and [`4264738364`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4264738364).
+
+Four separate published test-only/implementation pairs correct the behavioural
+findings:
+
+- `51e0a196` / `3fb2643d` permits parent deletion only after cleanup is
+  recorded, so cascades cannot bypass append-only staging;
+- `2065e34b` / `19f76548` adds renewable, expiring owner leases so a separate
+  live SQLite connection is not mistaken for abandoned work;
+- `bbd23799` / `baf9569d` checks a source chunk's length against the remaining
+  allowance before freezing or copying untrusted bytes; and
+- `7e0dbc3f` / `748e46af` protects dependency snapshots required by a retained
+  previous version until the pending activation is confirmed or rolled back.
+
+Commit `117d75a6` permanently replays the four published red heads after
+`5bca1f38` was corrected to replace local-only commit identities with the
+published GitHub identities. CI `38483653336` was superseded for that replay
+identity correction. Replacement CI `38484217390` passed permanent red replay,
+committed structure, dependency-lock verification, all 520 native tests, and
+secret scanning, then exposed a canonical formatting difference. Diagnostic CI
+`38485293218` printed the initial formatter patch while again passing all 520
+tests; commits `aa1df032` and `ae4587c4` restored the ordinary gate and applied
+that output. CI `38485644451` again passed permanent red replay, all 520 tests,
+and secret scanning, but exposed five remaining expression-layout changes in
+the same test file.
+
+Diagnostic CI `38508170019` prints those exact remaining changes after the full
+red replay and again passes all 520 native tests. Commit `9a462250` applies that
+output and removes the temporary diagnostic step. Authoritative tenth-round
+behavioural CI `38508993254` verifies the complete gate set at `9a462250`:
+permanent red evidence, committed project structure, dependency lock, canonical
+formatting, fatal analysis, bundled-content validation, eight Chrome contracts,
+all 520 native tests, 96.66% line coverage, and secret scanning.
