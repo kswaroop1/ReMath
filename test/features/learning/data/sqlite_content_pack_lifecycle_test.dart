@@ -488,6 +488,72 @@ void main() {
     },
   );
 
+  test('staging chunks reject conflict replacement', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final backend = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'chunk-replace-protected',
+    );
+    final reservation = await backend.reserve(
+      packId: 'org.remath.pack.one',
+      requiredBytes: 64,
+      version: '1.0.0',
+    );
+    await reservation.add(const [1, 2, 3]);
+
+    expect(
+      () => database.execute(
+        '''
+        INSERT OR REPLACE INTO content_pack_object_chunks (
+          seal_id, sequence, content
+        ) VALUES (?, ?, ?)
+      ''',
+        [
+          'chunk-replace-protected',
+          0,
+          Uint8List.fromList(const [9, 9, 9]),
+        ],
+      ),
+      throwsA(isA<SqliteException>()),
+    );
+  });
+
+  test('staging parents reject conflict replacement', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final backend = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'parent-replace-protected',
+    );
+    await backend.reserve(
+      packId: 'org.remath.pack.one',
+      requiredBytes: 64,
+      version: '1.0.0',
+    );
+
+    expect(
+      () => database.execute(
+        '''
+        INSERT OR REPLACE INTO content_pack_objects (
+          seal_id, pack_id, version, required_bytes, content, owner_id, state
+        ) VALUES (?, ?, ?, ?, ?, ?, 'staging')
+      ''',
+        [
+          'parent-replace-protected',
+          'org.remath.pack.one',
+          '1.0.0',
+          64,
+          Uint8List(0),
+          'replacement-owner',
+        ],
+      ),
+      throwsA(isA<SqliteException>()),
+    );
+  });
+
   test(
     'staging chunks cannot be deleted before their digest is trusted',
     () async {
