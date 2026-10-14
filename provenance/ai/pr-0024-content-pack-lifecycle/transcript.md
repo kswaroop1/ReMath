@@ -811,3 +811,46 @@ behavioural CI `38508993254` verifies the complete gate set at `9a462250`:
 permanent red evidence, committed project structure, dependency lock, canonical
 formatting, fatal analysis, bundled-content validation, eight Chrome contracts,
 all 520 native tests, 96.66% line coverage, and secret scanning.
+
+Records-head CI `38510202868` passes the same complete gate set at `ab2e5f14`,
+including all 520 native tests, 96.66% line coverage, and secret scanning.
+
+## 2026-10-14 — Eleventh independent review and append-only lease cleanup
+
+The eleventh independent review returned four findings: reservations whose
+leases expired after startup were not reclaimed until another restart; pack
+replacement ignored dependencies required by a retained previous version while
+an activation awaited its first load; this record omitted records-head CI
+`38510202868`; and SQLite `INSERT OR REPLACE` could replace a staging object or
+chunk despite the append-only contract. The exact review exchanges remain in
+GitHub discussions
+[`4266828266`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4266828266),
+[`4266828271`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4266828271),
+[`4266828278`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4266828278),
+and [`4266828288`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4266828288).
+
+Three separate published test-only/implementation pairs correct the
+behavioural findings:
+
+- `f499d4d0` / `af803db6` renews the current owner's lease and reclaims expired
+  foreign reservations inside a later session transaction, including cleanup
+  retries after the lease expires;
+- `dfe2f088` / `23b4395d` protects dependencies required by both the active and
+  retained previous version while first-load confirmation is pending; and
+- `e6f011ff` / `b57ffd29` adds explicit duplicate guards for staging object and
+  chunk inserts so SQLite replacement conflict clauses cannot bypass
+  append-only storage.
+
+Commit `0e40ff92` permanently replays all four new red assertions. CI
+`38545163455` passes permanent red replay, committed structure, dependency-lock
+verification, all 524 native tests, and secret scanning, then exposes a
+canonical formatting difference in the new test cases. Diagnostic CI
+`38547131925` prints the exact formatter patch while again passing all 524
+native tests and secret scanning. Commit `a339779d` applies that output and
+removes the temporary diagnostic step.
+
+Authoritative eleventh-round behavioural CI `38549046628` verifies the complete
+gate set at `a339779d`: permanent red evidence, committed project structure,
+dependency lock, canonical formatting, fatal analysis, bundled-content
+validation, eight Chrome contracts, all 524 native tests, 96.67% line coverage,
+and secret scanning.
