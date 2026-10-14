@@ -184,6 +184,52 @@ void main() {
     expect(await recovered.pendingCleanupCount(), 0);
   });
 
+  test('expired reservations are reclaimed without another restart', () async {
+    final directory = await Directory.systemTemp.createTemp(
+      'remath-pack-expired-lease-',
+    );
+    addTearDown(() => directory.delete(recursive: true));
+    final path = '${directory.path}/lifecycle.sqlite3';
+    var database = sqlite3.open(path);
+    var now = DateTime.utc(2026, 10, 14);
+    final interrupted = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      clock: () => now,
+      database: database,
+      idGenerator: () => 'orphan-object',
+      leaseDuration: const Duration(minutes: 5),
+      ownerIdGenerator: () => 'expired-owner',
+    );
+    await interrupted.reserve(
+      packId: 'org.remath.pack.one',
+      requiredBytes: 64,
+      version: '1.0.0',
+    );
+    database.close();
+
+    now = now.add(const Duration(minutes: 1));
+    database = sqlite3.open(path);
+    addTearDown(database.close);
+    final recovered = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      clock: () => now,
+      database: database,
+      idGenerator: () => 'recovered-object',
+      leaseDuration: const Duration(minutes: 5),
+      ownerIdGenerator: () => 'recovered-owner',
+    );
+    expect(await recovered.pendingCleanupCount(), 0);
+
+    now = now.add(const Duration(minutes: 5));
+    await recovered.retryPendingDiscards();
+
+    expect(
+      database.select('SELECT COUNT(*) AS count FROM content_pack_objects')
+          .single['count'],
+      0,
+    );
+  });
+
   test('restart ownership uses a process-unique identity', () async {
     final directory = await Directory.systemTemp.createTemp(
       'remath-pack-owner-',
