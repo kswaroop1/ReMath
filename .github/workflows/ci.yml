@@ -231,6 +231,18 @@ jobs:
           verify_red 7e0dbc3faf0fc2006b6ef40cf3a910c2e38db226 \
             test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
             "removal preserves dependencies needed by pending rollback"
+          verify_red f499d4d065bfe94e4fea793b225c0ad1d479f2cf \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "expired reservations are reclaimed without another restart"
+          verify_red dfe2f088b4b91cc9a9ae1996fc622067781cc78b \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "activation preserves dependencies required by pending rollback"
+          verify_red e6f011ffe8398afa4c4a989c9d80f369c4cbaa5f \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "staging chunks reject conflict replacement"
+          verify_red e6f011ffe8398afa4c4a989c9d80f369c4cbaa5f \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "staging parents reject conflict replacement"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
