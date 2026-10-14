@@ -184,6 +184,10 @@ final class SqliteContentPackInstallationBackend
       );
     }
     _renewLease();
+    _reclaimExpiredReservations();
+  }
+
+  void _reclaimExpiredReservations() {
     final nowMs = _clock().millisecondsSinceEpoch;
     _database.execute(
       '''
@@ -558,6 +562,7 @@ final class SqliteContentPackInstallationBackend
 
   @override
   Future<void> retryPendingDiscards() async {
+    _transaction(() {});
     await _beforeCleanupDelete?.call();
     _deletePendingCleanup();
   }
@@ -965,6 +970,7 @@ final class SqliteContentPackInstallationBackend
     _database.execute('BEGIN IMMEDIATE');
     try {
       _renewLease();
+      _reclaimExpiredReservations();
       final result = operation();
       _database.execute('COMMIT');
       return result;
