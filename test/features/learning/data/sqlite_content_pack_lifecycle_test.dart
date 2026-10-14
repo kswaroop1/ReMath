@@ -808,6 +808,78 @@ void main() {
     },
   );
 
+  test(
+    'activation preserves dependencies required by pending rollback',
+    () async {
+      final database = sqlite3.openInMemory();
+      addTearDown(database.close);
+      var nextId = 0;
+      final backend = SqliteContentPackInstallationBackend(
+        availableBytes: () async => 1024 * 1024,
+        database: database,
+        idGenerator: () => 'rollback-activation-${nextId++}',
+      );
+      final installer = composeContentPackInstaller(
+        backend: backend,
+        environment: _Environment(backend),
+        signatureVerifier: const _TrustedSignatureVerifier(),
+      );
+      const dependencyPackId = 'org.remath.pack.dependency';
+      const dependantPackId = 'org.remath.pack.dependant';
+      final dependencyV2 = await _release('2.0.0', packId: dependencyPackId);
+      await installer.install(
+        dependencyV2,
+        _Source(utf8.encode(_pack('2.0.0', packId: dependencyPackId))),
+      );
+      await backend.confirmFirstLoad(
+        expectedActivationId: (await backend.activation(dependencyPackId))
+            .activationId,
+        packId: dependencyPackId,
+      );
+      final dependantV1 = await _release(
+        '1.0.0',
+        packId: dependantPackId,
+        dependencies: const [
+          ContentPackDependency(
+            packId: dependencyPackId,
+            minimumVersion: '2.0.0',
+          ),
+        ],
+      );
+      await installer.install(
+        dependantV1,
+        _Source(utf8.encode(_pack('1.0.0', packId: dependantPackId))),
+      );
+      await backend.confirmFirstLoad(
+        expectedActivationId: (await backend.activation(dependantPackId))
+            .activationId,
+        packId: dependantPackId,
+      );
+      final dependantV2 = await _release('2.0.0', packId: dependantPackId);
+      await installer.install(
+        dependantV2,
+        _Source(utf8.encode(_pack('2.0.0', packId: dependantPackId))),
+      );
+      final dependencyV1 = await _release('1.0.0', packId: dependencyPackId);
+
+      await expectLater(
+        installer.install(
+          dependencyV1,
+          _Source(utf8.encode(_pack('1.0.0', packId: dependencyPackId))),
+          isExplicitVersionChoice: true,
+        ),
+        throwsA(
+          isA<ContentPackActivationException>().having(
+            (error) => error.outcome,
+            'outcome',
+            ContentPackRetentionOutcome.blockedDependent,
+          ),
+        ),
+      );
+      expect(await backend.activeVersion(dependencyPackId), '2.0.0');
+    },
+  );
+
   test('durable unpin permits a later safe removal', () async {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
