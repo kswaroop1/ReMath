@@ -121,6 +121,18 @@ final class SqliteContentPackInstallationBackend
         ) STRICT
       ''')
       ..execute('DROP TRIGGER IF EXISTS content_pack_objects_state_guard')
+      ..execute('DROP TRIGGER IF EXISTS content_pack_objects_insert_unique')
+      ..execute('''
+        CREATE TRIGGER content_pack_objects_insert_unique
+        BEFORE INSERT ON content_pack_objects
+        WHEN EXISTS (
+          SELECT 1 FROM content_pack_objects
+          WHERE seal_id = NEW.seal_id
+        )
+        BEGIN
+          SELECT RAISE(ABORT, 'content pack object already exists');
+        END
+      ''')
       ..execute('''
         CREATE TRIGGER content_pack_objects_state_guard
         BEFORE UPDATE OF state ON content_pack_objects
@@ -132,6 +144,18 @@ final class SqliteContentPackInstallationBackend
         )
         BEGIN
           SELECT RAISE(ABORT, 'invalid content pack object state transition');
+        END
+      ''')
+      ..execute('DROP TRIGGER IF EXISTS content_pack_chunks_insert_unique')
+      ..execute('''
+        CREATE TRIGGER content_pack_chunks_insert_unique
+        BEFORE INSERT ON content_pack_object_chunks
+        WHEN EXISTS (
+          SELECT 1 FROM content_pack_object_chunks
+          WHERE seal_id = NEW.seal_id AND sequence = NEW.sequence
+        )
+        BEGIN
+          SELECT RAISE(ABORT, 'content pack chunk already exists');
         END
       ''')
       ..execute('''
