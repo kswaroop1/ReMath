@@ -224,7 +224,8 @@ void main() {
     await recovered.retryPendingDiscards();
 
     expect(
-      database.select('SELECT COUNT(*) AS count FROM content_pack_objects')
+      database
+          .select('SELECT COUNT(*) AS count FROM content_pack_objects')
           .single['count'],
       0,
     );
@@ -898,8 +899,9 @@ void main() {
         _Source(utf8.encode(_pack('2.0.0', packId: dependencyPackId))),
       );
       await backend.confirmFirstLoad(
-        expectedActivationId: (await backend.activation(dependencyPackId))
-            .activationId,
+        expectedActivationId: (await backend.activation(
+          dependencyPackId,
+        )).activationId,
         packId: dependencyPackId,
       );
       final dependantV1 = await _release(
@@ -917,8 +919,9 @@ void main() {
         _Source(utf8.encode(_pack('1.0.0', packId: dependantPackId))),
       );
       await backend.confirmFirstLoad(
-        expectedActivationId: (await backend.activation(dependantPackId))
-            .activationId,
+        expectedActivationId: (await backend.activation(
+          dependantPackId,
+        )).activationId,
         packId: dependantPackId,
       );
       final dependantV2 = await _release('2.0.0', packId: dependantPackId);
