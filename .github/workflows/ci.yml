@@ -243,6 +243,12 @@ jobs:
           verify_red e6f011ffe8398afa4c4a989c9d80f369c4cbaa5f \
             test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
             "staging parents reject conflict replacement"
+          verify_red e7258354035246d0c9c94d85b4ae76c245eb6e8e \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "reservation identity and accounting remain immutable"
+          verify_red eba4d32b0ee3d0777b6872ced5d7664a77d955c9 \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "restart selects the pack with the newest activation"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
