@@ -117,6 +117,55 @@ void main() {
     },
   );
 
+  test('restart selects the pack with the newest activation', () async {
+    final directory = await Directory.systemTemp.createTemp(
+      'remath-pack-selection-',
+    );
+    addTearDown(() => directory.delete(recursive: true));
+    final path = '${directory.path}/lifecycle.sqlite3';
+    final database = sqlite3.open(path);
+    var nextId = 0;
+    final backend = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: database,
+      idGenerator: () => 'selection-${nextId++}',
+    );
+    final installer = composeContentPackInstaller(
+      backend: backend,
+      environment: _Environment(backend),
+      signatureVerifier: const _TrustedSignatureVerifier(),
+    );
+    const firstPackId = 'org.remath.pack.first';
+    const secondPackId = 'org.remath.pack.second';
+
+    for (final release in <ContentPackRelease>[
+      await _release('1.0.0', packId: firstPackId),
+      await _release('1.0.0', packId: secondPackId),
+      await _release('2.0.0', packId: firstPackId),
+    ]) {
+      await installer.install(
+        release,
+        _Source(utf8.encode(_pack(release.version, packId: release.packId))),
+      );
+      final activation = await backend.activation(release.packId);
+      await backend.confirmFirstLoad(
+        expectedActivationId: activation.activationId,
+        packId: release.packId,
+      );
+    }
+    database.close();
+
+    final reopenedDatabase = sqlite3.open(path);
+    addTearDown(reopenedDatabase.close);
+    final reopened = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 1024 * 1024,
+      database: reopenedDatabase,
+      idGenerator: () => 'reopened-selection-${nextId++}',
+    );
+
+    expect(await reopened.startupPackId(), firstPackId);
+  });
+
   test('sqlite discard persists cleanup for retry before deletion', () async {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
