@@ -467,14 +467,23 @@ final class SqliteContentPackInstallationBackend
         }
         final closesCycle = _database.select(
           '''
-          WITH RECURSIVE reachable(pack_id) AS (
+          WITH RECURSIVE active_versions(pack_id, version) AS (
+            SELECT pack_id, version
+            FROM content_pack_active
+            UNION
+            SELECT pack_id, previous_version
+            FROM content_pack_active
+            WHERE awaiting_first_load = 1
+              AND previous_version IS NOT NULL
+          ),
+          reachable(pack_id) AS (
             SELECT ?
             UNION
             SELECT dependencies.dependency_pack_id
             FROM content_pack_dependencies AS dependencies
-            INNER JOIN content_pack_active AS active
-              ON active.pack_id = dependencies.pack_id
-              AND active.version = dependencies.version
+            INNER JOIN active_versions
+              ON active_versions.pack_id = dependencies.pack_id
+              AND active_versions.version = dependencies.version
             INNER JOIN reachable
               ON dependencies.pack_id = reachable.pack_id
           )
