@@ -68,10 +68,10 @@ depends on a network service.
 The bounded lifecycle behaviours are implemented as provider-neutral domain,
 application, and data contracts. Focused red/green evidence and permanent replay
 cover the behavioural gaps, with the historical evidence limitations below
-recorded explicitly rather than rewritten. Authoritative CI run `38693526874`
-verifies the final twelfth-review behavioural head with permanent red replay,
+recorded explicitly rather than rewritten. Authoritative CI run `38700056158`
+verifies the final thirteenth-review head with permanent red replay,
 canonical formatting, fatal static analysis, bundled-content validation, eight
-Chrome contracts, all 526 native tests, 96.66% line coverage, and secret
+Chrome contracts, all 527 native tests, 96.66% line coverage, and secret
 scanning. The measured coverage remains 6.66 percentage points above the 90%
 repository floor.
 
@@ -125,6 +125,13 @@ so restart selects the pack activated most recently even after an earlier row is
 updated. Both behavioural corrections have separate published red and green
 commits and permanent red replay; the omitted eleventh-round records-head CI is
 restored to the chronological provenance metadata.
+
+The thirteenth-review correction includes the retained previous version of a
+pending first-load activation in dependency-cycle traversal, so no graph that a
+rollback can restore is allowed to become cyclic. The correction has a separate
+published red/green pair and permanent red replay; exact twelfth-round
+records-head CI `38694985887`, the formatter-only follow-up, and replacement
+authoritative CI `38700056158` are appended chronologically to provenance.
 
 CP-005 remains deliberately partial: archive length, SHA-256, and signature
 verification are complete, while publisher trust-root lifecycle operations stay
