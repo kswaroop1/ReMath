@@ -854,3 +854,33 @@ gate set at `a339779d`: permanent red evidence, committed project structure,
 dependency lock, canonical formatting, fatal analysis, bundled-content
 validation, eight Chrome contracts, all 524 native tests, 96.67% line coverage,
 and secret scanning.
+
+Records-head CI `38551028349` passes the same complete gate set at `6c7a1566`,
+including all 524 native tests, 96.67% line coverage, and secret scanning.
+
+## 2026-10-15 — Twelfth independent review and activation ordering
+
+The twelfth independent review returned three findings: the record omitted
+records-head CI `38551028349`; mutable parent identity and reservation-accounting
+fields could bypass the durable capacity budget; and startup selected active
+packs by their original SQLite row order rather than their latest activation.
+The exact review exchanges remain in GitHub discussions
+[`4273098298`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4273098298),
+[`4273098317`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4273098317),
+and [`4273098320`](https://github.com/kswaroop1/ReMath/pull/24#discussion_r4273098320).
+
+Two separate published test-only/implementation pairs correct the behavioural
+findings:
+
+- `e7258354` / `5287a97d` makes the reservation's identity, owner, payload, and
+  required-byte accounting immutable while preserving the intended sealing and
+  lifecycle state transitions; and
+- `eba4d32b` / `38ca7be8` persists a monotonic activation order so updating an
+  earlier SQLite row still selects that pack on the next startup.
+
+Commit `c8d544a1` permanently replays both new red assertions. Authoritative
+twelfth-round behavioural CI `38693526874` verifies the complete gate set at
+that commit: permanent red evidence, committed project structure, dependency
+lock, canonical formatting, fatal analysis, bundled-content validation, eight
+Chrome contracts, all 526 native tests, 96.66% line coverage, and secret
+scanning.
