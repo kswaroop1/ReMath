@@ -121,6 +121,7 @@ final class SqliteContentPackInstallationBackend
         ) STRICT
       ''')
       ..execute('DROP TRIGGER IF EXISTS content_pack_objects_state_guard')
+      ..execute('DROP TRIGGER IF EXISTS content_pack_objects_identity_guard')
       ..execute('DROP TRIGGER IF EXISTS content_pack_objects_insert_unique')
       ..execute('''
         CREATE TRIGGER content_pack_objects_insert_unique
@@ -131,6 +132,27 @@ final class SqliteContentPackInstallationBackend
         )
         BEGIN
           SELECT RAISE(ABORT, 'content pack object already exists');
+        END
+      ''')
+      ..execute('''
+        CREATE TRIGGER content_pack_objects_identity_guard
+        BEFORE UPDATE ON content_pack_objects
+        WHEN OLD.seal_id IS NOT NEW.seal_id
+          OR OLD.pack_id IS NOT NEW.pack_id
+          OR OLD.version IS NOT NEW.version
+          OR OLD.required_bytes IS NOT NEW.required_bytes
+          OR OLD.content IS NOT NEW.content
+          OR OLD.owner_id IS NOT NEW.owner_id
+          OR (
+            OLD.length_bytes IS NOT NEW.length_bytes
+            AND NOT (OLD.state = 'staging' AND NEW.state = 'sealed')
+          )
+          OR (
+            OLD.sha256 IS NOT NEW.sha256
+            AND NOT (OLD.state = 'staging' AND NEW.state = 'sealed')
+          )
+        BEGIN
+          SELECT RAISE(ABORT, 'content pack object identity is immutable');
         END
       ''')
       ..execute('''
