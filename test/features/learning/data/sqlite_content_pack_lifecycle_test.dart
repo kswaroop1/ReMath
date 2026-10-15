@@ -555,6 +555,45 @@ void main() {
     );
   });
 
+  test('reservation identity and accounting remain immutable', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    var nextId = 0;
+    final backend = SqliteContentPackInstallationBackend(
+      availableBytes: () async => 64,
+      database: database,
+      idGenerator: () => 'immutable-accounting-${nextId++}',
+    );
+    await backend.reserve(
+      packId: 'org.remath.pack.one',
+      requiredBytes: 64,
+      version: '1.0.0',
+    );
+
+    for (final mutation in <String>[
+      "seal_id = 'replacement-seal'",
+      "pack_id = 'org.remath.pack.other'",
+      "version = '9.0.0'",
+      'required_bytes = 0',
+      "content = X'01'",
+      "owner_id = 'replacement-owner'",
+    ]) {
+      expect(
+        () => database.execute('UPDATE content_pack_objects SET $mutation'),
+        throwsA(isA<SqliteException>()),
+        reason: mutation,
+      );
+    }
+    await expectLater(
+      backend.reserve(
+        packId: 'org.remath.pack.two',
+        requiredBytes: 1,
+        version: '1.0.0',
+      ),
+      throwsA(isA<ContentPackStagingException>()),
+    );
+  });
+
   test(
     'staging chunks cannot be deleted before their digest is trusted',
     () async {
