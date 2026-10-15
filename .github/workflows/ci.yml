@@ -249,6 +249,9 @@ jobs:
           verify_red eba4d32b0ee3d0777b6872ced5d7664a77d955c9 \
             test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
             "restart selects the pack with the newest activation"
+          verify_red 4d018f10959f6adeda802fe93a9d907e3c996a50 \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "activation rejects a cycle through a pending rollback snapshot"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
