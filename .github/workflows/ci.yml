@@ -37,11 +37,221 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
+      - name: Verify focused content lifecycle red evidence
+        run: |
+          set -euo pipefail
+          verify_red() {
+            local sha="$1"
+            local file="$2"
+            local expected="$3"
+            local worktree
+            local log
+            worktree="$(mktemp -d)"
+            log="$(mktemp)"
+            git worktree add --detach "$worktree" "$sha"
+            if (
+              cd "$worktree"
+              flutter pub get >/dev/null
+              flutter test -r expanded "$file"
+            ) >"$log" 2>&1; then
+              cat "$log"
+              echo "Expected focused content lifecycle test to fail." >&2
+              exit 1
+            fi
+            cat "$log"
+            grep -F "$expected" "$log"
+            git worktree remove --force "$worktree"
+          }
+          verify_red 4ec790524530f1feb868ab60a404769d39f6fe68 \
+            test/features/learning/data/content_pack_release_parser_test.dart \
+            "Content-pack release parsing is not implemented"
+          verify_red d806655da5cbf69b2dd3dfec4a19d91c8809ab96 \
+            test/features/learning/data/content_pack_release_validator_test.dart \
+            "CP-004 release validation is not implemented"
+          verify_red b5ef673128d48e7af4c2c820febd9ee5e206bc28 \
+            test/features/learning/domain/content_pack_storage_forecast_test.dart \
+            "CP-010 storage forecast is not implemented"
+          verify_red 8b31697250b144402bc95480ecaec9d4ad1ec2ee \
+            test/features/learning/domain/content_pack_catalogue_test.dart \
+            "CP-011 catalogue states are not implemented"
+          verify_red 9fa292874867eb04db053025df1a196d1dfc954d \
+            test/features/learning/application/content_pack_installer_test.dart \
+            "CP-006 transactional installation is not implemented"
+          verify_red 32758dd3b6fefbd5bd2433f70b239080099de424 \
+            test/features/learning/data/content_pack_archive_verifier_test.dart \
+            "CP-006 archive verification is not implemented"
+          verify_red 250305284e6ceb9a7a4917b5db70becf9893e99d \
+            test/features/learning/domain/content_pack_retention_test.dart \
+            "CP-008 retention controls are not implemented"
+          verify_red ffe48d11008f765a01179d09431b29c5bcfaaf31 \
+            test/features/learning/application/content_pack_remover_test.dart \
+            "CP-012 progress-preserving removal is not implemented"
+          verify_red 18dcc73d9b5883270c274c5802a4acc350217383 \
+            test/features/learning/application/content_pack_rollback_test.dart \
+            "CP-013 runtime rollback is not implemented"
+          verify_red cb3e8f4855451b18b1e9a0975f6db1d297423843 \
+            test/features/learning/application/content_pack_installer_test.dart \
+            "Bounded staged installation is not implemented"
+          verify_red cb3e8f4855451b18b1e9a0975f6db1d297423843 \
+            test/features/learning/data/content_pack_archive_verifier_test.dart \
+            "Bounded archive verification is not implemented"
+          verify_red d2f5b864ea4dbca91eee691d4b61faaf4fe2aad7 \
+            test/features/learning/data/content_pack_archive_verifier_test.dart \
+            "FormatException"
+          verify_red e356d7b3cc4259681b3f87fc71482c8699463b75 \
+            test/features/learning/data/content_pack_install_guard_test.dart \
+            "Content-pack activation policy is not implemented"
+          verify_red 039edf7fcbcce42c0cc73572d62a0d93551df8fe \
+            test/features/learning/application/content_pack_rollback_test.dart \
+            "Atomic first-load rollback is not implemented"
+          verify_red 26b6d7f2526e88e561ef32fbd21462b02b03d511 \
+            test/features/learning/domain/content_pack_retention_test.dart \
+            "ContentPackRetentionOutcome.blockedDowngrade"
+          verify_red 76cea583c74dd58416d609dc648315788bd7b796 \
+            test/features/learning/application/content_pack_installer_test.dart \
+            "installation freezes release metadata"
+          verify_red 76cea583c74dd58416d609dc648315788bd7b796 \
+            test/features/learning/data/content_pack_install_guard_test.dart \
+            "ContentPackInstallException"
+          verify_red dfe98074d7143fab5268f39c2c8363ce0dfd5a5c \
+            test/features/learning/data/content_pack_install_store_test.dart \
+            "content_pack_install_store.dart"
+          verify_red dfe98074d7143fab5268f39c2c8363ce0dfd5a5c \
+            test/features/learning/data/content_pack_payload_verifier_test.dart \
+            "content_pack_payload_verifier.dart"
+          verify_red a06350f5764ae6d5501393747ed765812760c5ba \
+            test/features/learning/application/content_pack_remover_test.dart \
+            "ContentPackRemovalCommitOutcome"
+          verify_red a06350f5764ae6d5501393747ed765812760c5ba \
+            test/features/learning/application/content_pack_rollback_test.dart \
+            "confirmFirstLoad"
+          verify_red 610a425d8bc4c8b44eaeccdc0c5903f99f828c75 \
+            test/features/learning/data/content_pack_install_store_test.dart \
+            "staging hashes the same frozen bytes"
+          verify_red 610a425d8bc4c8b44eaeccdc0c5903f99f828c75 \
+            test/features/learning/data/content_pack_payload_verifier_test.dart \
+            "maximumSchemaVersion"
+          verify_red 610a425d8bc4c8b44eaeccdc0c5903f99f828c75 \
+            test/features/learning/domain/content_pack_catalogue_test.dart \
+            "olderAvailable"
+          verify_red a17fda9ad4202816fc8821e0928f611553bcbb2e \
+            test/features/learning/application/content_pack_installer_test.dart \
+            "isExplicitVersionChoice"
+          verify_red a17fda9ad4202816fc8821e0928f611553bcbb2e \
+            test/features/learning/application/content_pack_rollback_test.dart \
+            "ContentPackRuntimeActivation"
+          verify_red 1f1582efef95f4d8d1a958774d969fc21468e77c \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "sqlite_content_pack_installation_backend.dart"
+          verify_red eae9124639da341744dac9d0feb354df9ae2bdae \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "startup recovers abandoned reservations as cleanup work"
+          verify_red 4d0e09cce432b5f339db5094d4de5be3b7697c7f \
+            test/features/learning/data/content_pack_release_validator_test.dart \
+            "version components must fit every lifecycle comparator"
+          verify_red 808950160f2caf2722fb03bae9f954f834231bdd \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "sealed objects reject chunks moved from live staging"
+          verify_red d98451a00d7f707eaaa1eb6803aa3d343ac3ab5d \
+            test/features/learning/data/content_pack_install_store_test.dart \
+            "abort interrupted"
+          verify_red 283c80b7ab7174b680b51c3627ecd3d132017499 \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "expectedState"
+          verify_red bb221cc3bc4ebc109b0aebd8f2bdfb8a9d2ad67f \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "void"
+          verify_red 60d9acb8808bd0ad41772325647287c701c229f0 \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "activation rejects a cycle in active pack dependencies"
+          verify_red 72b7ad81673bce109cd699854d6f9b92eaed9aec \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "sealed parent cannot be reopened for chunk mutation"
+          verify_red fd11094dbae85e88fa910f2e25713e13100cfedf \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "The staged object is missing or is in the wrong state."
+          verify_red 4fefec7d8504c2b130087004685c869da8239544 \
+            test/features/learning/data/content_pack_lifecycle_composition_test.dart \
+            "composeSqliteContentPackLifecycle"
+          verify_red e1934bb91c898d7f7a0dd7a455bb1723566888dc \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "staging chunks are append-only before their digest is trusted"
+          verify_red 7e58adc3d26aff54c093ccb6c544f0246d840cf3 \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "active pack storage remains charged against the durable budget"
+          verify_red 3b7f0197fe3065e2f4804440588e676fad2d7714 \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "ownerIdGenerator"
+          verify_red 94ab2d2211986131112ef1c6e668b6249f07f5d9 \
+            test/features/learning/data/content_pack_release_validator_test.dart \
+            "semantic versions reject noncanonical leading zeros"
+          verify_red ccbc77aa23e3691a53028a7c1977bdb1b937a219 \
+            test/release_installation_contract_test.dart \
+            "every released native app receives its calculated semantic version"
+          verify_red 06a9451921f17546a0bcd7fbf5cb01958beb596c \
+            test/features/learning/data/content_pack_lifecycle_composition_test.dart \
+            "loadStartupPack"
+          verify_red eea556ea80d37fb74e7bc10eb3d5fcfa12f785c5 \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "staging chunks cannot be deleted before their digest is trusted"
+          verify_red 27cb6c6a3382724e2043dbc95d14fc3bc00d4d4d \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "repeating a durable unpin reports an unchanged state"
+          verify_red 73369efa1b727fde59420f0d9d8d7631e6d14611 \
+            test/features/learning/data/content_pack_lifecycle_composition_test.dart \
+            "startup recovers every pending pack before selecting one"
+          verify_red 6137b3da721a10fcc60a17586ecdaa7c598e6645 \
+            test/features/learning/application/content_pack_rollback_test.dart \
+            "recoverPendingFirstLoad"
+          verify_red ef2dbb8b80b791dcfb65efffd6a44b51271f0709 \
+            test/features/learning/data/content_pack_lifecycle_composition_test.dart \
+            "closeDatabase"
+          verify_red f5f0d95fb809a3e6f1013a6d731fce4a2e2e1268 \
+            test/features/learning/data/content_pack_install_store_test.dart \
+            "staging bounds persisted rows for empty and tiny chunks"
+          verify_red 014588f23c467f69138d3c8f15a57f65b0b5ddde \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "retired pack versions do not retain dependency snapshots"
+          verify_red 51e0a196253c736de98e387230dcbb05bb8b50af \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "staging parent cannot be deleted before cleanup is recorded"
+          verify_red 2065e34bcdab62de96b456cf7089b6443d39825b \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "clock"
+          verify_red bbd237990f9f70958c25c51c54b7ecc7c6824969 \
+            test/features/learning/data/content_pack_install_store_test.dart \
+            "oversized chunk was copied"
+          verify_red 7e0dbc3faf0fc2006b6ef40cf3a910c2e38db226 \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "removal preserves dependencies needed by pending rollback"
+          verify_red f499d4d065bfe94e4fea793b225c0ad1d479f2cf \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "expired reservations are reclaimed without another restart"
+          verify_red dfe2f088b4b91cc9a9ae1996fc622067781cc78b \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "activation preserves dependencies required by pending rollback"
+          verify_red e6f011ffe8398afa4c4a989c9d80f369c4cbaa5f \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "staging chunks reject conflict replacement"
+          verify_red e6f011ffe8398afa4c4a989c9d80f369c4cbaa5f \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "staging parents reject conflict replacement"
+          verify_red e7258354035246d0c9c94d85b4ae76c245eb6e8e \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "reservation identity and accounting remain immutable"
+          verify_red eba4d32b0ee3d0777b6872ced5d7664a77d955c9 \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "restart selects the pack with the newest activation"
+          verify_red 4d018f10959f6adeda802fe93a9d907e3c996a50 \
+            test/features/learning/data/sqlite_content_pack_lifecycle_test.dart \
+            "activation rejects a cycle through a pending rollback snapshot"
       - name: Verify committed application structure
         run: dart run tool/verify_project_structure.dart
       - name: Install dependencies
@@ -49,8 +259,7 @@ jobs:
       - name: Verify dependency lock is unchanged
         run: git diff --exit-code -- pubspec.lock
       - name: Verify formatting
-        run: |
-          dart format --output=none --set-exit-if-changed lib test tool
+        run: dart format --output=none --set-exit-if-changed lib test tool
       - name: Static analysis
         run: flutter analyze --fatal-infos --fatal-warnings
       - name: Validate content packs
