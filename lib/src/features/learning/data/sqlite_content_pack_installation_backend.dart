@@ -84,6 +84,7 @@ final class SqliteContentPackInstallationBackend
           previous_seal_id TEXT,
           previous_pinned_version TEXT,
           activation_id TEXT NOT NULL,
+          activation_order INTEGER NOT NULL DEFAULT 0,
           awaiting_first_load INTEGER NOT NULL
             CHECK (awaiting_first_load IN (0, 1))
         ) STRICT
@@ -229,6 +230,16 @@ final class SqliteContentPackInstallationBackend
         'ALTER TABLE content_pack_objects ADD COLUMN owner_id TEXT',
       );
     }
+    final activeColumns = _database
+        .select('PRAGMA table_info(content_pack_active)')
+        .map((row) => row['name'])
+        .toSet();
+    if (!activeColumns.contains('activation_order')) {
+      _database.execute(
+        'ALTER TABLE content_pack_active ADD COLUMN '
+        'activation_order INTEGER NOT NULL DEFAULT 0',
+      );
+    }
     _renewLease();
     _reclaimExpiredReservations();
   }
@@ -283,7 +294,7 @@ final class SqliteContentPackInstallationBackend
     final rows = _database.select('''
       SELECT pack_id
       FROM content_pack_active
-      ORDER BY rowid DESC
+      ORDER BY activation_order DESC, rowid DESC
       LIMIT 1
     ''');
     return rows.isEmpty ? null : rows.single['pack_id'] as String;
@@ -533,13 +544,19 @@ final class SqliteContentPackInstallationBackend
       }
 
       final activationId = _idGenerator();
+      final activationOrder =
+          _database.select('''
+            SELECT COALESCE(MAX(activation_order), 0) + 1 AS next_order
+            FROM content_pack_active
+          ''').single['next_order']
+              as int;
       _database.execute(
         '''
         INSERT INTO content_pack_active (
           pack_id, version, seal_id, pinned_version,
           previous_version, previous_seal_id, previous_pinned_version,
-          activation_id, awaiting_first_load
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
+          activation_id, activation_order, awaiting_first_load
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
         ON CONFLICT(pack_id) DO UPDATE SET
           version = excluded.version,
           seal_id = excluded.seal_id,
@@ -548,6 +565,7 @@ final class SqliteContentPackInstallationBackend
           previous_seal_id = excluded.previous_seal_id,
           previous_pinned_version = excluded.previous_pinned_version,
           activation_id = excluded.activation_id,
+          activation_order = excluded.activation_order,
           awaiting_first_load = 1
       ''',
         [
@@ -559,6 +577,7 @@ final class SqliteContentPackInstallationBackend
           current?['seal_id'],
           current?['pinned_version'],
           activationId,
+          activationOrder,
         ],
       );
       if (current != null) {
