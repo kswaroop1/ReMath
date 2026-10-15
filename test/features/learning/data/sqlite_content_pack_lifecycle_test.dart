@@ -1464,84 +1464,87 @@ void main() {
     expect(await backend.activeVersion(packA), '1.0.0');
   });
 
-  test('activation rejects a cycle through a pending rollback snapshot', () async {
-    final database = sqlite3.openInMemory();
-    addTearDown(database.close);
-    var nextId = 0;
-    final backend = SqliteContentPackInstallationBackend(
-      availableBytes: () async => 1024 * 1024,
-      database: database,
-      idGenerator: () => 'rollback-cycle-${nextId++}',
-    );
-    final installer = composeContentPackInstaller(
-      backend: backend,
-      environment: _Environment(backend),
-      signatureVerifier: const _TrustedSignatureVerifier(),
-    );
-    const packA = 'org.remath.pack.a';
-    const packB = 'org.remath.pack.b';
-    const packC = 'org.remath.pack.c';
-
-    Future<void> installConfirmed(ContentPackRelease release) async {
-      await installer.install(
-        release,
-        _Source(utf8.encode(_pack(release.version, packId: release.packId))),
+  test(
+    'activation rejects a cycle through a pending rollback snapshot',
+    () async {
+      final database = sqlite3.openInMemory();
+      addTearDown(database.close);
+      var nextId = 0;
+      final backend = SqliteContentPackInstallationBackend(
+        availableBytes: () async => 1024 * 1024,
+        database: database,
+        idGenerator: () => 'rollback-cycle-${nextId++}',
       );
-      await backend.confirmFirstLoad(
-        expectedActivationId: (await backend.activation(
-          release.packId,
-        )).activationId,
-        packId: release.packId,
+      final installer = composeContentPackInstaller(
+        backend: backend,
+        environment: _Environment(backend),
+        signatureVerifier: const _TrustedSignatureVerifier(),
       );
-    }
+      const packA = 'org.remath.pack.a';
+      const packB = 'org.remath.pack.b';
+      const packC = 'org.remath.pack.c';
 
-    await installConfirmed(await _release('1.0.0', packId: packC));
-    await installConfirmed(
-      await _release(
-        '1.0.0',
-        packId: packB,
-        dependencies: const [
-          ContentPackDependency(minimumVersion: '1.0.0', packId: packC),
-        ],
-      ),
-    );
-    await installConfirmed(
-      await _release(
-        '1.0.0',
-        packId: packA,
-        dependencies: const [
-          ContentPackDependency(minimumVersion: '1.0.0', packId: packB),
-        ],
-      ),
-    );
-    final dependencyFreeB = await _release('2.0.0', packId: packB);
-    await installer.install(
-      dependencyFreeB,
-      _Source(utf8.encode(_pack('2.0.0', packId: packB))),
-    );
-    final cyclicC = await _release(
-      '2.0.0',
-      packId: packC,
-      dependencies: const [
-        ContentPackDependency(minimumVersion: '1.0.0', packId: packA),
-      ],
-    );
+      Future<void> installConfirmed(ContentPackRelease release) async {
+        await installer.install(
+          release,
+          _Source(utf8.encode(_pack(release.version, packId: release.packId))),
+        );
+        await backend.confirmFirstLoad(
+          expectedActivationId: (await backend.activation(
+            release.packId,
+          )).activationId,
+          packId: release.packId,
+        );
+      }
 
-    await expectLater(
-      installer.install(
-        cyclicC,
-        _Source(utf8.encode(_pack('2.0.0', packId: packC))),
-      ),
-      throwsA(
-        isA<ContentPackStagingException>().having(
-          (error) => error.message,
-          'message',
-          contains('dependency cycle'),
+      await installConfirmed(await _release('1.0.0', packId: packC));
+      await installConfirmed(
+        await _release(
+          '1.0.0',
+          packId: packB,
+          dependencies: const [
+            ContentPackDependency(minimumVersion: '1.0.0', packId: packC),
+          ],
         ),
-      ),
-    );
-    expect(await backend.activeVersion(packC), '1.0.0');
-  });
+      );
+      await installConfirmed(
+        await _release(
+          '1.0.0',
+          packId: packA,
+          dependencies: const [
+            ContentPackDependency(minimumVersion: '1.0.0', packId: packB),
+          ],
+        ),
+      );
+      final dependencyFreeB = await _release('2.0.0', packId: packB);
+      await installer.install(
+        dependencyFreeB,
+        _Source(utf8.encode(_pack('2.0.0', packId: packB))),
+      );
+      final cyclicC = await _release(
+        '2.0.0',
+        packId: packC,
+        dependencies: const [
+          ContentPackDependency(minimumVersion: '1.0.0', packId: packA),
+        ],
+      );
+
+      await expectLater(
+        installer.install(
+          cyclicC,
+          _Source(utf8.encode(_pack('2.0.0', packId: packC))),
+        ),
+        throwsA(
+          isA<ContentPackStagingException>().having(
+            (error) => error.message,
+            'message',
+            contains('dependency cycle'),
+          ),
+        ),
+      );
+      expect(await backend.activeVersion(packC), '1.0.0');
+    },
+  );
 
   test('removal rejects an ABA replacement at the same version', () async {
     final database = sqlite3.openInMemory();
