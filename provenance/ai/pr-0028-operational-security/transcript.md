@@ -68,3 +68,13 @@ CI correction `9084d5c8` fetches preserved `refs/pull/24/head` before replay,
 checks the known reviewed PR24 head is available, and adds the PR28 onboarding
 red commit to permanent replay without removing historical assertions.
 Replacement CI is pending; no green result or review readiness is claimed.
+
+## CI follow-up — 25 October 2026
+
+Exact-head CI `40138266079` restores all historical lifecycle red replays and
+passes the new onboarding replay, committed structure and unchanged dependency
+lock. All 528 native tests pass, establishing the first onboarding green result.
+Secret scanning passes. Formatting reports one changed file, the onboarding test;
+subsequent analysis, content/browser checks and coverage-floor gate were skipped.
+The local helper invocation is collapsed to the formatter's short single-line
+shape; replacement full CI is required. This is not a full-green claim.
