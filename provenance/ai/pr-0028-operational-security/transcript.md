@@ -54,3 +54,17 @@ red commits. Do not delete or weaken replay assertions. The next CI correction
 must explicitly fetch the preserved PR24 history before replay (and verify the
 historical SHAs), then retain the new onboarding red commit for replay as well.
 No production trust implementation or independent review is claimed yet.
+
+## Assistant — First onboarding green candidate
+
+After observed red `5e22f53a`, implementation commit `7885029f` records an
+immutable copy of explicitly enrolled public bytes and matches the publisher,
+key identity and byte sequence. This is only the first in-memory onboarding
+example, not the full security contract. Conflict rejection, input validation,
+rotation, irreversible revocation, persistence, cryptographic verification and
+production composition still require their own test-first cycles.
+
+CI correction `9084d5c8` fetches preserved `refs/pull/24/head` before replay,
+checks the known reviewed PR24 head is available, and adds the PR28 onboarding
+red commit to permanent replay without removing historical assertions.
+Replacement CI is pending; no green result or review readiness is claimed.
