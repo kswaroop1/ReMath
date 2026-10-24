@@ -1,14 +1,25 @@
 /// Explicit local trust decisions; content metadata cannot onboard itself.
 final class PublisherTrustStore {
+  final _keys = <(String, String), List<int>>{};
+
   void enroll({
     required String publisherId,
     required String keyId,
     required List<int> publicKey,
-  }) => throw UnimplementedError('SP-006 publisher onboarding is not implemented');
+  }) {
+    _keys[(publisherId, keyId)] = List<int>.unmodifiable(publicKey);
+  }
 
   bool isTrusted({
     required String publisherId,
     required String keyId,
     required List<int> publicKey,
-  }) => false;
+  }) {
+    final trusted = _keys[(publisherId, keyId)];
+    if (trusted == null || trusted.length != publicKey.length) return false;
+    for (var index = 0; index < trusted.length; index++) {
+      if (trusted[index] != publicKey[index]) return false;
+    }
+    return true;
+  }
 }
