@@ -3,6 +3,7 @@ import 'package:remath/src/features/backup/application/backup_coordinator.dart';
 import 'package:remath/src/features/backup/application/backup_file_transfer.dart';
 import 'package:remath/src/features/backup/data/password_backup_cipher.dart';
 import 'package:remath/src/features/home/presentation/home_screen.dart';
+import 'package:remath/src/features/learning/data/content_pack_lifecycle.dart';
 import 'package:remath/src/features/learning/domain/content_pack.dart';
 import 'package:remath/src/features/learning/domain/learning_session_compatibility.dart';
 import 'package:remath/src/features/learning/domain/progress_repository.dart';
@@ -11,12 +12,14 @@ class ReMathApp extends StatelessWidget {
   const ReMathApp({
     this.backupFiles,
     required this.contentPack,
+    this.contentPackLifecycle,
     required this.repository,
     super.key,
   });
 
   final BackupFileBoundary? backupFiles;
   final ContentPack contentPack;
+  final ContentPackLifecycle? contentPackLifecycle;
   final ProgressRepository repository;
 
   @override

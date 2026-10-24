@@ -152,5 +152,18 @@ database. Preserve active study state only when it is safe to apply. See the
 exact [scope and acceptance criteria](slices/portable-backup-recovery.md).
 
 Cloud providers, OAuth, automatic background sync, content-pack transfer, and a
-release remain outside PR22. PR23 follows with the content-pack lifecycle; PR24
-then addresses the broader operational-security foundation.
+release remain outside PR22. The next feature PR follows with the content-pack
+lifecycle; the subsequent PR then addresses the broader operational-security
+foundation.
+
+## PR #24 — Content-pack lifecycle
+
+Turn the bundled-pack foundation into a safe offline lifecycle: parse and
+validate distribution manifests, forecast storage, expose catalogue state, and
+install, pin, remove, update, or roll back packs transactionally without deleting
+stable-ID learner history. The exact [scope and acceptance criteria](slices/content-pack-lifecycle.md)
+keep network catalogues, provider OAuth, publisher trust operations, delta
+updates, releases, signing credentials, and `VERSION` changes out of scope.
+
+PR25 follows with publisher trust operations and the broader operational-
+security foundation.

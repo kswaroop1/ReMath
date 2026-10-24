@@ -108,6 +108,7 @@ jobs:
           flutter build apk --release
           --build-name "${{ needs.version.outputs.version }}"
           --build-number "${{ needs.version.outputs.build_number }}"
+          --dart-define="APP_VERSION=${{ needs.version.outputs.version }}"
       - name: Name release asset
         run: cp build/app/outputs/flutter-apk/app-release.apk "remath-${{ needs.version.outputs.version }}-android.apk"
       - uses: actions/upload-artifact@v7
@@ -159,6 +160,7 @@ jobs:
           flutter build windows --release
           --build-name "${{ needs.version.outputs.version }}"
           --build-number "${{ needs.version.outputs.build_number }}"
+          --dart-define="APP_VERSION=${{ needs.version.outputs.version }}"
       - name: Package Windows release
         shell: pwsh
         run: Compress-Archive -Path "build/windows/x64/runner/Release/*" -DestinationPath "remath-${{ needs.version.outputs.version }}-windows.zip"
@@ -190,11 +192,13 @@ jobs:
           flutter build macos --release
           --build-name "${{ needs.version.outputs.version }}"
           --build-number "${{ needs.version.outputs.build_number }}"
+          --dart-define="APP_VERSION=${{ needs.version.outputs.version }}"
       - name: Build iOS simulator
         run: >-
           flutter build ios --simulator
           --build-name "${{ needs.version.outputs.version }}"
           --build-number "${{ needs.version.outputs.build_number }}"
+          --dart-define="APP_VERSION=${{ needs.version.outputs.version }}"
       - name: Package Apple releases
         run: |
           ditto -c -k --sequesterRsrc --keepParent             build/macos/Build/Products/Release/remath.app             "remath-${{ needs.version.outputs.version }}-macos.zip"
