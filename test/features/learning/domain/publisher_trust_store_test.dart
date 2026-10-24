@@ -7,11 +7,7 @@ void main() {
     final publicKey = List<int>.generate(32, (index) => index);
 
     bool trusted(String publisherId, String keyId, List<int> bytes) =>
-        store.isTrusted(
-          publisherId: publisherId,
-          keyId: keyId,
-          publicKey: bytes,
-        );
+        store.isTrusted(publisherId: publisherId, keyId: keyId, publicKey: bytes);
 
     expect(trusted('publisher.one', 'key.one', publicKey), isFalse);
     store.enroll(
