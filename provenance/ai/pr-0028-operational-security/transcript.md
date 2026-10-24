@@ -38,3 +38,19 @@ Local Flutter execution remains blocked under the standing boundary and was not
 attempted. No observed red or green result is claimed yet; CI must establish the
 intended failure before implementation. All remaining acceptance criteria,
 production composition, durable storage and review remain pending.
+
+## CI diagnosis — 24 October 2026
+
+CI run `40132439345` on red head `5e22f53a` ran the complete native
+suite despite an earlier replay failure: 527 tests passed and the sole failure
+was the new onboarding test, with the intended `UnimplementedError: SP-006
+publisher onboarding is not implemented`. This establishes observed red evidence;
+it is not a green or complete gate result. Secret scanning passed.
+
+The separate historical content-lifecycle replay gate failed before testing:
+`fatal: invalid reference: 4ec790524530f1feb868ab60a404769d39f6fe68`.
+PR24 was squash-merged, so checkout of main no longer includes its intermediate
+red commits. Do not delete or weaken replay assertions. The next CI correction
+must explicitly fetch the preserved PR24 history before replay (and verify the
+historical SHAs), then retain the new onboarding red commit for replay as well.
+No production trust implementation or independent review is claimed yet.
