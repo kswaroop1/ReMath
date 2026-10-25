@@ -7,6 +7,16 @@ final class PublisherTrustStore {
     required String keyId,
     required List<int> publicKey,
   }) {
+    if (_keys.containsKey((publisherId, keyId))) {
+      if (!isTrusted(
+        publisherId: publisherId,
+        keyId: keyId,
+        publicKey: publicKey,
+      )) {
+        throw StateError('An enrolled key identity cannot be replaced.');
+      }
+      return;
+    }
     _keys[(publisherId, keyId)] = List<int>.unmodifiable(publicKey);
   }
 
