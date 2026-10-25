@@ -34,7 +34,6 @@ void main() {
     );
   });
 
-
   test('publisher trust survives closing and reopening storage', () {
     final directory = Directory.systemTemp.createTempSync('remath-trust-');
     addTearDown(() => directory.deleteSync(recursive: true));
