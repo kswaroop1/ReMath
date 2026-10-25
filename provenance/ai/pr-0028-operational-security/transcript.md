@@ -179,3 +179,14 @@ the exact timestamp-stripped output (multiline identity fixture list), with no
 assertion changes, and removed the temporary diagnostic. Fatal formatting and
 all other gates remain intact. Replacement full CI is pending; production
 rotation, revocation, persistence and signature verification remain outstanding.
+
+## Identity green and revocation test — 25 October 2026
+
+Exact-head CI `40179094771` passes the full workflow on `0e3b1406`, with all
+531 native tests. Next SP-006 contract: revoking an enrolled key makes it
+untrusted and subsequent enrollment cannot restore that key identity. Added a
+minimum compiling revoke seam that throws `SP-006 key revocation is not
+implemented`, then its business test; no production revocation is implemented.
+CI must establish the intended red before the fix. These two preliminary commits
+contain only the necessary seam and test, not passing production behaviour.
+Durable revocation after restart remains a later storage integration test.
