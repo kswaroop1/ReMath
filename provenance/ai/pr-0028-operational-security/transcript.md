@@ -232,3 +232,14 @@ idempotently and preserves trust. This is a cross-connection duplicate example,
 not a claim of simultaneous concurrent execution. Production code is unchanged;
 CI must establish the intended unique-key failure before implementation.
 Durable conflict rejection, revocation and failure/concurrency coverage remain.
+
+## Durable duplicate verified red and fix — 25 October 2026
+
+CI `40202015954` proves the intended duplicate red on `566b8568`: SQLite
+reports UNIQUE constraint failed for publisher/key identity on the second
+connection's identical enrollment. Changed insertion to targeted ON CONFLICT
+DO NOTHING, then verify that the existing public bytes match; no row replacement
+is used. A mismatch is reported as StateError without overwriting stored trust.
+Permanent replay retains the exact observed unique-constraint failure. Full
+replacement CI is pending; cross-connection duplicate handling is not a claim
+of simultaneous concurrency or durable revocation completion.
