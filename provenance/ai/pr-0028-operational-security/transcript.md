@@ -101,3 +101,17 @@ that exact timestamp-stripped output, including the multiline test invocation
 and continuation indentation, without changing assertions. Removed temporary
 formatter-output diagnostic; fatal formatting remains unchanged. Red replay and
 528 native tests passed in the diagnostic run; full replacement CI is pending.
+
+## Verified baseline and next test — 25 October 2026
+
+Exact-head CI `40154960825` on `1abd6df2` passes the full workflow after exact
+formatter recovery. The first onboarding example is green with 528 native tests.
+This does not complete SP-006 or make the draft review-ready.
+
+Next acceptance rule: onboarding cannot replace public bytes under an existing
+publisher/key identity, and rejection preserves original trust. Added a focused
+test expecting StateError on conflicting enrollment and original bytes still
+trusted. Production code is unchanged; it currently overwrites that identity.
+CI must establish the intended assertion failure before the corresponding fix.
+No new red result is claimed yet. Remaining validation, rotation, revocation,
+persistence, crypto integration and independent review are still outstanding.
