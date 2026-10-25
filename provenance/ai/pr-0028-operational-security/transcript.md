@@ -170,3 +170,12 @@ trust mutation. Test-only head `ea7750d1` is retained in permanent replay.
 Added a temporary non-mutating formatter-output diagnostic for the known test
 formatting issue; the fatal gate remains unchanged. Retrieve exact output and
 remove diagnostic before authoritative verification. Full green remains pending.
+
+## Identity validation formatter recovery — 25 October 2026
+
+Diagnostic run `40174772596` passes all 531 native tests, including identity
+validation, and prints canonical source for the sole formatting failure. Applied
+the exact timestamp-stripped output (multiline identity fixture list), with no
+assertion changes, and removed the temporary diagnostic. Fatal formatting and
+all other gates remain intact. Replacement full CI is pending; production
+rotation, revocation, persistence and signature verification remain outstanding.
