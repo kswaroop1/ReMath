@@ -54,4 +54,32 @@ void main() {
       isTrue,
     );
   });
+
+  test('malformed public keys cannot acquire publisher trust', () {
+    final store = PublisherTrustStore();
+    for (final bytes in [
+      <int>[],
+      List<int>.filled(31, 1),
+      List<int>.filled(33, 1),
+      [...List<int>.filled(31, 1), -1],
+      [...List<int>.filled(31, 1), 256],
+    ]) {
+      expect(
+        () => store.enroll(
+          publisherId: 'publisher.one',
+          keyId: 'key.one',
+          publicKey: bytes,
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        store.isTrusted(
+          publisherId: 'publisher.one',
+          keyId: 'key.one',
+          publicKey: bytes,
+        ),
+        isFalse,
+      );
+    }
+  });
 }
