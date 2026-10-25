@@ -80,6 +80,9 @@ jobs:
           verify_red a4603e2e826fb324bc47a8d53a1c5711b9ba9a8e \
             test/features/learning/domain/publisher_trust_store_test.dart \
             "Which: returned <null>"
+          verify_red ea7750d137ab3b081f5eb030709c7b75caa093f1 \
+            test/features/learning/domain/publisher_trust_store_test.dart \
+            "Which: returned <null>"
           verify_red 4ec790524530f1feb868ab60a404769d39f6fe68 \
             test/features/learning/data/content_pack_release_parser_test.dart \
             "Content-pack release parsing is not implemented"
@@ -270,7 +273,9 @@ jobs:
       - name: Verify dependency lock is unchanged
         run: git diff --exit-code -- pubspec.lock
       - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed lib test tool
+        run: |
+          dart format --output=show test/features/learning/domain/publisher_trust_store_test.dart
+          dart format --output=none --set-exit-if-changed lib test tool
       - name: Static analysis
         run: flutter analyze --fatal-infos --fatal-warnings
       - name: Validate content packs
