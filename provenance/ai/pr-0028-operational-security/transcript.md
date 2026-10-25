@@ -243,3 +243,14 @@ is used. A mismatch is reported as StateError without overwriting stored trust.
 Permanent replay retains the exact observed unique-constraint failure. Full
 replacement CI is pending; cross-connection duplicate handling is not a claim
 of simultaneous concurrency or durable revocation completion.
+
+## Duplicate enrollment behavioural green — 25 October 2026
+
+CI `40204130926` passes all 534 native tests, including cross-connection
+idempotent enrollment. The sole failed step is formatting of
+`test/features/learning/data/sqlite_publisher_trust_store_test.dart`; subsequent
+analysis/browser/content/coverage enforcement did not run. Added a temporary
+non-mutating exact formatter-output diagnostic for that one file; the fatal
+gate is unchanged. Apply its exact output and remove the diagnostic before
+claiming full green. No durable revocation or concurrent-race guarantee is
+claimed by this result.
