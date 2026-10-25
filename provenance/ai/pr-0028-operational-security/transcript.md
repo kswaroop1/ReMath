@@ -281,3 +281,17 @@ replaced or deleted. Permanent replay retains the observed red. Replacement
 full CI is pending. Concurrent enrollment/revocation ordering and direct-store
 immutability still require focused tests; this is not a complete concurrency
 or production security claim.
+
+## Durable revocation green and verification key lookup — 25 October 2026
+
+Exact-head CI `40230429890` passes the complete workflow on `a9eafade`,
+including durable revocation replay, formatting, analysis, browser contracts and
+coverage enforcement. No independent review has occurred; PR28 remains draft.
+
+Next SP-006/CP-005 boundary: the signature verifier needs public bytes resolved
+by both publisher and key identity, with unknown and revoked identities denied.
+Added a focused business test and only a minimum compiling lookup seam returning
+null. This is not a working verifier or a production composition change.
+CI must establish the intended trusted-key lookup assertion failure before
+implementation. Local Flutter was not executed. Existing domain and persistent
+trust behaviour is unchanged; concurrency hardening remains outstanding.

@@ -5,6 +5,36 @@ import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.d
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('verification resolves only trusted non-revoked public keys', () {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final store = SqlitePublisherTrustStore(database: database);
+    final bytes = List<int>.generate(32, (index) => index);
+    store.enroll(
+      publisherId: 'publisher.one',
+      keyId: 'key.one',
+      publicKey: bytes,
+    );
+    expect(
+      store.trustedPublicKey(publisherId: 'publisher.one', keyId: 'key.one'),
+      bytes,
+    );
+    expect(
+      store.trustedPublicKey(publisherId: 'publisher.other', keyId: 'key.one'),
+      isNull,
+    );
+    expect(
+      store.trustedPublicKey(publisherId: 'publisher.one', keyId: 'key.other'),
+      isNull,
+    );
+    store.revoke(publisherId: 'publisher.one', keyId: 'key.one');
+    expect(
+      store.trustedPublicKey(publisherId: 'publisher.one', keyId: 'key.one'),
+      isNull,
+    );
+  });
+
+
   test('publisher trust survives closing and reopening storage', () {
     final directory = Directory.systemTemp.createTempSync('remath-trust-');
     addTearDown(() => directory.deleteSync(recursive: true));
