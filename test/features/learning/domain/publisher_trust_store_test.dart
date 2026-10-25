@@ -111,4 +111,31 @@ void main() {
       );
     }
   });
+
+  test('revoked keys cannot regain trust through repeat enrollment', () {
+    final store = PublisherTrustStore();
+    final bytes = List<int>.generate(32, (index) => index);
+    store.enroll(
+      publisherId: 'publisher.one',
+      keyId: 'key.one',
+      publicKey: bytes,
+    );
+    store.revoke(publisherId: 'publisher.one', keyId: 'key.one');
+    expect(
+      store.isTrusted(
+        publisherId: 'publisher.one',
+        keyId: 'key.one',
+        publicKey: bytes,
+      ),
+      isFalse,
+    );
+    expect(
+      () => store.enroll(
+        publisherId: 'publisher.one',
+        keyId: 'key.one',
+        publicKey: bytes,
+      ),
+      throwsStateError,
+    );
+  });
 }
