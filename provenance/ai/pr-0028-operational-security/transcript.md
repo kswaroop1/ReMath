@@ -270,3 +270,14 @@ both denial of trust and rejection of re-enrollment. The minimum revoke seam
 throws `SP-006 durable revocation is not implemented`; no persistence behaviour
 for revocation is present. CI must establish intended red before implementation.
 The test includes finally-close protection and isolated temporary storage.
+
+## Durable revocation verified red and implementation — 25 October 2026
+
+CI `40223553022` proves intended red `SP-006 durable revocation is not
+implemented` on test-only head `095d11f5`. Added a separate durable revocation
+tombstone table; lookup denies tombstones and enrollment rejects them. Revoke
+uses a single idempotent insert. Existing public-key records are retained, not
+replaced or deleted. Permanent replay retains the observed red. Replacement
+full CI is pending. Concurrent enrollment/revocation ordering and direct-store
+immutability still require focused tests; this is not a complete concurrency
+or production security claim.
