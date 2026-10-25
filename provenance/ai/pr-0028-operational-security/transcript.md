@@ -93,3 +93,11 @@ source without writing it or weakening checks, using permitted CI because local
 Flutter execution is blocked. Retrieve that output, apply its exact source, then
 remove the diagnostic before the authoritative full run. No new behaviour,
 full-green status or independent review is claimed.
+
+## Exact formatter recovery — 25 October 2026
+
+Diagnostic CI `40146579494` printed canonical onboarding test source. Applied
+that exact timestamp-stripped output, including the multiline test invocation
+and continuation indentation, without changing assertions. Removed temporary
+formatter-output diagnostic; fatal formatting remains unchanged. Red replay and
+528 native tests passed in the diagnostic run; full replacement CI is pending.
