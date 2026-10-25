@@ -59,4 +59,42 @@ void main() {
       isTrue,
     );
   });
+
+  test('revocation survives reopening and prevents re-enrollment', () {
+    final directory = Directory.systemTemp.createTempSync('remath-trust-');
+    addTearDown(() => directory.deleteSync(recursive: true));
+    final path = '${directory.path}/trust.sqlite';
+    final bytes = List<int>.generate(32, (index) => index);
+    final first = sqlite3.open(path);
+    try {
+      final store = SqlitePublisherTrustStore(database: first);
+      store.enroll(
+        publisherId: 'publisher.one',
+        keyId: 'key.one',
+        publicKey: bytes,
+      );
+      store.revoke(publisherId: 'publisher.one', keyId: 'key.one');
+    } finally {
+      first.close();
+    }
+    final reopened = sqlite3.open(path);
+    addTearDown(reopened.close);
+    final store = SqlitePublisherTrustStore(database: reopened);
+    expect(
+      store.isTrusted(
+        publisherId: 'publisher.one',
+        keyId: 'key.one',
+        publicKey: bytes,
+      ),
+      isFalse,
+    );
+    expect(
+      () => store.enroll(
+        publisherId: 'publisher.one',
+        keyId: 'key.one',
+        publicKey: bytes,
+      ),
+      throwsStateError,
+    );
+  });
 }
