@@ -7,6 +7,13 @@ final class PublisherTrustStore {
     required String keyId,
     required List<int> publicKey,
   }) {
+    for (final identity in [publisherId, keyId]) {
+      if (identity.isEmpty ||
+          identity.length > 128 ||
+          identity.trim() != identity) {
+        throw ArgumentError('Trust identities must be unpadded and bounded.');
+      }
+    }
     if (publicKey.length != 32 ||
         publicKey.any((byte) => byte < 0 || byte > 255)) {
       throw ArgumentError('An Ed25519 public key requires 32 bytes.');
