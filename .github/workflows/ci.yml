@@ -71,6 +71,9 @@ jobs:
           }
           git fetch origin refs/pull/24/head
           git cat-file -e 651cf1411a5a0b63956854c2329d4506ed1070a1^{commit}
+          verify_red 86a33d98024efaf47d98fde1d6b8f544f1f34082 \
+            test/features/learning/data/sqlite_publisher_trust_store_test.dart \
+            'Which: is not Iterable'
           verify_red 5e22f53a8c7239085cb518cf000cc8efa85259ed \
             test/features/learning/domain/publisher_trust_store_test.dart \
             "SP-006 publisher onboarding is not implemented"
@@ -285,7 +288,9 @@ jobs:
       - name: Verify dependency lock is unchanged
         run: git diff --exit-code -- pubspec.lock
       - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed lib test tool
+        run: |
+          dart format --output=show test/features/learning/data/sqlite_publisher_trust_store_test.dart
+          dart format --output=none --set-exit-if-changed lib test tool
       - name: Static analysis
         run: flutter analyze --fatal-infos --fatal-warnings
       - name: Validate content packs
