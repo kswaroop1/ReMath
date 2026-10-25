@@ -295,3 +295,17 @@ null. This is not a working verifier or a production composition change.
 CI must establish the intended trusted-key lookup assertion failure before
 implementation. Local Flutter was not executed. Existing domain and persistent
 trust behaviour is unchanged; concurrency hardening remains outstanding.
+
+## Trusted lookup verified red and candidate — 25 October 2026
+
+CI `40235118927` on `86a33d98` proves the intended lookup failure:
+expected enrolled public bytes, actual null, Which: is not Iterable.
+It also reports formatting drift in the SQLite trust test. The separate
+production commit `4d11dd27` resolves exact publisher/key identity from SQLite,
+denies revoked or unknown identities, and returns an unmodifiable byte copy.
+No signature verification or production composition is claimed.
+
+Retained the test-first head in permanent red replay. Added a non-mutating
+formatter-output diagnostic before the unchanged fatal formatter gate; apply its
+exact output and remove the diagnostic before full-green verification. Replacement
+CI is pending. Concurrency hardening and independent review remain outstanding.
