@@ -128,3 +128,14 @@ leaves equivalent repeat enrollment unchanged. The existing test also checks the
 original bytes remain trusted after rejection. Added permanent replay matching
 the observed `Which: returned <null>` failure. Replacement full CI is pending;
 no green result or completion of the wider trust lifecycle is claimed yet.
+
+## Conflict green and malformed-key red candidate — 25 October 2026
+
+Exact-head CI `40161487113` passes the full workflow on `928e60d0`, including
+permanent onboarding/conflict red replay and the key-conflict preservation fix.
+Next SP-006 rule: an Ed25519 public key must contain exactly 32 byte values;
+empty, short, long, negative and greater-than-255 inputs must be rejected without
+acquiring trust. Added a behaviour-focused test for these cases before any
+production validation change. CI must establish the intended red failure before
+the fix; no red result is claimed yet. This validates encoding shape, not curve
+point validity, which remains the cryptographic verifier's responsibility.
