@@ -200,3 +200,14 @@ cannot restore them. Retained the observed red in permanent replay. Persistence
 across restart, key lookup for actual signature verification and production
 composition remain unimplemented; no durable revocation claim is made.
 Replacement full CI is pending.
+
+## Revocation green and durable trust seam — 25 October 2026
+
+Exact-head CI `40189773981` passes the full workflow on `1649a49f`.
+Next SP-006 example explicitly enrolls a public key, closes the actual SQLite
+connection, reopens the same file, and expects trust to survive. Added only a
+minimum CommonDatabase seam (enroll throws `SP-006 durable trust is not
+implemented`; lookup denies) and its restart test. No persistence behaviour is
+implemented yet. Test temporary storage is isolated and cleaned after closing.
+CI must establish intended red before implementation; durable revocation and
+transaction failure coverage will follow separately.
