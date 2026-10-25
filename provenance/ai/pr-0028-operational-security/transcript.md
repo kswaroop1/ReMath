@@ -211,3 +211,14 @@ implemented`; lookup denies) and its restart test. No persistence behaviour is
 implemented yet. Test temporary storage is isolated and cleaned after closing.
 CI must establish intended red before implementation; durable revocation and
 transaction failure coverage will follow separately.
+
+## Durable enrollment red and first persistence candidate — 25 October 2026
+
+CI `40193026626` proves intended red `SP-006 durable trust is not implemented`
+on test-only head `6217fc83`. Added a SQLite table keyed by publisher/key ID,
+validated public bytes using the domain policy, inserted enrollment atomically
+with SQLite's single-statement guarantee, and matched stored bytes after reopen.
+Permanent replay retains that red. This only implements the first restart
+example; duplicate enrollment, durable revocation, rollback and concurrency
+contracts remain separate upcoming tests. No full trust-store completion is
+claimed. Replacement full CI is pending.
