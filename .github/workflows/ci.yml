@@ -86,6 +86,9 @@ jobs:
           verify_red cc0aab49463f99a51235fea05b10db34a1cefc1d \
             test/features/learning/domain/publisher_trust_store_test.dart \
             "SP-006 key revocation is not implemented"
+          verify_red 6217fc83e722080124c35ad0bd379e77eb692f88 \
+            test/features/learning/data/sqlite_publisher_trust_store_test.dart \
+            "SP-006 durable trust is not implemented"
           verify_red 4ec790524530f1feb868ab60a404769d39f6fe68 \
             test/features/learning/data/content_pack_release_parser_test.dart \
             "Content-pack release parsing is not implemented"
