@@ -190,3 +190,13 @@ implemented`, then its business test; no production revocation is implemented.
 CI must establish the intended red before the fix. These two preliminary commits
 contain only the necessary seam and test, not passing production behaviour.
 Durable revocation after restart remains a later storage integration test.
+
+## Revocation verified red and implementation — 25 October 2026
+
+CI `40184101171` reports the intended UnimplementedError for SP-006 key
+revocation on test-first head `cc0aab49`. Implemented in-memory irreversible
+revocation by key identity: lookup denies revoked identities and enrollment
+cannot restore them. Retained the observed red in permanent replay. Persistence
+across restart, key lookup for actual signature verification and production
+composition remain unimplemented; no durable revocation claim is made.
+Replacement full CI is pending.
