@@ -69,7 +69,14 @@ final class SqlitePublisherTrustStore {
     required String publisherId,
     required String keyId,
   }) {
-    return null;
+    if (_isRevoked(publisherId, keyId)) return null;
+    final rows = database.select(
+      'SELECT public_key FROM publisher_trust '
+      'WHERE publisher_id = ? AND key_id = ?',
+      [publisherId, keyId],
+    );
+    if (rows.isEmpty) return null;
+    return List<int>.unmodifiable(rows.single['public_key'] as List<int>);
   }
 
   bool isTrusted({
