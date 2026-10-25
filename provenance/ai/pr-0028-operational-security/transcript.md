@@ -309,3 +309,12 @@ Retained the test-first head in permanent red replay. Added a non-mutating
 formatter-output diagnostic before the unchanged fatal formatter gate; apply its
 exact output and remove the diagnostic before full-green verification. Replacement
 CI is pending. Concurrency hardening and independent review remain outstanding.
+
+## Trusted lookup formatting recovery — 25 October 2026
+
+Diagnostic CI `40239583181` passes the native test job step, secret scanning
+and permanent red replays. Formatting is its sole failed step; subsequent
+analysis/browser/content/coverage enforcement was skipped, so this is not full
+green. Applied exact timestamp-stripped canonical SQLite trust-test output from
+that run, without assertion changes, and removed the temporary diagnostic.
+The fatal formatter remains intact. Replacement full CI is pending.
