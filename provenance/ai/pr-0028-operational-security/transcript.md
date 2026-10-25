@@ -160,3 +160,13 @@ concretizes the existing bounded public-input contract, without adding a new
 feature. Production code is unchanged; CI must establish the intended red before
 its fix. Rotation, revocation, durable storage and cryptographic composition
 remain outstanding; PR28 is not ready for independent final review.
+
+## Bounded identity red and fix — 25 October 2026
+
+CI `40172560433` proves the intended identity red: expected ArgumentError, but
+enrollment returned null. It also reports formatting drift in the same test
+file. The separate fix rejects empty, padded and over-128-character IDs before
+trust mutation. Test-only head `ea7750d1` is retained in permanent replay.
+Added a temporary non-mutating formatter-output diagnostic for the known test
+formatting issue; the fatal gate remains unchanged. Retrieve exact output and
+remove diagnostic before authoritative verification. Full green remains pending.
