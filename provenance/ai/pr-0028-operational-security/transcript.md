@@ -254,3 +254,10 @@ non-mutating exact formatter-output diagnostic for that one file; the fatal
 gate is unchanged. Apply its exact output and remove the diagnostic before
 claiming full green. No durable revocation or concurrent-race guarantee is
 claimed by this result.
+
+## Durable duplicate exact formatting recovery — 25 October 2026
+
+Diagnostic CI `40213160335` passes all 534 native tests and provides canonical
+SQLite trust-test source. Applied its exact timestamp-stripped output without
+assertion changes; removed the temporary diagnostic and retained fatal formatting.
+Replacement full CI is pending. No production behaviour changed in this recovery.
