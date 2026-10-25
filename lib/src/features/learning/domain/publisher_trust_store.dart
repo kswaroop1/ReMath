@@ -7,6 +7,10 @@ final class PublisherTrustStore {
     required String keyId,
     required List<int> publicKey,
   }) {
+    if (publicKey.length != 32 ||
+        publicKey.any((byte) => byte < 0 || byte > 255)) {
+      throw ArgumentError('An Ed25519 public key requires 32 bytes.');
+    }
     if (_keys.containsKey((publisherId, keyId))) {
       if (!isTrusted(
         publisherId: publisherId,
