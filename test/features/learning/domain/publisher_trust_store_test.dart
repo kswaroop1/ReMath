@@ -27,4 +27,31 @@ void main() {
       );
     },
   );
+
+  test('onboarding cannot replace an existing key identity', () {
+    final store = PublisherTrustStore();
+    final original = List<int>.generate(32, (index) => index);
+    final replacement = List<int>.filled(32, 7);
+    store.enroll(
+      publisherId: 'publisher.one',
+      keyId: 'key.one',
+      publicKey: original,
+    );
+    expect(
+      () => store.enroll(
+        publisherId: 'publisher.one',
+        keyId: 'key.one',
+        publicKey: replacement,
+      ),
+      throwsStateError,
+    );
+    expect(
+      store.isTrusted(
+        publisherId: 'publisher.one',
+        keyId: 'key.one',
+        publicKey: original,
+      ),
+      isTrue,
+    );
+  });
 }
