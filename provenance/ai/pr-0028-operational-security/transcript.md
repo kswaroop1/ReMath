@@ -78,3 +78,18 @@ Secret scanning passes. Formatting reports one changed file, the onboarding test
 subsequent analysis, content/browser checks and coverage-floor gate were skipped.
 The local helper invocation is collapsed to the formatter's short single-line
 shape; replacement full CI is required. This is not a full-green claim.
+
+## CI follow-up — canonical formatting still unresolved
+
+CI `40144023973` again passes historical and onboarding red replay, structure,
+dependency lock, secret scan and all 528 native tests. The attempted manual
+format correction was insufficient: the same test file still differs from the
+canonical formatter. The earlier wording that formatting was corrected was a
+candidate change, not a verified result. Do not guess another layout.
+
+Diagnostic commit `f467f119` adds `dart format --output=show` for the exact
+failing file before the unchanged fatal formatting gate. This prints canonical
+source without writing it or weakening checks, using permitted CI because local
+Flutter execution is blocked. Retrieve that output, apply its exact source, then
+remove the diagnostic before the authoritative full run. No new behaviour,
+full-green status or independent review is claimed.
