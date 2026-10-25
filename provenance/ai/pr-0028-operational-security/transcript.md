@@ -222,3 +222,13 @@ Permanent replay retains that red. This only implements the first restart
 example; duplicate enrollment, durable revocation, rollback and concurrency
 contracts remain separate upcoming tests. No full trust-store completion is
 claimed. Replacement full CI is pending.
+
+## Durable enrollment green and duplicate test — 25 October 2026
+
+Exact-head CI `40197252913` passes all gates on `948ea2ea`, establishing the
+first SQLite enrollment/restart example as green. Added the next test-only rule:
+identical enrollment through a second connection to the same database succeeds
+idempotently and preserves trust. This is a cross-connection duplicate example,
+not a claim of simultaneous concurrent execution. Production code is unchanged;
+CI must establish the intended unique-key failure before implementation.
+Durable conflict rejection, revocation and failure/concurrency coverage remain.
