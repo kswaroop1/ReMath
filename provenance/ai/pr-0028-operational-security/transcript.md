@@ -148,3 +148,15 @@ replay and secrets passed. The separate production fix checks exact 32-byte
 length and byte range before modifying trust. Preserved test-only commit
 `a4603e2e` in permanent replay. Existing valid enrollment and identity-conflict
 rules are unchanged. Replacement full CI is pending; no green result is claimed.
+
+## Key validation green and bounded identities — 25 October 2026
+
+Exact-head CI `40167573761` passes the complete workflow on `c2f959ac`,
+including malformed-key replay and validation. Next acceptance rule makes local
+trust identities bounded and unambiguous: publisher and key IDs must not be
+empty, whitespace-only, padded with whitespace, or longer than 128 characters.
+Added a test for both identity fields before implementing validation. This
+concretizes the existing bounded public-input contract, without adding a new
+feature. Production code is unchanged; CI must establish the intended red before
+its fix. Rotation, revocation, durable storage and cryptographic composition
+remain outstanding; PR28 is not ready for independent final review.
