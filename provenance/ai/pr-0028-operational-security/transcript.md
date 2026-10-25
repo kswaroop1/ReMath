@@ -261,3 +261,12 @@ Diagnostic CI `40213160335` passes all 534 native tests and provides canonical
 SQLite trust-test source. Applied its exact timestamp-stripped output without
 assertion changes; removed the temporary diagnostic and retained fatal formatting.
 Replacement full CI is pending. No production behaviour changed in this recovery.
+
+## Durable duplicate green and revocation restart test — 25 October 2026
+
+Exact-head CI `40217341712` passes the complete workflow on `740ee308`.
+Added the next SP-006 test: enroll, revoke, close SQLite, reopen, then verify
+both denial of trust and rejection of re-enrollment. The minimum revoke seam
+throws `SP-006 durable revocation is not implemented`; no persistence behaviour
+for revocation is present. CI must establish intended red before implementation.
+The test includes finally-close protection and isolated temporary storage.
