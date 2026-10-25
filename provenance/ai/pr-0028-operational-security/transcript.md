@@ -115,3 +115,16 @@ trusted. Production code is unchanged; it currently overwrites that identity.
 CI must establish the intended assertion failure before the corresponding fix.
 No new red result is claimed yet. Remaining validation, rotation, revocation,
 persistence, crypto integration and independent review are still outstanding.
+
+## Identity-conflict red and green candidate — 25 October 2026
+
+CI `40158782803` verifies the intended red: the new onboarding conflict test
+expected StateError but enrollment returned null. Formatting, analysis, content,
+browser, historical replay and secret gates passed; the native suite failed only
+for the new rule. Published test-only head `0d9d8f90` is retained for replay.
+
+The separate fix rejects conflicting bytes before changing enrolled trust and
+leaves equivalent repeat enrollment unchanged. The existing test also checks the
+original bytes remain trusted after rejection. Added permanent replay matching
+the observed `Which: returned <null>` failure. Replacement full CI is pending;
+no green result or completion of the wider trust lifecycle is claimed yet.
