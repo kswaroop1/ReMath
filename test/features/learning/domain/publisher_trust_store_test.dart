@@ -82,4 +82,27 @@ void main() {
       );
     }
   });
+
+  test('publisher identities are bounded and unambiguous', () {
+    final store = PublisherTrustStore();
+    final bytes = List<int>.generate(32, (index) => index);
+    for (final identity in ['', ' ', ' publisher.one', 'publisher.one ', 'x' * 129]) {
+      expect(
+        () => store.enroll(
+          publisherId: identity,
+          keyId: 'key.one',
+          publicKey: bytes,
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => store.enroll(
+          publisherId: 'publisher.one',
+          keyId: identity,
+          publicKey: bytes,
+        ),
+        throwsArgumentError,
+      );
+    }
+  });
 }
