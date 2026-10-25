@@ -139,3 +139,12 @@ acquiring trust. Added a behaviour-focused test for these cases before any
 production validation change. CI must establish the intended red failure before
 the fix; no red result is claimed yet. This validates encoding shape, not curve
 point validity, which remains the cryptographic verifier's responsibility.
+
+## Malformed-key verified red and fix — 25 October 2026
+
+CI `40166238309` proves the intended malformed-key red: expected ArgumentError,
+but enrollment returned null. Formatting, analysis, browser/content, historical
+replay and secrets passed. The separate production fix checks exact 32-byte
+length and byte range before modifying trust. Preserved test-only commit
+`a4603e2e` in permanent replay. Existing valid enrollment and identity-conflict
+rules are unchanged. Replacement full CI is pending; no green result is claimed.
