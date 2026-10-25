@@ -31,4 +31,34 @@ void main() {
       isTrue,
     );
   });
+
+  test('repeat durable enrollment is idempotent across connections', () {
+    final directory = Directory.systemTemp.createTempSync('remath-trust-');
+    addTearDown(() => directory.deleteSync(recursive: true));
+    final path = '${directory.path}/trust.sqlite';
+    final first = sqlite3.open(path);
+    addTearDown(first.close);
+    final second = sqlite3.open(path);
+    addTearDown(second.close);
+    final bytes = List<int>.generate(32, (index) => index);
+    SqlitePublisherTrustStore(database: first).enroll(
+      publisherId: 'publisher.one',
+      keyId: 'key.one',
+      publicKey: bytes,
+    );
+    final other = SqlitePublisherTrustStore(database: second);
+    other.enroll(
+      publisherId: 'publisher.one',
+      keyId: 'key.one',
+      publicKey: bytes,
+    );
+    expect(
+      other.isTrusted(
+        publisherId: 'publisher.one',
+        keyId: 'key.one',
+        publicKey: bytes,
+      ),
+      isTrue,
+    );
+  });
 }
