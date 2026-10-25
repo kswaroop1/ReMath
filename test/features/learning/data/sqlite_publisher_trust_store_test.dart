@@ -41,11 +41,9 @@ void main() {
     final second = sqlite3.open(path);
     addTearDown(second.close);
     final bytes = List<int>.generate(32, (index) => index);
-    SqlitePublisherTrustStore(database: first).enroll(
-      publisherId: 'publisher.one',
-      keyId: 'key.one',
-      publicKey: bytes,
-    );
+    SqlitePublisherTrustStore(
+      database: first,
+    ).enroll(publisherId: 'publisher.one', keyId: 'key.one', publicKey: bytes);
     final other = SqlitePublisherTrustStore(database: second);
     other.enroll(
       publisherId: 'publisher.one',
