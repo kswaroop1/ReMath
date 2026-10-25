@@ -28,9 +28,16 @@ final class SqlitePublisherTrustStore {
     );
     database.execute(
       'INSERT INTO publisher_trust (publisher_id, key_id, public_key) '
-      'VALUES (?, ?, ?)',
+      'VALUES (?, ?, ?) ON CONFLICT (publisher_id, key_id) DO NOTHING',
       [publisherId, keyId, Uint8List.fromList(publicKey)],
     );
+    if (!isTrusted(
+      publisherId: publisherId,
+      keyId: keyId,
+      publicKey: publicKey,
+    )) {
+      throw StateError('An enrolled key identity cannot be replaced.');
+    }
   }
 
   bool isTrusted({
