@@ -1,5 +1,6 @@
 /// Explicit local trust decisions; content metadata cannot onboard itself.
 final class PublisherTrustStore {
+  final _revoked = <(String, String)>{};
   final _keys = <(String, String), List<int>>{};
 
   void enroll({
@@ -13,6 +14,9 @@ final class PublisherTrustStore {
           identity.trim() != identity) {
         throw ArgumentError('Trust identities must be unpadded and bounded.');
       }
+    }
+    if (_revoked.contains((publisherId, keyId))) {
+      throw StateError('A revoked key identity cannot be enrolled.');
     }
     if (publicKey.length != 32 ||
         publicKey.any((byte) => byte < 0 || byte > 255)) {
@@ -31,14 +35,16 @@ final class PublisherTrustStore {
     _keys[(publisherId, keyId)] = List<int>.unmodifiable(publicKey);
   }
 
-  void revoke({required String publisherId, required String keyId}) =>
-      throw UnimplementedError('SP-006 key revocation is not implemented');
+  void revoke({required String publisherId, required String keyId}) {
+    _revoked.add((publisherId, keyId));
+  }
 
   bool isTrusted({
     required String publisherId,
     required String keyId,
     required List<int> publicKey,
   }) {
+    if (_revoked.contains((publisherId, keyId))) return false;
     final trusted = _keys[(publisherId, keyId)];
     if (trusted == null || trusted.length != publicKey.length) return false;
     for (var index = 0; index < trusted.length; index++) {
