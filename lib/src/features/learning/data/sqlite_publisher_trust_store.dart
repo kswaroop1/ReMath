@@ -15,11 +15,27 @@ final class SqlitePublisherTrustStore {
 
   final CommonDatabase database;
 
+  bool _isRevoked(String publisherId, String keyId) {
+    database.execute(
+      'CREATE TABLE IF NOT EXISTS publisher_revocations ('
+      'publisher_id TEXT NOT NULL, key_id TEXT NOT NULL,'
+      'PRIMARY KEY (publisher_id, key_id))',
+    );
+    return database.select(
+      'SELECT 1 FROM publisher_revocations '
+      'WHERE publisher_id = ? AND key_id = ?',
+      [publisherId, keyId],
+    ).isNotEmpty;
+  }
+
   void enroll({
     required String publisherId,
     required String keyId,
     required List<int> publicKey,
   }) {
+    if (_isRevoked(publisherId, keyId)) {
+      throw StateError('A revoked key identity cannot be enrolled.');
+    }
     final validation = PublisherTrustStore();
     validation.enroll(
       publisherId: publisherId,
@@ -40,14 +56,21 @@ final class SqlitePublisherTrustStore {
     }
   }
 
-  void revoke({required String publisherId, required String keyId}) =>
-      throw UnimplementedError('SP-006 durable revocation is not implemented');
+  void revoke({required String publisherId, required String keyId}) {
+    _isRevoked(publisherId, keyId);
+    database.execute(
+      'INSERT INTO publisher_revocations (publisher_id, key_id) '
+      'VALUES (?, ?) ON CONFLICT (publisher_id, key_id) DO NOTHING',
+      [publisherId, keyId],
+    );
+  }
 
   bool isTrusted({
     required String publisherId,
     required String keyId,
     required List<int> publicKey,
   }) {
+    if (_isRevoked(publisherId, keyId)) return false;
     final rows = database.select(
       'SELECT public_key FROM publisher_trust '
       'WHERE publisher_id = ? AND key_id = ?',
