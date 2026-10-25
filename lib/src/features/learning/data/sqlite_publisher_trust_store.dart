@@ -40,6 +40,9 @@ final class SqlitePublisherTrustStore {
     }
   }
 
+  void revoke({required String publisherId, required String keyId}) =>
+      throw UnimplementedError('SP-006 durable revocation is not implemented');
+
   bool isTrusted({
     required String publisherId,
     required String keyId,
