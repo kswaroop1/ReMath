@@ -31,6 +31,9 @@ final class PublisherTrustStore {
     _keys[(publisherId, keyId)] = List<int>.unmodifiable(publicKey);
   }
 
+  void revoke({required String publisherId, required String keyId}) =>
+      throw UnimplementedError('SP-006 key revocation is not implemented');
+
   bool isTrusted({
     required String publisherId,
     required String keyId,
