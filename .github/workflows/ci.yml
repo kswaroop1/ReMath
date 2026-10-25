@@ -77,6 +77,9 @@ jobs:
           verify_red 0d9d8f9016dd090b7ef4e958157dd0a103d780b6 \
             test/features/learning/domain/publisher_trust_store_test.dart \
             "Which: returned <null>"
+          verify_red a4603e2e826fb324bc47a8d53a1c5711b9ba9a8e \
+            test/features/learning/domain/publisher_trust_store_test.dart \
+            "Which: returned <null>"
           verify_red 4ec790524530f1feb868ab60a404769d39f6fe68 \
             test/features/learning/data/content_pack_release_parser_test.dart \
             "Content-pack release parsing is not implemented"
