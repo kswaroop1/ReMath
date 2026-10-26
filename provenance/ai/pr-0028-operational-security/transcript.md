@@ -423,3 +423,14 @@ types before accessing length or bytes. The original test and observed red
 head are retained in permanent replay. Full replacement CI is pending.
 This defensive storage validation does not complete signature integration or
 independent review; PR28 remains draft.
+
+## Stored-type full green and threat model draft — 26 October 2026
+
+Exact-head full CI `40290599768` passes on `67c72aa0`.
+Published the bounded SP-011 threat-model draft in the accepted slice document,
+covering malicious packs, trust bootstrap, metadata tampering, replay, key
+compromise/rotation, hostile backups, device compromise, credential theft,
+supply chain and interrupted/competing operations. It distinguishes required
+controls from unfinished implementation and states residual risks explicitly.
+No production behaviour, dependency, credential or release changes are included.
+Threat-model review and the wider slice acceptance remain pending.
