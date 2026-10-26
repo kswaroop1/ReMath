@@ -390,3 +390,14 @@ Production code is unchanged. CI must prove the intended missing validation
 failure before implementation. This is defensive validation, not protection
 against a device attacker who can substitute a valid key or alter the app.
 Signature binding, cryptography and independent review remain outstanding.
+
+## Malformed stored key verified red and fix — 26 October 2026
+
+CI `40274711282` on `25822df3` proves intended red: expected null, actual
+[1, 2] from trusted lookup. Formatting, static analysis, browser/content checks,
+secrets and historical replay passed. Added length validation on both SQLite
+lookup paths so non-32-byte stored blobs cannot resolve or match as trusted.
+Preserved the observed test-first head in permanent red replay. SQLite BLOB
+already provides byte-range values; this change addresses length only, not
+curve validity, non-BLOB corruption or compromised-device protection.
+Replacement full CI is pending; signature integration and review remain open.
