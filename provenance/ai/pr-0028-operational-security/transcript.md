@@ -412,3 +412,14 @@ boundary and asserts safe denial. Production code is unchanged; CI must
 establish the intended missing stored-type validation failure before its fix.
 This is not a claim of protection against device compromise or of completed
 signature integration. PR28 remains draft.
+
+## Stored type verified red and fix — 26 October 2026
+
+CI `40284854853` on `57e7d3da` proves intended red: type 'String' is not
+a subtype of type 'List<int>' in type cast. Formatting, analysis, content,
+browser, secrets and prior red replays pass. Replaced unchecked casts with
+explicit List<int> checks in both public-key lookup paths, denying other stored
+types before accessing length or bytes. The original test and observed red
+head are retained in permanent replay. Full replacement CI is pending.
+This defensive storage validation does not complete signature integration or
+independent review; PR28 remains draft.
