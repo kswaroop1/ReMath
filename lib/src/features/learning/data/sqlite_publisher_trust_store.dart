@@ -76,8 +76,8 @@ final class SqlitePublisherTrustStore {
       [publisherId, keyId],
     );
     if (rows.isEmpty) return null;
-    final stored = rows.single['public_key'] as List<int>;
-    if (stored.length != 32) return null;
+    final stored = rows.single['public_key'];
+    if (stored is! List<int> || stored.length != 32) return null;
     return List<int>.unmodifiable(stored);
   }
 
@@ -93,7 +93,8 @@ final class SqlitePublisherTrustStore {
       [publisherId, keyId],
     );
     if (rows.isEmpty) return false;
-    final stored = rows.single['public_key'] as List<int>;
+    final stored = rows.single['public_key'];
+    if (stored is! List<int>) return false;
     if (stored.length != 32 || stored.length != publicKey.length) return false;
     for (var index = 0; index < stored.length; index++) {
       if (stored[index] != publicKey[index]) return false;
