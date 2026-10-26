@@ -5,6 +5,29 @@ import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.d
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('non-blob stored key values fail closed without throwing', () {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final store = SqlitePublisherTrustStore(database: database);
+    database.execute(
+      'INSERT INTO publisher_trust (publisher_id, key_id, public_key) '
+      'VALUES (?, ?, ?)',
+      ['publisher.one', 'key.one', 'not-a-public-key'],
+    );
+    expect(
+      store.trustedPublicKey(publisherId: 'publisher.one', keyId: 'key.one'),
+      isNull,
+    );
+    expect(
+      store.isTrusted(
+        publisherId: 'publisher.one',
+        keyId: 'key.one',
+        publicKey: List<int>.filled(32, 1),
+      ),
+      isFalse,
+    );
+  });
+
   test('malformed stored public keys never resolve as trusted', () {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
