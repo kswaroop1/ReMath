@@ -434,3 +434,11 @@ supply chain and interrupted/competing operations. It distinguishes required
 controls from unfinished implementation and states residual risks explicitly.
 No production behaviour, dependency, credential or release changes are included.
 Threat-model review and the wider slice acceptance remain pending.
+
+## PR status reconciliation — 26 October 2026
+
+Full CI `40299958198` passes on `4f3d9e82`. No review discussion is present.
+Replaced PR28's stale acceptance-only description with verified foundations,
+exact CI reference and remaining acceptance gaps. Kept the PR draft; final
+independent review is not yet requested for the unfinished slice.
+No production behaviour or tests changed in this records-only checkpoint.
