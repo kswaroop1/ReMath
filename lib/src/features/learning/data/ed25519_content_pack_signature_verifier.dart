@@ -15,6 +15,7 @@ final class Ed25519ContentPackSignatureVerifier
     required List<int> signedPayload,
     required List<int> signature,
   }) async {
+    if (signature.length != 64) return false;
     final publicKey = trustStore.uniquelyTrustedPublicKey(
       keyId: publisherKeyId,
     );
