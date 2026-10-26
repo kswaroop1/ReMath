@@ -44,7 +44,32 @@ No private signing keys or credentials, signing service, release, `VERSION` chan
 platform-runner regeneration, cloud/OAuth, AI onboarding, transparency service,
 automatic trust-root download, or remote repository-protection changes.
 
-## Initial checkpoint
+## Implementation checkpoint — 26 October 2026
 
-Acceptance contract only. No implementation, red result, green result, coverage,
-or independent review is claimed yet.
+Full CI run [40264531840](https://github.com/kswaroop1/ReMath/actions/runs/40264531840)
+passes on `3a59875e`. Completed foundations, not complete feature acceptance:
+
+- Explicit in-memory and SQLite public-key enrollment; bounded identities and
+  32-byte key shape validation; conflicting identities cannot replace trust.
+- Idempotent duplicate enrollment across connections.
+- Durable irreversible revocation and trusted-public-key lookup.
+- Existing-behaviour coverage for explicit rotation, cross-connection conflict
+  preservation, and transaction rollback verified after closing/reopening.
+
+Chronological red/green and characterization evidence is in
+`provenance/ai/pr-0028-operational-security/transcript.md`.
+Rollback coverage is not a process-kill or disk-failure simulation; sequential
+cross-connection examples are not simultaneous concurrency evidence.
+
+Remaining acceptance work:
+
+- Resolve the archive verifier's key-only identity boundary against the store's
+  publisher/key pair without ambiguous cross-publisher lookup.
+- Ed25519 verification, cryptographic negative cases, and production-composed
+  installation coverage using durable trust.
+- Explicit operator onboarding/rotation path and concurrency/failure hardening.
+- Threat model, dependency security assessment, feature-register reconciliation,
+  coverage review and explicit independent review.
+
+PR28 remains draft. SP-006 and CP-005 remain incomplete. No signing credentials,
+release, VERSION change or merge is included.
