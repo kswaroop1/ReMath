@@ -71,6 +71,9 @@ jobs:
           }
           git fetch origin refs/pull/24/head
           git cat-file -e 651cf1411a5a0b63956854c2329d4506ed1070a1^{commit}
+          verify_red 25822df39552bb0cd9242ebbe51e60532bfba5d3 \
+            test/features/learning/data/sqlite_publisher_trust_store_test.dart \
+            'Actual: [1, 2]'
           verify_red 86a33d98024efaf47d98fde1d6b8f544f1f34082 \
             test/features/learning/data/sqlite_publisher_trust_store_test.dart \
             'Which: is not Iterable'
