@@ -483,3 +483,16 @@ is present yet; CI must prove the intended false-versus-true failure before
 implementation. Production composition is unchanged and still rejects packs.
 The vector tests primitive verification, not canonical release composition;
 tampering, wrong keys, revocation and composed installation remain pending.
+
+## Ed25519 verified red and candidate — 26 October 2026
+
+CI `40347909282` on `11ed5b33` proves intended red: expected true,
+actual false for the published public verification vector. Formatting,
+analysis, browser/content, secrets and historical replay pass.
+Implemented public verification using the existing cryptography dependency:
+resolve a uniquely trusted key, construct its Ed25519 public key and verify
+the supplied payload/signature. Consulted the package's official Ed25519 API
+documentation. No private key or signing operation was introduced.
+Permanent replay retains the red head. Full CI is pending. Malformed signature
+handling, tampering/revocation negative coverage and production composition
+remain separate acceptance work; this is not a complete security claim.
