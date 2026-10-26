@@ -378,3 +378,15 @@ acceptance-only checkpoint to distinguish delivered trust-store foundations from
 remaining signature integration, operator path, failure/concurrency hardening,
 threat model and independent review. Feature completion is not claimed.
 This records-only checkpoint changes no production behaviour or tests.
+
+## Malformed persisted trust red contract — 26 October 2026
+
+Full CI `40270225427` passes on checkpoint `879b7175`.
+Added the next test-first failure-path rule: malformed public bytes already
+present in SQLite must neither resolve for signature verification nor match
+isTrusted. The test inserts a two-byte blob to simulate invalid persisted data;
+it asserts observable denial, not a specific schema or SQL implementation.
+Production code is unchanged. CI must prove the intended missing validation
+failure before implementation. This is defensive validation, not protection
+against a device attacker who can substitute a valid key or alter the app.
+Signature binding, cryptography and independent review remain outstanding.
