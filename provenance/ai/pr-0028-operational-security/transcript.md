@@ -358,3 +358,14 @@ changing production behaviour or manufacturing a red failure. It does not
 simulate simultaneous concurrent writes. Replacement CI is pending.
 The signature identity integration gap remains unresolved; this coverage change
 does not claim cryptographic verification or production trust composition.
+
+## Conflict green and rollback characterization — 26 October 2026
+
+Exact-head full CI `40258655973` passes on `372ac7b2`, including the
+cross-connection conflict preservation test. Added characterization of SQLite's
+existing transaction guarantee: begin a transaction, revoke an existing key and
+enroll another, roll back, close and reopen, then require the original key to
+remain trusted and the new key to remain absent. No production code changes
+or manufactured red failure are involved. This tests explicit rollback, not
+process-kill or disk-failure simulation. Replacement CI is pending.
+Signature integration and independent review remain outstanding.
