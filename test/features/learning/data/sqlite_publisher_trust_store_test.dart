@@ -5,6 +5,28 @@ import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.d
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('key-only verification requires one unambiguous publisher identity', () {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final store = SqlitePublisherTrustStore(database: database);
+    final bytes = List<int>.filled(32, 1);
+    expect(store.uniquelyTrustedPublicKey(keyId: 'key.one'), isNull);
+    store.enroll(
+      publisherId: 'publisher.one',
+      keyId: 'key.one',
+      publicKey: bytes,
+    );
+    expect(store.uniquelyTrustedPublicKey(keyId: 'key.one'), bytes);
+    store.enroll(
+      publisherId: 'publisher.other',
+      keyId: 'key.one',
+      publicKey: bytes,
+    );
+    expect(store.uniquelyTrustedPublicKey(keyId: 'key.one'), isNull);
+    store.revoke(publisherId: 'publisher.other', keyId: 'key.one');
+    expect(store.uniquelyTrustedPublicKey(keyId: 'key.one'), isNull);
+  });
+
   test('non-blob stored key values fail closed without throwing', () {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
