@@ -546,3 +546,14 @@ No production code changed and no failure was manufactured; this is existing
 behaviour characterization under AGENTS.md. CI must verify these negative
 examples. Invalid byte values, wrong-key/ambiguity coverage and production
 composition remain pending; PR28 stays draft.
+
+## Negative verification green and byte-range contract — 26 October 2026
+
+Exact-head full CI `40401660375` passes on `1d9687a4`, including unknown
+keys, payload/signature tampering and revoked-key denial.
+Added a boundary test requiring 64-element signatures containing -1 or 256 to
+return false without throwing. Production code is unchanged. CI must establish
+whether the existing dependency already satisfies this contract; if it passes,
+record characterization rather than manufacture a red. A defensive production
+change requires observed intended red first.
+Wrong-key/ambiguity verification and production composition remain outstanding.
