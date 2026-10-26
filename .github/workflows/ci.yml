@@ -71,6 +71,9 @@ jobs:
           }
           git fetch origin refs/pull/24/head
           git cat-file -e 651cf1411a5a0b63956854c2329d4506ed1070a1^{commit}
+          verify_red 43ea5a5b36a3bca1c3c10f071d387cf76fd6f31e \
+            test/features/learning/data/ed25519_content_pack_signature_verifier_test.dart \
+            'Invalid signature length'
           verify_red 11ed5b3321f86fdb4b2e9eedc075bd747e5bbb73 \
             test/features/learning/data/ed25519_content_pack_signature_verifier_test.dart \
             'Actual: <false>'
