@@ -369,3 +369,12 @@ remain trusted and the new key to remain absent. No production code changes
 or manufactured red failure are involved. This tests explicit rollback, not
 process-kill or disk-failure simulation. Replacement CI is pending.
 Signature integration and independent review remain outstanding.
+
+## Rollback green and acceptance reconciliation — 26 October 2026
+
+Verified exact-head full CI `40264531840` on `3a59875e` passes, including
+rollback/reopen characterization. Updated the operational-security slice's stale
+acceptance-only checkpoint to distinguish delivered trust-store foundations from
+remaining signature integration, operator path, failure/concurrency hardening,
+threat model and independent review. Feature completion is not claimed.
+This records-only checkpoint changes no production behaviour or tests.
