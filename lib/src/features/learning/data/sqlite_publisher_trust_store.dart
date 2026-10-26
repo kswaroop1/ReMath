@@ -65,6 +65,10 @@ final class SqlitePublisherTrustStore {
     );
   }
 
+  List<int>? uniquelyTrustedPublicKey({required String keyId}) {
+    return null;
+  }
+
   List<int>? trustedPublicKey({
     required String publisherId,
     required String keyId,
