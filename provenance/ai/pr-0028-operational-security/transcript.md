@@ -442,3 +442,20 @@ Replaced PR28's stale acceptance-only description with verified foundations,
 exact CI reference and remaining acceptance gaps. Kept the PR draft; final
 independent review is not yet requested for the unfinished slice.
 No production behaviour or tests changed in this records-only checkpoint.
+
+## Key-only identity binding red contract — 26 October 2026
+
+Recovered unchanged head `803834a8`, previously verified by full CI
+`40308460133`. To bridge the existing signed publisherKeyId without silently
+choosing a publisher, selected fail-closed unique resolution: a key ID may
+resolve only when exactly one enrolled publisher/key pair has ever claimed it.
+Multiple publisher claims remain ambiguous even if their bytes match or one
+claim is revoked. Pack metadata still cannot enroll keys or grant trust.
+
+Added only a compiling null-returning lookup seam and a test requiring unknown
+denial, unique positive resolution, ambiguous denial and persistent ambiguity
+after one claim is revoked. No implementation that makes the positive case
+pass is present. CI must prove intended red before implementation. This is a
+conservative compatibility boundary, not authorization to treat a key as an
+independent publisher claim or to add signing credentials.
+Actual Ed25519 verification and production composition remain pending.
