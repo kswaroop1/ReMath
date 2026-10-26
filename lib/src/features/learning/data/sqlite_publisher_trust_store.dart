@@ -66,7 +66,15 @@ final class SqlitePublisherTrustStore {
   }
 
   List<int>? uniquelyTrustedPublicKey({required String keyId}) {
-    return null;
+    final rows = database.select(
+      'SELECT publisher_id FROM publisher_trust WHERE key_id = ?',
+      [keyId],
+    );
+    if (rows.length != 1) return null;
+    return trustedPublicKey(
+      publisherId: rows.single['publisher_id'] as String,
+      keyId: keyId,
+    );
   }
 
   List<int>? trustedPublicKey({
