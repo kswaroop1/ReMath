@@ -330,3 +330,19 @@ the existing-behaviour coverage exception in AGENTS.md, not a new implementation
 cycle. Replacement CI must verify the characterization.
 Cryptographic verification, production composition, concurrency hardening and
 independent review remain outstanding. PR28 stays draft.
+
+## Rotation full green and signature boundary inspection — 26 October 2026
+
+Exact-head CI `40249148397` passes on `ede0c5c8`, including the existing
+rotation characterization. PR28 has no review comments and remains draft.
+
+Inspected the durable current archive verifier before cryptographic integration:
+ContentPackSignatureVerifier.verify receives publisherKeyId, payload and
+signature, but no separate publisher identity. The canonical release payload
+likewise includes publisherKeyId without publisherId. The trust store instead
+binds the pair (publisherId, keyId). Integration must not silently resolve an
+ambiguous key ID across publishers or infer operator trust from pack metadata.
+The next test-first contract must make that identity binding explicit before
+wiring Ed25519 verification. No interface or production behaviour was changed
+during this inspection. Signature verification, production composition and
+independent review remain outstanding.
