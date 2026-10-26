@@ -15,7 +15,9 @@ final class Ed25519ContentPackSignatureVerifier
     required List<int> signedPayload,
     required List<int> signature,
   }) async {
-    final publicKey = trustStore.uniquelyTrustedPublicKey(keyId: publisherKeyId);
+    final publicKey = trustStore.uniquelyTrustedPublicKey(
+      keyId: publisherKeyId,
+    );
     if (publicKey == null) return false;
     return Ed25519().verify(
       signedPayload,
