@@ -525,3 +525,13 @@ is present. CI must establish whether the dependency throws for the malformed
 lengths before the corresponding defensive fix; no observed red is claimed yet.
 No signing operation or private key was introduced. Tampering, revocation,
 ambiguity and production-composed installation coverage remain outstanding.
+
+## Malformed signature verified red and fix — 26 October 2026
+
+CI `40387010184` on `43ea5a5b` proves intended red: Invalid argument
+(signature): Invalid signature length. Formatting, analysis, browser/content,
+secrets and prior replay gates pass. Added a 64-byte signature length guard
+before trust resolution/crypto verification so malformed lengths return false.
+Retained the exact red head in permanent replay; no assertions were weakened.
+Replacement full CI is pending. Invalid byte values, tampering, wrong-key,
+revocation/ambiguity and production composition coverage remain outstanding.
