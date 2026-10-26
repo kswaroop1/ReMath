@@ -515,3 +515,13 @@ replays, but fails formatting; later gates remain skipped. Applied exact
 timestamp-stripped canonical verifier source and removed the temporary
 diagnostic without changing behaviour or assertions. Fatal formatting remains
 unchanged. Replacement full CI is pending; no full-green claim is made.
+
+## Ed25519 full green and malformed signature red contract — 26 October 2026
+
+Exact-head full CI `40376846809` passes on `19f03815`.
+Added the next negative boundary: empty, short and long signatures for a trusted
+public key must return false without throwing. No production validation change
+is present. CI must establish whether the dependency throws for the malformed
+lengths before the corresponding defensive fix; no observed red is claimed yet.
+No signing operation or private key was introduced. Tampering, revocation,
+ambiguity and production-composed installation coverage remain outstanding.
