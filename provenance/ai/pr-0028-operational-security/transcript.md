@@ -496,3 +496,14 @@ documentation. No private key or signing operation was introduced.
 Permanent replay retains the red head. Full CI is pending. Malformed signature
 handling, tampering/revocation negative coverage and production composition
 remain separate acceptance work; this is not a complete security claim.
+
+## Ed25519 behavioural green and formatting diagnosis — 26 October 2026
+
+CI `40358213474` passes the native test step, including the public Ed25519
+verification vector, and permanent red replay. Its sole failed step is
+formatting; subsequent analysis, content/browser and coverage enforcement are
+skipped, so no full-green claim is made.
+Added a non-mutating exact formatter-output diagnostic for the production
+Ed25519 verifier before the unchanged fatal formatter. Retrieve canonical
+output, apply it exactly, and remove the diagnostic before authoritative CI.
+No assertions or security behaviour were changed in this diagnosis.
