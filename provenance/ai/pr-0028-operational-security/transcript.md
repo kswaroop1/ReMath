@@ -535,3 +535,14 @@ before trust resolution/crypto verification so malformed lengths return false.
 Retained the exact red head in permanent replay; no assertions were weakened.
 Replacement full CI is pending. Invalid byte values, tampering, wrong-key,
 revocation/ambiguity and production composition coverage remain outstanding.
+
+## Signature length green and negative characterization — 26 October 2026
+
+Exact-head full CI `40394152485` passes on `681b7071`.
+Added characterization coverage for the existing verifier's denial of an
+unknown key, a tampered payload, an altered signature and an otherwise valid
+signature after local revocation. Reuses only the published RFC public vector.
+No production code changed and no failure was manufactured; this is existing
+behaviour characterization under AGENTS.md. CI must verify these negative
+examples. Invalid byte values, wrong-key/ambiguity coverage and production
+composition remain pending; PR28 stays draft.
