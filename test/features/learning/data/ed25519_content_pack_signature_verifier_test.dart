@@ -9,6 +9,31 @@ List<int> hexBytes(String hex) => [
 ];
 
 void main() {
+  test('malformed signatures are denied without throwing', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final store = SqlitePublisherTrustStore(database: database);
+    store.enroll(
+      publisherId: 'publisher.rfc',
+      keyId: 'key.rfc',
+      publicKey: hexBytes(
+        'd75a980182b10ab7d54bfed3c964073a'
+        '0ee172f3daa62325af021a68f707511a',
+      ),
+    );
+    final verifier = Ed25519ContentPackSignatureVerifier(trustStore: store);
+    for (final length in [0, 63, 65]) {
+      expect(
+        await verifier.verify(
+          publisherKeyId: 'key.rfc',
+          signedPayload: [],
+          signature: List<int>.filled(length, 0),
+        ),
+        isFalse,
+      );
+    }
+  });
+
   test('trusted publisher verifies the published Ed25519 vector', () async {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
