@@ -507,3 +507,11 @@ Added a non-mutating exact formatter-output diagnostic for the production
 Ed25519 verifier before the unchanged fatal formatter. Retrieve canonical
 output, apply it exactly, and remove the diagnostic before authoritative CI.
 No assertions or security behaviour were changed in this diagnosis.
+
+## Exact Ed25519 formatting recovery — 26 October 2026
+
+Diagnostic CI `40366661475` passes native tests, secret scanning and red
+replays, but fails formatting; later gates remain skipped. Applied exact
+timestamp-stripped canonical verifier source and removed the temporary
+diagnostic without changing behaviour or assertions. Fatal formatting remains
+unchanged. Replacement full CI is pending; no full-green claim is made.
