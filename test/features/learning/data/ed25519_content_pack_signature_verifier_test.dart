@@ -9,6 +9,63 @@ List<int> hexBytes(String hex) => [
 ];
 
 void main() {
+  test('tampering and loss of publisher trust deny valid signatures', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final store = SqlitePublisherTrustStore(database: database);
+    final publicKey = hexBytes(
+      'd75a980182b10ab7d54bfed3c964073a'
+      '0ee172f3daa62325af021a68f707511a',
+    );
+    final signature = hexBytes(
+      'e5564300c360ac729086e2cc806e828a'
+      '84877f1eb8e5d974d873e06522490155'
+      '5fb8821590a33bacc61e39701cf9b46b'
+      'd25bf5f0595bbe24655141438e7a100b',
+    );
+    final verifier = Ed25519ContentPackSignatureVerifier(trustStore: store);
+    expect(
+      await verifier.verify(
+        publisherKeyId: 'key.rfc',
+        signedPayload: [],
+        signature: signature,
+      ),
+      isFalse,
+    );
+    store.enroll(
+      publisherId: 'publisher.rfc',
+      keyId: 'key.rfc',
+      publicKey: publicKey,
+    );
+    expect(
+      await verifier.verify(
+        publisherKeyId: 'key.rfc',
+        signedPayload: [1],
+        signature: signature,
+      ),
+      isFalse,
+    );
+    final altered = [...signature];
+    altered[0] ^= 1;
+    expect(
+      await verifier.verify(
+        publisherKeyId: 'key.rfc',
+        signedPayload: [],
+        signature: altered,
+      ),
+      isFalse,
+    );
+    store.revoke(publisherId: 'publisher.rfc', keyId: 'key.rfc');
+    expect(
+      await verifier.verify(
+        publisherKeyId: 'key.rfc',
+        signedPayload: [],
+        signature: signature,
+      ),
+      isFalse,
+    );
+  });
+
   test('malformed signatures are denied without throwing', () async {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
