@@ -5,6 +5,41 @@ import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.d
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('rotation preserves old trust until explicit revocation', () {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final store = SqlitePublisherTrustStore(database: database);
+    final oldKey = List<int>.filled(32, 1);
+    final newKey = List<int>.filled(32, 2);
+    store.enroll(
+      publisherId: 'publisher.one',
+      keyId: 'key.old',
+      publicKey: oldKey,
+    );
+    store.enroll(
+      publisherId: 'publisher.one',
+      keyId: 'key.new',
+      publicKey: newKey,
+    );
+    expect(
+      store.trustedPublicKey(publisherId: 'publisher.one', keyId: 'key.old'),
+      oldKey,
+    );
+    expect(
+      store.trustedPublicKey(publisherId: 'publisher.one', keyId: 'key.new'),
+      newKey,
+    );
+    store.revoke(publisherId: 'publisher.one', keyId: 'key.old');
+    expect(
+      store.trustedPublicKey(publisherId: 'publisher.one', keyId: 'key.old'),
+      isNull,
+    );
+    expect(
+      store.trustedPublicKey(publisherId: 'publisher.one', keyId: 'key.new'),
+      newKey,
+    );
+  });
+
   test('verification resolves only trusted non-revoked public keys', () {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
