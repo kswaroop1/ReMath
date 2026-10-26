@@ -557,3 +557,14 @@ whether the existing dependency already satisfies this contract; if it passes,
 record characterization rather than manufacture a red. A defensive production
 change requires observed intended red first.
 Wrong-key/ambiguity verification and production composition remain outstanding.
+
+## Byte-range characterization and key mismatch coverage — 26 October 2026
+
+Full CI `40413270015` passes on `7c370287`: the existing dependency already
+denies the tested -1/256 signature values without throwing. Recorded this as
+characterization; no production guard or manufactured red was introduced.
+Added existing-behaviour coverage that a different RFC public key cannot verify
+TEST 1's signature, and that two publishers claiming the same key ID cannot
+verify even with matching public bytes. Uses only previously consulted RFC
+public material. No production code changed; replacement CI is pending.
+Production composition, operator controls and independent review remain open.
