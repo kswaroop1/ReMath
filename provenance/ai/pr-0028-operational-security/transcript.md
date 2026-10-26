@@ -401,3 +401,14 @@ Preserved the observed test-first head in permanent red replay. SQLite BLOB
 already provides byte-range values; this change addresses length only, not
 curve validity, non-BLOB corruption or compromised-device protection.
 Replacement full CI is pending; signature integration and review remain open.
+
+## Malformed length green and stored-type red contract — 26 October 2026
+
+Exact-head full CI `40280926088` passes on `40e9b8ba`.
+Added the next failure-path test: a non-BLOB key value in SQLite must return
+null/false from trust lookup, without a type-cast exception. SQLite's current
+non-strict column permits such persisted values; the test uses the real storage
+boundary and asserts safe denial. Production code is unchanged; CI must
+establish the intended missing stored-type validation failure before its fix.
+This is not a claim of protection against device compromise or of completed
+signature integration. PR28 remains draft.
