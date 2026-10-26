@@ -318,3 +318,15 @@ analysis/browser/content/coverage enforcement was skipped, so this is not full
 green. Applied exact timestamp-stripped canonical SQLite trust-test output from
 that run, without assertion changes, and removed the temporary diagnostic.
 The fatal formatter remains intact. Replacement full CI is pending.
+
+## Lookup full green and rotation characterization — 26 October 2026
+
+Exact-head CI `40244661696` passes the full workflow on `ed8ef977`.
+Added characterization coverage for existing explicit rotation behaviour:
+admitting a new key preserves both identities until the old identity is
+explicitly revoked, and revoking the old key does not revoke the new one.
+No production code changes or manufactured red failure are involved; this is
+the existing-behaviour coverage exception in AGENTS.md, not a new implementation
+cycle. Replacement CI must verify the characterization.
+Cryptographic verification, production composition, concurrency hardening and
+independent review remain outstanding. PR28 stays draft.
