@@ -459,3 +459,15 @@ pass is present. CI must prove intended red before implementation. This is a
 conservative compatibility boundary, not authorization to treat a key as an
 independent publisher claim or to add signing credentials.
 Actual Ed25519 verification and production composition remain pending.
+
+## Unique identity verified red and candidate — 26 October 2026
+
+CI `40321316048` on `31f4c516` proves intended red: unique enrolled key
+lookup returned null (Which: is not Iterable). Other executable gates except
+coverage enforcement passed. Implemented resolution only when exactly one
+publisher_trust row claims the key ID, then delegate to validated, non-revoked
+pair lookup. Revoked claims remain counted, so ambiguity cannot be removed by
+revoking one publisher. No first-match or byte-equality shortcut is used.
+Permanent replay retains the test-first head. Replacement full CI is pending.
+This synchronous resolution foundation does not yet wire Ed25519, establish
+simultaneous race safety, or complete production composition.
