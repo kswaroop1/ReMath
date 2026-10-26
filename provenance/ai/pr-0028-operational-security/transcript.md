@@ -346,3 +346,15 @@ The next test-first contract must make that identity binding explicit before
 wiring Ed25519 verification. No interface or production behaviour was changed
 during this inspection. Signature verification, production composition and
 independent review remain outstanding.
+
+## Cross-connection conflict characterization — 26 October 2026
+
+Verified unchanged branch head `93d964fb` and passing full CI `40251621658`.
+Added existing-behaviour characterization: a second SQLite connection attempting
+different public bytes under an enrolled publisher/key identity must receive
+StateError, and both connections must still resolve the original bytes.
+This exercises the previously implemented duplicate/conflict path without
+changing production behaviour or manufacturing a red failure. It does not
+simulate simultaneous concurrent writes. Replacement CI is pending.
+The signature identity integration gap remains unresolved; this coverage change
+does not claim cryptographic verification or production trust composition.
