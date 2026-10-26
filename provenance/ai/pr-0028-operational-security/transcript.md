@@ -471,3 +471,15 @@ revoking one publisher. No first-match or byte-equality shortcut is used.
 Permanent replay retains the test-first head. Replacement full CI is pending.
 This synchronous resolution foundation does not yet wire Ed25519, establish
 simultaneous race safety, or complete production composition.
+
+## Ed25519 verification red contract — 26 October 2026
+
+Unique key resolution passes full CI `40330349563` on `6e02f179`.
+Added a minimum ContentPackSignatureVerifier implementation returning false and
+a positive test using RFC 8032 section 7.1 TEST 1's public key, empty message
+and published signature. Verified fixture against the RFC Editor text source.
+No private seed/key is included or generated. No cryptographic implementation
+is present yet; CI must prove the intended false-versus-true failure before
+implementation. Production composition is unchanged and still rejects packs.
+The vector tests primitive verification, not canonical release composition;
+tampering, wrong keys, revocation and composed installation remain pending.
