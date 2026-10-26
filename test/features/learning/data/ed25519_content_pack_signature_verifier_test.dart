@@ -9,6 +9,33 @@ List<int> hexBytes(String hex) => [
 ];
 
 void main() {
+  test('out-of-range signature values are denied without throwing', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final store = SqlitePublisherTrustStore(database: database);
+    store.enroll(
+      publisherId: 'publisher.rfc',
+      keyId: 'key.rfc',
+      publicKey: hexBytes(
+        'd75a980182b10ab7d54bfed3c964073a'
+        '0ee172f3daa62325af021a68f707511a',
+      ),
+    );
+    final verifier = Ed25519ContentPackSignatureVerifier(trustStore: store);
+    for (final value in [-1, 256]) {
+      final signature = List<int>.filled(64, 0);
+      signature[0] = value;
+      expect(
+        await verifier.verify(
+          publisherKeyId: 'key.rfc',
+          signedPayload: [],
+          signature: signature,
+        ),
+        isFalse,
+      );
+    }
+  });
+
   test('tampering and loss of publisher trust deny valid signatures', () async {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
