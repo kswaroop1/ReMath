@@ -6,10 +6,35 @@ import 'package:remath/src/features/learning/application/content_pack_installer.
 import 'package:remath/src/features/learning/data/content_pack_archive_verifier.dart';
 import 'package:remath/src/features/learning/data/content_pack_lifecycle.dart';
 import 'package:remath/src/features/learning/data/content_pack_parser.dart';
+import 'package:remath/src/features/learning/data/open_content_pack_lifecycle_native.dart';
 import 'package:remath/src/features/learning/domain/content_pack_release.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('native trust composition denies unsigned installation by default', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    var nextId = 0;
+    final lifecycle = composeSqliteContentPackLifecycle(
+      availableBytes: () async => 1024 * 1024,
+      currentAppVersion: '0.1.0',
+      database: database,
+      idGenerator: () => 'untrusted-${nextId++}',
+      signatureVerifier: composeContentPackSignatureVerifier(database: database),
+    );
+    final bytes = utf8.encode(_pack);
+    final release = await _releaseFor('org.remath.composed', bytes);
+    await expectLater(
+      lifecycle.installer.install(release, _Source(bytes)),
+      throwsA(isA<ContentPackVerificationException>()),
+    );
+    expect(await lifecycle.backend.activeVersion(release.packId), isNull);
+    final fallback = const ContentPackParser().parse(
+      _pack.replaceFirst('org.remath.composed', 'org.remath.fallback'),
+    );
+    expect(await lifecycle.loadStartupPack(fallback), same(fallback));
+  });
+
   test('native composition exposes the production lifecycle backend', () async {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
