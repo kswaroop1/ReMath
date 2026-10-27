@@ -73,10 +73,7 @@ final class SqlitePublisherTrustStore {
     if (rows.length != 1) return null;
     final publisherId = rows.single['publisher_id'];
     if (publisherId is! String) return null;
-    return trustedPublicKey(
-      publisherId: publisherId,
-      keyId: keyId,
-    );
+    return trustedPublicKey(publisherId: publisherId, keyId: keyId);
   }
 
   List<int>? trustedPublicKey({
