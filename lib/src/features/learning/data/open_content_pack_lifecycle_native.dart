@@ -34,13 +34,17 @@ Future<ContentPackLifecycle?> openContentPackLifecycle() async {
         16,
         (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
       ).join(),
-      signatureVerifier: const _UnconfiguredSignatureVerifier(),
+      signatureVerifier: composeContentPackSignatureVerifier(database: database),
     );
   } on Object {
     database.close();
     rethrow;
   }
 }
+
+ContentPackSignatureVerifier composeContentPackSignatureVerifier({
+  required Database database,
+}) => const _UnconfiguredSignatureVerifier();
 
 final class _UnconfiguredSignatureVerifier
     implements ContentPackSignatureVerifier {
