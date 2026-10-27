@@ -651,3 +651,12 @@ storage is removed after closing connections. No signing material or production
 change is introduced; no red is manufactured. CI verification is pending.
 This extends factory/storage evidence but is not full canonical-release
 installation coverage or operator UI acceptance.
+
+## Native restart behavioural green and formatting diagnosis — 27 October 2026
+
+CI `40473095811` passes native tests including trust/revocation verification
+across actual close/reopen cycles. Formatting of the verifier test is the sole
+failed step; later analysis/content/browser/coverage gates are skipped.
+Published the non-mutating exact formatter-output diagnostic before the
+unchanged fatal gate. Apply canonical output and remove diagnostic before
+claiming full green. No production code or assertions changed.
