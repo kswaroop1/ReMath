@@ -5,6 +5,17 @@ import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.d
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('malformed stored publisher identity denies key resolution', () {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final store = SqlitePublisherTrustStore(database: database);
+    database.execute(
+      'INSERT INTO publisher_trust (publisher_id, key_id, public_key) '
+      "VALUES (X'01', 'key.one', zeroblob(32))",
+    );
+    expect(store.uniquelyTrustedPublicKey(keyId: 'key.one'), isNull);
+  });
+
   test('key-only verification requires one unambiguous publisher identity', () {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
