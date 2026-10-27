@@ -679,3 +679,17 @@ and retain bundled fallback on startup. No production behaviour changed and
 no red was manufactured. CI must verify this characterization.
 This covers the fail-closed installation journey, not a successful signed
 canonical-release installation. Operator controls/review remain outstanding.
+
+## Installation denial behavioural green and formatting diagnosis — 27 October 2026
+
+Recovered unchanged head `49ec053a`; PR28 has no review discussion or active-work
+marker. CI `40495183637` passes native tests, including the native-composed
+untrusted installation denial, unchanged activation and bundled fallback
+characterization. Secret scanning and retained red replay also pass. Formatting
+of content_pack_lifecycle_composition_test.dart is the sole failed step;
+analysis, content/browser and coverage enforcement are skipped, so full green
+is not claimed. Added a non-mutating exact formatter-output diagnostic before
+the unchanged fatal formatting gate. Apply CI's canonical output and remove
+that diagnostic before authoritative replacement CI. No production behaviour,
+assertion or feature-completion status changed. Full signed-release installation,
+operator controls and explicit independent review remain outstanding.
