@@ -621,3 +621,13 @@ timestamp-stripped canonical native opener output and removed its diagnostic.
 No behaviour or assertions changed; fatal formatting remains unchanged.
 Replacement full CI is pending. Full installation journey and operator controls
 remain outstanding; this is not final review readiness.
+
+## Native composition analysis correction — 27 October 2026
+
+CI `40455394983` passes formatting, native tests, secrets and retained red
+replay. Static analysis fails only directives_ordering in the verifier test:
+the new native-opener import follows sqlite_publisher_trust_store rather than
+alphabetical order. Sorted package imports without assertion or behaviour
+changes. Content/browser and coverage enforcement were skipped in that run.
+Replacement full CI is pending. No review discussion is present and PR28
+remains draft; full installation/operator acceptance is still incomplete.
