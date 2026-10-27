@@ -5,6 +5,32 @@ import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.d
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('revocation before enrollment remains binding after restart', () {
+    final directory = Directory.systemTemp.createTempSync('remath-trust-');
+    addTearDown(() => directory.deleteSync(recursive: true));
+    final path = '${directory.path}/trust.sqlite';
+    final first = sqlite3.open(path);
+    try {
+      final store = SqlitePublisherTrustStore(database: first);
+      store.revoke(publisherId: 'publisher.one', keyId: 'key.one');
+      store.revoke(publisherId: 'publisher.one', keyId: 'key.one');
+    } finally {
+      first.close();
+    }
+    final reopened = sqlite3.open(path);
+    addTearDown(reopened.close);
+    final store = SqlitePublisherTrustStore(database: reopened);
+    expect(
+      () => store.enroll(
+        publisherId: 'publisher.one',
+        keyId: 'key.one',
+        publicKey: List<int>.filled(32, 1),
+      ),
+      throwsStateError,
+    );
+    expect(store.uniquelyTrustedPublicKey(keyId: 'key.one'), isNull);
+  });
+
   test('closing uncommitted trust changes preserves prior decisions', () {
     final directory = Directory.systemTemp.createTempSync('remath-trust-');
     addTearDown(() => directory.deleteSync(recursive: true));
