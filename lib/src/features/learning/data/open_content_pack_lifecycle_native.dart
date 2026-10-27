@@ -36,7 +36,9 @@ Future<ContentPackLifecycle?> openContentPackLifecycle() async {
         16,
         (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
       ).join(),
-      signatureVerifier: composeContentPackSignatureVerifier(database: database),
+      signatureVerifier: composeContentPackSignatureVerifier(
+        database: database,
+      ),
     );
   } on Object {
     database.close();
