@@ -757,3 +757,15 @@ unchanged head `8cf8099a`. Applied exact timestamp-stripped canonical trust-stor
 source and removed the temporary diagnostic, retaining the fatal gate.
 No assertions or production behaviour changed. Replacement full CI is pending;
 remaining operator, installation and independent-review acceptance stays open.
+
+## Stored identity full green and unfinished transaction coverage — 27 October 2026
+
+Recovered unchanged `9446fd75`; full CI `40562481843` passes, including the
+malformed stored publisher identity fix and its retained red replay.
+Added existing-behaviour characterization for closing a database with an
+unfinished trust transaction: after reopening, prior committed trust remains
+and neither uncommitted revocation nor new-key enrollment survives. This
+complements explicit ROLLBACK coverage but is not a process-kill, power-loss,
+disk-failure or simultaneous race simulation. No production behaviour changed
+and no red was manufactured. CI must verify the new characterization. Remaining
+operator controls, successful signed installation and independent review stay open.
