@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/data/ed25519_content_pack_signature_verifier.dart';
 import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.dart';
+import 'package:remath/src/features/learning/data/open_content_pack_lifecycle_native.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 List<int> hexBytes(String hex) => [
@@ -9,6 +10,33 @@ List<int> hexBytes(String hex) => [
 ];
 
 void main() {
+  test('native verifier composition reads explicitly enrolled trust', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    SqlitePublisherTrustStore(database: database).enroll(
+      publisherId: 'publisher.rfc',
+      keyId: 'key.rfc',
+      publicKey: hexBytes(
+        'd75a980182b10ab7d54bfed3c964073a'
+        '0ee172f3daa62325af021a68f707511a',
+      ),
+    );
+    final verifier = composeContentPackSignatureVerifier(database: database);
+    expect(
+      await verifier.verify(
+        publisherKeyId: 'key.rfc',
+        signedPayload: [],
+        signature: hexBytes(
+          'e5564300c360ac729086e2cc806e828a'
+          '84877f1eb8e5d974d873e06522490155'
+          '5fb8821590a33bacc61e39701cf9b46b'
+          'd25bf5f0595bbe24655141438e7a100b',
+        ),
+      ),
+      isTrue,
+    );
+  });
+
   test(
     'wrong and ambiguous publisher keys cannot verify a signature',
     () async {
