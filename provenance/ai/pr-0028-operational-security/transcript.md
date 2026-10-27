@@ -693,3 +693,13 @@ the unchanged fatal formatting gate. Apply CI's canonical output and remove
 that diagnostic before authoritative replacement CI. No production behaviour,
 assertion or feature-completion status changed. Full signed-release installation,
 operator controls and explicit independent review remain outstanding.
+
+## Installation denial exact formatting recovery — 27 October 2026
+
+Diagnostic CI `40504318677` passes native tests, secret scanning and retained
+red replay. Formatting remains the sole failed step; later gates are skipped.
+Applied its exact timestamp-stripped canonical lifecycle-composition test
+source and removed the temporary diagnostic. Assertions and production behaviour
+are unchanged; fatal formatting remains intact. Recovered unchanged PR28 head
+`92651e13` before edits. Replacement full CI is pending; successful signed-release
+installation, operator controls and independent review remain outstanding.
