@@ -660,3 +660,11 @@ failed step; later analysis/content/browser/coverage gates are skipped.
 Published the non-mutating exact formatter-output diagnostic before the
 unchanged fatal gate. Apply canonical output and remove diagnostic before
 claiming full green. No production code or assertions changed.
+
+## Native restart exact formatting recovery — 27 October 2026
+
+Diagnostic CI `40482765998` passes native tests, secrets and retained red
+replay. Applied its exact timestamp-stripped verifier-test source, including
+the multiline restart test declaration; no assertions changed. Removed the
+diagnostic and retained the fatal formatting gate. Later gates were skipped
+in the diagnostic run; replacement full CI is pending.
