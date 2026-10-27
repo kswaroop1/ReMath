@@ -611,3 +611,13 @@ real verifier. Retained red replay and added a non-mutating exact-format
 diagnostic for the native opener before the unchanged fatal gate.
 Replacement full CI is pending. Full signed-release installation and explicit
 operator controls are not established by this factory-level test.
+
+## Native composition formatting recovery — 27 October 2026
+
+Diagnostic CI `40446846767` passes native tests, including the real native
+factory/public-vector test, secret scanning and retained red replay. Formatting
+is its sole failure; subsequent gates remain skipped. Applied the exact
+timestamp-stripped canonical native opener output and removed its diagnostic.
+No behaviour or assertions changed; fatal formatting remains unchanged.
+Replacement full CI is pending. Full installation journey and operator controls
+remain outstanding; this is not final review readiness.
