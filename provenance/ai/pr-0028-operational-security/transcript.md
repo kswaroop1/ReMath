@@ -631,3 +631,12 @@ alphabetical order. Sorted package imports without assertion or behaviour
 changes. Content/browser and coverage enforcement were skipped in that run.
 Replacement full CI is pending. No review discussion is present and PR28
 remains draft; full installation/operator acceptance is still incomplete.
+
+## Native signature trust full green — 27 October 2026
+
+Exact-head full CI `40458220054` passes on `35343e33`.
+Reconciled the slice and threat-model draft's stale unconfigured-verifier claims
+with the delivered unique resolution, Ed25519 negative cases and native factory
+composition. Explicitly retained full installation, operator, race/failure,
+dependency/coverage and independent-review gaps. No feature checkbox was marked
+complete. Records-only change; no production code or assertions changed.
