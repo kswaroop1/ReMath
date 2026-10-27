@@ -5,6 +5,42 @@ import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.d
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('closing uncommitted trust changes preserves prior decisions', () {
+    final directory = Directory.systemTemp.createTempSync('remath-trust-');
+    addTearDown(() => directory.deleteSync(recursive: true));
+    final path = '${directory.path}/trust.sqlite';
+    final bytes = List<int>.filled(32, 1);
+    final first = sqlite3.open(path);
+    try {
+      final store = SqlitePublisherTrustStore(database: first);
+      store.enroll(
+        publisherId: 'publisher.one',
+        keyId: 'key.old',
+        publicKey: bytes,
+      );
+      first.execute('BEGIN');
+      store.revoke(publisherId: 'publisher.one', keyId: 'key.old');
+      store.enroll(
+        publisherId: 'publisher.one',
+        keyId: 'key.new',
+        publicKey: bytes,
+      );
+    } finally {
+      first.close();
+    }
+    final reopened = sqlite3.open(path);
+    addTearDown(reopened.close);
+    final store = SqlitePublisherTrustStore(database: reopened);
+    expect(
+      store.trustedPublicKey(publisherId: 'publisher.one', keyId: 'key.old'),
+      bytes,
+    );
+    expect(
+      store.trustedPublicKey(publisherId: 'publisher.one', keyId: 'key.new'),
+      isNull,
+    );
+  });
+
   test('malformed stored publisher identity denies key resolution', () {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
