@@ -109,3 +109,17 @@ Public RFC vectors establish primitive correctness and factory wiring, not a
 full canonical-release installation journey. Explicit operator onboarding,
 remaining race/interruption evidence, dependency assessment, coverage review
 and independent review remain open. Feature completion is not claimed.
+
+## Verified defensive recovery checkpoint — 27 October 2026
+
+Full CI [40572197316](https://github.com/kswaroop1/ReMath/actions/runs/40572197316)
+passes on `c214b268`. In addition to native trust/revocation restart verification,
+the SQLite installer rejects untrusted releases without activation and preserves
+bundled fallback. Malformed stored publisher identities resolve as untrusted
+without a cast exception. Closing an unfinished transaction preserves prior
+committed trust and discards its uncommitted revocation/new enrollment on reopen.
+
+The close/reopen example is not process-kill, power-loss or disk-failure evidence.
+It does not establish simultaneous concurrency safety. Successful signed canonical
+release installation, explicit operator controls, dependency assessment, coverage
+reconciliation and independent review remain required. SP-006/CP-005 stay open.
