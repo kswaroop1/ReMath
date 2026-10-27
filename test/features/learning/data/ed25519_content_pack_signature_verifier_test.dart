@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/data/ed25519_content_pack_signature_verifier.dart';
-import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.dart';
 import 'package:remath/src/features/learning/data/open_content_pack_lifecycle_native.dart';
+import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 List<int> hexBytes(String hex) => [
