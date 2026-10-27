@@ -599,3 +599,15 @@ CI must establish intended false-versus-true red before wiring the real
 verifier. This tests the native verifier composition boundary, not yet a full
 signed-release installation journey or operator onboarding UI. No private
 signing material, release or merge is involved.
+
+## Native composition verified red and candidate — 27 October 2026
+
+CI `40442798652` on `fe718fe7` proves intended composition red: expected
+true, actual false from the native factory. It also reports native-opener
+formatting drift. Wired that factory to Ed25519ContentPackSignatureVerifier
+with SqlitePublisherTrustStore on the same lifecycle database; removed the
+obsolete reject-all implementation. Empty/unknown trust still denies via the
+real verifier. Retained red replay and added a non-mutating exact-format
+diagnostic for the native opener before the unchanged fatal gate.
+Replacement full CI is pending. Full signed-release installation and explicit
+operator controls are not established by this factory-level test.
