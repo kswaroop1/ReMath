@@ -578,3 +578,11 @@ test before the unchanged fatal gate. No full-green claim is made.
 Also located the production native lifecycle opener's unconfigured verifier;
 do not replace it until a production-composed test establishes the next red.
 No production behaviour changed in this diagnosis.
+
+## Negative verification exact formatting recovery — 27 October 2026
+
+Diagnostic CI `40424789390` passes native tests, secrets and retained red
+replay. Applied its exact timestamp-stripped canonical verifier-test output,
+without assertion changes, and removed the diagnostic. The fatal formatter
+remains unchanged. Replacement full CI is pending; later gate success is not
+claimed from the diagnostic run. Production composition remains unchanged.
