@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/data/ed25519_content_pack_signature_verifier.dart';
 import 'package:remath/src/features/learning/data/open_content_pack_lifecycle_native.dart';
@@ -10,6 +12,59 @@ List<int> hexBytes(String hex) => [
 ];
 
 void main() {
+  test('native verification reads durable trust and revocation after restart', () async {
+    final directory = Directory.systemTemp.createTempSync('remath-verify-');
+    addTearDown(() => directory.deleteSync(recursive: true));
+    final path = '${directory.path}/trust.sqlite';
+    final publicKey = hexBytes(
+      'd75a980182b10ab7d54bfed3c964073a'
+      '0ee172f3daa62325af021a68f707511a',
+    );
+    final signature = hexBytes(
+      'e5564300c360ac729086e2cc806e828a'
+      '84877f1eb8e5d974d873e06522490155'
+      '5fb8821590a33bacc61e39701cf9b46b'
+      'd25bf5f0595bbe24655141438e7a100b',
+    );
+    final first = sqlite3.open(path);
+    try {
+      SqlitePublisherTrustStore(database: first).enroll(
+        publisherId: 'publisher.rfc',
+        keyId: 'key.rfc',
+        publicKey: publicKey,
+      );
+    } finally {
+      first.close();
+    }
+    final second = sqlite3.open(path);
+    try {
+      expect(
+        await composeContentPackSignatureVerifier(database: second).verify(
+          publisherKeyId: 'key.rfc',
+          signedPayload: [],
+          signature: signature,
+        ),
+        isTrue,
+      );
+      SqlitePublisherTrustStore(database: second).revoke(
+        publisherId: 'publisher.rfc',
+        keyId: 'key.rfc',
+      );
+    } finally {
+      second.close();
+    }
+    final third = sqlite3.open(path);
+    addTearDown(third.close);
+    expect(
+      await composeContentPackSignatureVerifier(database: third).verify(
+        publisherKeyId: 'key.rfc',
+        signedPayload: [],
+        signature: signature,
+      ),
+      isFalse,
+    );
+  });
+
   test('native verifier composition reads explicitly enrolled trust', () async {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
