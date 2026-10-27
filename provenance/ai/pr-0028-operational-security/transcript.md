@@ -779,3 +779,14 @@ characterization. Explicitly retained successful canonical-release installation,
 operator controls, simultaneous concurrency/failure limitations, dependency and
 coverage assessment and independent review. No production code, assertions or
 feature completion status changed. PR28 remains draft.
+
+## Pre-enrollment revocation characterization — 27 October 2026
+
+Recovered unchanged `4428298d`; full CI `40587996345` passes. Added existing-
+behaviour coverage for an operator revoking a not-yet-enrolled identity twice,
+closing/reopening SQLite, then attempting enrollment. The tombstone must remain
+binding, enrollment must throw StateError, and key-only resolution must remain
+untrusted. This tests idempotent offline revocation distribution arriving before
+a public key; no production change or manufactured red is introduced. CI is
+pending. This is not the unfinished operator interface or full signed install;
+those acceptance gaps and independent review remain open.
