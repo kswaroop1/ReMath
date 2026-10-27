@@ -703,3 +703,15 @@ source and removed the temporary diagnostic. Assertions and production behaviour
 are unchanged; fatal formatting remains intact. Recovered unchanged PR28 head
 `92651e13` before edits. Replacement full CI is pending; successful signed-release
 installation, operator controls and independent review remain outstanding.
+
+## Installation denial full green and review checkpoint reconciliation — 27 October 2026
+
+Exact-head full CI `40509261693` passes on `e8aa40ba`: native-composed
+untrusted installation denial, unchanged active version and bundled fallback
+are verified alongside restart and cryptographic negative coverage. Recovered
+unchanged head and empty review discussion. Reconciled the stale PR summary
+with delivered Ed25519 verification and native composition, while explicitly
+retaining successful canonical-release installation, operator controls,
+concurrency/failure evidence, dependency/coverage reconciliation and independent
+review as open acceptance work. No feature completion or review readiness is
+claimed; no production code or tests changed in this records checkpoint.
