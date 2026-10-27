@@ -9,54 +9,57 @@ List<int> hexBytes(String hex) => [
 ];
 
 void main() {
-  test('wrong and ambiguous publisher keys cannot verify a signature', () async {
-    final database = sqlite3.openInMemory();
-    addTearDown(database.close);
-    final store = SqlitePublisherTrustStore(database: database);
-    final signature = hexBytes(
-      'e5564300c360ac729086e2cc806e828a'
-      '84877f1eb8e5d974d873e06522490155'
-      '5fb8821590a33bacc61e39701cf9b46b'
-      'd25bf5f0595bbe24655141438e7a100b',
-    );
-    // RFC 8032 TEST 2 public key cannot verify TEST 1's signature.
-    store.enroll(
-      publisherId: 'publisher.other',
-      keyId: 'key.wrong',
-      publicKey: hexBytes(
-        '3d4017c3e843895a92b70aa74d1b7ebc'
-        '9c982ccf2ec4968cc0cd55f12af4660c',
-      ),
-    );
-    final verifier = Ed25519ContentPackSignatureVerifier(trustStore: store);
-    expect(
-      await verifier.verify(
-        publisherKeyId: 'key.wrong',
-        signedPayload: [],
-        signature: signature,
-      ),
-      isFalse,
-    );
-    final publicKey = hexBytes(
-      'd75a980182b10ab7d54bfed3c964073a'
-      '0ee172f3daa62325af021a68f707511a',
-    );
-    for (final publisher in ['publisher.one', 'publisher.two']) {
-      store.enroll(
-        publisherId: publisher,
-        keyId: 'key.ambiguous',
-        publicKey: publicKey,
+  test(
+    'wrong and ambiguous publisher keys cannot verify a signature',
+    () async {
+      final database = sqlite3.openInMemory();
+      addTearDown(database.close);
+      final store = SqlitePublisherTrustStore(database: database);
+      final signature = hexBytes(
+        'e5564300c360ac729086e2cc806e828a'
+        '84877f1eb8e5d974d873e06522490155'
+        '5fb8821590a33bacc61e39701cf9b46b'
+        'd25bf5f0595bbe24655141438e7a100b',
       );
-    }
-    expect(
-      await verifier.verify(
-        publisherKeyId: 'key.ambiguous',
-        signedPayload: [],
-        signature: signature,
-      ),
-      isFalse,
-    );
-  });
+      // RFC 8032 TEST 2 public key cannot verify TEST 1's signature.
+      store.enroll(
+        publisherId: 'publisher.other',
+        keyId: 'key.wrong',
+        publicKey: hexBytes(
+          '3d4017c3e843895a92b70aa74d1b7ebc'
+          '9c982ccf2ec4968cc0cd55f12af4660c',
+        ),
+      );
+      final verifier = Ed25519ContentPackSignatureVerifier(trustStore: store);
+      expect(
+        await verifier.verify(
+          publisherKeyId: 'key.wrong',
+          signedPayload: [],
+          signature: signature,
+        ),
+        isFalse,
+      );
+      final publicKey = hexBytes(
+        'd75a980182b10ab7d54bfed3c964073a'
+        '0ee172f3daa62325af021a68f707511a',
+      );
+      for (final publisher in ['publisher.one', 'publisher.two']) {
+        store.enroll(
+          publisherId: publisher,
+          keyId: 'key.ambiguous',
+          publicKey: publicKey,
+        );
+      }
+      expect(
+        await verifier.verify(
+          publisherKeyId: 'key.ambiguous',
+          signedPayload: [],
+          signature: signature,
+        ),
+        isFalse,
+      );
+    },
+  );
 
   test('out-of-range signature values are denied without throwing', () async {
     final database = sqlite3.openInMemory();
