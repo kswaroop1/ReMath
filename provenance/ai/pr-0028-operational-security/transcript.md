@@ -769,3 +769,13 @@ complements explicit ROLLBACK coverage but is not a process-kill, power-loss,
 disk-failure or simultaneous race simulation. No production behaviour changed
 and no red was manufactured. CI must verify the new characterization. Remaining
 operator controls, successful signed installation and independent review stay open.
+
+## Unfinished transaction full green and acceptance reconciliation — 27 October 2026
+
+Exact-head full CI `40572197316` passes on unchanged `c214b268`. Reconciled
+the operational-security acceptance checkpoint with verified fail-closed install,
+malformed stored identity handling and unfinished transaction close/reopen
+characterization. Explicitly retained successful canonical-release installation,
+operator controls, simultaneous concurrency/failure limitations, dependency and
+coverage assessment and independent review. No production code, assertions or
+feature completion status changed. PR28 remains draft.
