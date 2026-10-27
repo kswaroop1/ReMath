@@ -568,3 +568,13 @@ TEST 1's signature, and that two publishers claiming the same key ID cannot
 verify even with matching public bytes. Uses only previously consulted RFC
 public material. No production code changed; replacement CI is pending.
 Production composition, operator controls and independent review remain open.
+
+## Wrong-key behavioural green and formatting diagnosis — 27 October 2026
+
+CI `40421964326` passes native tests, including wrong-key and ambiguous
+publisher denial. Formatting is the only failed step; later gates are skipped.
+Added a non-mutating canonical formatter-output diagnostic for the verifier
+test before the unchanged fatal gate. No full-green claim is made.
+Also located the production native lifecycle opener's unconfigured verifier;
+do not replace it until a production-composed test establishes the next red.
+No production behaviour changed in this diagnosis.
