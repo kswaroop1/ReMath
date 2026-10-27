@@ -727,3 +727,14 @@ coverage; it does not claim protection against an attacker controlling storage.
 No production fix is present. CI must prove the intended cast failure before
 any defensive change; no observed red is claimed yet. Full installation and
 operator acceptance remain outstanding.
+
+## Stored publisher identity verified red and fix — 27 October 2026
+
+CI `40530782214` on `415b474e` proves intended red: malformed stored publisher
+identity throws type 'Uint8List' is not a subtype of type 'String' in type cast.
+Formatting, analysis, content/browser, secrets and historical replay pass.
+Added only a stored-type check returning null before delegation to trusted pair
+lookup. No assertion changed; normal enrolled identities retain their behaviour.
+Permanent replay retains the exact test-first head. Replacement full CI is
+pending. This is defensive corruption handling, not resistance to device control
+or simultaneous concurrency evidence. PR28 remains draft.
