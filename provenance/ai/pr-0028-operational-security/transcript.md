@@ -748,3 +748,12 @@ non-mutating exact formatter output for the trust-store implementation before
 the unchanged fatal gate. No assertions or business behaviour changed. Apply
 canonical output and remove diagnostic before authoritative full CI. Operator
 controls and the other recorded acceptance gaps remain open.
+
+## Stored identity exact formatting recovery — 27 October 2026
+
+Diagnostic CI `40549709646` passes native tests, secrets and retained red
+replay; formatting is the sole failure and later gates are skipped. Recovered
+unchanged head `8cf8099a`. Applied exact timestamp-stripped canonical trust-store
+source and removed the temporary diagnostic, retaining the fatal gate.
+No assertions or production behaviour changed. Replacement full CI is pending;
+remaining operator, installation and independent-review acceptance stays open.
