@@ -668,3 +668,14 @@ replay. Applied its exact timestamp-stripped verifier-test source, including
 the multiline restart test declaration; no assertions changed. Removed the
 diagnostic and retained the fatal formatting gate. Later gates were skipped
 in the diagnostic run; replacement full CI is pending.
+
+## Restart full green and installation denial coverage — 27 October 2026
+
+Full CI `40487967150` passes on `008e82a4`, including native verification
+across trust/revocation restarts. Added existing-behaviour integration coverage
+using the native verifier factory in the real SQLite installer composition:
+an unsigned/untrusted release must fail verification, leave no active version,
+and retain bundled fallback on startup. No production behaviour changed and
+no red was manufactured. CI must verify this characterization.
+This covers the fail-closed installation journey, not a successful signed
+canonical-release installation. Operator controls/review remain outstanding.
