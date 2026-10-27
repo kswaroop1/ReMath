@@ -790,3 +790,14 @@ untrusted. This tests idempotent offline revocation distribution arriving before
 a public key; no production change or manufactured red is introduced. CI is
 pending. This is not the unfinished operator interface or full signed install;
 those acceptance gaps and independent review remain open.
+
+## Pre-enrollment revocation full green and operator boundary selection — 27 October 2026
+
+Recovered unchanged `e3196ee1`; exact-head full CI `40594970273` passes,
+including duplicate pre-enrollment revocation and restart denial. No review
+comments are present. Selected the next missing acceptance boundary: an explicit
+confirmed local operator application service over durable trust, separate from
+pack metadata/install admission. Published bounded acceptance criteria for
+unconfirmed denial, confirmed enrollment, rotation and revocation without
+claiming that service or its user-facing composition exists yet. Records-only
+change; no production behaviour, tests or completion checkboxes changed.
