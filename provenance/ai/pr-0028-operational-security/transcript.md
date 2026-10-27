@@ -715,3 +715,15 @@ retaining successful canonical-release installation, operator controls,
 concurrency/failure evidence, dependency/coverage reconciliation and independent
 review as open acceptance work. No feature completion or review readiness is
 claimed; no production code or tests changed in this records checkpoint.
+
+## Stored publisher identity red contract — 27 October 2026
+
+Recovered unchanged PR28 head `72e0103c`. Inspection finds that key-only
+resolution casts the stored publisher identity directly to String. SQLite's
+non-strict TEXT column can contain a BLOB, unlike the normal enrollment path.
+Added a safety test requiring malformed stored publisher identity to resolve
+as untrusted without throwing. This complements existing stored-key corruption
+coverage; it does not claim protection against an attacker controlling storage.
+No production fix is present. CI must prove the intended cast failure before
+any defensive change; no observed red is claimed yet. Full installation and
+operator acceptance remain outstanding.
