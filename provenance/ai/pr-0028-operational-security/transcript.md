@@ -738,3 +738,13 @@ lookup. No assertion changed; normal enrolled identities retain their behaviour.
 Permanent replay retains the exact test-first head. Replacement full CI is
 pending. This is defensive corruption handling, not resistance to device control
 or simultaneous concurrency evidence. PR28 remains draft.
+
+## Publisher identity behavioural green and formatting diagnosis — 27 October 2026
+
+Recovered unchanged head `a35e26ef`. CI `40539444469` passes native tests,
+including malformed publisher identity denial, retained red replay and secrets.
+Formatting is the sole failed step; subsequent gates are skipped. Published
+non-mutating exact formatter output for the trust-store implementation before
+the unchanged fatal gate. No assertions or business behaviour changed. Apply
+canonical output and remove diagnostic before authoritative full CI. Operator
+controls and the other recorded acceptance gaps remain open.
