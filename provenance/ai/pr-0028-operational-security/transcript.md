@@ -640,3 +640,14 @@ with the delivered unique resolution, Ed25519 negative cases and native factory
 composition. Explicitly retained full installation, operator, race/failure,
 dependency/coverage and independent-review gaps. No feature checkbox was marked
 complete. Records-only change; no production code or assertions changed.
+
+## Native verification restart characterization — 27 October 2026
+
+Recovered unchanged head `9f6e05fd`, full CI `40468000052` passing.
+Added existing-behaviour integration characterization through the exact native
+verifier factory: enroll into a real file, close/reopen and verify the public
+RFC vector, revoke, close/reopen again and require denial. Isolated temporary
+storage is removed after closing connections. No signing material or production
+change is introduced; no red is manufactured. CI verification is pending.
+This extends factory/storage evidence but is not full canonical-release
+installation coverage or operator UI acceptance.
