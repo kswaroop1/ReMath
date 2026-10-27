@@ -123,3 +123,20 @@ The close/reopen example is not process-kill, power-loss or disk-failure evidenc
 It does not establish simultaneous concurrency safety. Successful signed canonical
 release installation, explicit operator controls, dependency assessment, coverage
 reconciliation and independent review remain required. SP-006/CP-005 stay open.
+
+## Next bounded operator-control increment
+
+Implement a local application service over the existing SQLite trust store;
+content installation must never call its admission path. Admission requires an
+explicit confirmation flag plus publisher ID, key ID and independently obtained
+32-byte public key. Without confirmation, refuse without changing durable trust.
+A confirmed identical admission is idempotent; conflicting reuse and revoked
+identities remain rejected by the existing store. Rotation admits a new key ID
+without silently revoking the old one. Revocation requires explicit confirmation
+and remains binding even before first enrollment and after restart.
+
+Tests must first establish unconfirmed admission/revocation cannot mutate trust,
+then confirmed admission, duplicate/conflict, rotation and durable revocation.
+This application boundary is not itself a user-facing UI or command-line tool;
+operator access and instructions must be composed separately before completion.
+No private signing material or automatic trust download is included.
