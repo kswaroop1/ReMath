@@ -586,3 +586,16 @@ replay. Applied its exact timestamp-stripped canonical verifier-test output,
 without assertion changes, and removed the diagnostic. The fatal formatter
 remains unchanged. Replacement full CI is pending; later gate success is not
 claimed from the diagnostic run. Production composition remains unchanged.
+
+## Native composition test-first boundary — 27 October 2026
+
+Recovered unchanged `24b9f473`, fully green in CI `40433331574`.
+Extracted the native opener's existing reject-all verifier selection into a
+public composition function accepting its SQLite database. The opener now calls
+that function, which still returns the same reject-all verifier: no passing
+trust behaviour was added. Added a business test enrolling the public RFC key
+then requiring the exact native factory to verify its public vector.
+CI must establish intended false-versus-true red before wiring the real
+verifier. This tests the native verifier composition boundary, not yet a full
+signed-release installation journey or operator onboarding UI. No private
+signing material, release or merge is involved.
