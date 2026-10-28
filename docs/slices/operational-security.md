@@ -140,3 +140,18 @@ then confirmed admission, duplicate/conflict, rotation and durable revocation.
 This application boundary is not itself a user-facing UI or command-line tool;
 operator access and instructions must be composed separately before completion.
 No private signing material or automatic trust download is included.
+
+## Verified operator-service checkpoint — 28 October 2026
+
+Full CI [40682860127](https://github.com/kswaroop1/ReMath/actions/runs/40682860127)
+passes on `76c81778`. PublisherTrustOperator now refuses unconfirmed enrollment
+and revocation before durable mutation. Confirmed operations delegate to SQLite
+trust policy. Tests verify exact admission, duplicate/conflict preservation,
+irreversible revocation, explicit rotation without silent old-key removal, and
+new-key trust/old-key denial after database close/reopen.
+
+This service is not yet exposed as an operator UI or command-line tool. Native
+trust remains empty until explicitly populated; content metadata cannot admit
+itself. User-facing composition/instructions, successful signed canonical-release
+installation, concurrency/failure hardening, dependency/coverage assessment and
+independent review remain acceptance work. SP-006/CP-005 remain incomplete.
