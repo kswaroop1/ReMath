@@ -12,6 +12,6 @@ final class PublisherTrustOperator {
     required String keyId,
     required List<int> publicKey,
   }) {
-    throw UnimplementedError('SP-006 operator confirmation is not implemented');
+    throw StateError('Explicit operator confirmation is required.');
   }
 }
