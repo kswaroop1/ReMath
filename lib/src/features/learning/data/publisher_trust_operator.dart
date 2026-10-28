@@ -21,4 +21,11 @@ final class PublisherTrustOperator {
       publicKey: publicKey,
     );
   }
+  void revoke({
+    required bool confirmed,
+    required String publisherId,
+    required String keyId,
+  }) {
+    throw UnimplementedError('SP-006 operator revocation is not implemented');
+  }
 }
