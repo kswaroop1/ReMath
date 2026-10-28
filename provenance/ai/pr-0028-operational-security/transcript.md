@@ -890,3 +890,13 @@ Implemented only StateError refusal without durable mutation. Confirmed
 revocation deliberately remains unsupported until its positive red example.
 Retained exact red replay. Full CI is pending; later gates were skipped in
 the red run. No feature completion or independent review is claimed.
+
+## Confirmed operator revocation red contract — 28 October 2026
+
+Recovered unchanged `c888a71d`; full CI `40652615765` passes for refusal
+without trust mutation. Added the next positive example: confirmed revocation
+must remove key resolution and make subsequent confirmed re-admission fail.
+Current service still refuses all revocation; no passing implementation is
+included. CI must prove intended red before durable delegation. Restart,
+rotation and user-facing composition remain separate acceptance evidence.
+No private signing material or feature completion is claimed.
