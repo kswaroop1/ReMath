@@ -27,6 +27,9 @@ final class PublisherTrustOperator {
     required String publisherId,
     required String keyId,
   }) {
-    throw StateError('Explicit operator confirmation is required.');
+    if (!confirmed) {
+      throw StateError('Explicit operator confirmation is required.');
+    }
+    trustStore.revoke(publisherId: publisherId, keyId: keyId);
   }
 }
