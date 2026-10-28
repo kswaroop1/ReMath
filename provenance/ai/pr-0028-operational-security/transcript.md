@@ -930,3 +930,13 @@ close/reopen, preserve new trust and reject old-key re-admission. No production
 change or manufactured red is present. CI is pending. This is service durability,
 not yet user-facing composition, simultaneous concurrency or full signed-release
 installation. All remaining acceptance and review gaps stay open.
+
+## Operator restart full green and checkpoint reconciliation — 28 October 2026
+
+Recovered unchanged `76c81778`; exact-head full CI `40682860127` passes.
+Reconciled the slice with delivered confirmation guards, durable admission and
+revocation, duplicate/conflict, rotation and restart service coverage. Explicitly
+retained missing operator UI/CLI composition and instructions, successful signed
+canonical-release install, concurrency/failure hardening, dependency/coverage
+assessment and independent review. Records-only change; no assertions, production
+behaviour or completion checkboxes changed. PR28 remains draft.
