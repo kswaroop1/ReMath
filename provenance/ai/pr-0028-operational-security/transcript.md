@@ -952,3 +952,13 @@ executable must require an explicit existing database path, never guess/create a
 application database. No executable, passing parser, signing material or completion
 claim is included. An initial orchestration syntax error made no repository calls;
 corrected the orchestration and published this test-first checkpoint.
+
+## Command refusal verified red and candidate — 28 October 2026
+
+CI `40706537422` on `b86f1e35` proves intended red: unconfirmed command
+throws SP-006 trust command is not implemented instead of returning nonzero.
+Formatting also fails. Implemented only usage/refusal status 64 without durable
+mutation; confirmed command admission is deliberately unsupported pending its
+positive test. Retained exact red replay and added non-mutating canonical
+formatter output for the command adapter before the unchanged fatal gate.
+Full CI is pending. No executable or completed operator interface is claimed.
