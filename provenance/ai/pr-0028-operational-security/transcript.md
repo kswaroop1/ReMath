@@ -831,3 +831,13 @@ to another publisher. The current service still always throws StateError; no
 passing confirmed-admission implementation is included. CI must establish the
 intended red before delegation to the existing durable enrollment policy.
 No private signing material, UI completion or feature completion is claimed.
+
+## Confirmed admission verified red and candidate — 28 October 2026
+
+CI `40619959442` on `4bbadb6b` proves intended red: confirmed admission
+throws Explicit operator confirmation is required. Formatting, analysis,
+content/browser, secrets and prior replay pass. Added the confirmation guard
+and delegated confirmed input to existing durable enrollment policy. Unconfirmed
+admission still throws without mutation. Retained exact red replay. Full CI
+is pending. Operator revocation, composition/UI and other acceptance gaps remain
+open; this is not feature completion or independent review readiness.
