@@ -972,3 +972,13 @@ red replay; formatting alone fails and later gates are skipped. Applied exact
 timestamp-stripped canonical command-test source, removed the diagnostic and
 retained fatal formatting. No assertions or behaviour changed. Replacement
 full CI is pending; confirmed commands and executable remain unimplemented.
+
+## Confirmed enrollment command red contract — 28 October 2026
+
+Recovered unchanged `8dd4e717`; full CI `40724793440` passes command refusal.
+Added a positive test for the bounded enroll publisherId keyId publicHex
+--confirm grammar: return zero and persist exact decoded public bytes. Current
+adapter still returns usage status 64 for every request. No passing parser or
+admission implementation accompanies this test. CI must establish intended red
+before implementation. Malformed/unknown commands, revocation command and the
+explicit-database executable remain subsequent bounded acceptance work.
