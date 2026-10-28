@@ -1003,3 +1003,12 @@ No assertions or intended policy changed. Retain formatting diagnostic because
 invalid source prevented canonical output. No behavioural/full green is claimed;
 secrets and retained red replay pass. An orchestration syntax error made no calls
 before the corrected update. Replacement CI remains pending.
+
+## Confirmed command behavioural green and formatting recovery — 28 October 2026
+
+Recovered unchanged `db0a8871`. CI `40756919774` passes native tests,
+including confirmed command enrollment, secrets and retained red replay.
+Formatting alone fails; later gates are skipped. Applied exact timestamp-stripped
+canonical adapter/test outputs and removed temporary diagnostic, preserving the
+fatal gate. No assertions or intended behaviour changed. Replacement full CI is
+pending; malformed/error coverage, revoke command and executable remain open.
