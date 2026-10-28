@@ -841,3 +841,13 @@ and delegated confirmed input to existing durable enrollment policy. Unconfirmed
 admission still throws without mutation. Retained exact red replay. Full CI
 is pending. Operator revocation, composition/UI and other acceptance gaps remain
 open; this is not feature completion or independent review readiness.
+
+## Confirmed admission full green and conflict characterization — 28 October 2026
+
+Recovered unchanged `5d8bade3`; exact-head full CI `40627149483` passes.
+Added existing-behaviour characterization through the operator boundary:
+confirmed identical enrollment can repeat, conflicting public bytes throw,
+and the original trust remains unchanged. No production behaviour changed or
+red was manufactured. CI is pending. Operator revocation, durable service
+restart coverage and user-facing composition remain incomplete along with
+other recorded signed-installation/security acceptance work.
