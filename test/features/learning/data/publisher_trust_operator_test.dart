@@ -18,10 +18,7 @@ void main() {
     );
     admit(bytes);
     admit(bytes);
-    expect(
-      () => admit(List<int>.filled(32, 2)),
-      throwsStateError,
-    );
+    expect(() => admit(List<int>.filled(32, 2)), throwsStateError);
     expect(store.uniquelyTrustedPublicKey(keyId: 'key.one'), bytes);
   });
 
