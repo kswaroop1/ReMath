@@ -920,3 +920,13 @@ new key preserves both keys until explicit confirmed revocation of the old key,
 which must not revoke the new key. No production behaviour changed and no red
 was manufactured. CI is pending. Service restart, user-facing composition and
 remaining signed-install/security acceptance gaps stay open; PR28 remains draft.
+
+## Operator rotation full green and restart characterization — 28 October 2026
+
+Recovered unchanged `2e9c336f`; full CI `40679250833` passes including
+operator rotation without silent revocation. Added existing-behaviour coverage
+through the service on a real database file: admit old/new keys, revoke old,
+close/reopen, preserve new trust and reject old-key re-admission. No production
+change or manufactured red is present. CI is pending. This is service durability,
+not yet user-facing composition, simultaneous concurrency or full signed-release
+installation. All remaining acceptance and review gaps stay open.
