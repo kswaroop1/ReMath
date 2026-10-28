@@ -11,9 +11,7 @@ int runPublisherTrustCommand(
     return 64;
   }
   final hex = arguments[3];
-  if (!RegExp(r'^[0-9a-fA-F]{64}
-}
-).hasMatch(hex)) return 64;
+  if (!RegExp(r'^[0-9a-fA-F]{64}$').hasMatch(hex)) return 64;
   final bytes = [
     for (var index = 0; index < hex.length; index += 2)
       int.parse(hex.substring(index, index + 2), radix: 16),
