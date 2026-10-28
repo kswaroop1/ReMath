@@ -940,3 +940,15 @@ retained missing operator UI/CLI composition and instructions, successful signed
 canonical-release install, concurrency/failure hardening, dependency/coverage
 assessment and independent review. Records-only change; no assertions, production
 behaviour or completion checkboxes changed. PR28 remains draft.
+
+## Operator command confirmation red boundary — 28 October 2026
+
+Recovered unchanged `29e4af53`. Added a command-boundary test: enrollment without
+explicit confirmation must return nonzero and leave durable trust empty. Only a
+minimum adapter throwing UnimplementedError accompanies it; CI must establish
+intended red before implementation. Bounded intended grammar: enroll publisherId
+keyId publicHex --confirm, or revoke publisherId keyId --confirm. A subsequent
+executable must require an explicit existing database path, never guess/create an
+application database. No executable, passing parser, signing material or completion
+claim is included. An initial orchestration syntax error made no repository calls;
+corrected the orchestration and published this test-first checkpoint.
