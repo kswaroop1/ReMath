@@ -993,3 +993,13 @@ Other forms remain refused. Retained exact red replay and added non-mutating
 canonical formatter output for both adapter/test before unchanged fatal gate.
 Full CI pending. Malformed/error characterization, revocation grammar and the
 explicit-existing-database executable remain outstanding.
+
+## Command compilation correction — 28 October 2026
+
+CI `40743319559` fails formatting and native loading: JavaScript replacement
+suffix expansion corrupted the anchored hex regex raw string. Inspected durable
+source and restored the intended 64-hex pattern using literal callback replacement.
+No assertions or intended policy changed. Retain formatting diagnostic because
+invalid source prevented canonical output. No behavioural/full green is claimed;
+secrets and retained red replay pass. An orchestration syntax error made no calls
+before the corrected update. Replacement CI remains pending.
