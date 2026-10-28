@@ -900,3 +900,13 @@ Current service still refuses all revocation; no passing implementation is
 included. CI must prove intended red before durable delegation. Restart,
 rotation and user-facing composition remain separate acceptance evidence.
 No private signing material or feature completion is claimed.
+
+## Confirmed revocation verified red and candidate — 28 October 2026
+
+CI `40660101502` on `4c726755` proves intended red: confirmed operator
+revocation throws Explicit operator confirmation is required. Formatting,
+analysis, content/browser, secrets and prior replay pass. Added confirmation
+guard and delegation to existing durable revocation; unconfirmed requests still
+refuse without mutation. Retained exact red replay. Full CI is pending.
+Service restart/rotation coverage and user-facing controls remain outstanding;
+no completion or independent-review readiness is claimed.
