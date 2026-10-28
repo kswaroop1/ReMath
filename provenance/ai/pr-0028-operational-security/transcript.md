@@ -910,3 +910,13 @@ guard and delegation to existing durable revocation; unconfirmed requests still
 refuse without mutation. Retained exact red replay. Full CI is pending.
 Service restart/rotation coverage and user-facing controls remain outstanding;
 no completion or independent-review readiness is claimed.
+
+## Confirmed revocation full green and operator rotation coverage — 28 October 2026
+
+Recovered unchanged `f9d88c1f`; exact-head full CI `40670987542` passes
+including confirmed revocation and irreversible re-admission denial. Added
+existing-behaviour characterization through the operator service: admitting a
+new key preserves both keys until explicit confirmed revocation of the old key,
+which must not revoke the new key. No production behaviour changed and no red
+was manufactured. CI is pending. Service restart, user-facing composition and
+remaining signed-install/security acceptance gaps stay open; PR28 remains draft.
