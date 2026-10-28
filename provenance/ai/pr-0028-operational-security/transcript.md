@@ -869,3 +869,14 @@ unchanged head `831d8592`. Applied exact timestamp-stripped canonical operator
 test output and removed the temporary diagnostic; fatal formatting remains.
 No assertions or production behaviour changed. Replacement full CI is pending.
 Operator revocation and other recorded acceptance gaps remain open.
+
+## Operator revocation confirmation red boundary — 28 October 2026
+
+Recovered unchanged `f86642bb`; full CI `40640197308` passes including
+operator duplicate/conflict characterization. Added the next business example:
+unconfirmed revocation must throw StateError while preserving enrolled trust.
+Only a minimum revocation seam throwing UnimplementedError accompanies the test;
+no passing refusal or revocation behaviour is implemented. CI must establish
+intended missing-policy red before implementation. Confirmed revocation and
+user-facing composition remain separate acceptance work. No feature completion
+or independent-review readiness is claimed.
