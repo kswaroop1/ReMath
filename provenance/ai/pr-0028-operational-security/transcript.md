@@ -962,3 +962,13 @@ mutation; confirmed command admission is deliberately unsupported pending its
 positive test. Retained exact red replay and added non-mutating canonical
 formatter output for the command adapter before the unchanged fatal gate.
 Full CI is pending. No executable or completed operator interface is claimed.
+
+## Command refusal formatting recovery — 28 October 2026
+
+Recovered unchanged `4cbda444`. The prior diagnostic was initially aimed at
+the adapter; corrected it to the test actually reported by the formatter before
+this run. Diagnostic CI `40711309464` passes native tests, secrets and retained
+red replay; formatting alone fails and later gates are skipped. Applied exact
+timestamp-stripped canonical command-test source, removed the diagnostic and
+retained fatal formatting. No assertions or behaviour changed. Replacement
+full CI is pending; confirmed commands and executable remain unimplemented.
