@@ -860,3 +860,12 @@ replay. Formatting is the sole failed step; later gates are skipped. Published
 non-mutating exact formatter output for the operator test before the unchanged
 fatal gate. No assertions or business behaviour changed; authoritative full CI
 remains pending. Operator revocation and user-facing composition stay open.
+
+## Operator conflict exact formatting recovery — 28 October 2026
+
+Diagnostic CI `40636202091` passes native tests, secrets and retained red
+replay. Formatting remains its sole failure; later gates are skipped. Recovered
+unchanged head `831d8592`. Applied exact timestamp-stripped canonical operator
+test output and removed the temporary diagnostic; fatal formatting remains.
+No assertions or production behaviour changed. Replacement full CI is pending.
+Operator revocation and other recorded acceptance gaps remain open.
