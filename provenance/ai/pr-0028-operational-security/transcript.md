@@ -1022,3 +1022,12 @@ empty/unknown commands, short/non-hex keys, wrong confirmation and excess args:
 nonzero status and no admitted trust. No production change or manufactured red
 is present. CI pending. Revoke grammar, policy-error handling and explicit-path
 executable remain unfinished along with remaining security acceptance/review.
+
+## Malformed command CI diagnosis — 28 October 2026
+
+Recovered unchanged `9d68dad5`. CI `40782553025` reports formatting failure
+before cancellation during native tests. Secret scanning and retained red replay
+pass. Native characterization success is not established; later gates are skipped.
+Published non-mutating canonical output for the changed command test before the
+unchanged fatal formatting gate. Do not rerun the known formatting failure
+unchanged. No assertions or business behaviour changed; full CI remains pending.
