@@ -880,3 +880,13 @@ no passing refusal or revocation behaviour is implemented. CI must establish
 intended missing-policy red before implementation. Confirmed revocation and
 user-facing composition remain separate acceptance work. No feature completion
 or independent-review readiness is claimed.
+
+## Revocation confirmation verified red and refusal — 28 October 2026
+
+CI `40646125024` on `61be61bd` proves intended red: unconfirmed operator
+revocation throws UnimplementedError rather than StateError. Formatting also
+flags the missing blank line before the new method; corrected that layout.
+Implemented only StateError refusal without durable mutation. Confirmed
+revocation deliberately remains unsupported until its positive red example.
+Retained exact red replay. Full CI is pending; later gates were skipped in
+the red run. No feature completion or independent review is claimed.
