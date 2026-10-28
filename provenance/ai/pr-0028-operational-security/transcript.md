@@ -982,3 +982,14 @@ adapter still returns usage status 64 for every request. No passing parser or
 admission implementation accompanies this test. CI must establish intended red
 before implementation. Malformed/unknown commands, revocation command and the
 explicit-database executable remain subsequent bounded acceptance work.
+
+## Confirmed enrollment command verified red and candidate — 28 October 2026
+
+CI `40738290832` on `2cef66bf` proves intended red: expected zero, actual 64
+for confirmed enrollment. Test formatting also fails; later gates are skipped.
+Implemented exact five-argument enrollment grammar with --confirm, bounded
+64-character hex decoding, and delegation to the confirmed operator policy.
+Other forms remain refused. Retained exact red replay and added non-mutating
+canonical formatter output for both adapter/test before unchanged fatal gate.
+Full CI pending. Malformed/error characterization, revocation grammar and the
+explicit-existing-database executable remain outstanding.
