@@ -4,6 +4,36 @@ import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.d
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('operator rotation preserves both keys until explicit revocation', () {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final store = SqlitePublisherTrustStore(database: database);
+    final operator = PublisherTrustOperator(trustStore: store);
+    final oldKey = List<int>.filled(32, 1);
+    final newKey = List<int>.filled(32, 2);
+    operator.enroll(
+      confirmed: true,
+      publisherId: 'publisher.one',
+      keyId: 'key.old',
+      publicKey: oldKey,
+    );
+    operator.enroll(
+      confirmed: true,
+      publisherId: 'publisher.one',
+      keyId: 'key.new',
+      publicKey: newKey,
+    );
+    expect(store.uniquelyTrustedPublicKey(keyId: 'key.old'), oldKey);
+    expect(store.uniquelyTrustedPublicKey(keyId: 'key.new'), newKey);
+    operator.revoke(
+      confirmed: true,
+      publisherId: 'publisher.one',
+      keyId: 'key.old',
+    );
+    expect(store.uniquelyTrustedPublicKey(keyId: 'key.old'), isNull);
+    expect(store.uniquelyTrustedPublicKey(keyId: 'key.new'), newKey);
+  });
+
   test('confirmed operator revocation removes trust irreversibly', () {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
