@@ -5,6 +5,27 @@ import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.d
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('malformed trust commands cannot admit public keys', () {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final store = SqlitePublisherTrustStore(database: database);
+    final operator = PublisherTrustOperator(trustStore: store);
+    for (final arguments in [
+      <String>[],
+      ['unknown', 'publisher.one', 'key.one', '01' * 32, '--confirm'],
+      ['enroll', 'publisher.one', 'key.one', '01' * 31, '--confirm'],
+      ['enroll', 'publisher.one', 'key.one', 'gg' * 32, '--confirm'],
+      ['enroll', 'publisher.one', 'key.one', '01' * 32, '--yes'],
+      ['enroll', 'publisher.one', 'key.one', '01' * 32, '--confirm', 'extra'],
+    ]) {
+      expect(
+        runPublisherTrustCommand(arguments, operator: operator),
+        isNot(0),
+      );
+      expect(store.uniquelyTrustedPublicKey(keyId: 'key.one'), isNull);
+    }
+  });
+
   test('confirmed enrollment command admits the supplied public bytes', () {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
