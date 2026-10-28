@@ -801,3 +801,13 @@ pack metadata/install admission. Published bounded acceptance criteria for
 unconfirmed denial, confirmed enrollment, rotation and revocation without
 claiming that service or its user-facing composition exists yet. Records-only
 change; no production behaviour, tests or completion checkboxes changed.
+
+## Operator confirmation red boundary — 28 October 2026
+
+Recovered unchanged `efc52aaa`. Published a test requiring unconfirmed operator
+admission to throw StateError and leave key resolution untrusted. Added only
+the minimum compiling application-adapter seam, throwing UnimplementedError;
+it does not implement confirmation or durable enrollment. CI must establish
+intended missing-policy red before implementation. This is a local service
+boundary, not completed UI/CLI composition. No private signing material or
+feature completion claim is included.
