@@ -4,6 +4,27 @@ import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.d
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('confirmed admission preserves duplicate and conflict policy', () {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final store = SqlitePublisherTrustStore(database: database);
+    final operator = PublisherTrustOperator(trustStore: store);
+    final bytes = List<int>.filled(32, 1);
+    void admit(List<int> key) => operator.enroll(
+      confirmed: true,
+      publisherId: 'publisher.one',
+      keyId: 'key.one',
+      publicKey: key,
+    );
+    admit(bytes);
+    admit(bytes);
+    expect(
+      () => admit(List<int>.filled(32, 2)),
+      throwsStateError,
+    );
+    expect(store.uniquelyTrustedPublicKey(keyId: 'key.one'), bytes);
+  });
+
   test('confirmed operator admission trusts the exact public key', () {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
