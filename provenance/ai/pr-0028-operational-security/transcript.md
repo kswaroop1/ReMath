@@ -811,3 +811,13 @@ it does not implement confirmation or durable enrollment. CI must establish
 intended missing-policy red before implementation. This is a local service
 boundary, not completed UI/CLI composition. No private signing material or
 feature completion claim is included.
+
+## Operator confirmation verified red and denial — 28 October 2026
+
+CI `40606302196` on `de389cbd` proves intended red: the operator admission
+test receives UnimplementedError instead of the required StateError. Formatting,
+analysis, content/browser, secrets and historical replay pass. Implemented only
+the refusal contract using StateError without touching durable trust. Confirmed
+admission is deliberately not implemented until its next positive red example;
+no implied completion of operator controls. Retained exact red replay. Full CI
+is pending. No private material, merge or release is included.
