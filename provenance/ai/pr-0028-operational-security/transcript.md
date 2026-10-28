@@ -1012,3 +1012,13 @@ Formatting alone fails; later gates are skipped. Applied exact timestamp-strippe
 canonical adapter/test outputs and removed temporary diagnostic, preserving the
 fatal gate. No assertions or intended behaviour changed. Replacement full CI is
 pending; malformed/error coverage, revoke command and executable remain open.
+
+## Confirmed command full green and malformed input characterization — 28 October 2026
+
+Recovered unchanged `ce031191`. CI `40765252840` was cancelled during native
+tests after earlier gates passed; reran only the cancelled build/test job.
+The completed retry now passes full CI. Added existing-behaviour coverage for
+empty/unknown commands, short/non-hex keys, wrong confirmation and excess args:
+nonzero status and no admitted trust. No production change or manufactured red
+is present. CI pending. Revoke grammar, policy-error handling and explicit-path
+executable remain unfinished along with remaining security acceptance/review.
