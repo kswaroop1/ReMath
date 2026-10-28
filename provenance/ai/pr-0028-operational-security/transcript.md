@@ -821,3 +821,13 @@ the refusal contract using StateError without touching durable trust. Confirmed
 admission is deliberately not implemented until its next positive red example;
 no implied completion of operator controls. Retained exact red replay. Full CI
 is pending. No private material, merge or release is included.
+
+## Confirmed operator admission red contract — 28 October 2026
+
+Recovered unchanged `3dbd38c1`; exact-head full CI `40613697549` passes for
+unconfirmed refusal. Added the next positive business example: explicit confirmed
+admission must make the exact publisher/key bytes trusted without granting trust
+to another publisher. The current service still always throws StateError; no
+passing confirmed-admission implementation is included. CI must establish the
+intended red before delegation to the existing durable enrollment policy.
+No private signing material, UI completion or feature completion is claimed.
