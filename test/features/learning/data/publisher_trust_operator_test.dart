@@ -1,9 +1,54 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/data/publisher_trust_operator.dart';
 import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('operator rotation and revocation survive database restart', () {
+    final directory = Directory.systemTemp.createTempSync('remath-operator-');
+    addTearDown(() => directory.deleteSync(recursive: true));
+    final path = '${directory.path}/trust.sqlite';
+    final bytes = List<int>.filled(32, 1);
+    final first = sqlite3.open(path);
+    try {
+      final operator = PublisherTrustOperator(
+        trustStore: SqlitePublisherTrustStore(database: first),
+      );
+      for (final keyId in ['key.old', 'key.new']) {
+        operator.enroll(
+          confirmed: true,
+          publisherId: 'publisher.one',
+          keyId: keyId,
+          publicKey: bytes,
+        );
+      }
+      operator.revoke(
+        confirmed: true,
+        publisherId: 'publisher.one',
+        keyId: 'key.old',
+      );
+    } finally {
+      first.close();
+    }
+    final reopened = sqlite3.open(path);
+    addTearDown(reopened.close);
+    final store = SqlitePublisherTrustStore(database: reopened);
+    final operator = PublisherTrustOperator(trustStore: store);
+    expect(store.uniquelyTrustedPublicKey(keyId: 'key.old'), isNull);
+    expect(store.uniquelyTrustedPublicKey(keyId: 'key.new'), bytes);
+    expect(
+      () => operator.enroll(
+        confirmed: true,
+        publisherId: 'publisher.one',
+        keyId: 'key.old',
+        publicKey: bytes,
+      ),
+      throwsStateError,
+    );
+  });
+
   test('operator rotation preserves both keys until explicit revocation', () {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
