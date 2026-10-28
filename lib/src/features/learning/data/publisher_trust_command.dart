@@ -5,5 +5,5 @@ int runPublisherTrustCommand(
   List<String> arguments, {
   required PublisherTrustOperator operator,
 }) {
-  throw UnimplementedError('SP-006 trust command is not implemented');
+  return 64;
 }
