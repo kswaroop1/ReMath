@@ -851,3 +851,12 @@ and the original trust remains unchanged. No production behaviour changed or
 red was manufactured. CI is pending. Operator revocation, durable service
 restart coverage and user-facing composition remain incomplete along with
 other recorded signed-installation/security acceptance work.
+
+## Operator conflict behavioural green and formatting diagnosis — 28 October 2026
+
+Recovered unchanged `1dfa21e4`. CI `40632782476` passes native tests,
+including confirmed duplicate/conflict preservation, secret scanning and red
+replay. Formatting is the sole failed step; later gates are skipped. Published
+non-mutating exact formatter output for the operator test before the unchanged
+fatal gate. No assertions or business behaviour changed; authoritative full CI
+remains pending. Operator revocation and user-facing composition stay open.
