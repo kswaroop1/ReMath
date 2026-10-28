@@ -71,6 +71,9 @@ jobs:
           }
           git fetch origin refs/pull/24/head
           git cat-file -e 651cf1411a5a0b63956854c2329d4506ed1070a1^{commit}
+          verify_red 4bbadb6bddecfe8b3e65acccb5259a4dd46f9a0b \
+            test/features/learning/data/publisher_trust_operator_test.dart \
+            'Explicit operator confirmation is required.'
           verify_red de389cbd6401c3a1b15f0f39582cce47fdf32925 \
             test/features/learning/data/publisher_trust_operator_test.dart \
             'SP-006 operator confirmation is not implemented'
