@@ -12,6 +12,13 @@ final class PublisherTrustOperator {
     required String keyId,
     required List<int> publicKey,
   }) {
-    throw StateError('Explicit operator confirmation is required.');
+    if (!confirmed) {
+      throw StateError('Explicit operator confirmation is required.');
+    }
+    trustStore.enroll(
+      publisherId: publisherId,
+      keyId: keyId,
+      publicKey: publicKey,
+    );
   }
 }
