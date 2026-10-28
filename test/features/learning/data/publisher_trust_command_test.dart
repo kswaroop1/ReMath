@@ -11,10 +11,13 @@ void main() {
     final store = SqlitePublisherTrustStore(database: database);
     final operator = PublisherTrustOperator(trustStore: store);
     expect(
-      runPublisherTrustCommand(
-        ['enroll', 'publisher.one', 'key.one', '01' * 32, '--confirm'],
-        operator: operator,
-      ),
+      runPublisherTrustCommand([
+        'enroll',
+        'publisher.one',
+        'key.one',
+        '01' * 32,
+        '--confirm',
+      ], operator: operator),
       0,
     );
     expect(
