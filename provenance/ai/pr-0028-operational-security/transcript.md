@@ -1059,3 +1059,12 @@ to operator revocation. Other forms remain refused by existing guards. Retained
 exact red replay and published non-mutating canonical output for adapter/test
 before unchanged fatal formatter. Full CI pending; unconfirmed revoke/error
 coverage and the existing-database executable remain outstanding.
+
+## Revoke command behavioural green and canonical formatting — 29 October 2026
+
+Recovered unchanged `26608e49`. Diagnostic CI `40805863734` passes native
+tests, including confirmed revoke, secrets and retained red replay. Formatting
+alone fails; later gates are skipped. Applied exact timestamp-stripped canonical
+adapter/test sources and removed diagnostic while preserving fatal formatting.
+No assertions or business behaviour changed. Replacement full CI is pending;
+unconfirmed revoke/error coverage and executable remain unfinished.
