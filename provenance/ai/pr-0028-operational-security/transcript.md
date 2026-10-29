@@ -1077,3 +1077,12 @@ confirmation, wrong confirmation and excess arguments must return nonzero and
 preserve original enrolled trust. No production change or manufactured red is
 included. CI pending. Policy-error reporting, explicit-existing-database
 executable and remaining signed-install/security acceptance remain unfinished.
+
+## Unconfirmed revoke behavioural green and formatting diagnosis — 29 October 2026
+
+Recovered unchanged `2ed65698`. CI `40818026072` completes native tests
+successfully, including malformed/unconfirmed revoke preserving trust. Secret
+scanning and retained red replay pass. Formatting alone fails and later gates
+are skipped. Published non-mutating exact formatter output for changed command
+test before unchanged fatal gate. No assertions or business behaviour changed;
+full CI remains pending and remaining acceptance gaps stay open.
