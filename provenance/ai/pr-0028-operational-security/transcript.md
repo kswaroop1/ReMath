@@ -1095,3 +1095,14 @@ gates are skipped. Applied exact timestamp-stripped canonical command-test outpu
 and removed diagnostic, preserving fatal formatting. No assertions or business
 behaviour changed. Replacement full CI pending; policy-error reporting and the
 explicit-existing-database executable remain outstanding.
+
+## Command policy-error red contract — 29 October 2026
+
+Recovered unchanged `765fc178`. CI `40833117126` was cancelled during native
+tests after other gates passed; reran only cancelled job and full CI now passes.
+Added command-boundary business test requiring conflicting confirmed enrollment
+to return nonzero without throwing or replacing original trust. Existing operator
+policy throws StateError; no error-mapping implementation is present. CI must
+prove intended red before mapping expected policy refusal to a command status.
+Storage faults must not be silently converted into successful commands. Executable
+and remaining security acceptance/review stay open.
