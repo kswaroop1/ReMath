@@ -5,6 +5,27 @@ import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.d
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('confirmed revoke command removes enrolled trust', () {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final store = SqlitePublisherTrustStore(database: database);
+    final operator = PublisherTrustOperator(trustStore: store);
+    operator.enroll(
+      confirmed: true,
+      publisherId: 'publisher.one',
+      keyId: 'key.one',
+      publicKey: List<int>.filled(32, 1),
+    );
+    expect(
+      runPublisherTrustCommand(
+        ['revoke', 'publisher.one', 'key.one', '--confirm'],
+        operator: operator,
+      ),
+      0,
+    );
+    expect(store.uniquelyTrustedPublicKey(keyId: 'key.one'), isNull);
+  });
+
   test('malformed trust commands cannot admit public keys', () {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
