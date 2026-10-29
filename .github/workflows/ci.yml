@@ -71,6 +71,9 @@ jobs:
           }
           git fetch origin refs/pull/24/head
           git cat-file -e 651cf1411a5a0b63956854c2329d4506ed1070a1^{commit}
+          verify_red 97585e6d2d9c46b63c1d00bbbc5b645c4f4cd1db \
+            test/publisher_trust_tool_test.dart \
+            'Actual: <66>'
           verify_red 7060bfa3061748337326222f0eb454ba03349f0a \
             test/publisher_trust_tool_test.dart \
             'SP-006 trust tool is not implemented'
