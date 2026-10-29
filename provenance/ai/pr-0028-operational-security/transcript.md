@@ -1068,3 +1068,12 @@ alone fails; later gates are skipped. Applied exact timestamp-stripped canonical
 adapter/test sources and removed diagnostic while preserving fatal formatting.
 No assertions or business behaviour changed. Replacement full CI is pending;
 unconfirmed revoke/error coverage and executable remain unfinished.
+
+## Revoke command full green and unconfirmed characterization — 29 October 2026
+
+Recovered unchanged `2e1d98d0`; exact-head full CI `40811150858` passes
+including confirmed revoke. Added existing-behaviour command coverage: missing
+confirmation, wrong confirmation and excess arguments must return nonzero and
+preserve original enrolled trust. No production change or manufactured red is
+included. CI pending. Policy-error reporting, explicit-existing-database
+executable and remaining signed-install/security acceptance remain unfinished.
