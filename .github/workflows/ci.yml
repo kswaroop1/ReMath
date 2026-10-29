@@ -71,6 +71,9 @@ jobs:
           }
           git fetch origin refs/pull/24/head
           git cat-file -e 651cf1411a5a0b63956854c2329d4506ed1070a1^{commit}
+          verify_red 27544e0dda708908aff7f2c33e3c55887a5fe40f \
+            test/features/learning/data/publisher_trust_command_test.dart \
+            'An enrolled key identity cannot be replaced.'
           verify_red ca55c18d39de7685a62b3c246744e3e001783555 \
             test/features/learning/data/publisher_trust_command_test.dart \
             'Actual: <64>'
@@ -330,7 +333,9 @@ jobs:
       - name: Verify dependency lock is unchanged
         run: git diff --exit-code -- pubspec.lock
       - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed lib test tool
+        run: |
+          dart format --output=show lib/src/features/learning/data/publisher_trust_command.dart test/features/learning/data/publisher_trust_command_test.dart
+          dart format --output=none --set-exit-if-changed lib test tool
       - name: Static analysis
         run: flutter analyze --fatal-infos --fatal-warnings
       - name: Validate content packs
