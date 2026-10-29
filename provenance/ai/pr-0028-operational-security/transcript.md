@@ -1196,3 +1196,14 @@ zero and persist exact public bytes visible after reopening. Current tool still
 returns 66 for all requests; no passing filesystem/database composition is
 included. CI must establish intended red before implementation. Real application
 data is untouched; process entry point/error handling remain separate acceptance.
+
+## Existing database tool observed red and composition candidate — 29 October 2026
+
+Recovered unchanged `97585e6d`, with no review discussion. CI `40951783255`
+was cancelled during native tests, but its completed log proves intended focused
+red: existing-database admission expected zero, actual 66. Earlier formatting,
+analysis, content/browser, secrets and replay pass; no full-green claim is made.
+Implemented explicit path existence refusal, SQLite readWrite mode (not creation),
+composition through tested operator/command adapter and finally-close. Retained
+exact red replay. Full CI pending; process main, error status, operational docs
+and remaining security acceptance are not claimed complete.
