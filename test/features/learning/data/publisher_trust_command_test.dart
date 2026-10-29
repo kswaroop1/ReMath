@@ -18,10 +18,7 @@ void main() {
       ['enroll', 'publisher.one', 'key.one', '01' * 32, '--yes'],
       ['enroll', 'publisher.one', 'key.one', '01' * 32, '--confirm', 'extra'],
     ]) {
-      expect(
-        runPublisherTrustCommand(arguments, operator: operator),
-        isNot(0),
-      );
+      expect(runPublisherTrustCommand(arguments, operator: operator), isNot(0));
       expect(store.uniquelyTrustedPublicKey(keyId: 'key.one'), isNull);
     }
   });
