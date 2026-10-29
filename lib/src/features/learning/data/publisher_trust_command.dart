@@ -26,11 +26,15 @@ int runPublisherTrustCommand(
     for (var index = 0; index < hex.length; index += 2)
       int.parse(hex.substring(index, index + 2), radix: 16),
   ];
-  operator.enroll(
-    confirmed: true,
-    publisherId: arguments[1],
-    keyId: arguments[2],
-    publicKey: bytes,
-  );
-  return 0;
+  try {
+    operator.enroll(
+      confirmed: true,
+      publisherId: arguments[1],
+      keyId: arguments[2],
+      publicKey: bytes,
+    );
+    return 0;
+  } on StateError {
+    return 65;
+  }
 }
