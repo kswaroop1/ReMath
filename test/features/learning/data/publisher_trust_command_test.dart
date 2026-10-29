@@ -5,6 +5,31 @@ import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.d
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('unconfirmed revoke commands preserve enrolled trust', () {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final store = SqlitePublisherTrustStore(database: database);
+    final operator = PublisherTrustOperator(trustStore: store);
+    final bytes = List<int>.filled(32, 1);
+    operator.enroll(
+      confirmed: true,
+      publisherId: 'publisher.one',
+      keyId: 'key.one',
+      publicKey: bytes,
+    );
+    for (final arguments in [
+      ['revoke', 'publisher.one', 'key.one'],
+      ['revoke', 'publisher.one', 'key.one', '--yes'],
+      ['revoke', 'publisher.one', 'key.one', '--confirm', 'extra'],
+    ]) {
+      expect(
+        runPublisherTrustCommand(arguments, operator: operator),
+        isNot(0),
+      );
+      expect(store.uniquelyTrustedPublicKey(keyId: 'key.one'), bytes);
+    }
+  });
+
   test('confirmed revoke command removes enrolled trust', () {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
