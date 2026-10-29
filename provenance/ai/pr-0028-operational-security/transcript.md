@@ -1125,3 +1125,14 @@ retained red replay. Formatting alone fails; later gates are skipped. Applied
 exact timestamp-stripped canonical adapter/test sources and removed diagnostic,
 retaining fatal formatting. No assertions or behaviour changed. Replacement
 full CI pending; remaining invalid-identity/executable acceptance is unfinished.
+
+## Invalid command identity red contract — 29 October 2026
+
+Recovered unchanged `8ce4f306`. Initial CI `40861498900` passed all substantive
+gates including native tests and coverage but was cancelled in Flutter cleanup.
+The targeted retry was cancelled during native tests; no clean overall-green
+claim is made. Added next test-first boundary (not refactoring): empty publisher
+identity must return nonzero without throwing or admitting trust. Current adapter
+allows ArgumentError to escape; no passing mapping is included. CI must establish
+intended red before implementation. Prior substantive green evidence remains
+recorded separately; remaining executable/security acceptance is unchanged.
