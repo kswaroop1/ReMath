@@ -1165,3 +1165,13 @@ executable as next bounded increment, with no path guessing or implicit database
 creation and guaranteed closure/truthful status. Records-only; no production
 behaviour/assertion/completion checkbox changed. Full signed install, remaining
 security assessment/coverage and independent review remain incomplete.
+
+## Existing-database operator tool red boundary — 29 October 2026
+
+Recovered unchanged `71a21b37`. Added executable-boundary business test with
+an isolated nonexistent SQLite path: return nonzero and create no file. Only
+minimum synchronous tool seam throwing UnimplementedError accompanies it; no
+filesystem/database implementation or process entry point exists yet. CI must
+prove intended red before missing-path refusal implementation. Confirmed mutation,
+closure, truthful process status and operator instructions remain subsequent
+acceptance work. No real user database, private key or release is touched.
