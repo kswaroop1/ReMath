@@ -155,3 +155,20 @@ trust remains empty until explicitly populated; content metadata cannot admit
 itself. User-facing composition/instructions, successful signed canonical-release
 installation, concurrency/failure hardening, dependency/coverage assessment and
 independent review remain acceptance work. SP-006/CP-005 remain incomplete.
+
+## Verified command-adapter checkpoint — 29 October 2026
+
+Full CI [40900873476](https://github.com/kswaroop1/ReMath/actions/runs/40900873476)
+passes on `0ec7a7ca`. The local adapter accepts only exact confirmed enrollment
+and revocation grammars. Missing/wrong confirmation, unknown commands, malformed
+hex and excess arguments return nonzero without admission or unintended
+revocation. Enrollment conflict and invalid identity return failure without
+replacing trust; storage exceptions are not converted into success.
+
+This adapter is not an executable operator tool. The next bounded boundary must
+require an explicit existing SQLite path, refuse missing paths without creating
+files, compose the tested operator/command service, close storage on every path,
+and return truthful process status. Do not guess the platform application path
+or silently create a separate trust database. Operator instructions must explain
+independent public-key verification, rotation and irreversible revocation.
+Successful signed installation and remaining security assessment/review stay open.
