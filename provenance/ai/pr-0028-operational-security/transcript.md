@@ -1186,3 +1186,13 @@ red evidence, not a completed full-suite result. Implemented only status 66
 refusal with no filesystem/database access; successful existing-path composition
 requires its next positive test. Retained exact red replay. Full CI pending;
 executable process entry point and remaining acceptance stay unfinished.
+
+## Existing database tool positive red contract — 29 October 2026
+
+Recovered unchanged `fba13e7b`; full CI `40936526444` passes missing-path
+refusal without file creation. Added positive integration example using an
+isolated existing SQLite file: confirmed enrollment through the tool must return
+zero and persist exact public bytes visible after reopening. Current tool still
+returns 66 for all requests; no passing filesystem/database composition is
+included. CI must establish intended red before implementation. Real application
+data is untouched; process entry point/error handling remain separate acceptance.
