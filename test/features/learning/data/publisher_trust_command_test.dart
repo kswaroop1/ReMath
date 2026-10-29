@@ -18,10 +18,13 @@ void main() {
       publicKey: bytes,
     );
     expect(
-      runPublisherTrustCommand(
-        ['enroll', 'publisher.one', 'key.one', '02' * 32, '--confirm'],
-        operator: operator,
-      ),
+      runPublisherTrustCommand([
+        'enroll',
+        'publisher.one',
+        'key.one',
+        '02' * 32,
+        '--confirm',
+      ], operator: operator),
       isNot(0),
     );
     expect(store.uniquelyTrustedPublicKey(keyId: 'key.one'), bytes);
