@@ -1136,3 +1136,13 @@ identity must return nonzero without throwing or admitting trust. Current adapte
 allows ArgumentError to escape; no passing mapping is included. CI must establish
 intended red before implementation. Prior substantive green evidence remains
 recorded separately; remaining executable/security acceptance is unchanged.
+
+## Invalid command identity verified red and candidate — 29 October 2026
+
+CI `40882574739` on `0a5ae74b` proves intended red: invalid enrollment
+identity throws Trust identities must be unpadded and bounded. Test formatting
+also fails and later gates are skipped. Mapped ArgumentError from enrollment
+to failure status 65 alongside StateError; no trust assertion weakened and
+storage exceptions remain uncaught. Retained exact red replay and published
+non-mutating canonical adapter/test output before unchanged fatal formatter.
+Full CI pending; executable and other security acceptance remain incomplete.
