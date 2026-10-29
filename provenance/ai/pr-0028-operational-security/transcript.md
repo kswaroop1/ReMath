@@ -1086,3 +1086,12 @@ scanning and retained red replay pass. Formatting alone fails and later gates
 are skipped. Published non-mutating exact formatter output for changed command
 test before unchanged fatal gate. No assertions or business behaviour changed;
 full CI remains pending and remaining acceptance gaps stay open.
+
+## Revoke refusal canonical formatting recovery — 29 October 2026
+
+Recovered unchanged `c30a3009`. Diagnostic CI `40828916498` passes native
+tests, secrets and retained red replay. Formatting is the sole failure; later
+gates are skipped. Applied exact timestamp-stripped canonical command-test output
+and removed diagnostic, preserving fatal formatting. No assertions or business
+behaviour changed. Replacement full CI pending; policy-error reporting and the
+explicit-existing-database executable remain outstanding.
