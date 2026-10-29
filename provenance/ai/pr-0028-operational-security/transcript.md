@@ -1106,3 +1106,13 @@ policy throws StateError; no error-mapping implementation is present. CI must
 prove intended red before mapping expected policy refusal to a command status.
 Storage faults must not be silently converted into successful commands. Executable
 and remaining security acceptance/review stay open.
+
+## Command conflict verified red and status mapping — 29 October 2026
+
+CI `40851310358` on `27544e0d` proves intended red: conflicting command
+throws An enrolled key identity cannot be replaced. Test formatting also fails;
+later gates are skipped. Mapped only StateError from enrollment to status 65;
+SQLite/storage exceptions remain visible and cannot report success. Original
+trust preservation assertion is unchanged. Retained red replay and published
+non-mutating adapter/test formatter output before unchanged fatal gate. Full CI
+pending; invalid identities and executable remain separate acceptance work.
