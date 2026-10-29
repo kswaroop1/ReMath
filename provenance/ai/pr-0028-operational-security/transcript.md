@@ -1155,3 +1155,13 @@ Secrets and retained red replay pass. Retrieved canonical adapter/test output
 from the completed diagnostic step, applied it exactly and removed diagnostic,
 retaining fatal formatting. Assertions and intended policy unchanged. Replacement
 full CI is pending; no native/full-green claim is made for the cancelled run.
+
+## Command validation full green and executable boundary selection — 29 October 2026
+
+Recovered unchanged `0ec7a7ca`; exact-head full CI `40900873476` passes.
+Reconciled slice acceptance with exact command grammars, malformed/unconfirmed
+refusal and enrollment policy-error status. Selected explicit-existing-database
+executable as next bounded increment, with no path guessing or implicit database
+creation and guaranteed closure/truthful status. Records-only; no production
+behaviour/assertion/completion checkbox changed. Full signed install, remaining
+security assessment/coverage and independent review remain incomplete.
