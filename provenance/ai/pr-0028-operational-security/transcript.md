@@ -1146,3 +1146,12 @@ to failure status 65 alongside StateError; no trust assertion weakened and
 storage exceptions remain uncaught. Retained exact red replay and published
 non-mutating canonical adapter/test output before unchanged fatal formatter.
 Full CI pending; executable and other security acceptance remain incomplete.
+
+## Invalid identity canonical recovery after cancelled CI — 29 October 2026
+
+Recovered unchanged `5202d22d`. CI `40885501274` reports formatting failure
+and was cancelled during native tests, so behavioural green is not established.
+Secrets and retained red replay pass. Retrieved canonical adapter/test output
+from the completed diagnostic step, applied it exactly and removed diagnostic,
+retaining fatal formatting. Assertions and intended policy unchanged. Replacement
+full CI is pending; no native/full-green claim is made for the cancelled run.
