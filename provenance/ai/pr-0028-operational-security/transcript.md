@@ -1175,3 +1175,14 @@ filesystem/database implementation or process entry point exists yet. CI must
 prove intended red before missing-path refusal implementation. Confirmed mutation,
 closure, truthful process status and operator instructions remain subsequent
 acceptance work. No real user database, private key or release is touched.
+
+## Missing-database tool observed red and refusal candidate — 29 October 2026
+
+Recovered unchanged `7060bfa3`. CI `40924082924` was cancelled during native
+tests, but completed log explicitly records the intended tool test failure:
+UnimplementedError SP-006 trust tool is not implemented. Formatting, analysis,
+content/browser, secrets and retained replay passed. This is observed focused
+red evidence, not a completed full-suite result. Implemented only status 66
+refusal with no filesystem/database access; successful existing-path composition
+requires its next positive test. Retained exact red replay. Full CI pending;
+executable process entry point and remaining acceptance stay unfinished.
