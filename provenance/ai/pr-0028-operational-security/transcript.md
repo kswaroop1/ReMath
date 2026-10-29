@@ -1040,3 +1040,12 @@ red replay. Formatting alone fails; later gates are skipped. Applied exact
 timestamp-stripped canonical test source and removed diagnostic while preserving
 fatal formatting. No assertions or business behaviour changed. Replacement full
 CI is pending; revoke grammar, executable and other acceptance gaps remain open.
+
+## Revoke command red contract — 29 October 2026
+
+Recovered unchanged `4c69a50d`; full CI `40793861319` passes malformed-command
+characterization. Added positive revoke publisherId keyId --confirm example:
+return zero and remove enrolled key resolution. Current adapter supports only
+enroll and must return 64 for this grammar; no passing revoke implementation
+is included. CI must establish intended red before delegation. Unconfirmed
+revoke, error reporting, executable and other security acceptance remain open.
