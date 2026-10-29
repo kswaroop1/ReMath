@@ -22,10 +22,7 @@ void main() {
       ['revoke', 'publisher.one', 'key.one', '--yes'],
       ['revoke', 'publisher.one', 'key.one', '--confirm', 'extra'],
     ]) {
-      expect(
-        runPublisherTrustCommand(arguments, operator: operator),
-        isNot(0),
-      );
+      expect(runPublisherTrustCommand(arguments, operator: operator), isNot(0));
       expect(store.uniquelyTrustedPublicKey(keyId: 'key.one'), bytes);
     }
   });
