@@ -1116,3 +1116,12 @@ SQLite/storage exceptions remain visible and cannot report success. Original
 trust preservation assertion is unchanged. Retained red replay and published
 non-mutating adapter/test formatter output before unchanged fatal gate. Full CI
 pending; invalid identities and executable remain separate acceptance work.
+
+## Command conflict behavioural green and canonical recovery — 29 October 2026
+
+Recovered unchanged `9317d6ca`. Diagnostic CI `40856122883` passes native
+tests including conflict failure status/original trust preservation, secrets and
+retained red replay. Formatting alone fails; later gates are skipped. Applied
+exact timestamp-stripped canonical adapter/test sources and removed diagnostic,
+retaining fatal formatting. No assertions or behaviour changed. Replacement
+full CI pending; remaining invalid-identity/executable acceptance is unfinished.
