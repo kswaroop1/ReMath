@@ -71,6 +71,9 @@ jobs:
           }
           git fetch origin refs/pull/24/head
           git cat-file -e 651cf1411a5a0b63956854c2329d4506ed1070a1^{commit}
+          verify_red 7060bfa3061748337326222f0eb454ba03349f0a \
+            test/publisher_trust_tool_test.dart \
+            'SP-006 trust tool is not implemented'
           verify_red 0a5ae74b996f057fd2175e213b96b9a00d71163f \
             test/features/learning/data/publisher_trust_command_test.dart \
             'Trust identities must be unpadded and bounded.'
