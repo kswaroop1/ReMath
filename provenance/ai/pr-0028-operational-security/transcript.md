@@ -1049,3 +1049,13 @@ return zero and remove enrolled key resolution. Current adapter supports only
 enroll and must return 64 for this grammar; no passing revoke implementation
 is included. CI must establish intended red before delegation. Unconfirmed
 revoke, error reporting, executable and other security acceptance remain open.
+
+## Revoke command verified red and candidate — 29 October 2026
+
+CI `40799483063` on `ca55c18d` proves intended red: confirmed revoke command
+returns 64 instead of zero. Test formatting also fails; later gates are skipped.
+Added exact four-argument revoke grammar with trailing --confirm and delegation
+to operator revocation. Other forms remain refused by existing guards. Retained
+exact red replay and published non-mutating canonical output for adapter/test
+before unchanged fatal formatter. Full CI pending; unconfirmed revoke/error
+coverage and the existing-database executable remain outstanding.
