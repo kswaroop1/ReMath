@@ -17,10 +17,12 @@ void main() {
       publicKey: List<int>.filled(32, 1),
     );
     expect(
-      runPublisherTrustCommand(
-        ['revoke', 'publisher.one', 'key.one', '--confirm'],
-        operator: operator,
-      ),
+      runPublisherTrustCommand([
+        'revoke',
+        'publisher.one',
+        'key.one',
+        '--confirm',
+      ], operator: operator),
       0,
     );
     expect(store.uniquelyTrustedPublicKey(keyId: 'key.one'), isNull);
