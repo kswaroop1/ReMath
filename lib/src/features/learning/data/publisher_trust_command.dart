@@ -5,6 +5,16 @@ int runPublisherTrustCommand(
   List<String> arguments, {
   required PublisherTrustOperator operator,
 }) {
+  if (arguments.length == 4 &&
+      arguments[0] == 'revoke' &&
+      arguments[3] == '--confirm') {
+    operator.revoke(
+      confirmed: true,
+      publisherId: arguments[1],
+      keyId: arguments[2],
+    );
+    return 0;
+  }
   if (arguments.length != 5 ||
       arguments[0] != 'enroll' ||
       arguments[4] != '--confirm') {
