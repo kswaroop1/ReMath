@@ -1031,3 +1031,12 @@ pass. Native characterization success is not established; later gates are skippe
 Published non-mutating canonical output for the changed command test before the
 unchanged fatal formatting gate. Do not rerun the known formatting failure
 unchanged. No assertions or business behaviour changed; full CI remains pending.
+
+## Malformed command behavioural green and canonical recovery — 29 October 2026
+
+Recovered unchanged `fa7f5402`. Diagnostic CI `40789580263` completes native
+tests successfully, including malformed command refusal, secrets and retained
+red replay. Formatting alone fails; later gates are skipped. Applied exact
+timestamp-stripped canonical test source and removed diagnostic while preserving
+fatal formatting. No assertions or business behaviour changed. Replacement full
+CI is pending; revoke grammar, executable and other acceptance gaps remain open.
