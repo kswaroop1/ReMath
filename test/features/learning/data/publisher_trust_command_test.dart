@@ -5,6 +5,28 @@ import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.d
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('conflicting enrollment reports failure and preserves trust', () {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final store = SqlitePublisherTrustStore(database: database);
+    final operator = PublisherTrustOperator(trustStore: store);
+    final bytes = List<int>.filled(32, 1);
+    operator.enroll(
+      confirmed: true,
+      publisherId: 'publisher.one',
+      keyId: 'key.one',
+      publicKey: bytes,
+    );
+    expect(
+      runPublisherTrustCommand(
+        ['enroll', 'publisher.one', 'key.one', '02' * 32, '--confirm'],
+        operator: operator,
+      ),
+      isNot(0),
+    );
+    expect(store.uniquelyTrustedPublicKey(keyId: 'key.one'), bytes);
+  });
+
   test('unconfirmed revoke commands preserve enrolled trust', () {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
