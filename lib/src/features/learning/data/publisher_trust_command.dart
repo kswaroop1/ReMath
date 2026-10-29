@@ -36,5 +36,7 @@ int runPublisherTrustCommand(
     return 0;
   } on StateError {
     return 65;
+  } on ArgumentError {
+    return 65;
   }
 }
