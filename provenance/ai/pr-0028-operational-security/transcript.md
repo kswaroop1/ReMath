@@ -1377,3 +1377,14 @@ No current advisory, licence, maintenance, package-source audit or cross-platfor
 claim is made; SP-012 remains incomplete. Records-only, no code/assertion/lock
 changes, signing credentials or completion claims. Signed canonical installation,
 remaining hardening, coverage reconciliation and independent review remain open.
+
+## Upstream dependency evidence and version gap — 30 October 2026
+
+Recovered unchanged ca024d67; CI 41138567725 succeeds and no review discussion
+exists. Retrieved version-specific publisher documentation and licence for
+cryptography 2.7.0: Apache-2.0, stated maintainer and multi-platform/pure-Dart
+Ed25519 claims. The page advertises newer 2.9.0; fetching its changelog returned
+an access/internal error. Recorded the unresolved intervening-change/advisory
+assessment explicitly rather than asserting the locked version is current or
+vulnerability-free. No dependency upgrade or production behaviour changed.
+SP-012 and remaining signed-installation/security/review acceptance remain open.
