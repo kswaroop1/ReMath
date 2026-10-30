@@ -7,31 +7,34 @@ import 'package:sqlite3/sqlite3.dart';
 import '../tool/publisher_trust.dart';
 
 void main() {
-  test('operator process persists confirmed enrollment in selected storage', () {
-    final directory = Directory.systemTemp.createTempSync('remath-process-');
-    addTearDown(() => directory.deleteSync(recursive: true));
-    final path = '${directory.path}/existing.sqlite';
-    sqlite3.open(path).close();
-    final result = Process.runSync('dart', [
-      'run',
-      'tool/publisher_trust.dart',
-      path,
-      'enroll',
-      'publisher.one',
-      'key.one',
-      '01' * 32,
-      '--confirm',
-    ]);
-    expect(result.exitCode, 0, reason: result.stderr.toString());
-    final reopened = sqlite3.open(path);
-    addTearDown(reopened.close);
-    expect(
-      SqlitePublisherTrustStore(
-        database: reopened,
-      ).uniquelyTrustedPublicKey(keyId: 'key.one'),
-      List<int>.filled(32, 1),
-    );
-  });
+  test(
+    'operator process persists confirmed enrollment in selected storage',
+    () {
+      final directory = Directory.systemTemp.createTempSync('remath-process-');
+      addTearDown(() => directory.deleteSync(recursive: true));
+      final path = '${directory.path}/existing.sqlite';
+      sqlite3.open(path).close();
+      final result = Process.runSync('dart', [
+        'run',
+        'tool/publisher_trust.dart',
+        path,
+        'enroll',
+        'publisher.one',
+        'key.one',
+        '01' * 32,
+        '--confirm',
+      ]);
+      expect(result.exitCode, 0, reason: result.stderr.toString());
+      final reopened = sqlite3.open(path);
+      addTearDown(reopened.close);
+      expect(
+        SqlitePublisherTrustStore(
+          database: reopened,
+        ).uniquelyTrustedPublicKey(keyId: 'key.one'),
+        List<int>.filled(32, 1),
+      );
+    },
+  );
 
   test('operator process reports missing database as exit status 66', () {
     final directory = Directory.systemTemp.createTempSync('remath-process-');
