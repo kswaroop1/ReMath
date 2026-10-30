@@ -1327,3 +1327,17 @@ status 74 for SQLite errors inside composed command access, retained opening/
 other runtime limitations, and recorded verified process revocation/path refusal.
 Records-only; no code, assertions or completion checkboxes changed. Remaining
 signed-installation/security assessment and independent review stay open.
+
+## Competing operator-process characterization — 30 October 2026
+
+Recovered unchanged cb8d0eb8; exact-head CI 41100091594 passes and PR28 has
+no review discussion. Added existing-behaviour characterization launching two
+enrollment processes concurrently against isolated preinitialized storage with
+different public bytes for the same identity. Exactly one must report success;
+the other must report conflict (65) or SQLite contention (74), and reopened
+storage must retain the successful process's exact bytes. No production change
+or manufactured red. This checks competing process requests, not synchronized
+SQLite instruction interleavings, exhaustive race safety, crash or power loss.
+CI pending. Successful signed canonical installation, remaining hardening,
+dependency/coverage assessment, register reconciliation and independent review
+remain outstanding; no completion checkbox or review readiness is claimed.
