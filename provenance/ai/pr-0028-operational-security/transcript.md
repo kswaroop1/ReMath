@@ -1365,3 +1365,15 @@ fixture storage only; no production change or manufactured red. CI pending.
 This establishes one forced contention/retry schedule if green, not exhaustive
 concurrency, revocation/verification atomicity, crash or disk-failure safety.
 Signed canonical installation and remaining security assessment/review stay open.
+
+## Contention recovery full green and source-boundary inventory — 30 October 2026
+
+Recovered unchanged cbca75c1; full CI 41132406077 succeeds, with no review
+discussion. Recovered slice and lock from GitHub and inspected Ed25519 adapter,
+native composition and pubspec. Published deterministic contention/retry evidence
+and a bounded source-level dependency-use inventory: existing locked cryptography
+2.7.0, delegated verification, public-only inputs and data-layer interface.
+No current advisory, licence, maintenance, package-source audit or cross-platform
+claim is made; SP-012 remains incomplete. Records-only, no code/assertion/lock
+changes, signing credentials or completion claims. Signed canonical installation,
+remaining hardening, coverage reconciliation and independent review remain open.
