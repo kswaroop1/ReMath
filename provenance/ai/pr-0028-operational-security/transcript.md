@@ -1388,3 +1388,14 @@ an access/internal error. Recorded the unresolved intervening-change/advisory
 assessment explicitly rather than asserting the locked version is current or
 vulnerability-free. No dependency upgrade or production behaviour changed.
 SP-012 and remaining signed-installation/security/review acceptance remain open.
+
+## Intervening crypto release-note review — 30 October 2026
+
+Recovered unchanged 352fe75f with full CI 41144742039 and empty review discussion.
+Canonical pub.dev changelog retrieval succeeded: 2.8.0 WASM/JS interop, 2.8.1
+unspecified fixes, 2.9.0 Web Crypto Ed25519/X25519 plus fixes/refactoring.
+Documented browser relevance without equating release notes to a security audit
+or a justified retention decision. Upstream GitHub advisory-page retrieval
+returned DisabledError; respected the denial, attempted no alternate route,
+and explicitly retained the advisory assessment gap. Records-only; no dependency,
+lock, production behaviour, completion checkbox or review-ready status changed.
