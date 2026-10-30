@@ -1207,3 +1207,13 @@ Implemented explicit path existence refusal, SQLite readWrite mode (not creation
 composition through tested operator/command adapter and finally-close. Retained
 exact red replay. Full CI pending; process main, error status, operational docs
 and remaining security acceptance are not claimed complete.
+
+## Operator process entry-point red contract — 30 October 2026
+
+Recovered unchanged `4d3ac815`. Repeated targeted CI retries were cancelled;
+previous completed native log verifies both tool-function examples, but no clean
+full-suite result is claimed. Added the next business boundary, not refactoring:
+run the tool as a Dart process against an isolated missing path and require exit
+status 66 with no file created. Tool currently has no main entry point, so CI
+must prove intended missing-executable red before adding main/status delegation.
+No real database touched; full CI and remaining acceptance remain open.
