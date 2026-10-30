@@ -71,6 +71,9 @@ jobs:
           }
           git fetch origin refs/pull/24/head
           git cat-file -e 651cf1411a5a0b63956854c2329d4506ed1070a1^{commit}
+          verify_red 93352674ff86b8b3e8092a8cf6c8b406698926b9 \
+            test/publisher_trust_tool_test.dart \
+            'file is not a database'
           verify_red 7378164453e4015aee4451beda51687ff9561c54 \
             test/publisher_trust_tool_test.dart \
             "Invoked Dart programs must have a 'main' function defined"
