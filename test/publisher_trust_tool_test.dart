@@ -7,6 +7,24 @@ import 'package:sqlite3/sqlite3.dart';
 import '../tool/publisher_trust.dart';
 
 void main() {
+  test('operator process reports missing database as exit status 66', () {
+    final directory = Directory.systemTemp.createTempSync('remath-process-');
+    addTearDown(() => directory.deleteSync(recursive: true));
+    final path = '${directory.path}/missing.sqlite';
+    final result = Process.runSync('dart', [
+      'run',
+      'tool/publisher_trust.dart',
+      path,
+      'enroll',
+      'publisher.one',
+      'key.one',
+      '01' * 32,
+      '--confirm',
+    ]);
+    expect(result.exitCode, 66, reason: result.stderr.toString());
+    expect(File(path).existsSync(), isFalse);
+  });
+
   test('trust tool admits keys into the explicit existing database', () {
     final directory = Directory.systemTemp.createTempSync('remath-tool-');
     addTearDown(() => directory.deleteSync(recursive: true));
