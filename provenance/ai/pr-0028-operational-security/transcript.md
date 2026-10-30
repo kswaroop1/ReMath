@@ -1288,3 +1288,12 @@ remove trusted resolution after reopening and preserve irreversible refusal of
 re-enrollment. No production change or manufactured red. CI pending. Other failure
 coverage and signed-installation/security acceptance/review remain outstanding;
 no feature completion or merge readiness is claimed.
+
+## Process revocation full green and path refusal characterization — 30 October 2026
+
+Recovered unchanged `8c73e62a`; full CI `41056973707` passes process revocation,
+including persistent denial and irreversible re-admission refusal after reopen.
+Added existing-behaviour path-boundary characterization: no arguments or an
+existing directory path must return nonzero without creating files. No production
+change or manufactured red. CI pending. Storage failure/error handling, remaining
+signed-install/security acceptance and independent review stay unfinished.
