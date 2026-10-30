@@ -1352,3 +1352,16 @@ evidence. Records-only; no code, assertions, feature completion or review-ready
 status changed. Signed canonical installation, remaining hardening, dependency
 and meaningful coverage assessment, register reconciliation and independent review
 remain outstanding.
+
+## Deterministic write-contention characterization — 30 October 2026
+
+Recovered unchanged a8845fbf; full CI 41116337488 succeeds with no review
+discussion. Added existing-behaviour SP-006 process characterization while an
+independent SQLite connection holds BEGIN IMMEDIATE: admission must return 74,
+retain prior trust and admit no new key. After releasing the lock, the identical
+command must succeed and both exact public keys must persist on reopening.
+The lock is held until the child process exits, not timed with sleeps. Isolated
+fixture storage only; no production change or manufactured red. CI pending.
+This establishes one forced contention/retry schedule if green, not exhaustive
+concurrency, revocation/verification atomicity, crash or disk-failure safety.
+Signed canonical installation and remaining security assessment/review stay open.
