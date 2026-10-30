@@ -1239,3 +1239,14 @@ replay, fatal formatting/analysis, browser/native tests, coverage and secret che
 This is infrastructure execution allowance, not an app performance-budget change
 or test weakening. No behavioural green is claimed. Replacement full CI pending.
 Earlier repeated blind retries were ineffective; this checkpoint records diagnosis.
+
+## Operator executable full green and success-path characterization — 30 October 2026
+
+Recovered unchanged `9a945465`; full CI `41016571276` passes with adequate
+execution allowance. This verifies tool composition and missing-path process
+status after repeated timeout cancellations. Added existing-behaviour process
+integration: confirmed enrollment must exit zero and persist exact public bytes
+in the explicitly selected existing isolated database, verified after reopening.
+No production change or manufactured red. CI pending. Operational instructions,
+error/failure coverage, successful signed install and remaining security review
+acceptance stay unfinished; PR28 remains draft.
