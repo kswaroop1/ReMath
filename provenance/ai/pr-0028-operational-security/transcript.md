@@ -1308,3 +1308,13 @@ file must return nonzero without throwing or replacing its contents. Current
 composition lets SqliteException escape; no passing error mapping is included.
 CI must establish intended red before handling storage failure. Uses isolated
 fixture storage only. Remaining signed-install/security review acceptance stays open.
+
+## Invalid storage verified red and failure status — 30 October 2026
+
+Recovered unchanged `93352674`. CI `41081347876` proves intended red:
+invalid database test throws SqliteException(26), file is not a database.
+Formatting, analysis, content/browser, secrets and prior replay pass. Added only
+SqliteException handling around composed command/table access returning failure
+status 74; finally-close remains intact. Opening failures before that scope and
+other runtime errors are not claimed covered. Retained exact red replay. Full CI
+pending; supplied file preservation assertion unchanged. No completion claim.
