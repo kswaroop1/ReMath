@@ -203,8 +203,9 @@ multiple publishers cannot authorize verification, even after one claim is revok
 
 Exit status: 0 means the command completed; 64 means unsupported/malformed command
 or missing confirmation; 65 means enrollment identity/conflict/revocation policy
-refused admission; 66 means no supplied existing file. Other storage/runtime
-failures currently surface as uncaught process errors, not successful commands.
+refused admission; 66 means no supplied existing file. SQLite failures during composed command/table access return 74 and still close
+storage. Opening failures before that scope and other runtime failures can still
+surface as uncaught process errors, never successful commands.
 Do not interpret silence as success: inspect the process exit status.
 
 Limitations: this is a developer/operator tool, not a packaged mobile UI. It opens
@@ -213,3 +214,16 @@ the correct application content database is the operator's responsibility.
 Process-level revocation/failure coverage and remaining signed-installation,
 concurrency/security assessment, coverage reconciliation and independent review
 remain acceptance work. SP-006/CP-005 are not marked complete.
+
+## Verified operator failure checkpoint — 30 October 2026
+
+Full CI [41092988680](https://github.com/kswaroop1/ReMath/actions/runs/41092988680)
+passes on `44b2ccc9`. Process revocation persists after reopening and prevents
+re-enrollment. Empty/missing/directory paths are refused without file creation.
+An existing non-SQLite fixture reports failure while preserving its original
+contents. These examples do not establish safety for every corrupt database,
+opening failure, concurrent process, filesystem fault or privileged attacker.
+
+The operator tool is usable at its documented developer boundary; broader
+signed-installation, concurrency/failure assessment, dependency/coverage review,
+feature reconciliation and independent review remain outstanding.
