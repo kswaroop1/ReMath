@@ -1217,3 +1217,13 @@ run the tool as a Dart process against an isolated missing path and require exit
 status 66 with no file created. Tool currently has no main entry point, so CI
 must prove intended missing-executable red before adding main/status delegation.
 No real database touched; full CI and remaining acceptance remain open.
+
+## Operator process verified red and entry point — 30 October 2026
+
+Recovered unchanged `73781644`. CI `40990733039` proves intended process red:
+expected exit 66, actual 253, with Invoked Dart programs must have a main function
+defined. Formatting, analysis, content/browser, secrets and prior replay pass.
+Added only main delegating arguments to the tested tool and assigning its return
+to dart:io exitCode. Retained exact red replay. Full CI pending; successful process
+mutation, storage-failure reporting and operator instructions remain outstanding.
+No full security feature completion or review readiness is claimed.
