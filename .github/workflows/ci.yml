@@ -71,6 +71,9 @@ jobs:
           }
           git fetch origin refs/pull/24/head
           git cat-file -e 651cf1411a5a0b63956854c2329d4506ed1070a1^{commit}
+          verify_red 7378164453e4015aee4451beda51687ff9561c54 \
+            test/publisher_trust_tool_test.dart \
+            "Invoked Dart programs must have a 'main' function defined"
           verify_red 97585e6d2d9c46b63c1d00bbbc5b645c4f4cd1db \
             test/publisher_trust_tool_test.dart \
             'Actual: <66>'
