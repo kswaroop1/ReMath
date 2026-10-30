@@ -7,6 +7,26 @@ import 'package:sqlite3/sqlite3.dart';
 import '../tool/publisher_trust.dart';
 
 void main() {
+  test('invalid database reports failure without replacing its contents', () {
+    final directory = Directory.systemTemp.createTempSync('remath-tool-');
+    addTearDown(() => directory.deleteSync(recursive: true));
+    final file = File('${directory.path}/invalid.sqlite');
+    const original = 'not a SQLite database';
+    file.writeAsStringSync(original);
+    expect(
+      runPublisherTrustTool([
+        file.path,
+        'enroll',
+        'publisher.one',
+        'key.one',
+        '01' * 32,
+        '--confirm',
+      ]),
+      isNot(0),
+    );
+    expect(file.readAsStringSync(), original);
+  });
+
   test('operator tool refuses empty arguments and directory paths', () {
     final directory = Directory.systemTemp.createTempSync('remath-tool-');
     addTearDown(() => directory.deleteSync(recursive: true));
