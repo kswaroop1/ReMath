@@ -1279,3 +1279,12 @@ that wrong existing database selection can create trust tables, runtime/storage
 faults remain uncaught, and this is not packaged mobile UI. No production behaviour,
 assertions or completion checkboxes changed. Process revoke/failure coverage and
 remaining signed-install/security review acceptance stay unfinished.
+
+## Operator process revocation characterization — 30 October 2026
+
+Recovered unchanged `55ac5526`; full CI `41046589060` passes. Added existing-
+behaviour process coverage using isolated storage: confirmed revoke must exit zero,
+remove trusted resolution after reopening and preserve irreversible refusal of
+re-enrollment. No production change or manufactured red. CI pending. Other failure
+coverage and signed-installation/security acceptance/review remain outstanding;
+no feature completion or merge readiness is claimed.
