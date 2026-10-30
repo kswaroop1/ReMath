@@ -19,6 +19,8 @@ int runPublisherTrustTool(List<String> arguments) {
         trustStore: SqlitePublisherTrustStore(database: database),
       ),
     );
+  } on SqliteException {
+    return 74;
   } finally {
     database.close();
   }
