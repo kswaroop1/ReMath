@@ -227,3 +227,17 @@ opening failure, concurrent process, filesystem fault or privileged attacker.
 The operator tool is usable at its documented developer boundary; broader
 signed-installation, concurrency/failure assessment, dependency/coverage review,
 feature reconciliation and independent review remain outstanding.
+
+## Verified competing-process checkpoint — 30 October 2026
+
+Full CI [41109286166](https://github.com/kswaroop1/ReMath/actions/runs/41109286166)
+passes on `3293d021`. Two concurrently launched operator processes compete to
+admit different public bytes for one publisher/key identity. The example requires
+exactly one success, a conflict or SQLite-contention failure for the other, and
+the successful process's exact public bytes after reopening storage.
+
+Concurrent process launch does not force a particular SQLite instruction
+interleaving or prove all race schedules safe. In particular, this is not a
+revocation-versus-verification race test or process-kill/disk-failure evidence.
+The signed canonical-installation journey and final security assessment/review
+remain open; SP-006/CP-005 remain incomplete.
