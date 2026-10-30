@@ -1341,3 +1341,14 @@ SQLite instruction interleavings, exhaustive race safety, crash or power loss.
 CI pending. Successful signed canonical installation, remaining hardening,
 dependency/coverage assessment, register reconciliation and independent review
 remain outstanding; no completion checkbox or review readiness is claimed.
+
+## Competing-process full green checkpoint — 30 October 2026
+
+Recovered unchanged 3293d021; full CI 41109286166 succeeds and review discussion
+remains empty. Published verified competing-process results in the slice and PR
+description, preserving limitations: concurrent launch is not synchronized
+instruction-level scheduling, revocation/verification race coverage or crash
+evidence. Records-only; no code, assertions, feature completion or review-ready
+status changed. Signed canonical installation, remaining hardening, dependency
+and meaningful coverage assessment, register reconciliation and independent review
+remain outstanding.
