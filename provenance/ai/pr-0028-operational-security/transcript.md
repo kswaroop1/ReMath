@@ -1297,3 +1297,14 @@ Added existing-behaviour path-boundary characterization: no arguments or an
 existing directory path must return nonzero without creating files. No production
 change or manufactured red. CI pending. Storage failure/error handling, remaining
 signed-install/security acceptance and independent review stay unfinished.
+
+## Path refusal full green and invalid storage red contract — 30 October 2026
+
+Recovered unchanged `436d418f`; full CI `41071824156` passes empty/directory
+path refusal. The preceding test update returned an internal connector error;
+read back the file, confirmed it was absent, then retried successfully after the
+provenance commit. Added next test-first failure boundary: an existing non-SQLite
+file must return nonzero without throwing or replacing its contents. Current
+composition lets SqliteException escape; no passing error mapping is included.
+CI must establish intended red before handling storage failure. Uses isolated
+fixture storage only. Remaining signed-install/security review acceptance stays open.
