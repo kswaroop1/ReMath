@@ -1268,3 +1268,14 @@ skipped. Applied exact timestamp-stripped canonical tool-test source and removed
 temporary diagnostic, preserving fatal formatter. No assertions or business
 behaviour changed. Replacement full CI pending; operational instructions and
 remaining security acceptance are not yet complete.
+
+## Process enrollment full green and operator instructions — 30 October 2026
+
+Recovered unchanged `84cfbe54`; full CI `41040075730` passes. Published local
+operator procedure for exact existing content database selection, independent
+public-key verification, confirmed enrollment/revocation, rotation, irreversible
+tombstones, offline distribution and truthful exit statuses. Explicitly documented
+that wrong existing database selection can create trust tables, runtime/storage
+faults remain uncaught, and this is not packaged mobile UI. No production behaviour,
+assertions or completion checkboxes changed. Process revoke/failure coverage and
+remaining signed-install/security review acceptance stay unfinished.
