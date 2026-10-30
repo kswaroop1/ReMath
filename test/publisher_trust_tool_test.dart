@@ -7,6 +7,44 @@ import 'package:sqlite3/sqlite3.dart';
 import '../tool/publisher_trust.dart';
 
 void main() {
+  test('operator process revocation persists and prevents re-admission', () {
+    final directory = Directory.systemTemp.createTempSync('remath-process-');
+    addTearDown(() => directory.deleteSync(recursive: true));
+    final path = '${directory.path}/existing.sqlite';
+    final initial = sqlite3.open(path);
+    try {
+      SqlitePublisherTrustStore(database: initial).enroll(
+        publisherId: 'publisher.one',
+        keyId: 'key.one',
+        publicKey: List<int>.filled(32, 1),
+      );
+    } finally {
+      initial.close();
+    }
+    final result = Process.runSync('dart', [
+      'run',
+      'tool/publisher_trust.dart',
+      path,
+      'revoke',
+      'publisher.one',
+      'key.one',
+      '--confirm',
+    ]);
+    expect(result.exitCode, 0, reason: result.stderr.toString());
+    final reopened = sqlite3.open(path);
+    addTearDown(reopened.close);
+    final store = SqlitePublisherTrustStore(database: reopened);
+    expect(store.uniquelyTrustedPublicKey(keyId: 'key.one'), isNull);
+    expect(
+      () => store.enroll(
+        publisherId: 'publisher.one',
+        keyId: 'key.one',
+        publicKey: List<int>.filled(32, 1),
+      ),
+      throwsStateError,
+    );
+  });
+
   test(
     'operator process persists confirmed enrollment in selected storage',
     () {
