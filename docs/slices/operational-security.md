@@ -172,3 +172,44 @@ and return truthful process status. Do not guess the platform application path
 or silently create a separate trust database. Operator instructions must explain
 independent public-key verification, rotation and irreversible revocation.
 Successful signed installation and remaining security assessment/review stay open.
+
+## Local operator tool — 30 October 2026
+
+Full CI [41040075730](https://github.com/kswaroop1/ReMath/actions/runs/41040075730)
+passes on `84cfbe54`, including successful Dart-process enrollment and persisted
+public bytes verified after reopening.
+
+Run from a checked-out repository with its locked dependencies installed. Close
+ReMath first and identify the exact existing `remath-content.sqlite` used by
+that installation. Do not use the personal-progress database or invent a new path.
+Keep a recoverable copy before modifying trust. The tool does not discover paths,
+create missing database files, download trust roots or handle private signing keys.
+
+Independently verify the publisher identity, key ID and all 32 public-key bytes
+through a trusted channel before admission. A key supplied inside the pack is
+not evidence of its own authenticity. The hex argument is exactly 64 hex digits.
+
+```text
+dart run tool/publisher_trust.dart "<existing-content-database>" enroll <publisher-id> <key-id> <64-hex-public-key> --confirm
+dart run tool/publisher_trust.dart "<existing-content-database>" revoke <publisher-id> <key-id> --confirm
+```
+
+Rotation: explicitly enroll a distinct new key ID, verify its intended use, then
+explicitly revoke the old identity when appropriate. Admission does not silently
+revoke earlier keys. Revocation is irreversible for that publisher/key identity,
+including future re-enrollment, and does not delete already installed content.
+Offline devices require their own explicit local updates. A key ID claimed by
+multiple publishers cannot authorize verification, even after one claim is revoked.
+
+Exit status: 0 means the command completed; 64 means unsupported/malformed command
+or missing confirmation; 65 means enrollment identity/conflict/revocation policy
+refused admission; 66 means no supplied existing file. Other storage/runtime
+failures currently surface as uncaught process errors, not successful commands.
+Do not interpret silence as success: inspect the process exit status.
+
+Limitations: this is a developer/operator tool, not a packaged mobile UI. It opens
+the selected existing SQLite database and may create trust tables there; selecting
+the correct application content database is the operator's responsibility.
+Process-level revocation/failure coverage and remaining signed-installation,
+concurrency/security assessment, coverage reconciliation and independent review
+remain acceptance work. SP-006/CP-005 are not marked complete.
