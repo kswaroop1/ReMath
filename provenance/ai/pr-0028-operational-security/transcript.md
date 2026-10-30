@@ -1259,3 +1259,12 @@ red replay. Formatting alone fails; later gates are skipped. Published non-mutat
 canonical formatter output for changed tool test before unchanged fatal gate.
 No assertions or business behaviour changed. Full CI pending; operator instructions,
 remaining failure coverage and signed-install/security acceptance remain open.
+
+## Process enrollment canonical formatting recovery — 30 October 2026
+
+Recovered unchanged `3dc9e501`. Diagnostic CI `41032106975` passes native
+tests, secrets and retained red replay. Formatting alone fails; later gates are
+skipped. Applied exact timestamp-stripped canonical tool-test source and removed
+temporary diagnostic, preserving fatal formatter. No assertions or business
+behaviour changed. Replacement full CI pending; operational instructions and
+remaining security acceptance are not yet complete.
