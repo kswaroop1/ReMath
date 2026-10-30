@@ -7,6 +7,24 @@ import 'package:sqlite3/sqlite3.dart';
 import '../tool/publisher_trust.dart';
 
 void main() {
+  test('operator tool refuses empty arguments and directory paths', () {
+    final directory = Directory.systemTemp.createTempSync('remath-tool-');
+    addTearDown(() => directory.deleteSync(recursive: true));
+    expect(runPublisherTrustTool([]), isNot(0));
+    expect(
+      runPublisherTrustTool([
+        directory.path,
+        'enroll',
+        'publisher.one',
+        'key.one',
+        '01' * 32,
+        '--confirm',
+      ]),
+      isNot(0),
+    );
+    expect(directory.listSync(), isEmpty);
+  });
+
   test('operator process revocation persists and prevents re-admission', () {
     final directory = Directory.systemTemp.createTempSync('remath-process-');
     addTearDown(() => directory.deleteSync(recursive: true));
