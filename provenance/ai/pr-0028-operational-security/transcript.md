@@ -1318,3 +1318,12 @@ SqliteException handling around composed command/table access returning failure
 status 74; finally-close remains intact. Opening failures before that scope and
 other runtime errors are not claimed covered. Retained exact red replay. Full CI
 pending; supplied file preservation assertion unchanged. No completion claim.
+
+## Invalid storage full green and operator checkpoint reconciliation — 30 October 2026
+
+Recovered unchanged `44b2ccc9`; full CI `41092988680` passes invalid-file
+failure status and content preservation. Reconciled operator instructions with
+status 74 for SQLite errors inside composed command access, retained opening/
+other runtime limitations, and recorded verified process revocation/path refusal.
+Records-only; no code, assertions or completion checkboxes changed. Remaining
+signed-installation/security assessment and independent review stay open.
