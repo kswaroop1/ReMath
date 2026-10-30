@@ -265,3 +265,26 @@ checks remain required for SP-012 acceptance. Lock integrity and passing public
 vectors do not establish supply-chain trust. Successful signed canonical-release
 installation, remaining race/failure work, meaningful coverage reconciliation
 and independent review remain open.
+
+## SP-012 upstream evidence — 30 October 2026
+
+Checked the locked version's upstream
+[package documentation](https://pub.dev/packages/cryptography/versions/2.7.0)
+and [licence](https://pub.dev/packages/cryptography/versions/2.7.0/license).
+The publisher identifies Apache-2.0 licensing and gohilla.com maintenance.
+Its documentation describes multi-platform use and a pure-Dart Ed25519
+implementation; these are upstream capability statements, not evidence of
+ReMath installation on every target. No additional platform crypto package is
+introduced here.
+
+The upstream page identifies 2.9.0 as newer than the locked 2.7.0. Therefore
+the existing lock is reproducible but must not be described as current merely
+because CI passes. A direct newer-version changelog fetch failed in this review;
+no claim is made about intervening fixes or absence of vulnerabilities.
+Before SP-012 acceptance, compare intervening changes/advisories against this
+verification use and record either an evidenced retention decision or a separate
+tested dependency update. No speculative lock upgrade is included.
+
+Latest records checkpoint `ca024d67` passes full CI
+[41138567725](https://github.com/kswaroop1/ReMath/actions/runs/41138567725).
+SP-012, signed-installation acceptance and independent review remain open.
