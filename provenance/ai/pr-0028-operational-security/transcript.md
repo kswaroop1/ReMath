@@ -1250,3 +1250,12 @@ in the explicitly selected existing isolated database, verified after reopening.
 No production change or manufactured red. CI pending. Operational instructions,
 error/failure coverage, successful signed install and remaining security review
 acceptance stay unfinished; PR28 remains draft.
+
+## Process enrollment behavioural green and formatting diagnosis — 30 October 2026
+
+Recovered unchanged `c8833f99`. CI `41026266913` passes native tests including
+successful process enrollment and reopened durable trust, secrets and retained
+red replay. Formatting alone fails; later gates are skipped. Published non-mutating
+canonical formatter output for changed tool test before unchanged fatal gate.
+No assertions or business behaviour changed. Full CI pending; operator instructions,
+remaining failure coverage and signed-install/security acceptance remain open.
