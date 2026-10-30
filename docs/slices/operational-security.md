@@ -288,3 +288,21 @@ tested dependency update. No speculative lock upgrade is included.
 Latest records checkpoint `ca024d67` passes full CI
 [41138567725](https://github.com/kswaroop1/ReMath/actions/runs/41138567725).
 SP-012, signed-installation acceptance and independent review remain open.
+
+### Intervening release-note review — 30 October 2026
+
+The canonical [upstream changelog](https://pub.dev/packages/cryptography/changelog)
+was accessible after the version-specific URL failed. Between locked 2.7.0 and
+advertised 2.9.0 it lists WASM/JS-interop support (2.8.0), unspecified bug fixes
+(2.8.1), and Web Crypto Ed25519/X25519 support plus fixes/refactoring (2.9.0).
+These notes identify browser-backend changes relevant to future cross-platform
+verification; they do not identify every corrected defect or establish whether
+2.7.0 is affected by a security issue. Retaining 2.7.0 is not yet a completed
+security disposition.
+
+The upstream GitHub advisory page returned DisabledError through the research
+tool. No alternate access route was attempted and no clean advisory result is
+claimed. Advisory assessment and detailed fix applicability remain unresolved;
+other authorized implementation work is not blocked by that single lookup.
+Current records head `352fe75f` passes CI
+[41144742039](https://github.com/kswaroop1/ReMath/actions/runs/41144742039).
