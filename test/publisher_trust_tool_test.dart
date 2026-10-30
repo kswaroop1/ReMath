@@ -7,6 +7,43 @@ import 'package:sqlite3/sqlite3.dart';
 import '../tool/publisher_trust.dart';
 
 void main() {
+  test('competing processes cannot replace a key identity', () async {
+    final directory = Directory.systemTemp.createTempSync('remath-race-');
+    addTearDown(() => directory.deleteSync(recursive: true));
+    final path = '${directory.path}/existing.sqlite';
+    final initial = sqlite3.open(path);
+    try {
+      SqlitePublisherTrustStore(database: initial);
+    } finally {
+      initial.close();
+    }
+    final results = await Future.wait([
+      for (final hex in ['01', '02'])
+        Process.run('dart', [
+          'run',
+          'tool/publisher_trust.dart',
+          path,
+          'enroll',
+          'publisher.one',
+          'key.one',
+          hex * 32,
+          '--confirm',
+        ]),
+    ]);
+    final statuses = results.map((result) => result.exitCode).toList();
+    expect(statuses.where((status) => status == 0), hasLength(1));
+    expect(statuses.where((status) => status != 0).single, anyOf(65, 74));
+    final winner = statuses.indexOf(0) + 1;
+    final reopened = sqlite3.open(path);
+    addTearDown(reopened.close);
+    expect(
+      SqlitePublisherTrustStore(
+        database: reopened,
+      ).uniquelyTrustedPublicKey(keyId: 'key.one'),
+      List<int>.filled(32, winner),
+    );
+  });
+
   test('invalid database reports failure without replacing its contents', () {
     final directory = Directory.systemTemp.createTempSync('remath-tool-');
     addTearDown(() => directory.deleteSync(recursive: true));
