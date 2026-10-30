@@ -241,3 +241,27 @@ interleaving or prove all race schedules safe. In particular, this is not a
 revocation-versus-verification race test or process-kill/disk-failure evidence.
 The signed canonical-installation journey and final security assessment/review
 remain open; SP-006/CP-005 remain incomplete.
+
+## Verified contention recovery and dependency boundary — 30 October 2026
+
+Full CI [41132406077](https://github.com/kswaroop1/ReMath/actions/runs/41132406077)
+passes on `cbca75c1`. A separate connection holds an immediate write transaction
+until the operator process exits. Admission returns 74 without changing prior
+trust; releasing the lock permits the identical command to succeed, with both
+exact keys verified after reopening. This is one deterministic contention/retry
+schedule, not process termination, power loss or exhaustive race evidence.
+
+Source-level dependency review at this checkpoint: the signature adapter imports
+the existing cryptography package, pinned by pubspec.lock to 2.7.0 with a hosted
+archive SHA-256. It delegates Ed25519 verification rather than implementing the
+primitive, and receives only public key bytes, payload and signature. Native
+composition supplies the SQLite trust store through ContentPackSignatureVerifier;
+domain code does not need the cryptography API. This path has no signing service,
+private-key handling or network operation. No dependency or lock change is made.
+
+This is a dependency-use/boundary inventory, not a package-source audit or a
+current vulnerability, maintenance, licence or all-platform assessment. Those
+checks remain required for SP-012 acceptance. Lock integrity and passing public
+vectors do not establish supply-chain trust. Successful signed canonical-release
+installation, remaining race/failure work, meaningful coverage reconciliation
+and independent review remain open.
