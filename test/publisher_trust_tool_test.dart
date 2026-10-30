@@ -7,6 +7,55 @@ import 'package:sqlite3/sqlite3.dart';
 import '../tool/publisher_trust.dart';
 
 void main() {
+  test('locked storage refuses admission and permits a safe retry', () async {
+    final directory = Directory.systemTemp.createTempSync('remath-lock-');
+    addTearDown(() => directory.deleteSync(recursive: true));
+    final path = '${directory.path}/existing.sqlite';
+    final holder = sqlite3.open(path);
+    addTearDown(holder.close);
+    final store = SqlitePublisherTrustStore(database: holder);
+    store.enroll(
+      publisherId: 'publisher.one',
+      keyId: 'key.old',
+      publicKey: List<int>.filled(32, 2),
+    );
+    final arguments = [
+      'run',
+      'tool/publisher_trust.dart',
+      path,
+      'enroll',
+      'publisher.one',
+      'key.new',
+      '01' * 32,
+      '--confirm',
+    ];
+    holder.execute('BEGIN IMMEDIATE');
+    try {
+      final blocked = await Process.run('dart', arguments);
+      expect(blocked.exitCode, 74, reason: blocked.stderr.toString());
+      expect(store.uniquelyTrustedPublicKey(keyId: 'key.new'), isNull);
+      expect(
+        store.uniquelyTrustedPublicKey(keyId: 'key.old'),
+        List<int>.filled(32, 2),
+      );
+    } finally {
+      holder.execute('ROLLBACK');
+    }
+    final retried = await Process.run('dart', arguments);
+    expect(retried.exitCode, 0, reason: retried.stderr.toString());
+    final reopened = sqlite3.open(path);
+    addTearDown(reopened.close);
+    final recovered = SqlitePublisherTrustStore(database: reopened);
+    expect(
+      recovered.uniquelyTrustedPublicKey(keyId: 'key.new'),
+      List<int>.filled(32, 1),
+    );
+    expect(
+      recovered.uniquelyTrustedPublicKey(keyId: 'key.old'),
+      List<int>.filled(32, 2),
+    );
+  });
+
   test('competing processes cannot replace a key identity', () async {
     final directory = Directory.systemTemp.createTempSync('remath-race-');
     addTearDown(() => directory.deleteSync(recursive: true));
