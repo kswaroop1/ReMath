@@ -1227,3 +1227,15 @@ Added only main delegating arguments to the tested tool and assigning its return
 to dart:io exitCode. Retained exact red replay. Full CI pending; successful process
 mutation, storage-failure reporting and operator instructions remain outstanding.
 No full security feature completion or review readiness is claimed.
+
+## Repeated CI cancellation root cause and bounded recovery — 30 October 2026
+
+Recovered unchanged `db2b9de3`. Inspected actual workflow and latest retry logs:
+quality job timeout is 20 minutes; job began 05:35:47 UTC and cancellation was
+logged 05:55:54 UTC. Growing mandatory historical red replay consumes the shared
+job budget, explaining variable cancellation points without source failures.
+Raised only quality job execution allowance to 60 minutes; preserved every red
+replay, fatal formatting/analysis, browser/native tests, coverage and secret check.
+This is infrastructure execution allowance, not an app performance-budget change
+or test weakening. No behavioural green is claimed. Replacement full CI pending.
+Earlier repeated blind retries were ineffective; this checkpoint records diagnosis.
