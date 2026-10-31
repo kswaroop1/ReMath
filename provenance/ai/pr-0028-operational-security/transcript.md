@@ -1605,3 +1605,16 @@ while preserving fatal formatting. No assertions or behaviour changed.
 Replacement full CI pending. Successful signed canonical installation and
 post-verification durable revocation/ambiguity activation evidence, receipt
 lifecycle/bounds and independent review remain open; no P1-resolution claim.
+
+## Native guard full green and bounded receipt red contract — 31 October 2026
+
+Recovered unchanged c007d356; full CI 41223749312 succeeds. Selected bounded
+SP-006 authorization lifecycle contract: keep at most 32 pending verification
+receipts per verifier. A 33rd distinct valid verification must evict the oldest,
+which then requires re-verification; the newest remains usable. This is a
+fail-closed operational capacity limit, not an app performance-budget change.
+Added public RFC-vector test for eviction denial/newest acceptance; current
+unbounded map retains the first receipt, so intended red must precede capacity
+enforcement. No production implementation or private signing material included.
+Native positive signed installation, durable activation-race evidence, cleanup
+and final independent review remain required; PR28/P1 stay incomplete.
