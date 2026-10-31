@@ -1660,3 +1660,21 @@ controlled trust changes through a second connection, preserving prior pointers
 and cleanup. Receipt identities need a fixed-size cryptographic digest or an
 aggregate retained-byte limit, not another entry-count-only claim. No production
 change in this checkpoint; draft/P1/P2 remain open.
+
+## Public-only canonical fixture and native positive characterization — 31 October 2026
+
+Recovered unchanged ce1a69d9; full CI 41243252618 succeeds. Prepared a compact
+original test pack and canonical release metadata matching the production field
+order. An isolated local Python cryptography process generated an ephemeral
+in-memory Ed25519 test key, signed and self-verified the payload, and emitted only
+public bytes/signature/digest. No private key/seed was printed, written, committed,
+configured as a credential or retained; no Flutter execution or signing service.
+Committed only public fixture material. Archive SHA-256:
+b7450252910f7a7ad729f2df52e14784be633cf12dec44aa63197c0abbe08e19.
+
+Added existing-behaviour characterization using actual native verifier, SQLite
+enrollment, production canonical payload, installer and startup confirmation.
+Require activated outcome, exact active version and confirmed loaded pack.
+This is not new production behaviour or a manufactured red; CI must validate the
+cross-implementation fixture and full journey. No positive journey claim yet.
+Durable revocation/ambiguity schedules, WAL, memory bounds and review remain open.
