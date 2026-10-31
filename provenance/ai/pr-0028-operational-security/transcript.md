@@ -1618,3 +1618,15 @@ unbounded map retains the first receipt, so intended red must precede capacity
 enforcement. No production implementation or private signing material included.
 Native positive signed installation, durable activation-race evidence, cleanup
 and final independent review remain required; PR28/P1 stay incomplete.
+
+## Receipt capacity verified red and bounded eviction — 31 October 2026
+
+Recovered unchanged 7221d60e. CI 41228268427 passes formatting, analysis,
+browser/content, secrets and prior replay; intended red is verified: oldest
+authorization expected verification exception after 33 successes, returned null.
+Added only a 32-entry pending receipt cap, removing the oldest insertion when
+capacity is exceeded. Evicted authorization has no receipt and fails closed
+until re-verification. No assertions weakened. Retained exact red replay; full CI
+pending. This bounds entry count, not arbitrary payload byte sizes or lifecycle
+cleanup on every failure; those limits and successful signed-install/race evidence
+remain review work. P1 activation finding stays open.
