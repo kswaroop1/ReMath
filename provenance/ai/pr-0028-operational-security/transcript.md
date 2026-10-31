@@ -1581,3 +1581,16 @@ Current composition does not wire the real verifier's final authorization guard,
 so activation should succeed incorrectly. No passing production fix included;
 CI must establish intended red. This is unauthorized-bypass denial, not successful
 signed canonical release or post-verification revocation evidence. P1 stays open.
+
+## Native activation verified red and real guard composition — 31 October 2026
+
+Recovered unchanged b3760892. CI 41214020045 proves direct native activation
+incorrectly emits activated instead of verification exception. Formatting also
+fails; later gates skipped. Exposed the existing canonical payload function
+without changing encoding and composed real Ed25519 final authorization inside
+the backend transaction using the same release payload/signature and verifier
+instance. Optional injected validator is additional, not an override of native
+enforcement. Retained red replay and non-mutating formatter diagnostic. Full CI
+pending. Positive real signed installation, post-verification durable revocation/
+ambiguity activation tests, receipt lifecycle/bounds and independent re-review
+remain required; P1 is not marked resolved.
