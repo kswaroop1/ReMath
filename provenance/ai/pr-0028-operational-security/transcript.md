@@ -1523,3 +1523,14 @@ replay; full CI pending. This implements the tested injected authorization
 boundary only. Native Ed25519 exact-key authorization capture/composition and
 real SQLite revocation/ambiguity regressions remain absent; P1 4430247175 is
 NOT resolved and no production fail-closed completion is claimed.
+
+## Exact-key final authorization red contract — 31 October 2026
+
+Recovered unchanged 696e4356; full CI 41190264951 passes the injected activation
+transaction guard. Added minimum synchronous validateAuthorization seam throwing
+UnimplementedError, plus public RFC-vector test: no prior verified authorization
+must throw verification exception; successful verification allows unchanged
+payload; changed payload and subsequently revoked key must refuse. No private
+signing material. CI must prove intended missing-authorization red before storing
+verified exact-key/payload evidence. This primitive contract is not native release
+composition or a signed canonical-installation journey; P1 remains open.
