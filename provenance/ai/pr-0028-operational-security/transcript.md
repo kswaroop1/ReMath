@@ -1594,3 +1594,14 @@ enforcement. Retained red replay and non-mutating formatter diagnostic. Full CI
 pending. Positive real signed installation, post-verification durable revocation/
 ambiguity activation tests, receipt lifecycle/bounds and independent re-review
 remain required; P1 is not marked resolved.
+
+## Native activation behavioural green and canonical recovery — 31 October 2026
+
+Recovered unchanged 636dd7c3. CI 41220135499 passes native tests including real
+guard bypass denial, secrets and retained red replay. Formatting alone fails;
+later gates skipped. Applied exact timestamp-stripped canonical lifecycle/test
+output, leaving unchanged archive-verifier source alone, and removed diagnostic
+while preserving fatal formatting. No assertions or behaviour changed.
+Replacement full CI pending. Successful signed canonical installation and
+post-verification durable revocation/ambiguity activation evidence, receipt
+lifecycle/bounds and independent review remain open; no P1-resolution claim.
