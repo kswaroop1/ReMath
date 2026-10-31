@@ -1,0 +1,17 @@
+schema_version: 1
+pull_request: 28
+title: Establish operational security and publisher trust
+human_owner: kswaroop1
+agents:
+  - product: OpenAI Codex
+    model: gpt-6.1-sol-wm
+started_at: 2026-10-24T20:55:00Z
+finalized_at: null
+scope:
+  - docs
+  - tests
+  - code
+redactions:
+  - category: unrelated-context
+    reason: Unrelated personal context and hidden instructions are excluded
+ci_runs: []

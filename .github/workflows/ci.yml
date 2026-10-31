@@ -34,7 +34,7 @@ jobs:
   quality:
     name: Build and test
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -69,6 +69,115 @@ jobs:
             grep -F "$expected" "$log"
             git worktree remove --force "$worktree"
           }
+          git fetch origin refs/pull/24/head
+          git fetch origin refs/pull/28/head
+          git cat-file -e f18cafeef000a4c5a21b0dd4dc989ffe3260ba12^{commit}
+          git cat-file -e 651cf1411a5a0b63956854c2329d4506ed1070a1^{commit}
+          verify_red 7221d60eb4a1ab8e89da74c4556d2f3ec6da429b \
+            test/features/learning/data/ed25519_content_pack_signature_verifier_test.dart \
+            'Which: returned <null>'
+          verify_red b3760892fe58ebaee1d39bf3b97366ace092b52f \
+            test/features/learning/data/content_pack_lifecycle_composition_test.dart \
+            'emitted ContentPackInstallOutcome:<ContentPackInstallOutcome.activated>'
+          verify_red 4c5ec0a2b3095beda0965ddd8cac6782de1a846e \
+            test/features/learning/data/ed25519_content_pack_signature_verifier_test.dart \
+            'Final key authorization is not implemented'
+          verify_red 49d41926102fd9932733a277193a119550d5d29b \
+            test/features/learning/data/content_pack_lifecycle_composition_test.dart \
+            'emitted ContentPackInstallOutcome:<ContentPackInstallOutcome.activated>'
+          verify_red 9b62e8f9cfbcb35ac553443bcdb099af295a9792 \
+            test/features/learning/data/sqlite_publisher_trust_store_test.dart \
+            'Which: is not Iterable'
+          verify_red f18cafeef000a4c5a21b0dd4dc989ffe3260ba12 \
+            test/features/learning/data/publisher_trust_command_test.dart \
+            'Actual: <0>'
+          verify_red 93352674ff86b8b3e8092a8cf6c8b406698926b9 \
+            test/publisher_trust_tool_test.dart \
+            'file is not a database'
+          verify_red 7378164453e4015aee4451beda51687ff9561c54 \
+            test/publisher_trust_tool_test.dart \
+            "Invoked Dart programs must have a 'main' function defined"
+          verify_red 97585e6d2d9c46b63c1d00bbbc5b645c4f4cd1db \
+            test/publisher_trust_tool_test.dart \
+            'Actual: <66>'
+          verify_red 7060bfa3061748337326222f0eb454ba03349f0a \
+            test/publisher_trust_tool_test.dart \
+            'SP-006 trust tool is not implemented'
+          verify_red 0a5ae74b996f057fd2175e213b96b9a00d71163f \
+            test/features/learning/data/publisher_trust_command_test.dart \
+            'Trust identities must be unpadded and bounded.'
+          verify_red 27544e0dda708908aff7f2c33e3c55887a5fe40f \
+            test/features/learning/data/publisher_trust_command_test.dart \
+            'An enrolled key identity cannot be replaced.'
+          verify_red ca55c18d39de7685a62b3c246744e3e001783555 \
+            test/features/learning/data/publisher_trust_command_test.dart \
+            'Actual: <64>'
+          verify_red 2cef66bff418eaf3e3a1358b81e27e7647167993 \
+            test/features/learning/data/publisher_trust_command_test.dart \
+            'Actual: <64>'
+          verify_red b86f1e35239d24e706be3f3c64da110a8fceec1a \
+            test/features/learning/data/publisher_trust_command_test.dart \
+            'SP-006 trust command is not implemented'
+          verify_red 4c7267552b0f91a2010a23ad272208cd1585c009 \
+            test/features/learning/data/publisher_trust_operator_test.dart \
+            'Explicit operator confirmation is required.'
+          verify_red 61be61bdfe6c98b305b0c83a7506f1c754de49f7 \
+            test/features/learning/data/publisher_trust_operator_test.dart \
+            'SP-006 operator revocation is not implemented'
+          verify_red 4bbadb6bddecfe8b3e65acccb5259a4dd46f9a0b \
+            test/features/learning/data/publisher_trust_operator_test.dart \
+            'Explicit operator confirmation is required.'
+          verify_red de389cbd6401c3a1b15f0f39582cce47fdf32925 \
+            test/features/learning/data/publisher_trust_operator_test.dart \
+            'SP-006 operator confirmation is not implemented'
+          verify_red 415b474e6f44d6a31545f722277d9145775abb91 \
+            test/features/learning/data/sqlite_publisher_trust_store_test.dart \
+            "type 'Uint8List' is not a subtype of type 'String'"
+          verify_red fe718fe794e008192afcbd493d23b1599698a99b \
+            test/features/learning/data/ed25519_content_pack_signature_verifier_test.dart \
+            'Actual: <false>'
+          verify_red 43ea5a5b36a3bca1c3c10f071d387cf76fd6f31e \
+            test/features/learning/data/ed25519_content_pack_signature_verifier_test.dart \
+            'Invalid signature length'
+          verify_red 11ed5b3321f86fdb4b2e9eedc075bd747e5bbb73 \
+            test/features/learning/data/ed25519_content_pack_signature_verifier_test.dart \
+            'Actual: <false>'
+          verify_red 31f4c516f3b4e2ea637195718888b6324ba91ace \
+            test/features/learning/data/sqlite_publisher_trust_store_test.dart \
+            'Which: is not Iterable'
+          verify_red 57e7d3da6b4cf8741c27712f64c5977ce2be1b31 \
+            test/features/learning/data/sqlite_publisher_trust_store_test.dart \
+            "type 'String' is not a subtype"
+          verify_red 25822df39552bb0cd9242ebbe51e60532bfba5d3 \
+            test/features/learning/data/sqlite_publisher_trust_store_test.dart \
+            'Actual: [1, 2]'
+          verify_red 86a33d98024efaf47d98fde1d6b8f544f1f34082 \
+            test/features/learning/data/sqlite_publisher_trust_store_test.dart \
+            'Which: is not Iterable'
+          verify_red 5e22f53a8c7239085cb518cf000cc8efa85259ed \
+            test/features/learning/domain/publisher_trust_store_test.dart \
+            "SP-006 publisher onboarding is not implemented"
+          verify_red 0d9d8f9016dd090b7ef4e958157dd0a103d780b6 \
+            test/features/learning/domain/publisher_trust_store_test.dart \
+            "Which: returned <null>"
+          verify_red a4603e2e826fb324bc47a8d53a1c5711b9ba9a8e \
+            test/features/learning/domain/publisher_trust_store_test.dart \
+            "Which: returned <null>"
+          verify_red ea7750d137ab3b081f5eb030709c7b75caa093f1 \
+            test/features/learning/domain/publisher_trust_store_test.dart \
+            "Which: returned <null>"
+          verify_red cc0aab49463f99a51235fea05b10db34a1cefc1d \
+            test/features/learning/domain/publisher_trust_store_test.dart \
+            "SP-006 key revocation is not implemented"
+          verify_red 6217fc83e722080124c35ad0bd379e77eb692f88 \
+            test/features/learning/data/sqlite_publisher_trust_store_test.dart \
+            "SP-006 durable trust is not implemented"
+          verify_red 566b85687022edb1da7d02f230e1d39e1d16d4ad \
+            test/features/learning/data/sqlite_publisher_trust_store_test.dart \
+            "UNIQUE constraint failed: publisher_trust.publisher_id"
+          verify_red 095d11f5a8507a777f9fbba16d3c1b1be9f0051b \
+            test/features/learning/data/sqlite_publisher_trust_store_test.dart \
+            "SP-006 durable revocation is not implemented"
           verify_red 4ec790524530f1feb868ab60a404769d39f6fe68 \
             test/features/learning/data/content_pack_release_parser_test.dart \
             "Content-pack release parsing is not implemented"

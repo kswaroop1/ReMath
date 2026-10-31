@@ -5,12 +5,14 @@ import 'package:sqlite3/common.dart';
 import '../application/content_pack_installer.dart';
 import '../application/content_pack_rollback.dart';
 import '../domain/content_pack.dart';
+import '../domain/content_pack_release.dart';
 import 'content_pack_archive_verifier.dart';
 import 'content_pack_install_guard.dart';
 import 'content_pack_install_store.dart';
 import 'content_pack_parser.dart';
 import 'content_pack_payload_verifier.dart';
 import 'content_pack_validator.dart';
+import 'ed25519_content_pack_signature_verifier.dart';
 import 'sqlite_content_pack_installation_backend.dart';
 
 final class ContentPackLifecycle {
@@ -80,6 +82,7 @@ Future<ContentPackStartup> loadContentPackForStartup({
 }
 
 ContentPackLifecycle composeSqliteContentPackLifecycle({
+  void Function(ContentPackRelease release)? validateActivation,
   required Future<int> Function() availableBytes,
   void Function()? closeDatabase,
   required String currentAppVersion,
@@ -90,6 +93,18 @@ ContentPackLifecycle composeSqliteContentPackLifecycle({
   required ContentPackSignatureVerifier signatureVerifier,
 }) {
   final backend = SqliteContentPackInstallationBackend(
+    validateActivation: (release) {
+      if (signatureVerifier is Ed25519ContentPackSignatureVerifier) {
+        signatureVerifier.validateAuthorization(
+          publisherKeyId: release.publisherKeyId,
+          signedPayload: ContentPackArchiveVerifier.signedReleasePayload(
+            release,
+          ),
+          signature: base64Decode(release.signature),
+        );
+      }
+      validateActivation?.call(release);
+    },
     availableBytes: availableBytes,
     database: database,
     idGenerator: idGenerator,
