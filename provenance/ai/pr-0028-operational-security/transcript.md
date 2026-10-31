@@ -1399,3 +1399,15 @@ or a justified retention decision. Upstream GitHub advisory-page retrieval
 returned DisabledError; respected the denial, attempted no alternate route,
 and explicitly retained the advisory assessment gap. Records-only; no dependency,
 lock, production behaviour, completion checkbox or review-ready status changed.
+
+## Revocation identity-boundary red contract — 31 October 2026
+
+Recovered unchanged db0b0058 with full CI 41146944934 and empty review discussion.
+Inspected command adapter: enrollment rejects malformed identities, but confirmed
+revocation delegates without the same bounded/unpadded identity guard. Added
+SP-006 test-first acceptance for empty, whitespace, padded and over-128-character
+publisher or key identities: report nonzero and preserve existing valid trust.
+Current revoke branch returns zero; no passing validation implementation is
+included. CI must establish intended red before the fix. No signing credentials,
+dependency update or completed-feature claim. Remaining signed canonical install
+and final security/coverage/independent-review acceptance stay open.
