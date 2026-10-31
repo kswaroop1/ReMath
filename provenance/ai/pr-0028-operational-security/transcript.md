@@ -1630,3 +1630,14 @@ until re-verification. No assertions weakened. Retained exact red replay; full C
 pending. This bounds entry count, not arbitrary payload byte sizes or lifecycle
 cleanup on every failure; those limits and successful signed-install/race evidence
 remain review work. P1 activation finding stays open.
+
+## Capacity full green and independent correction re-review — 31 October 2026
+
+Recovered unchanged a8d6f305; full CI 41231659040 passes. Published consolidated
+verified guard/capacity checkpoint with explicit unresolved positive-install,
+activation-race, byte-memory/cleanup, dependency and reconciliation gaps.
+Explicitly requested @codex independent re-review of all corrections since
+9307ad27, including original three P1s, WAL/concurrent transaction semantics,
+payload/key binding, receipt lifecycle/resource limits, meaningful tests, TDD
+and chronological provenance. Draft remains incomplete; no findings resolved,
+completion boxes checked, merge/release or signing material introduced.
