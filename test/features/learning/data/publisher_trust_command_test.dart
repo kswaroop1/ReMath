@@ -5,6 +5,36 @@ import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.d
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('invalid revocation identities fail without changing trust', () {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final store = SqlitePublisherTrustStore(database: database);
+    final operator = PublisherTrustOperator(trustStore: store);
+    final bytes = List<int>.filled(32, 1);
+    operator.enroll(
+      confirmed: true,
+      publisherId: 'publisher.one',
+      keyId: 'key.one',
+      publicKey: bytes,
+    );
+    for (final identity in ['', ' ', ' padded', 'padded ', 'x' * 129]) {
+      for (final pair in [
+        [identity, 'key.one'],
+        ['publisher.one', identity],
+      ]) {
+        expect(
+          runPublisherTrustCommand([
+            'revoke',
+            ...pair,
+            '--confirm',
+          ], operator: operator),
+          isNot(0),
+        );
+        expect(store.uniquelyTrustedPublicKey(keyId: 'key.one'), bytes);
+      }
+    }
+  });
+
   test('invalid enrollment identity reports failure without trust', () {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
