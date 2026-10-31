@@ -9,6 +9,14 @@ final class Ed25519ContentPackSignatureVerifier
 
   final SqlitePublisherTrustStore trustStore;
 
+  void validateAuthorization({
+    required String publisherKeyId,
+    required List<int> signedPayload,
+    required List<int> signature,
+  }) {
+    throw UnimplementedError('Final key authorization is not implemented');
+  }
+
   @override
   Future<bool> verify({
     required String publisherKeyId,
