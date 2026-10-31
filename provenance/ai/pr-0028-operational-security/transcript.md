@@ -1485,3 +1485,15 @@ revocation/new-claim interleavings must preserve prior activation/fallback and
 cleanup safety. Do not substitute a verifier-only post-await check or mistake
 test-double authorization for real signed canonical installation. Records-only.
 Replied with verified rollback evidence while leaving review finding unresolved.
+
+## Historical prose secret-scan false positive — 31 October 2026
+
+Recovered unchanged b88019fe. CI 41179843463 passes the complete quality job,
+including native tests and coverage, but secret scan fails on one historical
+generic-api-key finding in commit 681b7071, transcript line 536. Retrieved that
+exact source range: it is ordinary status prose listing wrong-key and
+revocation/ambiguity cases, with no key or credential. Added only its exact
+Gitleaks fingerprint to .gitleaksignore; no path/rule/commit-wide exclusion,
+history rewrite or scanning disablement. Full CI pending. Deferred activation
+regression until this concrete gate failure was diagnosed; no activation seam,
+test or production change has been added in this checkpoint.
