@@ -52,7 +52,7 @@ final class ContentPackArchiveVerifier implements ContentPackPayloadVerifier {
     }
     final isTrusted = await signatureVerifier.verify(
       publisherKeyId: release.publisherKeyId,
-      signedPayload: _signedReleasePayload(release),
+      signedPayload: signedReleasePayload(release),
       signature: signature,
     );
     if (!isTrusted) {
@@ -62,7 +62,7 @@ final class ContentPackArchiveVerifier implements ContentPackPayloadVerifier {
     }
   }
 
-  List<int> _signedReleasePayload(ContentPackRelease release) {
+  static List<int> signedReleasePayload(ContentPackRelease release) {
     final dependencies = [...release.dependencies]
       ..sort((left, right) {
         final idComparison = left.packId.compareTo(right.packId);
