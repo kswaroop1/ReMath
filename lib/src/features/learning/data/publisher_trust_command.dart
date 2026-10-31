@@ -8,6 +8,13 @@ int runPublisherTrustCommand(
   if (arguments.length == 4 &&
       arguments[0] == 'revoke' &&
       arguments[3] == '--confirm') {
+    for (final identity in arguments.skip(1).take(2)) {
+      if (identity.isEmpty ||
+          identity.trim() != identity ||
+          identity.length > 128) {
+        return 65;
+      }
+    }
     operator.revoke(
       confirmed: true,
       publisherId: arguments[1],
