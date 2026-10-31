@@ -1678,3 +1678,15 @@ Require activated outcome, exact active version and confirmed loaded pack.
 This is not new production behaviour or a manufactured red; CI must validate the
 cross-implementation fixture and full journey. No positive journey claim yet.
 Durable revocation/ambiguity schedules, WAL, memory bounds and review remain open.
+
+## Real signed installation behavioural green and formatting diagnosis — 31 October 2026
+
+Recovered unchanged 82116c66. CI 41249465504 passes native tests, including
+real signed canonical-release verification/receipt/native activation/startup
+confirmation, plus secrets and retained red replay. The cross-implementation
+public fixture is accepted by actual Ed25519 and canonical composition.
+Formatting is the sole failed gate; analysis/content/browser/coverage floor
+were skipped, so no full-green acceptance claim. Published non-mutating exact
+formatter output for the changed composition test before unchanged fatal gate.
+No assertions, fixture values or business behaviour changed. Durable activation
+revocation/ambiguity/WAL and receipt-memory review findings remain unresolved.
