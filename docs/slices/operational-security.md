@@ -306,3 +306,33 @@ claimed. Advisory assessment and detailed fix applicability remain unresolved;
 other authorized implementation work is not blocked by that single lookup.
 Current records head `352fe75f` passes CI
 [41144742039](https://github.com/kswaroop1/ReMath/actions/runs/41144742039).
+
+## Review correction checkpoint — 31 October 2026
+
+Full CI [41175694203](https://github.com/kswaroop1/ReMath/actions/runs/41175694203)
+passes on `4b87490c`. Enrollment now uses a savepoint around revocation lookup,
+validation, insertion and result validation, rolling back on refusal. The
+deterministic insertion-time revocation fixture preserves the original unique
+key after reopening. Caller-owned transactions remain caller-owned. This is
+candidate evidence for review finding 4430247170, not independent acceptance.
+
+### Next blocking activation contract (4430247175)
+
+Inspection confirms activateAtomically already executes pointer/dependency
+updates inside the SQLite backend's synchronous transaction. Final trust
+authorization must participate in that same transaction, using the exact key
+bytes authorized by the earlier signature check, not merely any currently
+trusted bytes or an asynchronous check before activation.
+
+Required regression schedules: after initial cryptographic authorization but
+before activation, commit (a) revocation, (b) another publisher claim for the
+same key ID. Both must refuse activation, preserve the previous active pointer
+and bundled fallback, and leave staging recoverable/discarded. Unchanged trust
+must retain the successful activation path. Use deterministic barriers or
+boundary doubles rather than timing sleeps; do not claim doubles prove the
+remaining real signed canonical-installation journey.
+
+An Ed25519-only post-await check is insufficient: streamed payload validation
+and staging can still separate it from activation. Keep the finding open until
+transaction-coordinated enforcement, negative interleaving tests and independent
+review pass. No new signing credentials or implicit trust admission is permitted.
