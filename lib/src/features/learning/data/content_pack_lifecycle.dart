@@ -92,6 +92,7 @@ ContentPackLifecycle composeSqliteContentPackLifecycle({
   required ContentPackSignatureVerifier signatureVerifier,
 }) {
   final backend = SqliteContentPackInstallationBackend(
+    validateActivation: validateActivation,
     availableBytes: availableBytes,
     database: database,
     idGenerator: idGenerator,
