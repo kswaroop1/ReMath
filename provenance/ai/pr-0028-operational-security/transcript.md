@@ -1432,3 +1432,16 @@ revocation/enrollment/verification races, meaningful coverage, TDD and provenanc
 Disclosed known signed-install, dependency/advisory and final reconciliation gaps;
 did not mark ready or claim review completion. Final review must cover remaining
 changes. No implementation or assertion changes in this checkpoint.
+
+## Independent review findings and replay-history correction — 31 October 2026
+
+Recovered unchanged 411ed34f with full CI 41164451558. Independent review of
+9307ad27 returned three P1 findings: enrollment can leave an ambiguity-causing
+row after revocation races; installation can activate with stale trust after
+revocation or a new ambiguous publisher claim; post-squash red replay lacks
+an explicit PR28-history fetch. Accepted these as blocking findings, not review
+approval. Added the preserved refs/pull/28/head fetch and explicit red-object
+availability check before existing replay, mirroring PR24. This is CI history
+availability correction, not production business behaviour; no replay removed.
+Replacement CI pending. The two trust/activation races still require deterministic
+test-first reproduction and transactionally coordinated fixes; not resolved.
