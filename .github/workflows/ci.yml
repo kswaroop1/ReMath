@@ -73,6 +73,9 @@ jobs:
           git fetch origin refs/pull/28/head
           git cat-file -e f18cafeef000a4c5a21b0dd4dc989ffe3260ba12^{commit}
           git cat-file -e 651cf1411a5a0b63956854c2329d4506ed1070a1^{commit}
+          verify_red 4c5ec0a2b3095beda0965ddd8cac6782de1a846e \
+            test/features/learning/data/ed25519_content_pack_signature_verifier_test.dart \
+            'Final key authorization is not implemented'
           verify_red 49d41926102fd9932733a277193a119550d5d29b \
             test/features/learning/data/content_pack_lifecycle_composition_test.dart \
             'emitted ContentPackInstallOutcome:<ContentPackInstallOutcome.activated>'
@@ -359,7 +362,9 @@ jobs:
       - name: Verify dependency lock is unchanged
         run: git diff --exit-code -- pubspec.lock
       - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed lib test tool
+        run: |
+          dart format --output=show lib/src/features/learning/data/ed25519_content_pack_signature_verifier.dart test/features/learning/data/ed25519_content_pack_signature_verifier_test.dart
+          dart format --output=none --set-exit-if-changed lib test tool
       - name: Static analysis
         run: flutter analyze --fatal-infos --fatal-warnings
       - name: Validate content packs
