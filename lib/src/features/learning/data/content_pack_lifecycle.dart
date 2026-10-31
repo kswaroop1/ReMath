@@ -97,7 +97,9 @@ ContentPackLifecycle composeSqliteContentPackLifecycle({
       if (signatureVerifier is Ed25519ContentPackSignatureVerifier) {
         signatureVerifier.validateAuthorization(
           publisherKeyId: release.publisherKeyId,
-          signedPayload: ContentPackArchiveVerifier.signedReleasePayload(release),
+          signedPayload: ContentPackArchiveVerifier.signedReleasePayload(
+            release,
+          ),
           signature: base64Decode(release.signature),
         );
       }
