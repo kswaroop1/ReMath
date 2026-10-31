@@ -1641,3 +1641,22 @@ Explicitly requested @codex independent re-review of all corrections since
 payload/key binding, receipt lifecycle/resource limits, meaningful tests, TDD
 and chronological provenance. Draft remains incomplete; no findings resolved,
 completion boxes checked, merge/release or signing material introduced.
+
+## Correction re-review findings — 31 October 2026
+
+Recovered unchanged da32dfd2; full CI 41237920719 succeeds. Independent re-review
+of a8d6f305 returned P1 4433155541: successful real signed canonical installation
+and deterministic durable revocation/ambiguity activation schedules including WAL
+remain missing. It also returned P2 4433155544: 32 receipts still retain expanded
+full metadata payloads and are not a bounded byte-memory budget; completed/failed
+installations retain receipts. Accepted both findings, not approval. The earlier
+implementation corrections do not close acceptance without these tests.
+
+Next work must use public-only signed canonical-release fixture material;
+no signing key, seed, credential, signing service or release may be committed.
+Fixture validity must be checked by real Ed25519 and the production canonical
+payload function. Then cover unchanged-trust activation and explicit barrier-
+controlled trust changes through a second connection, preserving prior pointers
+and cleanup. Receipt identities need a fixed-size cryptographic digest or an
+aggregate retained-byte limit, not another entry-count-only claim. No production
+change in this checkpoint; draft/P1/P2 remain open.
