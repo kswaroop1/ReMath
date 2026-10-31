@@ -1421,3 +1421,14 @@ in the exact confirmed-revoke branch: empty, padded or over-128-character
 publisher/key identity returns 65 before operator mutation. Valid revocation
 semantics unchanged. Retained red replay at f18cafee. Full replacement CI pending;
 no assertion weakening, signing material or security completion claim.
+
+## Revocation identity full green and interim independent review — 31 October 2026
+
+Recovered unchanged 9307ad27; full CI 41161537906 succeeds, with no review
+discussion before this action. Explicitly requested server-side @codex review
+of that behavioural checkpoint as an interim draft correctness/security review.
+Asked for complete bounded findings covering trust/Ed25519/operator boundaries,
+revocation/enrollment/verification races, meaningful coverage, TDD and provenance.
+Disclosed known signed-install, dependency/advisory and final reconciliation gaps;
+did not mark ready or claim review completion. Final review must cover remaining
+changes. No implementation or assertion changes in this checkpoint.
