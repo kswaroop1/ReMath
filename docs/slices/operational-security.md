@@ -336,3 +336,20 @@ An Ed25519-only post-await check is insufficient: streamed payload validation
 and staging can still separate it from activation. Keep the finding open until
 transaction-coordinated enforcement, negative interleaving tests and independent
 review pass. No new signing credentials or implicit trust admission is permitted.
+
+## Verified native guard and capacity checkpoint — 31 October 2026
+
+Full CI [41231659040](https://github.com/kswaroop1/ReMath/actions/runs/41231659040)
+passes on `a8d6f305`. Native SQLite composition now invokes exact payload/
+signature/key authorization in the activation transaction. Prior successful
+Ed25519 verification is required; changed public bytes, ambiguous claims and
+revocation deny the primitive final-authorization examples. Direct native
+activation without prior verification is denied. Pending receipt count is
+limited to 32; the oldest receipt is evicted and then requires re-verification.
+
+Independent re-review was requested explicitly after these corrections; no
+previous P1 is declared independently resolved here. Missing positive signed
+canonical-installation and post-verification durable activation-race evidence
+remain blocking, alongside receipt byte-size/cleanup assessment, dependency
+assessment, coverage/register reconciliation and final review. Entry count is
+not a total byte-memory bound. SP-006/CP-005 remain incomplete.
