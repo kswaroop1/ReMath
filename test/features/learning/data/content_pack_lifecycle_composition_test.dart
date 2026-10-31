@@ -4,6 +4,7 @@ import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/application/content_pack_installer.dart';
 import 'package:remath/src/features/learning/data/content_pack_archive_verifier.dart';
+import 'package:remath/src/features/learning/data/content_pack_install_store.dart';
 import 'package:remath/src/features/learning/data/content_pack_lifecycle.dart';
 import 'package:remath/src/features/learning/data/content_pack_parser.dart';
 import 'package:remath/src/features/learning/data/open_content_pack_lifecycle_native.dart';
@@ -11,6 +12,40 @@ import 'package:remath/src/features/learning/domain/content_pack_release.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('native backend refuses activation without verified authorization', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    var nextId = 0;
+    final lifecycle = composeSqliteContentPackLifecycle(
+      availableBytes: () async => 1024 * 1024,
+      currentAppVersion: '0.1.0',
+      database: database,
+      idGenerator: () => 'unauthorized-${nextId++}',
+      signatureVerifier: composeContentPackSignatureVerifier(
+        database: database,
+      ),
+    );
+    final bytes = utf8.encode(_pack);
+    final release = await _releaseFor('org.remath.composed', bytes);
+    final store = TransactionalContentPackInstallStore(
+      backend: lifecycle.backend,
+    );
+    final staged = await store.stage(release, _Source(bytes));
+    try {
+      await expectLater(
+        store.activateStaged(
+          release,
+          staged,
+          isExplicitVersionChoice: false,
+        ),
+        throwsA(isA<ContentPackVerificationException>()),
+      );
+      expect(await lifecycle.backend.activeVersion(release.packId), isNull);
+    } finally {
+      await store.discardStaged(release, staged);
+    }
+  });
+
   test('lost authorization cannot activate a verified pack', () async {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
