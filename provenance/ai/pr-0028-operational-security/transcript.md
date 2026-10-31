@@ -1569,3 +1569,15 @@ handling of changed local storage, not protection against a privileged attacker.
 No production change or manufactured red. CI pending. Native release composition,
 receipt lifecycle/bounds and complete canonical signed install remain required;
 P1 activation finding and review readiness remain open.
+
+## Native activation composition red contract — 31 October 2026
+
+Recovered unchanged 2f248d13; full CI 41210268771 passes changed-key/ambiguity
+characterization. Added test-first native production-verifier composition test:
+stage an isolated release then request activation directly through the install
+store without successful cryptographic verification. Backend must refuse with
+verification exception and retain no active pointer; finally discard staging.
+Current composition does not wire the real verifier's final authorization guard,
+so activation should succeed incorrectly. No passing production fix included;
+CI must establish intended red. This is unauthorized-bypass denial, not successful
+signed canonical release or post-verification revocation evidence. P1 stays open.
