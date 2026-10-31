@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cryptography/cryptography.dart';
 
 import 'content_pack_archive_verifier.dart';
@@ -5,16 +7,29 @@ import 'sqlite_publisher_trust_store.dart';
 
 final class Ed25519ContentPackSignatureVerifier
     implements ContentPackSignatureVerifier {
-  const Ed25519ContentPackSignatureVerifier({required this.trustStore});
+  Ed25519ContentPackSignatureVerifier({required this.trustStore});
 
   final SqlitePublisherTrustStore trustStore;
+  final Map<String, List<int>> _authorizations = {};
 
   void validateAuthorization({
     required String publisherKeyId,
     required List<int> signedPayload,
     required List<int> signature,
   }) {
-    throw UnimplementedError('Final key authorization is not implemented');
+    final identity = jsonEncode([publisherKeyId, signedPayload, signature]);
+    final authorized = _authorizations[identity];
+    final current = trustStore.uniquelyTrustedPublicKey(keyId: publisherKeyId);
+    if (authorized == null ||
+        current == null ||
+        current.length != authorized.length) {
+      throw const ContentPackVerificationException('Authorization is stale.');
+    }
+    for (var index = 0; index < authorized.length; index++) {
+      if (current[index] != authorized[index]) {
+        throw const ContentPackVerificationException('Authorization is stale.');
+      }
+    }
   }
 
   @override
@@ -28,12 +43,17 @@ final class Ed25519ContentPackSignatureVerifier
       keyId: publisherKeyId,
     );
     if (publicKey == null) return false;
-    return Ed25519().verify(
+    final verified = await Ed25519().verify(
       signedPayload,
       signature: Signature(
         signature,
         publicKey: SimplePublicKey(publicKey, type: KeyPairType.ed25519),
       ),
     );
+    if (verified) {
+      final identity = jsonEncode([publisherKeyId, signedPayload, signature]);
+      _authorizations[identity] = List<int>.unmodifiable(publicKey);
+    }
+    return verified;
   }
 }
