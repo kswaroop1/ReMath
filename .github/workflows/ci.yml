@@ -73,6 +73,9 @@ jobs:
           git fetch origin refs/pull/28/head
           git cat-file -e f18cafeef000a4c5a21b0dd4dc989ffe3260ba12^{commit}
           git cat-file -e 651cf1411a5a0b63956854c2329d4506ed1070a1^{commit}
+          verify_red 7221d60eb4a1ab8e89da74c4556d2f3ec6da429b \
+            test/features/learning/data/ed25519_content_pack_signature_verifier_test.dart \
+            'Which: returned <null>'
           verify_red b3760892fe58ebaee1d39bf3b97366ace092b52f \
             test/features/learning/data/content_pack_lifecycle_composition_test.dart \
             'emitted ContentPackInstallOutcome:<ContentPackInstallOutcome.activated>'
