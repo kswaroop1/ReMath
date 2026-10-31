@@ -1497,3 +1497,17 @@ Gitleaks fingerprint to .gitleaksignore; no path/rule/commit-wide exclusion,
 history rewrite or scanning disablement. Full CI pending. Deferred activation
 regression until this concrete gate failure was diagnosed; no activation seam,
 test or production change has been added in this checkpoint.
+
+## Activation authorization red boundary — 31 October 2026
+
+Recovered unchanged 6bef2f22; full CI 41184786769 succeeds including the
+fingerprint-specific prose scan correction. Added a minimum optional synchronous
+activation-validation seam to SQLite lifecycle composition; deliberately not
+wired or invoked yet. Added a boundary-double regression: initial signature
+authorization succeeds but revokes its live authorization before returning;
+activation must throw, leave no active pointer and preserve bundled fallback.
+The ignored seam means current implementation should activate instead. CI must
+establish intended red before wiring into the backend transaction. This double
+tests final-authorization enforcement, not real Ed25519, exact-key capture,
+SQLite revocation/ambiguity or full signed canonical installation. Those remain
+required subsequent acceptance, and P1 4430247175 stays open.
