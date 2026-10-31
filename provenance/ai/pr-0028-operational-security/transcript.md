@@ -1458,3 +1458,17 @@ test fault injection for rollback-on-refusal, not a claim of actual concurrent
 connection scheduling or complete race coverage. No passing production fix
 included; CI must prove intended red first. Activation stale-trust finding
 4430247175 and final signed-install/security/review acceptance remain blocking.
+
+## Enrollment refusal verified red and atomic rollback — 31 October 2026
+
+Recovered unchanged 9b62e8f9. CI 41170457204 passes formatting, analysis,
+browser/content, secrets and prior replay; regression fails as intended after
+reopen: expected original public bytes, actual null (ambiguity). One job lookup
+used an incorrect run ID and returned 404; corrected from returned run metadata.
+Wrapped the complete revocation check, validation, insertion and final trust
+validation in a SQLite savepoint; release on success, rollback/release/rethrow
+on refusal or storage failure. Savepoint preserves caller-owned transaction
+semantics. A competing write may still cause a safe SQLite contention refusal;
+this is not a retry policy or exhaustive simultaneous race proof. Retained red
+replay. Full CI pending. Activation stale-trust P1 remains unresolved, and this
+candidate must receive review before enrollment P1 is marked resolved.
