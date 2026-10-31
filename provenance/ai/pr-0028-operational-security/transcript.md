@@ -1558,3 +1558,14 @@ exactly; adapter formatting was unchanged. Removed diagnostic while preserving
 fatal formatter. No business logic or assertions changed. Replacement full CI
 pending. Native exact-key activation composition and receipt lifecycle/bounds
 remain required; no full-green or P1-resolution claim for diagnostic run.
+
+## Exact-key full green and changed-trust characterization — 31 October 2026
+
+Recovered unchanged 7a651218; full CI 41206550338 succeeds. Added existing-
+behaviour characterization using RFC public verification: after success, either
+a second publisher claim or direct stored public-byte replacement must prevent
+reuse of the prior authorization. The direct SQL mutation models defensive
+handling of changed local storage, not protection against a privileged attacker.
+No production change or manufactured red. CI pending. Native release composition,
+receipt lifecycle/bounds and complete canonical signed install remain required;
+P1 activation finding and review readiness remain open.
