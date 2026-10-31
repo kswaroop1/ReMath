@@ -12,6 +12,7 @@ import 'content_pack_install_store.dart';
 import 'content_pack_parser.dart';
 import 'content_pack_payload_verifier.dart';
 import 'content_pack_validator.dart';
+import 'ed25519_content_pack_signature_verifier.dart';
 import 'sqlite_content_pack_installation_backend.dart';
 
 final class ContentPackLifecycle {
@@ -92,7 +93,16 @@ ContentPackLifecycle composeSqliteContentPackLifecycle({
   required ContentPackSignatureVerifier signatureVerifier,
 }) {
   final backend = SqliteContentPackInstallationBackend(
-    validateActivation: validateActivation,
+    validateActivation: (release) {
+      if (signatureVerifier is Ed25519ContentPackSignatureVerifier) {
+        signatureVerifier.validateAuthorization(
+          publisherKeyId: release.publisherKeyId,
+          signedPayload: ContentPackArchiveVerifier.signedReleasePayload(release),
+          signature: base64Decode(release.signature),
+        );
+      }
+      validateActivation?.call(release);
+    },
     availableBytes: availableBytes,
     database: database,
     idGenerator: idGenerator,
