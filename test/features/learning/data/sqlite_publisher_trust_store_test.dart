@@ -5,6 +5,47 @@ import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.d
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('refused enrollment leaves existing key resolution unchanged', () {
+    final directory = Directory.systemTemp.createTempSync('remath-refusal-');
+    addTearDown(() => directory.deleteSync(recursive: true));
+    final path = '${directory.path}/trust.sqlite';
+    final database = sqlite3.open(path);
+    final bytes = List<int>.filled(32, 1);
+    try {
+      final store = SqlitePublisherTrustStore(database: database);
+      store.enroll(
+        publisherId: 'publisher.one',
+        keyId: 'key.one',
+        publicKey: bytes,
+      );
+      database.execute(
+        'CREATE TRIGGER revoke_during_admission BEFORE INSERT '
+        'ON publisher_trust '
+        "WHEN NEW.publisher_id = 'publisher.other' BEGIN "
+        'INSERT INTO publisher_revocations (publisher_id, key_id) '
+        'VALUES (NEW.publisher_id, NEW.key_id); END',
+      );
+      expect(
+        () => store.enroll(
+          publisherId: 'publisher.other',
+          keyId: 'key.one',
+          publicKey: List<int>.filled(32, 2),
+        ),
+        throwsStateError,
+      );
+    } finally {
+      database.close();
+    }
+    final reopened = sqlite3.open(path);
+    addTearDown(reopened.close);
+    expect(
+      SqlitePublisherTrustStore(
+        database: reopened,
+      ).uniquelyTrustedPublicKey(keyId: 'key.one'),
+      bytes,
+    );
+  });
+
   test('revocation before enrollment remains binding after restart', () {
     final directory = Directory.systemTemp.createTempSync('remath-trust-');
     addTearDown(() => directory.deleteSync(recursive: true));
