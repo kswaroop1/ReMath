@@ -1472,3 +1472,16 @@ semantics. A competing write may still cause a safe SQLite contention refusal;
 this is not a retry policy or exhaustive simultaneous race proof. Retained red
 replay. Full CI pending. Activation stale-trust P1 remains unresolved, and this
 candidate must receive review before enrollment P1 is marked resolved.
+
+## Enrollment rollback full green and activation boundary analysis — 31 October 2026
+
+Recovered unchanged 4b87490c with full CI 41175694203. Inspected installer
+composition, archive signature verifier, transactional install store and actual
+sqlite_content_pack_installation_backend activation transaction. Two initially
+guessed paths returned no content; used imports to locate actual backend.
+Published next P1 acceptance contract: exact previously authorized key bytes
+must remain uniquely trusted inside activation's synchronous SQLite transaction;
+revocation/new-claim interleavings must preserve prior activation/fallback and
+cleanup safety. Do not substitute a verifier-only post-await check or mistake
+test-double authorization for real signed canonical installation. Records-only.
+Replied with verified rollback evidence while leaving review finding unresolved.
