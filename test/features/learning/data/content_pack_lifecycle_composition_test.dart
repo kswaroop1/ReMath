@@ -8,10 +8,50 @@ import 'package:remath/src/features/learning/data/content_pack_install_store.dar
 import 'package:remath/src/features/learning/data/content_pack_lifecycle.dart';
 import 'package:remath/src/features/learning/data/content_pack_parser.dart';
 import 'package:remath/src/features/learning/data/open_content_pack_lifecycle_native.dart';
+import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.dart';
 import 'package:remath/src/features/learning/domain/content_pack_release.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('real signed canonical release installs through native trust', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    SqlitePublisherTrustStore(database: database).enroll(
+      publisherId: 'publisher.fixture',
+      keyId: 'org.remath.publisher.primary',
+      publicKey: _fixturePublicKey,
+    );
+    var nextId = 0;
+    final lifecycle = composeSqliteContentPackLifecycle(
+      availableBytes: () async => 1024 * 1024,
+      currentAppVersion: '0.1.0',
+      database: database,
+      idGenerator: () => 'signed-${nextId++}',
+      signatureVerifier: composeContentPackSignatureVerifier(
+        database: database,
+      ),
+    );
+    final bytes = utf8.encode(_signedFixturePack);
+    final release = await _releaseFor(
+      'org.remath.composed',
+      bytes,
+      signature: _fixtureSignature,
+    );
+    expect(
+      await lifecycle.installer.install(release, _Source(bytes)),
+      ContentPackInstallOutcome.activated,
+    );
+    expect(await lifecycle.backend.activeVersion(release.packId), '1.0.0');
+    final fallback = const ContentPackParser().parse(_pack);
+    final loaded = await lifecycle.loadStartupPack(fallback);
+    expect(loaded.id, release.packId);
+    expect(loaded.version, release.version);
+    expect(
+      (await lifecycle.backend.activation(release.packId)).awaitingFirstLoad,
+      isFalse,
+    );
+  });
+
   test(
     'native backend refuses activation without verified authorization',
     () async {
@@ -282,7 +322,11 @@ void main() {
   );
 }
 
-Future<ContentPackRelease> _releaseFor(String packId, List<int> bytes) async {
+Future<ContentPackRelease> _releaseFor(
+  String packId,
+  List<int> bytes, {
+  String signature = 'AQID',
+}) async {
   final digest = await Sha256().hash(bytes);
   return ContentPackRelease(
     compressedSizeBytes: bytes.length,
@@ -300,7 +344,7 @@ Future<ContentPackRelease> _releaseFor(String packId, List<int> bytes) async {
     sha256: digest.bytes
         .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
         .join(),
-    signature: 'AQID',
+    signature: signature,
     title: 'Composed',
     version: '1.0.0',
   );
@@ -381,3 +425,8 @@ final class _RevokingSignatureVerifier implements ContentPackSignatureVerifier {
     return true;
   }
 }
+
+// Public-only test fixture; private signing material is not retained.
+const _signedFixturePack = '{"schemaVersion":1,"id":"org.remath.composed","version":"1.0.0","title":"Composed","license":"CC-BY-SA-4.0","skills":[{"id":"arithmetic.addition","title":"Addition"}],"templates":[{"id":"arithmetic.addition.template","version":1,"skillId":"arithmetic.addition","operation":"addition","minimumOperand":0,"maximumOperand":10,"fluentTargetSeconds":10}]}';
+const _fixtureSignature = 'qcK5Kip04aTqTcsgWhOSRYXHhYwCbtqpv/RwdW6XxiBt+Rk2tXoxDgIwRLVld4MC1/2nrth7FzvGqLVs9pltBQ==';
+const _fixturePublicKey = <int>[44, 65, 41, 146, 179, 52, 98, 150, 52, 50, 31, 195, 160, 193, 13, 193, 103, 232, 15, 250, 86, 92, 143, 90, 241, 207, 131, 26, 223, 100, 31, 168];
