@@ -14,6 +14,55 @@ List<int> hexBytes(String hex) => [
 ];
 
 void main() {
+  test('pending authorizations have a bounded fail-closed lifetime', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    final store = SqlitePublisherTrustStore(database: database);
+    final bytes = hexBytes(
+      'd75a980182b10ab7d54bfed3c964073a'
+      '0ee172f3daa62325af021a68f707511a',
+    );
+    final signature = hexBytes(
+      'e5564300c360ac729086e2cc806e828a'
+      '84877f1eb8e5d974d873e06522490155'
+      '5fb8821590a33bacc61e39701cf9b46b'
+      'd25bf5f0595bbe24655141438e7a100b',
+    );
+    final verifier = Ed25519ContentPackSignatureVerifier(trustStore: store);
+    for (var index = 0; index < 33; index++) {
+      final keyId = 'key.$index';
+      store.enroll(
+        publisherId: 'publisher.rfc',
+        keyId: keyId,
+        publicKey: bytes,
+      );
+      expect(
+        await verifier.verify(
+          publisherKeyId: keyId,
+          signedPayload: [],
+          signature: signature,
+        ),
+        isTrue,
+      );
+    }
+    expect(
+      () => verifier.validateAuthorization(
+        publisherKeyId: 'key.0',
+        signedPayload: [],
+        signature: signature,
+      ),
+      throwsA(isA<ContentPackVerificationException>()),
+    );
+    expect(
+      () => verifier.validateAuthorization(
+        publisherKeyId: 'key.32',
+        signedPayload: [],
+        signature: signature,
+      ),
+      returnsNormally,
+    );
+  });
+
   test('changed trust cannot reuse earlier signature authorization', () async {
     for (final ambiguous in [false, true]) {
       final database = sqlite3.openInMemory();
