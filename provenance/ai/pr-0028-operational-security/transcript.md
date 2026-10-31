@@ -1511,3 +1511,15 @@ establish intended red before wiring into the backend transaction. This double
 tests final-authorization enforcement, not real Ed25519, exact-key capture,
 SQLite revocation/ambiguity or full signed canonical installation. Those remain
 required subsequent acceptance, and P1 4430247175 stays open.
+
+## Activation boundary verified red and transaction enforcement — 31 October 2026
+
+Recovered unchanged 49d41926. CI 41187843631 passes formatting, analysis,
+browser/content, secrets and replay; boundary regression fails as intended:
+expected verification exception, actual activated outcome. Forwarded optional
+synchronous activation validator to SQLite backend and invoke it inside the
+existing activation transaction before pointer mutation. Retained exact red
+replay; full CI pending. This implements the tested injected authorization
+boundary only. Native Ed25519 exact-key authorization capture/composition and
+real SQLite revocation/ambiguity regressions remain absent; P1 4430247175 is
+NOT resolved and no production fail-closed completion is claimed.
