@@ -11,6 +11,38 @@ import 'package:remath/src/features/learning/domain/content_pack_release.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('lost authorization cannot activate a verified pack', () async {
+    final database = sqlite3.openInMemory();
+    addTearDown(database.close);
+    var nextId = 0;
+    var trusted = true;
+    final lifecycle = composeSqliteContentPackLifecycle(
+      availableBytes: () async => 1024 * 1024,
+      currentAppVersion: '0.1.0',
+      database: database,
+      idGenerator: () => 'revoked-${nextId++}',
+      signatureVerifier: _RevokingSignatureVerifier(() => trusted = false),
+      validateActivation: (release) {
+        if (!trusted) {
+          throw const ContentPackVerificationException(
+            'Authorization changed before activation.',
+          );
+        }
+      },
+    );
+    final bytes = utf8.encode(_pack);
+    final release = await _releaseFor('org.remath.composed', bytes);
+    await expectLater(
+      lifecycle.installer.install(release, _Source(bytes)),
+      throwsA(isA<ContentPackVerificationException>()),
+    );
+    expect(await lifecycle.backend.activeVersion(release.packId), isNull);
+    final fallback = const ContentPackParser().parse(
+      _pack.replaceFirst('org.remath.composed', 'org.remath.fallback'),
+    );
+    expect(await lifecycle.loadStartupPack(fallback), same(fallback));
+  });
+
   test(
     'native trust composition denies unsigned installation by default',
     () async {
@@ -298,4 +330,20 @@ final class _TrustedSignatureVerifier implements ContentPackSignatureVerifier {
     required List<int> signedPayload,
     required List<int> signature,
   }) async => true;
+}
+
+final class _RevokingSignatureVerifier implements ContentPackSignatureVerifier {
+  const _RevokingSignatureVerifier(this.revoke);
+
+  final void Function() revoke;
+
+  @override
+  Future<bool> verify({
+    required String publisherKeyId,
+    required List<int> signedPayload,
+    required List<int> signature,
+  }) async {
+    revoke();
+    return true;
+  }
 }
