@@ -1547,3 +1547,14 @@ No private signing material. Retained red replay and non-mutating canonical
 formatter output for adapter/test before unchanged fatal gate. Full CI pending.
 Receipt lifecycle/bounds, native canonical-release composition, additional
 ambiguity/key-change tests and independent review remain required; P1 stays open.
+
+## Exact-key behavioural green and canonical formatting — 31 October 2026
+
+Recovered unchanged 81e81794. Diagnostic CI 41201564924 passes native tests,
+secrets and retained red replay. Formatting is sole failure; subsequent analysis,
+browser/content and coverage-floor gates were skipped. Extracted timestamp-
+stripped canonical test source from completed formatter output and applied it
+exactly; adapter formatting was unchanged. Removed diagnostic while preserving
+fatal formatter. No business logic or assertions changed. Replacement full CI
+pending. Native exact-key activation composition and receipt lifecycle/bounds
+remain required; no full-green or P1-resolution claim for diagnostic run.
