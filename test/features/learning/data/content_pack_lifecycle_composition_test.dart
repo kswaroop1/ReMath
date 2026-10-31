@@ -12,39 +12,38 @@ import 'package:remath/src/features/learning/domain/content_pack_release.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
-  test('native backend refuses activation without verified authorization', () async {
-    final database = sqlite3.openInMemory();
-    addTearDown(database.close);
-    var nextId = 0;
-    final lifecycle = composeSqliteContentPackLifecycle(
-      availableBytes: () async => 1024 * 1024,
-      currentAppVersion: '0.1.0',
-      database: database,
-      idGenerator: () => 'unauthorized-${nextId++}',
-      signatureVerifier: composeContentPackSignatureVerifier(
+  test(
+    'native backend refuses activation without verified authorization',
+    () async {
+      final database = sqlite3.openInMemory();
+      addTearDown(database.close);
+      var nextId = 0;
+      final lifecycle = composeSqliteContentPackLifecycle(
+        availableBytes: () async => 1024 * 1024,
+        currentAppVersion: '0.1.0',
         database: database,
-      ),
-    );
-    final bytes = utf8.encode(_pack);
-    final release = await _releaseFor('org.remath.composed', bytes);
-    final store = TransactionalContentPackInstallStore(
-      backend: lifecycle.backend,
-    );
-    final staged = await store.stage(release, _Source(bytes));
-    try {
-      await expectLater(
-        store.activateStaged(
-          release,
-          staged,
-          isExplicitVersionChoice: false,
+        idGenerator: () => 'unauthorized-${nextId++}',
+        signatureVerifier: composeContentPackSignatureVerifier(
+          database: database,
         ),
-        throwsA(isA<ContentPackVerificationException>()),
       );
-      expect(await lifecycle.backend.activeVersion(release.packId), isNull);
-    } finally {
-      await store.discardStaged(release, staged);
-    }
-  });
+      final bytes = utf8.encode(_pack);
+      final release = await _releaseFor('org.remath.composed', bytes);
+      final store = TransactionalContentPackInstallStore(
+        backend: lifecycle.backend,
+      );
+      final staged = await store.stage(release, _Source(bytes));
+      try {
+        await expectLater(
+          store.activateStaged(release, staged, isExplicitVersionChoice: false),
+          throwsA(isA<ContentPackVerificationException>()),
+        );
+        expect(await lifecycle.backend.activeVersion(release.packId), isNull);
+      } finally {
+        await store.discardStaged(release, staged);
+      }
+    },
+  );
 
   test('lost authorization cannot activate a verified pack', () async {
     final database = sqlite3.openInMemory();
