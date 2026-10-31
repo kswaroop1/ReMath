@@ -1534,3 +1534,16 @@ payload; changed payload and subsequently revoked key must refuse. No private
 signing material. CI must prove intended missing-authorization red before storing
 verified exact-key/payload evidence. This primitive contract is not native release
 composition or a signed canonical-installation journey; P1 remains open.
+
+## Exact-key verified red and authorization candidate — 31 October 2026
+
+CI 41194275516 on unchanged 4c5ec0a2 proves missing-method red: expected
+verification exception, actual Final key authorization is not implemented.
+Formatting also fails; later gates skipped. Added successful-verification
+evidence keyed by full publisher key ID/payload/signature JSON identity and
+immutable exact public bytes. Synchronous final validation requires that receipt
+and the same current uniquely trusted bytes; revoked/ambiguous keys refuse.
+No private signing material. Retained red replay and non-mutating canonical
+formatter output for adapter/test before unchanged fatal gate. Full CI pending.
+Receipt lifecycle/bounds, native canonical-release composition, additional
+ambiguity/key-change tests and independent review remain required; P1 stays open.
