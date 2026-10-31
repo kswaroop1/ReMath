@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/data/content_pack_archive_verifier.dart';
@@ -13,6 +14,61 @@ List<int> hexBytes(String hex) => [
 ];
 
 void main() {
+  test('changed trust cannot reuse earlier signature authorization', () async {
+    for (final ambiguous in [false, true]) {
+      final database = sqlite3.openInMemory();
+      try {
+        final store = SqlitePublisherTrustStore(database: database);
+        final bytes = hexBytes(
+          'd75a980182b10ab7d54bfed3c964073a'
+          '0ee172f3daa62325af021a68f707511a',
+        );
+        final signature = hexBytes(
+          'e5564300c360ac729086e2cc806e828a'
+          '84877f1eb8e5d974d873e06522490155'
+          '5fb8821590a33bacc61e39701cf9b46b'
+          'd25bf5f0595bbe24655141438e7a100b',
+        );
+        store.enroll(
+          publisherId: 'publisher.rfc',
+          keyId: 'key.rfc',
+          publicKey: bytes,
+        );
+        final verifier = Ed25519ContentPackSignatureVerifier(trustStore: store);
+        expect(
+          await verifier.verify(
+            publisherKeyId: 'key.rfc',
+            signedPayload: [],
+            signature: signature,
+          ),
+          isTrue,
+        );
+        if (ambiguous) {
+          store.enroll(
+            publisherId: 'publisher.other',
+            keyId: 'key.rfc',
+            publicKey: bytes,
+          );
+        } else {
+          database.execute(
+            'UPDATE publisher_trust SET public_key = ? WHERE key_id = ?',
+            [Uint8List.fromList(List<int>.filled(32, 2)), 'key.rfc'],
+          );
+        }
+        expect(
+          () => verifier.validateAuthorization(
+            publisherKeyId: 'key.rfc',
+            signedPayload: [],
+            signature: signature,
+          ),
+          throwsA(isA<ContentPackVerificationException>()),
+        );
+      } finally {
+        database.close();
+      }
+    }
+  });
+
   test(
     'final authorization requires the verified key to remain trusted',
     () async {
