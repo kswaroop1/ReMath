@@ -1411,3 +1411,13 @@ Current revoke branch returns zero; no passing validation implementation is
 included. CI must establish intended red before the fix. No signing credentials,
 dependency update or completed-feature claim. Remaining signed canonical install
 and final security/coverage/independent-review acceptance stay open.
+
+## Revocation identity verified red and guard — 31 October 2026
+
+Recovered unchanged f18cafee. CI 41152145196 passes formatting, analysis,
+content/browser, secrets and historical replay; native test proves intended red:
+invalid revocation identity expected not zero, actual zero. Added only a guard
+in the exact confirmed-revoke branch: empty, padded or over-128-character
+publisher/key identity returns 65 before operator mutation. Valid revocation
+semantics unchanged. Retained red replay at f18cafee. Full replacement CI pending;
+no assertion weakening, signing material or security completion claim.
