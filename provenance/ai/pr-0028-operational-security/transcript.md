@@ -1445,3 +1445,16 @@ availability check before existing replay, mirroring PR24. This is CI history
 availability correction, not production business behaviour; no replay removed.
 Replacement CI pending. The two trust/activation races still require deterministic
 test-first reproduction and transactionally coordinated fixes; not resolved.
+
+## Refused enrollment atomicity red regression — 31 October 2026
+
+Recovered unchanged 084996f6; full CI 41167286941 passes the explicit PR28
+history fetch. Began P1 review finding 4430247170 with test-only regression:
+an insertion-time SQLite trigger deterministically injects revocation after
+the initial check. Enrollment must throw and reopening must still resolve the
+previously unique publisher's exact key. Current autocommit implementation
+leaves the refused publisher row, making that key ambiguous. This trigger is
+test fault injection for rollback-on-refusal, not a claim of actual concurrent
+connection scheduling or complete race coverage. No passing production fix
+included; CI must prove intended red first. Activation stale-trust finding
+4430247175 and final signed-install/security/review acceptance remain blocking.
