@@ -33,26 +33,34 @@ final class SqlitePublisherTrustStore {
     required String keyId,
     required List<int> publicKey,
   }) {
-    if (_isRevoked(publisherId, keyId)) {
-      throw StateError('A revoked key identity cannot be enrolled.');
-    }
-    final validation = PublisherTrustStore();
-    validation.enroll(
-      publisherId: publisherId,
-      keyId: keyId,
-      publicKey: publicKey,
-    );
-    database.execute(
-      'INSERT INTO publisher_trust (publisher_id, key_id, public_key) '
-      'VALUES (?, ?, ?) ON CONFLICT (publisher_id, key_id) DO NOTHING',
-      [publisherId, keyId, Uint8List.fromList(publicKey)],
-    );
-    if (!isTrusted(
-      publisherId: publisherId,
-      keyId: keyId,
-      publicKey: publicKey,
-    )) {
-      throw StateError('An enrolled key identity cannot be replaced.');
+    database.execute('SAVEPOINT publisher_trust_enrollment');
+    try {
+      if (_isRevoked(publisherId, keyId)) {
+        throw StateError('A revoked key identity cannot be enrolled.');
+      }
+      final validation = PublisherTrustStore();
+      validation.enroll(
+        publisherId: publisherId,
+        keyId: keyId,
+        publicKey: publicKey,
+      );
+      database.execute(
+        'INSERT INTO publisher_trust (publisher_id, key_id, public_key) '
+        'VALUES (?, ?, ?) ON CONFLICT (publisher_id, key_id) DO NOTHING',
+        [publisherId, keyId, Uint8List.fromList(publicKey)],
+      );
+      if (!isTrusted(
+        publisherId: publisherId,
+        keyId: keyId,
+        publicKey: publicKey,
+      )) {
+        throw StateError('An enrolled key identity cannot be replaced.');
+      }
+      database.execute('RELEASE publisher_trust_enrollment');
+    } on Object {
+      database.execute('ROLLBACK TO publisher_trust_enrollment');
+      database.execute('RELEASE publisher_trust_enrollment');
+      rethrow;
     }
   }
 
