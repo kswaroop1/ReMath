@@ -1787,3 +1787,16 @@ change or manufactured red. Combined with the 64-KiB signed message and 32-entry
 capacity tests, these check retained receipt material rather than claiming a
 total heap/transient memory limit. CI pending. P2 independent acceptance and
 remaining dependency/coverage/register/final review reconciliation remain open.
+
+## Lifecycle bounds full green and feature-register reconciliation — 1 November 2026
+
+Recovered unchanged c13b5093; full CI 41288888617 passes lifecycle material-byte
+assertions. CI reports 96.76% repository line coverage, not near-100% acceptance.
+Inspected uncovered output: security verifier/trust/operator files are not listed,
+but archive verifier, lifecycle and backend have uncovered branches/lines needing
+specific review; no blanket coverage-complete claim. Updated CP-005/SP-006/SP-011
+foundation descriptions without checking completion boxes, corrected obsolete
+PR25 roadmap/reference to draft PR28, and distinguished already-checked SP-012
+adoption review from unresolved current advisory/fix applicability. No package,
+production code or assertions changed. Final independent review and remaining
+coverage/operational/dependency assessment stay open.
