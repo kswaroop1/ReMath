@@ -1765,3 +1765,14 @@ API search confirms pure-Dart synchronous hash support; CI supplies compilation
 and runtime evidence. Retained red replay and canonical formatter diagnostic.
 Full CI pending; completed/failed-install lifecycle evidence and P2 independent
 acceptance remain open. No whole-slice completion claim.
+
+## Fixed-size receipt behavioural green and canonical recovery — 1 November 2026
+
+Recovered unchanged ed36e4b2. CI 41279834501 passes native tests including
+64-KiB signed-message retained-material budget/final authorization, real signed
+installation and durable trust schedules, secrets and historical replay.
+Formatting alone fails; subsequent gates skipped. Applied exact timestamp-
+stripped canonical adapter/test sources and removed diagnostic with fatal
+formatter unchanged. No assertions, fixtures or business behaviour changed.
+Replacement full CI pending. Completed/failed-install receipt lifecycle evidence,
+P2 independent acceptance and final reconciliation/review remain open.
