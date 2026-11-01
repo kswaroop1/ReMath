@@ -1811,3 +1811,16 @@ fixed-size receipts from unresolved acceptance. Explicitly requested independent
 re-review of findings 4433155541/4433155544 and original findings with exact
 checkpoints and limitations; no self-resolution or ready transition. Metadata
 remains unfinalized pending review. No code/assertions/dependencies changed.
+
+## Independent review no major issues and canonical coverage assessment — 1 November 2026
+
+Recovered unchanged 2ffb0f54; CI 41296970236 succeeds. Independent response
+6556658082 reports no major issues at that exact checkpoint. This is not a
+claim that remaining declared assessment work is complete. Inspected uncovered
+archive-verifier paths: existing tests already cover malformed signature
+decoding/refusal; canonical dependency sorting had no dependency example.
+Added existing-behaviour test asserting permutation-invariant canonical payload,
+exact sorted dependency metadata, and changed minimum version changes signed
+bytes. No invalid duplicate-dependency line-execution-only test, production
+change or manufactured red. CI pending. Remaining coverage residuals and
+dependency/operational acceptance must be stated before review-ready.
