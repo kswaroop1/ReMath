@@ -1750,3 +1750,18 @@ implementation included; CI must establish intended red. Public-only fixture
 was signed/self-verified with an isolated ephemeral in-memory Python key;
 private material never printed, persisted or committed. No Flutter execution,
 credential configuration, signing service or release. Full CI/review pending.
+
+## Retained-byte verified red and fixed-size fingerprints — 1 November 2026
+
+Recovered unchanged 73e87cf9. CI 41274581637 proves intended retained-material
+red: expected at most 4096, actual 196890 bytes. Formatting also fails; later
+gates skipped. Replaced retained full JSON identity with base64 SHA-256 over
+the same unambiguous publisher ID/payload/signature tuple, using the existing
+package's synchronous DartSha256 for final transaction validation. Each retained
+identity is fixed-size; exact public bytes and 32-entry cap remain. Payload
+encoding/hashing is transient, not a claim of bounded transient peak allocation.
+No new dependency. Several versioned documentation lookups failed; upstream
+API search confirms pure-Dart synchronous hash support; CI supplies compilation
+and runtime evidence. Retained red replay and canonical formatter diagnostic.
+Full CI pending; completed/failed-install lifecycle evidence and P2 independent
+acceptance remain open. No whole-slice completion claim.
