@@ -324,12 +324,13 @@ Last reviewed: 1 November 2026 (PR28 operational-security checkpoint; draft).
   bounds and references, incoherent dependencies, unsafe sizes, and malformed
   integrity metadata before use. Equation, asset, full-generator, and source
   provenance checks remain future content-authoring work.
-- [ ] **CP-005 — Signed releases.** **Verification foundation delivered:** archive
+- [x] **CP-005 — Signed releases.** **Verification foundation delivered:** archive
   length, SHA-256, and a publisher signature supplied to a provider-neutral trust
-  boundary are checked before activation. Draft PR #28 adds real Ed25519,
+  boundary are checked before activation. PR #28 delivers real Ed25519,
   a public-only signed native installation fixture, exact-key authorization
   inside atomic activation, and durable revocation/ambiguity denial in default
-  and WAL journals. Final acceptance and independent review remain open.
+  and WAL journals. Bounded acceptance passed independent review; residual
+  platform/advisory limitations are documented in the slice.
 - [x] **CP-006 — Transactional installation.** Complete archives are bounded,
   content-addressed, sealed, verified, and atomically activated after dependency
   revalidation through the production-composed SQLite lifecycle backend;
@@ -422,11 +423,11 @@ Last reviewed: 1 November 2026 (PR28 operational-security checkpoint; draft).
 - [x] **SP-005 — Backup encryption.** Password-derived authenticated encryption
   fails closed for wrong passwords, malformed envelopes and tampering; the UI
   warns that forgotten backup passwords cannot be recovered.
-- [ ] **SP-006 — Content signature trust store.** **Foundation delivered in draft
+- [x] **SP-006 — Content signature trust store.** **Bounded capability delivered in
   PR #28:** explicit public-key enrollment/rotation/revocation, SQLite persistence,
   confirmed local operator commands, immutable identities, and fail-closed
   exact-key activation. Receipt byte bounds now use fixed-size fingerprints;
-  final coverage/operational assessment and independent acceptance remain open.
+  coverage and operational residuals are assessed in the slice and reviewed.
 - [ ] **SP-007 — Optional on-device explanations.** Local model only when it adds
   value and the device supports it.
 - [ ] **SP-008 — Optional OpenAI key onboarding.** Open official key and billing
@@ -435,14 +436,15 @@ Last reviewed: 1 November 2026 (PR28 operational-security checkpoint; draft).
   external-cost implications before activation.
 - [ ] **SP-010 — AI answer verification.** Never treat unconstrained model output
   as the mathematical marking authority.
-- [ ] **SP-011 — Threat model.** Draft PR #28 documents device compromise,
+- [x] **SP-011 — Threat model.** PR #28 documents device compromise,
   credential theft, malicious packs, replay, backup and supply-chain boundaries
-  and residual risks. Final assessment and independent acceptance remain open.
+  and residual risks. Bounded assessment passed independent review.
 - [x] **SP-012 — Dependency and licence review.** The cryptography and file-picker
   additions record maintenance, licence, platform, privacy and architecture
   implications before adoption; future packages require the same assessment.
   This prior adoption review is not a continuous vulnerability-clearance claim.
-  PR #28's newer-version/advisory applicability assessment remains open.
+  PR #28 records existing-lock retention and the unavailable current-advisory
+  clearance explicitly; this is not release or vulnerability-free approval.
 
 ## 10. Platform and engineering delivery
 
