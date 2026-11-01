@@ -386,15 +386,3 @@ jobs:
         run: flutter test --coverage
       - name: Enforce coverage floor
         run: dart run tool/check_coverage.dart 90
-      - name: Measure pre-slice coverage baseline
-        run: |
-          set -euo pipefail
-          baseline_worktree="$(mktemp -d)"
-          git worktree add --detach "$baseline_worktree" 6e187b0b19d83c65681bfc46783f567ee0ea5e42
-          (
-            cd "$baseline_worktree"
-            flutter pub get
-            flutter test --coverage
-            dart run tool/check_coverage.dart 90
-          )
-          git worktree remove --force "$baseline_worktree"
