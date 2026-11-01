@@ -427,6 +427,41 @@ final class _RevokingSignatureVerifier implements ContentPackSignatureVerifier {
 }
 
 // Public-only test fixture; private signing material is not retained.
-const _signedFixturePack = '{"schemaVersion":1,"id":"org.remath.composed","version":"1.0.0","title":"Composed","license":"CC-BY-SA-4.0","skills":[{"id":"arithmetic.addition","title":"Addition"}],"templates":[{"id":"arithmetic.addition.template","version":1,"skillId":"arithmetic.addition","operation":"addition","minimumOperand":0,"maximumOperand":10,"fluentTargetSeconds":10}]}';
-const _fixtureSignature = 'qcK5Kip04aTqTcsgWhOSRYXHhYwCbtqpv/RwdW6XxiBt+Rk2tXoxDgIwRLVld4MC1/2nrth7FzvGqLVs9pltBQ==';
-const _fixturePublicKey = <int>[44, 65, 41, 146, 179, 52, 98, 150, 52, 50, 31, 195, 160, 193, 13, 193, 103, 232, 15, 250, 86, 92, 143, 90, 241, 207, 131, 26, 223, 100, 31, 168];
+const _signedFixturePack =
+    '{"schemaVersion":1,"id":"org.remath.composed","version":"1.0.0","title":"Composed","license":"CC-BY-SA-4.0","skills":[{"id":"arithmetic.addition","title":"Addition"}],"templates":[{"id":"arithmetic.addition.template","version":1,"skillId":"arithmetic.addition","operation":"addition","minimumOperand":0,"maximumOperand":10,"fluentTargetSeconds":10}]}';
+const _fixtureSignature =
+    'qcK5Kip04aTqTcsgWhOSRYXHhYwCbtqpv/RwdW6XxiBt+Rk2tXoxDgIwRLVld4MC1/2nrth7FzvGqLVs9pltBQ==';
+const _fixturePublicKey = <int>[
+  44,
+  65,
+  41,
+  146,
+  179,
+  52,
+  98,
+  150,
+  52,
+  50,
+  31,
+  195,
+  160,
+  193,
+  13,
+  193,
+  103,
+  232,
+  15,
+  250,
+  86,
+  92,
+  143,
+  90,
+  241,
+  207,
+  131,
+  26,
+  223,
+  100,
+  31,
+  168,
+];
