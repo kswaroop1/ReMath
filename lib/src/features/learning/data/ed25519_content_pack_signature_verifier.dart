@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:cryptography/dart.dart';
 
 import 'content_pack_archive_verifier.dart';
 import 'sqlite_publisher_trust_store.dart';
@@ -25,7 +26,7 @@ final class Ed25519ContentPackSignatureVerifier
     required List<int> signedPayload,
     required List<int> signature,
   }) {
-    final identity = jsonEncode([publisherKeyId, signedPayload, signature]);
+    final identity = _authorizationIdentity(publisherKeyId, signedPayload, signature);
     final authorized = _authorizations[identity];
     final current = trustStore.uniquelyTrustedPublicKey(keyId: publisherKeyId);
     if (authorized == null ||
@@ -59,7 +60,7 @@ final class Ed25519ContentPackSignatureVerifier
       ),
     );
     if (verified) {
-      final identity = jsonEncode([publisherKeyId, signedPayload, signature]);
+      final identity = _authorizationIdentity(publisherKeyId, signedPayload, signature);
       _authorizations[identity] = List<int>.unmodifiable(publicKey);
       if (_authorizations.length > _maximumPendingAuthorizations) {
         _authorizations.remove(_authorizations.keys.first);
@@ -68,3 +69,13 @@ final class Ed25519ContentPackSignatureVerifier
     return verified;
   }
 }
+
+String _authorizationIdentity(
+  String publisherKeyId,
+  List<int> signedPayload,
+  List<int> signature,
+) => base64Encode(
+  const DartSha256().hashSync(
+    utf8.encode(jsonEncode([publisherKeyId, signedPayload, signature])),
+  ).bytes,
+);
