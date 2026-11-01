@@ -1,0 +1,39 @@
+schema_version: 1
+pull_request: 28
+title: Establish operational security and publisher trust
+human_owner: kswaroop1
+agents:
+  - product: OpenAI Codex
+    model: gpt-6.1-sol-wm
+started_at: 2026-10-24T20:55:00Z
+finalized_at: 2026-11-01T16:27:41Z
+scope:
+  - docs
+  - tests
+  - code
+redactions:
+  - category: unrelated-context
+    reason: Unrelated personal context and hidden instructions are excluded
+ci_runs:
+  - https://github.com/kswaroop1/ReMath/actions/runs/41152145196
+  - https://github.com/kswaroop1/ReMath/actions/runs/41161537906
+  - https://github.com/kswaroop1/ReMath/actions/runs/41170457204
+  - https://github.com/kswaroop1/ReMath/actions/runs/41175694203
+  - https://github.com/kswaroop1/ReMath/actions/runs/41187843631
+  - https://github.com/kswaroop1/ReMath/actions/runs/41190264951
+  - https://github.com/kswaroop1/ReMath/actions/runs/41194275516
+  - https://github.com/kswaroop1/ReMath/actions/runs/41206550338
+  - https://github.com/kswaroop1/ReMath/actions/runs/41214020045
+  - https://github.com/kswaroop1/ReMath/actions/runs/41223749312
+  - https://github.com/kswaroop1/ReMath/actions/runs/41228268427
+  - https://github.com/kswaroop1/ReMath/actions/runs/41231659040
+  - https://github.com/kswaroop1/ReMath/actions/runs/41257760931
+  - https://github.com/kswaroop1/ReMath/actions/runs/41272800217
+  - https://github.com/kswaroop1/ReMath/actions/runs/41274581637
+  - https://github.com/kswaroop1/ReMath/actions/runs/41284173212
+  - https://github.com/kswaroop1/ReMath/actions/runs/41288888617
+  - https://github.com/kswaroop1/ReMath/actions/runs/41291681238
+  - https://github.com/kswaroop1/ReMath/actions/runs/41296970236
+  - https://github.com/kswaroop1/ReMath/actions/runs/41309874326
+  - https://github.com/kswaroop1/ReMath/actions/runs/41313786026
+  - https://github.com/kswaroop1/ReMath/actions/runs/41319862285

@@ -1,0 +1,3 @@
+# Reviewed prose-only false positive: wrong-key followed by revocation/ambiguity.
+# Exact historical finding only; no path, rule or commit-wide exclusion.
+681b70717fd1973816dac4fd923f874a71c65a5d:provenance/ai/pr-0028-operational-security/transcript.md:generic-api-key:536

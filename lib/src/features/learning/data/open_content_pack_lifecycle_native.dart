@@ -6,6 +6,8 @@ import 'package:sqlite3/sqlite3.dart';
 
 import 'content_pack_archive_verifier.dart';
 import 'content_pack_lifecycle.dart';
+import 'ed25519_content_pack_signature_verifier.dart';
+import 'sqlite_publisher_trust_store.dart';
 
 const _contentPackStorageBudgetBytes = 512 * 1024 * 1024;
 const _currentAppVersion = String.fromEnvironment(
@@ -34,7 +36,9 @@ Future<ContentPackLifecycle?> openContentPackLifecycle() async {
         16,
         (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
       ).join(),
-      signatureVerifier: const _UnconfiguredSignatureVerifier(),
+      signatureVerifier: composeContentPackSignatureVerifier(
+        database: database,
+      ),
     );
   } on Object {
     database.close();
@@ -42,14 +46,8 @@ Future<ContentPackLifecycle?> openContentPackLifecycle() async {
   }
 }
 
-final class _UnconfiguredSignatureVerifier
-    implements ContentPackSignatureVerifier {
-  const _UnconfiguredSignatureVerifier();
-
-  @override
-  Future<bool> verify({
-    required String publisherKeyId,
-    required List<int> signedPayload,
-    required List<int> signature,
-  }) async => false;
-}
+ContentPackSignatureVerifier composeContentPackSignatureVerifier({
+  required Database database,
+}) => Ed25519ContentPackSignatureVerifier(
+  trustStore: SqlitePublisherTrustStore(database: database),
+);

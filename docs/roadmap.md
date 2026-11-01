@@ -165,5 +165,7 @@ stable-ID learner history. The exact [scope and acceptance criteria](slices/cont
 keep network catalogues, provider OAuth, publisher trust operations, delta
 updates, releases, signing credentials, and `VERSION` changes out of scope.
 
-PR25 follows with publisher trust operations and the broader operational-
-security foundation.
+Draft PR #28 implements publisher trust operations and the broader operational-
+security foundation under [its bounded contract](slices/operational-security.md).
+Passing checkpoints do not imply final acceptance; the feature register retains
+open completion status until the remaining assessments and independent review.
