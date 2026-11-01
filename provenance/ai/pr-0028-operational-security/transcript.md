@@ -1727,3 +1727,13 @@ fatal formatting. No logic/assertions changed. No full-green claim yet.
 These tests cover a second connection's trust commit before activation starts,
 not a writer racing inside the transaction. Receipt retained-byte P2 and final
 review remain open; draft and feature-completion state unchanged.
+
+## Durable native race canonical formatting recovery — 1 November 2026
+
+Recovered unchanged 3265b622. Diagnostic CI 41268156668 passes native tests
+including all four durable trust schedules and real signed canonical journey,
+secret scanning and retained red replay. Formatting alone fails; later gates
+skipped. Applied exact timestamp-stripped canonical composition-test output and
+removed diagnostic, preserving fatal formatting, fixtures and assertions.
+Replacement full CI pending. No behaviour or feature-completion state changed;
+receipt retained-byte P2 and final independent review remain open.
