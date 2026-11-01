@@ -1844,3 +1844,19 @@ diagnostic, preserving fatal formatting and all assertions. No production change
 Replacement full CI pending. Review's no-major-issues outcome remains anchored
 to 2ffb0f54; final coverage/dependency/operational assessment and evidence
 finalization remain open before readiness/completion.
+
+## Canonical coverage full green and exact baseline comparison — 1 November 2026
+
+Recovered unchanged 50ee6347; full CI 41309874326 passes and line coverage is
+96.80%, up from the prior 96.76% checkpoint. Uncovered archive-verifier lines
+are diagnostic toString and equal-ID sorting tie; valid release dependencies
+use distinct IDs, so no invalid duplicate execution-only test was added.
+Native path-provider/random-ID/cleanup wrappers and pre-existing backend policy
+branches remain listed, not claimed covered. Connector returns no comparable
+PR-triggered run for base 6e187b0b, so no pre-slice delta is asserted.
+
+Added read-only CI measurement of that exact base in an isolated git worktree
+using the same installed Flutter and its own locked dependencies, test suite
+and 90% checker. No base/source modification, runner generation, signing material,
+threshold reduction or test omission. Current full suite remains unchanged.
+Baseline comparison evidence pending; final assessment/review-ready status open.
