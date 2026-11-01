@@ -1800,3 +1800,14 @@ PR25 roadmap/reference to draft PR28, and distinguished already-checked SP-012
 adoption review from unresolved current advisory/fix applicability. No package,
 production code or assertions changed. Final independent review and remaining
 coverage/operational/dependency assessment stay open.
+
+## Acceptance evidence index and independent correction review — 1 November 2026
+
+Recovered unchanged 69a16814; full CI 41291681238 succeeds. Read provenance
+README and populated previously empty metadata CI index with material red/green
+runs (complete chronological context remains in transcript). Refreshed stale PR
+body to distinguish delivered/verified signed journey, durable schedules and
+fixed-size receipts from unresolved acceptance. Explicitly requested independent
+re-review of findings 4433155541/4433155544 and original findings with exact
+checkpoints and limitations; no self-resolution or ready transition. Metadata
+remains unfinalized pending review. No code/assertions/dependencies changed.
