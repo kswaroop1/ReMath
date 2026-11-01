@@ -1824,3 +1824,13 @@ exact sorted dependency metadata, and changed minimum version changes signed
 bytes. No invalid duplicate-dependency line-execution-only test, production
 change or manufactured red. CI pending. Remaining coverage residuals and
 dependency/operational acceptance must be stated before review-ready.
+
+## Canonical dependency characterization green and formatting diagnosis — 1 November 2026
+
+Recovered unchanged a15fa0dd. CI 41303373521 passes native suite including
+permutation-invariant canonical dependencies and changed-version signature
+binding, secrets and historical replay. Formatting alone fails; later gates
+skipped. Published non-mutating exact formatter output for changed archive
+verifier test before unchanged fatal formatting. No business/assertion change.
+Full CI remains pending. Independent review's no-major-issues outcome remains
+anchored to 2ffb0f54; new coverage-only changes still require final verification.
