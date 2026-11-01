@@ -1834,3 +1834,13 @@ skipped. Published non-mutating exact formatter output for changed archive
 verifier test before unchanged fatal formatting. No business/assertion change.
 Full CI remains pending. Independent review's no-major-issues outcome remains
 anchored to 2ffb0f54; new coverage-only changes still require final verification.
+
+## Canonical dependency test formatting recovery — 1 November 2026
+
+Recovered unchanged 6ee59484. Diagnostic CI 41306414779 passes native suite,
+secrets and retained red replay. Formatting alone fails, with later gates skipped.
+Applied exact timestamp-stripped canonical archive-verifier test and removed
+diagnostic, preserving fatal formatting and all assertions. No production change.
+Replacement full CI pending. Review's no-major-issues outcome remains anchored
+to 2ffb0f54; final coverage/dependency/operational assessment and evidence
+finalization remain open before readiness/completion.
