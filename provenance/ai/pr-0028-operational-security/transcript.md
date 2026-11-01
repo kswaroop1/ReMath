@@ -1874,3 +1874,15 @@ or vulnerability-free approval. Removed only completed baseline diagnostic;
 standard gates/replay unchanged. Explicitly requested final independent acceptance
 review of evidence/disposition/new coverage-only test. Draft remains pending CI
 and review; no completion boxes or merge action.
+
+## Exact-head independent acceptance and final records — 1 November 2026
+
+Recovered unchanged 3cd8ec81. Full CI 41319862285 succeeds. Independent response
+6559788491 explicitly reports no major issues on that exact head after reviewing
+bounded coverage/dependency disposition and latest coverage-only test. Reconciled
+CP-005/SP-006/SP-011 as delivered bounded capabilities without extending signing,
+platform or advisory claims; appended handoff/limitations and finalized metadata
+with acceptance CI index. Implementation frozen; final records CI must pass
+before external ready transition and programme completion. No merge, release,
+VERSION change, private signing material or unprioritized content. The user
+handles merges. Any final failure must reopen work rather than claim completion.
