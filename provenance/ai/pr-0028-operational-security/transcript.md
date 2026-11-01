@@ -1701,3 +1701,17 @@ the non-mutating diagnostic while preserving fatal formatting. Fixture pack,
 public key, signature and assertions unchanged. Replacement full CI pending;
 durable revocation/ambiguity/WAL activation schedules and receipt byte-memory
 findings remain open. No whole-slice completion or review readiness claimed.
+
+## Signed journey full green and durable activation-race characterization — 1 November 2026
+
+Recovered unchanged 6b8ba805; full CI 41257760931 passes real signed canonical
+native installation and startup confirmation. Added existing-behaviour tests for
+four deterministic schedules: default/WAL journal crossed with durable revocation/
+second-publisher ambiguity. First install signed fixture, stage and cryptographically
+verify again with the same production verifier, commit trust change through a
+second SQLite connection, then attempt activation. Require verification refusal,
+unchanged prior active version/bytes, and no sealed staging rows after discard.
+No sleeps or signing keys/credentials. This tests committed changes before the
+activation transaction, not a writer blocked during an already-open transaction,
+process kill or exhaustive schedules. No production change/manufactured red.
+CI pending; receipt byte-memory P2 and final independent review remain open.
