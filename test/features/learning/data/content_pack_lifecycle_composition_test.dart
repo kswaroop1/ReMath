@@ -8,6 +8,7 @@ import 'package:remath/src/features/learning/data/content_pack_archive_verifier.
 import 'package:remath/src/features/learning/data/content_pack_install_store.dart';
 import 'package:remath/src/features/learning/data/content_pack_lifecycle.dart';
 import 'package:remath/src/features/learning/data/content_pack_parser.dart';
+import 'package:remath/src/features/learning/data/ed25519_content_pack_signature_verifier.dart';
 import 'package:remath/src/features/learning/data/open_content_pack_lifecycle_native.dart';
 import 'package:remath/src/features/learning/data/sqlite_publisher_trust_store.dart';
 import 'package:remath/src/features/learning/domain/content_pack_release.dart';
@@ -97,6 +98,11 @@ void main() {
                 .expand((chunk) => chunk)
                 .toList();
             expect(activeBytes, bytes);
+            expect(
+              (verifier as Ed25519ContentPackSignatureVerifier)
+                  .retainedAuthorizationBytes,
+              lessThanOrEqualTo(4096),
+            );
           } finally {
             other.close();
             database.close();
@@ -115,15 +121,14 @@ void main() {
       keyId: 'org.remath.publisher.primary',
       publicKey: _fixturePublicKey,
     );
+    final verifier = composeContentPackSignatureVerifier(database: database);
     var nextId = 0;
     final lifecycle = composeSqliteContentPackLifecycle(
       availableBytes: () async => 1024 * 1024,
       currentAppVersion: '0.1.0',
       database: database,
       idGenerator: () => 'signed-${nextId++}',
-      signatureVerifier: composeContentPackSignatureVerifier(
-        database: database,
-      ),
+      signatureVerifier: verifier,
     );
     final bytes = utf8.encode(_signedFixturePack);
     final release = await _releaseFor(
@@ -140,6 +145,11 @@ void main() {
     final loaded = await lifecycle.loadStartupPack(fallback);
     expect(loaded.id, release.packId);
     expect(loaded.version, release.version);
+    expect(
+      (verifier as Ed25519ContentPackSignatureVerifier)
+          .retainedAuthorizationBytes,
+      lessThanOrEqualTo(4096),
+    );
     expect(
       (await lifecycle.backend.activation(release.packId)).awaitingFirstLoad,
       isFalse,
