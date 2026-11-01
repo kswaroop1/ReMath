@@ -1860,3 +1860,17 @@ using the same installed Flutter and its own locked dependencies, test suite
 and 90% checker. No base/source modification, runner generation, signing material,
 threshold reduction or test omission. Current full suite remains unchanged.
 Baseline comparison evidence pending; final assessment/review-ready status open.
+
+## Exact coverage delta and bounded disposition for final review — 1 November 2026
+
+Recovered unchanged 30cab2b6. Full CI 41313786026 including isolated pre-slice
+baseline succeeds: current 96.80%, base 96.66%, same installed Flutter. Compared
+uncovered lists and documented legacy/platform residuals without broad exclusion,
+branch-coverage claims or execution-only tests. New trust/verifier/operator files
+have no reported uncovered lines. Published bounded dependency retention decision:
+no new package/lock change, upstream licence/platform/change evidence retained,
+current advisory clearance unavailable and not claimed. This is not release
+or vulnerability-free approval. Removed only completed baseline diagnostic;
+standard gates/replay unchanged. Explicitly requested final independent acceptance
+review of evidence/disposition/new coverage-only test. Draft remains pending CI
+and review; no completion boxes or merge action.
