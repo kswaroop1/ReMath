@@ -14,6 +14,12 @@ final class Ed25519ContentPackSignatureVerifier
   final SqlitePublisherTrustStore trustStore;
   final Map<String, List<int>> _authorizations = {};
 
+  /// Retained UTF-8 identity and public-key bytes, excluding runtime overhead.
+  int get retainedAuthorizationBytes => _authorizations.entries.fold(
+    0,
+    (total, entry) => total + utf8.encode(entry.key).length + entry.value.length,
+  );
+
   void validateAuthorization({
     required String publisherKeyId,
     required List<int> signedPayload,
