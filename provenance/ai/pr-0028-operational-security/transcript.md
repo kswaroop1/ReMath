@@ -1776,3 +1776,14 @@ stripped canonical adapter/test sources and removed diagnostic with fatal
 formatter unchanged. No assertions, fixtures or business behaviour changed.
 Replacement full CI pending. Completed/failed-install receipt lifecycle evidence,
 P2 independent acceptance and final reconciliation/review remain open.
+
+## Fixed-size receipt full green and installation lifecycle bounds — 1 November 2026
+
+Recovered unchanged c3b23c44; full CI 41284173212 passes fixed-size fingerprint
+implementation and large-message budget. Added existing-behaviour material-byte
+assertions after actual signed installation/startup success and after each
+default/WAL revocation/ambiguity refusal with staging cleanup. No production
+change or manufactured red. Combined with the 64-KiB signed message and 32-entry
+capacity tests, these check retained receipt material rather than claiming a
+total heap/transient memory limit. CI pending. P2 independent acceptance and
+remaining dependency/coverage/register/final review reconciliation remain open.
