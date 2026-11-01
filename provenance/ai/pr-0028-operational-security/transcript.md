@@ -1690,3 +1690,14 @@ were skipped, so no full-green acceptance claim. Published non-mutating exact
 formatter output for the changed composition test before unchanged fatal gate.
 No assertions, fixture values or business behaviour changed. Durable activation
 revocation/ambiguity/WAL and receipt-memory review findings remain unresolved.
+
+## Signed native journey canonical formatting recovery — 1 November 2026
+
+Recovered unchanged e1d97fc0. Diagnostic CI 41252369192 again passes native
+tests including the real signed canonical-install/startup journey, secrets and
+retained red replay. Formatting alone fails, leaving later gates skipped.
+Applied exact timestamp-stripped canonical composition-test source and removed
+the non-mutating diagnostic while preserving fatal formatting. Fixture pack,
+public key, signature and assertions unchanged. Replacement full CI pending;
+durable revocation/ambiguity/WAL activation schedules and receipt byte-memory
+findings remain open. No whole-slice completion or review readiness claimed.
