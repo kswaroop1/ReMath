@@ -1737,3 +1737,16 @@ skipped. Applied exact timestamp-stripped canonical composition-test output and
 removed diagnostic, preserving fatal formatting, fixtures and assertions.
 Replacement full CI pending. No behaviour or feature-completion state changed;
 receipt retained-byte P2 and final independent review remain open.
+
+## Durable race full green and retained-byte red contract — 1 November 2026
+
+Recovered unchanged ff9ffa55; full CI 41272800217 passes real signed installation
+and four durable default/WAL trust schedules. Began P2 4433155544: added a
+material-byte accounting seam (UTF-8 receipt identities plus exact public bytes,
+explicitly not Dart heap overhead) and test requiring at most 4096 retained
+material bytes after a valid 65536-byte message, while final authorization still
+works. Existing JSON byte-array identity exceeds this budget. No hash/budget
+implementation included; CI must establish intended red. Public-only fixture
+was signed/self-verified with an isolated ephemeral in-memory Python key;
+private material never printed, persisted or committed. No Flutter execution,
+credential configuration, signing service or release. Full CI/review pending.
