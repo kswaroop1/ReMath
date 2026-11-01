@@ -386,3 +386,17 @@ claim. Re-review must assess this bounded disposition and residual risk honestly
 
 The one-time pre-slice baseline diagnostic can now be removed; its exact base,
 commands and results remain durable in the linked CI run and provenance.
+
+## Bounded acceptance and handoff — 1 November 2026
+
+Full CI [41319862285](https://github.com/kswaroop1/ReMath/actions/runs/41319862285)
+passes on `3cd8ec81`. Explicit independent acceptance review
+[6559788491](https://github.com/kswaroop1/ReMath/pull/28#issuecomment-6559788491)
+reports no major issues at that exact head, including coverage/dependency residual
+disposition. CP-005, SP-006 and SP-011 now record delivered bounded capabilities;
+this does not claim continuous advisory clearance, all-device fault injection,
+power-loss proof, automatic revocation distribution or a packaged mobile trust UI.
+
+Implementation is frozen. Remaining changes are acceptance/provenance records
+only; verify final records CI before marking review-ready. User retains merge
+authority. No release, VERSION change, signing credentials or new content.
