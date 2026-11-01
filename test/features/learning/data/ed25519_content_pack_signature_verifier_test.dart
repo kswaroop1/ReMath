@@ -475,5 +475,39 @@ void main() {
 }
 
 // Public-only signature for 65536 ASCII a bytes; no signing key retained.
-const _largePublicKey = <int>[90, 197, 248, 125, 107, 193, 116, 77, 10, 219, 27, 213, 34, 210, 111, 0, 117, 229, 64, 176, 14, 101, 33, 231, 152, 89, 6, 54, 2, 14, 0, 150];
-const _largeSignature = 'OzJOyY0KEq0hVqJwWfR+94LZS9whsMa9/t/rcDH7qRT8gCZDKnOD55aN4RIdH325rZk75KPcvl/z6CVxbtv/Ag==';
+const _largePublicKey = <int>[
+  90,
+  197,
+  248,
+  125,
+  107,
+  193,
+  116,
+  77,
+  10,
+  219,
+  27,
+  213,
+  34,
+  210,
+  111,
+  0,
+  117,
+  229,
+  64,
+  176,
+  14,
+  101,
+  33,
+  231,
+  152,
+  89,
+  6,
+  54,
+  2,
+  14,
+  0,
+  150,
+];
+const _largeSignature =
+    'OzJOyY0KEq0hVqJwWfR+94LZS9whsMa9/t/rcDH7qRT8gCZDKnOD55aN4RIdH325rZk75KPcvl/z6CVxbtv/Ag==';
