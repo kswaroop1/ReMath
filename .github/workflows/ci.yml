@@ -73,6 +73,9 @@ jobs:
           git fetch origin refs/pull/28/head
           git cat-file -e f18cafeef000a4c5a21b0dd4dc989ffe3260ba12^{commit}
           git cat-file -e 651cf1411a5a0b63956854c2329d4506ed1070a1^{commit}
+          verify_red 73e87cf958fc7cfc33c1be3544a100c3e7ac00ba \
+            test/features/learning/data/ed25519_content_pack_signature_verifier_test.dart \
+            'Actual: <196890>'
           verify_red 7221d60eb4a1ab8e89da74c4556d2f3ec6da429b \
             test/features/learning/data/ed25519_content_pack_signature_verifier_test.dart \
             'Which: returned <null>'
@@ -368,7 +371,9 @@ jobs:
       - name: Verify dependency lock is unchanged
         run: git diff --exit-code -- pubspec.lock
       - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed lib test tool
+        run: |
+          dart format --output=show lib/src/features/learning/data/ed25519_content_pack_signature_verifier.dart test/features/learning/data/ed25519_content_pack_signature_verifier_test.dart
+          dart format --output=none --set-exit-if-changed lib test tool
       - name: Static analysis
         run: flutter analyze --fatal-infos --fatal-warnings
       - name: Validate content packs
