@@ -18,7 +18,8 @@ final class Ed25519ContentPackSignatureVerifier
   /// Retained UTF-8 identity and public-key bytes, excluding runtime overhead.
   int get retainedAuthorizationBytes => _authorizations.entries.fold(
     0,
-    (total, entry) => total + utf8.encode(entry.key).length + entry.value.length,
+    (total, entry) =>
+        total + utf8.encode(entry.key).length + entry.value.length,
   );
 
   void validateAuthorization({
@@ -26,7 +27,11 @@ final class Ed25519ContentPackSignatureVerifier
     required List<int> signedPayload,
     required List<int> signature,
   }) {
-    final identity = _authorizationIdentity(publisherKeyId, signedPayload, signature);
+    final identity = _authorizationIdentity(
+      publisherKeyId,
+      signedPayload,
+      signature,
+    );
     final authorized = _authorizations[identity];
     final current = trustStore.uniquelyTrustedPublicKey(keyId: publisherKeyId);
     if (authorized == null ||
@@ -60,7 +65,11 @@ final class Ed25519ContentPackSignatureVerifier
       ),
     );
     if (verified) {
-      final identity = _authorizationIdentity(publisherKeyId, signedPayload, signature);
+      final identity = _authorizationIdentity(
+        publisherKeyId,
+        signedPayload,
+        signature,
+      );
       _authorizations[identity] = List<int>.unmodifiable(publicKey);
       if (_authorizations.length > _maximumPendingAuthorizations) {
         _authorizations.remove(_authorizations.keys.first);
@@ -75,7 +84,9 @@ String _authorizationIdentity(
   List<int> signedPayload,
   List<int> signature,
 ) => base64Encode(
-  const DartSha256().hashSync(
-    utf8.encode(jsonEncode([publisherKeyId, signedPayload, signature])),
-  ).bytes,
+  const DartSha256()
+      .hashSync(
+        utf8.encode(jsonEncode([publisherKeyId, signedPayload, signature])),
+      )
+      .bytes,
 );
