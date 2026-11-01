@@ -7,42 +7,46 @@ import 'package:remath/src/features/learning/domain/content_pack_release.dart';
 
 void main() {
   const archiveBytes = [1, 2, 3, 4];
-  test('canonical signatures bind dependency versions independent of order', () {
-    const first = ContentPackDependency(
-      minimumVersion: '1.0.0',
-      packId: 'org.remath.first',
-    );
-    const second = ContentPackDependency(
-      minimumVersion: '2.0.0',
-      packId: 'org.remath.second',
-    );
-    final original = ContentPackArchiveVerifier.signedReleasePayload(
-      _release(dependencies: [first, second]),
-    );
-    final reordered = ContentPackArchiveVerifier.signedReleasePayload(
-      _release(dependencies: [second, first]),
-    );
-    final changed = ContentPackArchiveVerifier.signedReleasePayload(
-      _release(
-        dependencies: [
-          first,
-          const ContentPackDependency(
-            minimumVersion: '3.0.0',
-            packId: 'org.remath.second',
-          ),
+  test(
+    'canonical signatures bind dependency versions independent of order',
+    () {
+      const first = ContentPackDependency(
+        minimumVersion: '1.0.0',
+        packId: 'org.remath.first',
+      );
+      const second = ContentPackDependency(
+        minimumVersion: '2.0.0',
+        packId: 'org.remath.second',
+      );
+      final original = ContentPackArchiveVerifier.signedReleasePayload(
+        _release(dependencies: [first, second]),
+      );
+      final reordered = ContentPackArchiveVerifier.signedReleasePayload(
+        _release(dependencies: [second, first]),
+      );
+      final changed = ContentPackArchiveVerifier.signedReleasePayload(
+        _release(
+          dependencies: [
+            first,
+            const ContentPackDependency(
+              minimumVersion: '3.0.0',
+              packId: 'org.remath.second',
+            ),
+          ],
+        ),
+      );
+      expect(reordered, original);
+      expect(changed, isNot(original));
+      expect(
+        (jsonDecode(utf8.decode(original))
+            as Map<String, Object?>)['dependencies'],
+        [
+          {'minimumVersion': '1.0.0', 'packId': 'org.remath.first'},
+          {'minimumVersion': '2.0.0', 'packId': 'org.remath.second'},
         ],
-      ),
-    );
-    expect(reordered, original);
-    expect(changed, isNot(original));
-    expect(
-      (jsonDecode(utf8.decode(original)) as Map<String, Object?>)['dependencies'],
-      [
-        {'minimumVersion': '1.0.0', 'packId': 'org.remath.first'},
-        {'minimumVersion': '2.0.0', 'packId': 'org.remath.second'},
-      ],
-    );
-  });
+      );
+    },
+  );
 
   test('verifies length, digest, and publisher signature', () async {
     final signatures = _RecordingSignatureVerifier();
