@@ -7,6 +7,43 @@ import 'package:remath/src/features/learning/domain/content_pack_release.dart';
 
 void main() {
   const archiveBytes = [1, 2, 3, 4];
+  test('canonical signatures bind dependency versions independent of order', () {
+    const first = ContentPackDependency(
+      minimumVersion: '1.0.0',
+      packId: 'org.remath.first',
+    );
+    const second = ContentPackDependency(
+      minimumVersion: '2.0.0',
+      packId: 'org.remath.second',
+    );
+    final original = ContentPackArchiveVerifier.signedReleasePayload(
+      _release(dependencies: [first, second]),
+    );
+    final reordered = ContentPackArchiveVerifier.signedReleasePayload(
+      _release(dependencies: [second, first]),
+    );
+    final changed = ContentPackArchiveVerifier.signedReleasePayload(
+      _release(
+        dependencies: [
+          first,
+          const ContentPackDependency(
+            minimumVersion: '3.0.0',
+            packId: 'org.remath.second',
+          ),
+        ],
+      ),
+    );
+    expect(reordered, original);
+    expect(changed, isNot(original));
+    expect(
+      (jsonDecode(utf8.decode(original)) as Map<String, Object?>)['dependencies'],
+      [
+        {'minimumVersion': '1.0.0', 'packId': 'org.remath.first'},
+        {'minimumVersion': '2.0.0', 'packId': 'org.remath.second'},
+      ],
+    );
+  });
+
   test('verifies length, digest, and publisher signature', () async {
     final signatures = _RecordingSignatureVerifier();
     final verifier = ContentPackArchiveVerifier(signatureVerifier: signatures);
@@ -103,6 +140,7 @@ Matcher _verificationFailure(String messageFragment) =>
     );
 
 ContentPackRelease _release({
+  List<ContentPackDependency> dependencies = const [],
   int compressedSizeBytes = 4,
   String sha256 =
       '9f64a747e1b97f131fabb6b447296c9b6f0201e79fb3c5356e6c77e89b6a806a',
@@ -111,7 +149,7 @@ ContentPackRelease _release({
   String version = '2.0.0',
 }) => ContentPackRelease(
   compressedSizeBytes: compressedSizeBytes,
-  dependencies: const [],
+  dependencies: dependencies,
   description: 'Original algebra lessons and practice.',
   installedSizeBytes: 16,
   language: 'en-GB',
