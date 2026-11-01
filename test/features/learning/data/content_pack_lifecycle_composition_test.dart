@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,6 +14,96 @@ import 'package:remath/src/features/learning/domain/content_pack_release.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
+  test('committed trust changes block native activation in both journals', () async {
+    for (final wal in [false, true]) {
+      for (final revoke in [false, true]) {
+        final directory = Directory.systemTemp.createTempSync('remath-race-');
+        final path = '${directory.path}/content.sqlite';
+        final database = sqlite3.open(path);
+        final other = sqlite3.open(path);
+        try {
+          if (wal) {
+            database.execute('PRAGMA journal_mode = WAL');
+          }
+          SqlitePublisherTrustStore(database: database).enroll(
+            publisherId: 'publisher.fixture',
+            keyId: 'org.remath.publisher.primary',
+            publicKey: _fixturePublicKey,
+          );
+          final verifier = composeContentPackSignatureVerifier(
+            database: database,
+          );
+          var nextId = 0;
+          final lifecycle = composeSqliteContentPackLifecycle(
+            availableBytes: () async => 1024 * 1024,
+            currentAppVersion: '0.1.0',
+            database: database,
+            idGenerator: () => 'race-${nextId++}',
+            signatureVerifier: verifier,
+          );
+          final bytes = utf8.encode(_signedFixturePack);
+          final release = await _releaseFor(
+            'org.remath.composed',
+            bytes,
+            signature: _fixtureSignature,
+          );
+          await lifecycle.installer.install(release, _Source(bytes));
+          final store = TransactionalContentPackInstallStore(
+            backend: lifecycle.backend,
+          );
+          final staged = await store.stage(release, _Source(bytes));
+          await ContentPackArchiveVerifier(
+            signatureVerifier: verifier,
+          ).verify(release, staged);
+          final competing = SqlitePublisherTrustStore(database: other);
+          if (revoke) {
+            competing.revoke(
+              publisherId: 'publisher.fixture',
+              keyId: release.publisherKeyId,
+            );
+          } else {
+            competing.enroll(
+              publisherId: 'publisher.other',
+              keyId: release.publisherKeyId,
+              publicKey: _fixturePublicKey,
+            );
+          }
+          try {
+            await expectLater(
+              store.activateStaged(
+                release,
+                staged,
+                isExplicitVersionChoice: false,
+              ),
+              throwsA(isA<ContentPackVerificationException>()),
+            );
+            expect(
+              await lifecycle.backend.activeVersion(release.packId),
+              '1.0.0',
+            );
+          } finally {
+            await store.discardStaged(release, staged);
+          }
+          expect(
+            database.select(
+              "SELECT 1 FROM content_pack_objects WHERE state = 'sealed'",
+            ),
+            isEmpty,
+          );
+          final activeBytes = await lifecycle.backend
+              .activeArchive(release.packId, release.version)
+              .expand((chunk) => chunk)
+              .toList();
+          expect(activeBytes, bytes);
+        } finally {
+          other.close();
+          database.close();
+          directory.deleteSync(recursive: true);
+        }
+      }
+    }
+  });
+
   test('real signed canonical release installs through native trust', () async {
     final database = sqlite3.openInMemory();
     addTearDown(database.close);
