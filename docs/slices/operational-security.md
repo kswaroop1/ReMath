@@ -353,3 +353,36 @@ canonical-installation and post-verification durable activation-race evidence
 remain blocking, alongside receipt byte-size/cleanup assessment, dependency
 assessment, coverage/register reconciliation and final review. Entry count is
 not a total byte-memory bound. SP-006/CP-005 remain incomplete.
+
+## Coverage and dependency disposition for final review — 1 November 2026
+
+CI [41313786026](https://github.com/kswaroop1/ReMath/actions/runs/41313786026)
+tests both current `30cab2b6` and exact pre-slice base `6e187b0b` with the
+same Flutter installation: current line coverage 96.80%, base 96.66%
+(+0.14 percentage points). Both complete suites and 90% checks pass. No coverage
+exclusion, assertion reduction or threshold change was used.
+
+The new publisher trust domain/SQLite store, Ed25519 verifier and operator/command
+files are absent from the uncovered-line list. This is line evidence, not branch
+instrumentation or proof against every schedule. Existing backend policy,
+startup/path-provider/random-ID/cleanup wrappers and legacy backup/UI branches
+remain uncovered in both reports with source-line shifts. Archive dependency
+ordering coverage improved; the remaining equal-ID tie is unreachable for
+validated distinct dependency IDs. Diagnostic exception toString lines remain
+uncovered rather than adding execution-only tests. Platform startup wrappers
+require device/platform fault injection beyond the exercised SQLite composition;
+this limitation is explicit, not an exclusion. These are residual coverage
+limitations for reviewer acceptance, not a claim of repository-wide near-100%.
+
+Dependency disposition: this slice adds no package or lock changes. It reuses
+locked cryptography 2.7.0 and SQLite, keeping package APIs in data adapters.
+Apache-2.0/upstream-maintainer/platform documentation and intervening release
+notes are recorded above. Retain the existing reproducible lock in this bounded
+slice; a package upgrade requires its own compatibility/security assessment and
+tests, especially browser backend changes. The denied advisory lookup was not
+bypassed; absence of a current advisory clearance remains a stated limitation.
+This retention is not a vulnerability-free, audited-primitive or release approval
+claim. Re-review must assess this bounded disposition and residual risk honestly.
+
+The one-time pre-slice baseline diagnostic can now be removed; its exact base,
+commands and results remain durable in the linked CI run and provenance.
