@@ -1715,3 +1715,15 @@ No sleeps or signing keys/credentials. This tests committed changes before the
 activation transaction, not a writer blocked during an already-open transaction,
 process kill or exhaustive schedules. No production change/manufactured red.
 CI pending; receipt byte-memory P2 and final independent review remain open.
+
+## Durable activation trust schedules behavioural green — 1 November 2026
+
+Recovered unchanged 203c88e3. CI 41261905904 passes native tests including four
+committed-trust-change schedules (revocation/ambiguity, default/WAL), real signed
+native positive installation, secrets and retained red replay. Formatting is
+sole failure; analysis/content/browser and coverage-floor checks were skipped.
+Published exact non-mutating composition-test formatter output before unchanged
+fatal formatting. No logic/assertions changed. No full-green claim yet.
+These tests cover a second connection's trust commit before activation starts,
+not a writer racing inside the transaction. Receipt retained-byte P2 and final
+review remain open; draft and feature-completion state unchanged.
