@@ -23,6 +23,7 @@ final class SqliteContentPackInstallationBackend
         ContentPackFailureStatusStore,
         ContentPackAvailabilityStore {
   SqliteContentPackInstallationBackend({
+    void Function(ContentPackRelease release)? validateActivation,
     required Future<int> Function() availableBytes,
     Future<void> Function()? beforeCleanupDelete,
     required CommonDatabase database,
@@ -30,7 +31,8 @@ final class SqliteContentPackInstallationBackend
     ContentPackClock? clock,
     Duration leaseDuration = const Duration(minutes: 30),
     ContentPackIdGenerator? ownerIdGenerator,
-  }) : _availableBytes = availableBytes,
+  }) : _validateActivation = validateActivation,
+       _availableBytes = availableBytes,
        _beforeCleanupDelete = beforeCleanupDelete,
        _clock = clock ?? DateTime.now,
        _database = database,
@@ -48,6 +50,7 @@ final class SqliteContentPackInstallationBackend
     ContentPackIdGenerator ownerIdGenerator,
   ) => _owners[database] ??= ownerIdGenerator();
 
+  final void Function(ContentPackRelease release)? _validateActivation;
   final Future<int> Function() _availableBytes;
   final Future<void> Function()? _beforeCleanupDelete;
   final ContentPackClock _clock;
@@ -440,6 +443,7 @@ final class SqliteContentPackInstallationBackend
   }) async {
     final sqliteSealed = _ownedSealed(sealed);
     return _transaction(() {
+      _validateActivation?.call(release);
       final object = _object(sqliteSealed.sealId, expectedState: 'sealed');
       if (object['pack_id'] != release.packId ||
           object['version'] != release.version ||
