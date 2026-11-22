@@ -23,3 +23,7 @@ Run [44953869697](https://github.com/kswaroop1/ReMath/actions/runs/44953869697) 
 ## 2026-11-22 — CI follow-up
 
 User: “Please fix these all and let me know when done”. [Run 45005037575](https://github.com/kswaroop1/ReMath/actions/runs/45005037575) generated a lockfile diff and observed exit 255 in the concurrent publisher-trust command test (586 passed). Applied the generated diff to the exact merge-candidate lockfile, retaining the merged file_picker update. Added stderr to unchanged concurrent process assertions; the previous log cannot distinguish process startup failure from a SQLite error. No production change or claim of a confirmed race fix at this checkpoint.
+
+## 2026-11-22 — Import-order correction
+
+User asked for clues on the failure. [Run 45055547255](https://github.com/kswaroop1/ReMath/actions/runs/45055547255) passed lock verification and all 587 native tests, including the concurrent process case; exit 255 did not recur. Fatal analysis reported 11 import-order diagnostics after the Material migration. Sorted only the affected imports; no lint or test assertion was changed. The intermittent exit remains unexplained.
