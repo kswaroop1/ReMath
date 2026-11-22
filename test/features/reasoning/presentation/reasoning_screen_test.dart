@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remath/src/features/learning/data/in_memory_progress_repository.dart';
 import 'package:remath/src/features/learning/domain/attempt_event.dart';

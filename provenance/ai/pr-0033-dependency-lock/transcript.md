@@ -15,3 +15,7 @@ PR #31 merged at `990d737` with the failing lockfile blob unchanged. No successf
 ## 2026-11-21 — Codex
 
 Used the exact one-line lockfile output from the failing run. GitHub returned blob `4f07b43`, matching the CI diff's regenerated blob prefix. The existing unchanged-lockfile check supplies regression evidence; no new business behaviour or test assertion is introduced. Opened draft PR #33 for full CI and independent review. No merge, VERSION edit, release publication, or signing change in this PR. Release remains a separate manual workflow on green main.
+
+## 2026-11-22 — Flutter compatibility follow-up
+
+Run [44953869697](https://github.com/kswaroop1/ReMath/actions/runs/44953869697) passed the lock check and 587 native tests but failed fatal analysis on 18 deprecated Material imports. User authorized continuing: “Ok go ahead”. Follow Flutter’s [official migration](https://docs.flutter.dev/release/breaking-changes/material-ui-and-cupertino-ui): replace the imports and use the Flutter-published BSD-3-Clause Material package, supported on Android, iOS, Linux, macOS, web and Windows. It is a UI-only library, does not need learner data or network access, and remains outside domain code. Keep warning policy and test assertions unchanged. CI must resolve and verify the lock and run the full suite before release.
