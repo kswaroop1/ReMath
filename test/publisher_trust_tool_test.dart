@@ -80,8 +80,19 @@ void main() {
         ]),
     ]);
     final statuses = results.map((result) => result.exitCode).toList();
-    expect(statuses.where((status) => status == 0), hasLength(1));
-    expect(statuses.where((status) => status != 0).single, anyOf(65, 74));
+    final diagnostics = results
+        .map((result) => 'exit ${result.exitCode}: ${result.stderr}')
+        .join('\n');
+    expect(
+      statuses.where((status) => status == 0),
+      hasLength(1),
+      reason: diagnostics,
+    );
+    expect(
+      statuses.where((status) => status != 0).single,
+      anyOf(65, 74),
+      reason: diagnostics,
+    );
     final winner = statuses.indexOf(0) + 1;
     final reopened = sqlite3.open(path);
     addTearDown(reopened.close);

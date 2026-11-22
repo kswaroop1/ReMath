@@ -1,0 +1,14 @@
+schema_version: 1
+pull_request: 33
+title: Restore reproducible dependency lock after PR #31
+human_owner: kswaroop1
+agents:
+  - product: OpenAI Codex
+    model: gpt-6.2-sol
+started_at: 2026-11-21T21:52:56Z
+finalized_at: null
+scope:
+  - dependency lock reproducibility
+redactions: []
+ci_runs:
+  - 43980039113
